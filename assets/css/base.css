@@ -115,6 +115,12 @@ button {
   border-bottom: 1px solid var(--c-border, rgba(255,255,255,0.08));
 }
 
+/* When the mobile nav is open, lift the header above the menu
+   so the brand + lang toggle stay visible. The hamburger sits within. */
+.site-header:has(+ .nav.is-open) {
+  z-index: 110;
+}
+
 .brand {
   grid-area: brand;
   font-weight: 700;
@@ -128,12 +134,23 @@ button {
   grid-area: navtoggle;
   display: none;
   position: fixed;
-  inset: 56px 0 0 0;
+  /* nav covers everything from header bottom to viewport bottom.
+     We use 100vh - header height so it sits below the sticky header. */
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   flex-direction: column;
+  /* Solid opaque background so the hero image cannot bleed through. */
   background: var(--c-bg, #0b0b0d);
-  padding: 24px var(--pad-x);
-  gap: 4px;
-  z-index: 49;
+  /* Sit above every section on the page (hero has implicit z-index from its stacking context). */
+  z-index: 100;
+  /* Promote to its own stacking context so the background paints fully. */
+  isolation: isolate;
+  padding: 16px var(--pad-x) 32px;
+  gap: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nav.is-open {
@@ -141,10 +158,14 @@ button {
 }
 
 .nav a {
-  padding: 18px 12px;
-  font-size: 18px;
+  padding: 22px 8px;
+  font-size: 20px;
   border-bottom: 1px solid var(--c-border, rgba(255,255,255,0.08));
   letter-spacing: 0.02em;
+  /* Long Spanish phrases like "Sobre mí" must not wrap mid-word. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* hamburger button — visible only on mobile */
@@ -157,6 +178,9 @@ button {
   width: 44px;
   height: 44px;
   border-radius: 8px;
+  /* Sit above the nav menu so the X icon stays clickable when nav is open. */
+  position: relative;
+  z-index: 101;
 }
 
 .nav-toggle span {
@@ -165,7 +189,7 @@ button {
   height: 2px;
   background: currentColor;
   margin: 3px 0;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.15s ease;
 }
 
 .nav-toggle[aria-expanded="true"] span:nth-child(1) {

@@ -141,6 +141,9 @@ function setupMobileNav() {
   function setOpen(isOpen) {
     toggleBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
     nav.classList.toggle("is-open", isOpen);
+    // Lock background scroll while the menu is open (otherwise the page scrolls
+    // behind the menu, which looks broken on touch devices).
+    document.body.style.overflow = isOpen ? "hidden" : "";
   }
 
   toggleBtn.addEventListener("click", () => {
