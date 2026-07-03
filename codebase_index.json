@@ -1,0 +1,66 @@
+{
+  "_about": "Codebase map for AI navigation. Updated 2026-07-03 after mobile-first + i18n refactor.",
+  "name": "Tarek Recolons — Portfolio (mobile-first, EN/ES)",
+  "live_url": "https://tarekrecolons.pages.dev",
+  "stack": {
+    "frontend": "vanilla HTML + CSS + JS (no build step, no framework)",
+    "hosting": "Cloudflare Pages (auto-deploy from github.com/rubereco/cinema-lighttech-portfolio)",
+    "storage_for_video": "Cloudflare R2 (planned, not yet provisioned)",
+    "version_control": "github.com/rubereco/cinema-lighttech-portfolio",
+    "themes": ["tungsten (default)", "anamorphic"]
+  },
+  "entry_points": {
+    "html": "index.html",
+    "css_layout": "assets/css/base.css (mobile-first; desktop kicks in at min-width:900px)",
+    "css_themes": ["assets/css/tungsten.css", "assets/css/anamorphic.css"],
+    "js_logic": "assets/js/main.js (i18n + theme toggle + mobile nav + kit filter)",
+    "translations": "data/i18n.json (en + es)",
+    "og_image": "assets/images/og-image.svg"
+  },
+  "routes": [
+    { "id": "top",     "label_en": "Hero",      "label_es": "Inicio",    "kind": "hero" },
+    { "id": "work",    "label_en": "Work",      "label_es": "Trabajo",   "kind": "credits" },
+    { "id": "about",   "label_en": "About",     "label_es": "Sobre mí",  "kind": "bio + stats" },
+    { "id": "reel",    "label_en": "Showreel",  "label_es": "Reel",      "kind": "video placeholder" },
+    { "id": "rental",  "label_en": "Rental",    "label_es": "Equipo",    "kind": "kit grid + filters" },
+    { "id": "contact", "label_en": "Contact",   "label_es": "Contacto",  "kind": "contact info + CTA" }
+  ],
+  "open_todos": {
+    "tarek_decisions": [
+      "Pick real contact email (currently placeholder contact@tarekrecolons.com)",
+      "Decide hero photo: keep BTS / swap for portrait / drop background",
+      "Confirm bio voice: keep 1st person / change to 3rd person / add more",
+      "Decide on showreel: Vimeo/YouTube embed OR self-hosted (R2) — licensing dependent",
+      "Confirm or replace the 11 credits (currently includes all of them)"
+    ],
+    "infra": [
+      "Provision Cloudflare R2 bucket `tarek-videos` (paused: needs payment card on file)",
+      "Buy real domain tarekrecolons.com once brand confirmed",
+      "Wire OG image preview by sharing the URL on LinkedIn/WhatsApp"
+    ]
+  },
+  "file_tree": {
+    "index.html": "single-page portfolio, all sections inline",
+    "assets/css/base.css": "mobile-first layout + components. Desktop overrides in @media (min-width: 900px) blocks at the bottom.",
+    "assets/css/tungsten.css": "default theme: warm gold on dark; cinematic mood.",
+    "assets/css/anamorphic.css": "alt theme: cooler anamorphic look.",
+    "assets/js/main.js": "vanilla, ~250 lines. Modules: I18N (load + apply), themeToggle, mobileNav, langToggle, kitFilter, yearStamp.",
+    "data/i18n.json": "EN + ES translations for ~64 UI strings. Add new strings by adding data-i18n=\"key\" to HTML.",
+    "assets/images/hero-forest.jpg": "BTS photo used as mobile-banner (above content) and desktop-overlay background. 535KB.",
+    "assets/images/og-image.svg": "1200×630 SVG, shown when link is shared on LinkedIn/WhatsApp/Twitter.",
+    "assets/images/README.md": "image folder conventions",
+    "README.md": "project overview + deployment notes",
+    "codebase_index.json": "this file"
+  },
+  "deploy": {
+    "trigger": "git push to main on github.com/rubereco/cinema-lighttech-portfolio",
+    "auto_deploy": "Cloudflare Pages picks up the change within ~30 seconds",
+    "rollback": "Cloudflare dashboard → Pages → cinema-lighttech-portfolio → Deployments → click any past deployment → 'Roll back to this deploy'"
+  },
+  "i18n_quick_guide": {
+    "add_string": "1) add the key to both 'en' and 'es' in data/i18n.json; 2) add data-i18n=\"key\" on the HTML element",
+    "html_string": "use data-i18n-html=\"key\" when the value contains markup (e.g. <em>)",
+    "attribute": "use data-i18n-attr=\"aria-label:key.path\" for translating attributes",
+    "default_lang": "set <html lang=\"es\"> to force Spanish as page default (overrides browser detection)"
+  }
+}

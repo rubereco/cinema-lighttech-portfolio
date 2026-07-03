@@ -1,0 +1,19 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   theme: TUNGSTEN  (default)
+   Vibe:    warm, classic-cinema, gold-on-black. References tungsten
+            filament and the Hollywood gaffer's practical worklamp.
+   Use it:  cinema, narrative features, music videos, anything emotive.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+html[data-theme="tungsten"],
+html:not([data-theme]) {
+  /* Palette — semantic tokens. Don't use raw values in components. */
+  --theme-bg:          #0b0b0d;       /* near-black, slight warm */
+  --theme-bg-alt:      #14110f;       /* warm-tinted dark */
+  --theme-fg:          #f4ecdf;       /* warm off-white */
+  --theme-fg-muted:    #9a8f80;       /* warm mid */
+  --theme-accent:      #e8a33d;       /* tungsten amber */
+  --theme-accent-soft: rgba(232,163,61,.30);
+  --theme-rule:        #2a2522;       /* hairline divider */
+  --theme-overlay:     rgba(0,0,0,.40);
+}

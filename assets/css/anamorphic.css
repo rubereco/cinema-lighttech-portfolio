@@ -1,0 +1,19 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   theme: ANAMORPHIC  (alternate)
+   Vibe:    cold, modern, arthouse. References blue anamorphic lens
+            flares and contemporary prestige-drama cinematography.
+   Use it:  thrillers, documentaries, contemporary dramas, lookbook work.
+   Switch:  see assets/js/main.js — toggle in the header flips between
+            this and tungsten.css without reloading.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+html[data-theme="anamorphic"] {
+  --theme-bg:          #070a0f;       /* deep blue-black */
+  --theme-bg-alt:      #0e131c;
+  --theme-fg:          #e7eef7;       /* cool off-white */
+  --theme-fg-muted:    #7e8a99;
+  --theme-accent:      #5fb4ff;       /* cyan / lens-flare blue */
+  --theme-accent-soft: rgba(95,180,255,.25);
+  --theme-rule:        #1a2230;
+  --theme-overlay:     rgba(0,0,0,.45);
+}

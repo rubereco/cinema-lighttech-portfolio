@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en" data-theme="tungsten">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0d" />
+
+  <title>Tarek Recolons — Gaffer &amp; Best Boy Electric</title>
+  <meta name="description" content="High-end cinematographic lighting. Gaffer and electrician on international feature films and commercials — including work with J.A. Bayona on La Sociedad de la Nieve, A Monster Calls, and The Impossible." />
+  <meta property="og:title" content="Tarek Recolons — Gaffer & Best Boy Electric" />
+  <meta property="og:description" content="Lighting and grip for international cinema. Based in Spain, available worldwide." />
+  <meta property="og:type" content="profile" />
+  <meta property="og:image" content="assets/images/og-image.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Performance: preconnect + 1 display font only; body uses system stack. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+
+  <!-- Theme-agnostic layout + components. Always loaded. -->
+  <link rel="stylesheet" href="assets/css/base.css" />
+
+  <!-- ════════════════════════════════════════════════════════════════
+       THEME PICK:
+       - Pick one of: assets/css/tungsten.css OR assets/css/anamorphic.css
+       - Or wire the `data-theme` attribute + main.js toggle (see README).
+       ════════════════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="assets/css/tungsten.css" id="theme-css" />
+
+  <!-- Inline favicon (single letter, no external request). -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b0b0d'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial' font-weight='900' font-size='28' fill='%23E8A33D'%3ETR%3C/text%3C/svg%3E" />
+</head>
+<body>
+
+  <!-- ───────────────────────────── SKIP LINK ───────────────────────────── -->
+  <a href="#main" class="skip-link" data-i18n="section.skipToContent">Skip to content</a>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       HEADER — brand, hamburger nav (mobile), full nav (desktop), language toggle, theme toggle (desktop)
+       ════════════════════════════════════════════════════════════════════ -->
+  <header class="site-header" role="banner">
+    <a class="brand" href="#top" data-i18n="brand">Tarek Recolons</a>
+
+    <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" data-nav-toggle>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+
+    <nav class="nav" aria-label="Primary" data-nav>
+      <a href="#work"  data-i18n="nav.work">Work</a>
+      <a href="#about" data-i18n="nav.about">About</a>
+      <a href="#reel"  data-i18n="nav.reel">Showreel</a>
+      <a href="#rental" data-i18n="nav.rental">Rental</a>
+      <a href="#contact" data-i18n="nav.contact">Contact</a>
+    </nav>
+
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true" data-i18n="language.en">EN</button>
+      <button type="button" data-lang="es" aria-pressed="false" data-i18n="language.es">ES</button>
+    </div>
+
+    <button class="theme-toggle" type="button" data-i18n-attr="aria-label:theme.toggleLabel" aria-label="Switch theme" data-theme-toggle>
+      <span aria-hidden="true">⇄</span> <span data-theme-label>Tungsten</span>
+    </button>
+  </header>
+
+  <main id="main">
+
+    <!-- ════════════════════════════════════════════════════════════════
+         HERO
+         Mobile-first: image above, content below.
+         Desktop (≥900px) flips to overlay via CSS.
+         ════════════════════════════════════════════════════════════════ -->
+    <section id="top" class="hero hero-with-image">
+      <div class="hero-bg" aria-hidden="true">
+        <img src="assets/images/hero-forest.jpg" alt="" loading="eager" />
+        <div class="hero-bg-tint"></div>
+      </div>
+      <div class="hero-content">
+        <p class="eyebrow" data-i18n="hero.role">Gaffer &amp; Best Boy Electric</p>
+        <h1 class="display" data-i18n="hero.headline">High-End Cinematographic Lighting.</h1>
+        <p class="lede" data-i18n="hero.tagline">Technical and artistic solutions for international feature films and commercials. Based in Spain, available worldwide.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#work" data-i18n="hero.ctaPrimary">View credits</a>
+          <a class="btn ghost" href="#rental" data-i18n="hero.ctaSecondary">Rental kit</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         WORK — selected credits.
+         On mobile: each <tr> becomes a card (CSS handles this).
+         On desktop: classic table.
+         ════════════════════════════════════════════════════════════════ -->
+    <section id="work" class="section">
+      <header class="section-head">
+        <span class="section-index">01</span>
+        <h2 class="section-title" data-i18n="work.title">Selected Work</h2>
+        <p class="section-sub" data-i18n="work.subtitle">Feature films, series &amp; selected commercials · 2012–2025</p>
+      </header>
+
+      <div class="credits-table-wrap">
+        <table class="credits-table">
+          <thead>
+            <tr>
+              <th scope="col" data-i18n="work.year">Year</th>
+              <th scope="col" data-i18n="work.project">Project</th>
+              <th scope="col" data-i18n="work.role">Role</th>
+              <th scope="col" class="hide-mobile" data-i18n="work.director">Director / Production</th>
+              <th scope="col" class="hide-mobile" data-i18n="work.type">Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>2025</td><td>Els Mals Noms</td>      <td><span class="role-pill" data-i18n="kit.roleGaffer">Gaffer</span></td>           <td class="hide-mobile">Production</td>          <td class="hide-mobile" data-i18n="work.typeFeature">Feature</td></tr>
+            <tr><td>2025</td><td>Un altre home</td>       <td><span class="role-pill" data-i18n="kit.roleGaffer">Gaffer</span></td>           <td class="hide-mobile">Production</td>          <td class="hide-mobile" data-i18n="work.typeFeature">Feature</td></tr>
+            <tr><td>2023</td><td>La Sociedad de la Nieve</td><td><span class="role-pill" data-i18n="kit.roleElectrician">Electrician</span></td>   <td class="hide-mobile">J.A. Bayona</td>          <td class="hide-mobile" data-i18n="work.typeFeature">Feature</td></tr>
+            <tr><td>2023</td><td>Calladita</td>           <td><span class="role-pill" data-i18n="kit.roleGaffer">Gaffer</span></td>           <td class="hide-mobile">Miguel Faus</td>          <td class="hide-mobile" data-i18n="work.typeFeature">Feature</td></tr>
+            <tr><td>2022</td><td>Uncharted</td>          <td><span class="role-pill" data-i18n="kit.roleRigging">Rigging Electric</span></td> <td class="hide-mobile">Ruben Fleischer</td>     <td class="hide-mobile" data-i18n="work.typeFeature">Feature</td></tr>
+            <tr><td>2022</td><td>Upon Entry</td>         <td><span class="role-pill" data-i18n="kit.roleGrip">Grip</span></td>             <td class="hide-mobile">Alejandro Rojas</td>     <td class="hide-mobile" data-i18n="work.typeFeature">Feature</td></tr>
+            <tr><td>2021</td><td>L'última nit del karaoke</td><td><span class="role-pill" data-i18n="kit.roleElectrician2nd">Electrician / 2nd Gaffer</span></td><td class="hide-mobile">TV Series</td><td class="hide-mobile" data-i18n="work.typeSeries">Series</td></tr>
+            <tr><td>2021</td><td>Alizzz: Salir</td>      <td><span class="role-pill" data-i18n="kit.roleGaffer">Gaffer</span></td>           <td class="hide-mobile">Music Video</td>         <td class="hide-mobile" data-i18n="work.typeCommercial">Commercial</td></tr>
+            <tr><td>2018</td><td>Jurassic World: Fallen Kingdom</td><td><span class="role-pill" data-i18n="kit.roleSpark">Spark (dailies)</span></td><td class="hide-mobile">J.A. Bayona</td><td class="hide-mobile" data-i18n="work.typeFeature">Feature</td></tr>
+            <tr><td>2016</td><td>A Monster Calls</td>    <td><span class="role-pill" data-i18n="kit.roleSpark">Spark</span></td>            <td class="hide-mobile">J.A. Bayona</td>          <td class="hide-mobile" data-i18n="work.typeFeature">Feature</td></tr>
+            <tr><td>2012</td><td>The Impossible</td>     <td><span class="role-pill" data-i18n="kit.roleLamp">Lamp Operator</span></td>    <td class="hide-mobile">J.A. Bayona</td>          <td class="hide-mobile" data-i18n="work.typeFeature">Feature</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="section-foot">
+        <a class="link-arrow" href="https://www.imdb.com/name/nm5007366/" target="_blank" rel="noopener" data-i18n="work.viewOnIMDb">Full filmography on IMDb →</a>
+      </p>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         ABOUT
+         ════════════════════════════════════════════════════════════════ -->
+    <section id="about" class="section section-alt">
+      <div class="about-grid">
+        <header class="section-head">
+          <span class="section-index">02</span>
+          <h2 class="section-title" data-i18n="about.title">About</h2>
+        </header>
+        <div class="about-body" data-i18n-html="about.body">
+          <p>With over a decade of experience in the electrical department, I specialize in major feature films and commercials. I've been part of technical crews on world-class projects such as <em>La Sociedad de la Nieve</em> and <em>Uncharted</em>.</p>
+          <p>My approach combines technical precision with artistic sensitivity, ensuring the Cinematographer's vision is executed efficiently and safely.</p>
+        </div>
+        <dl class="about-stats" aria-label="Career highlights">
+          <div><dt data-i18n="about.statsYearsLabel">Years experience</dt><dd data-i18n="about.statsYearsValue">10+</dd></div>
+          <div><dt data-i18n="about.statsFilmsLabel">Feature films</dt><dd data-i18n="about.statsFilmsValue">20+</dd></div>
+          <div><dt data-i18n="about.statsAvailabilityLabel">Availability</dt><dd data-i18n="about.statsAvailabilityValue">Global</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         REEL — showreel
+         ════════════════════════════════════════════════════════════════ -->
+    <section id="reel" class="section">
+      <header class="section-head">
+        <span class="section-index">03</span>
+        <h2 class="section-title" data-i18n="reel.title">Showreel</h2>
+      </header>
+      <div class="reel-frame">
+        <div class="reel-placeholder" data-i18n="reel.placeholder">
+          <span>Showreel goes here</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         KIT — equipment / skills
+         ════════════════════════════════════════════════════════════════ -->
+    <section id="rental" class="section section-alt">
+      <header class="section-head">
+        <span class="section-index">04</span>
+        <h2 class="section-title" data-i18n="rental.title">Kit &amp; Rental</h2>
+        <p class="section-sub" data-i18n="rental.subtitle">Lighting and grip available for dry hire or with operator.</p>
+      </header>
+
+      <div class="kit-filters" role="tablist" aria-label="Kit categories">
+        <button type="button" class="kit-pill is-active" data-cat="all"   role="tab" aria-selected="true"  data-i18n="rental.filterAll">All</button>
+        <button type="button" class="kit-pill"           data-cat="led"    role="tab" aria-selected="false" data-i18n="rental.filterLED">LED</button>
+        <button type="button" class="kit-pill"           data-cat="hmi"    role="tab" aria-selected="false" data-i18n="rental.filterHMI">HMI &amp; Tungsten</button>
+        <button type="button" class="kit-pill"           data-cat="grip"   role="tab" aria-selected="false" data-i18n="rental.filterGrip">Grip</button>
+        <button type="button" class="kit-pill"           data-cat="distro" role="tab" aria-selected="false" data-i18n="rental.filterDistro">Distro</button>
+      </div>
+
+      <ul class="kit-grid">
+        <li class="kit-item" data-cat="led">
+          <h3 class="kit-h">Astera Titan Tube Set</h3>
+          <p class="kit-cat" data-i18n="rental.catLED">LED Lighting</p>
+          <p class="kit-desc">8-tube kit with charging case.</p>
+        </li>
+        <li class="kit-item" data-cat="led">
+          <h3 class="kit-h">ARRI SkyPanel S60-C</h3>
+          <p class="kit-cat" data-i18n="rental.catLED">LED Lighting</p>
+          <p class="kit-desc">Full-color controllable LED soft light.</p>
+        </li>
+        <li class="kit-item" data-cat="led">
+          <h3 class="kit-h">Aputure 600d Pro</h3>
+          <p class="kit-cat" data-i18n="rental.catLED">LED Lighting</p>
+          <p class="kit-desc">High-output daylight LED.</p>
+        </li>
+        <li class="kit-item" data-cat="grip">
+          <h3 class="kit-h">C-Stand Kit (American)</h3>
+          <p class="kit-cat" data-i18n="rental.catGrip">Grip &amp; Stands</p>
+          <p class="kit-desc" data-i18n="rental.descCStands">Includes arm and knuckle (×10).</p>
+        </li>
+        <li class="kit-item" data-cat="distro">
+          <h3 class="kit-h">Distro Box 63A</h3>
+          <p class="kit-cat" data-i18n="rental.catPower">Power &amp; Distribution</p>
+          <p class="kit-desc" data-i18n="rental.descDistro">3-phase power distribution box.</p>
+        </li>
+        <li class="kit-item" data-cat="grip">
+          <h3 class="kit-h">Black Textile Kit</h3>
+          <p class="kit-cat" data-i18n="rental.catGrip">Grip &amp; Stands</p>
+          <p class="kit-desc" data-i18n="rental.descTextile">Flags, floppies, and nets set.</p>
+        </li>
+      </ul>
+
+      <p class="section-foot kit-cta">
+        <a class="btn primary" href="#contact" data-i18n="rental.requestCatalog">Request full catalog</a>
+      </p>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         CONTACT
+         ════════════════════════════════════════════════════════════════ -->
+    <section id="contact" class="section section-cta">
+      <header class="section-head">
+        <span class="section-index">05</span>
+        <h2 class="section-title" data-i18n="contact.title">Get in touch</h2>
+      </header>
+      <p class="lede" data-i18n="contact.lede">Available for feature, series, and select commercial work.</p>
+
+      <ul class="contact-list" role="list">
+        <li>
+          <span class="contact-label" data-i18n="contact.emailLabel">Email</span>
+          <a class="contact-value" href="mailto:contact@tarekrecolons.com">contact@tarekrecolons.com</a>
+        </li>
+        <li>
+          <span class="contact-label" data-i18n="contact.imdbLabel">IMDb</span>
+          <a class="contact-value" href="https://www.imdb.com/name/nm5007366/" target="_blank" rel="noopener">imdb.com/name/nm5007366</a>
+        </li>
+        <li>
+          <span class="contact-label" data-i18n="contact.instagramLabel">Instagram</span>
+          <a class="contact-value" href="https://www.instagram.com/tarekreco/" target="_blank" rel="noopener">@tarekreco</a>
+        </li>
+      </ul>
+
+      <p class="section-foot contact-cta-row">
+        <a class="btn primary" href="mailto:contact@tarekrecolons.com" data-i18n="contact.requestCV">Request CV</a>
+      </p>
+    </section>
+
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       FOOTER
+       ════════════════════════════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <p>© <span data-i18n="brand">Tarek Recolons</span> · <span id="year">2025</span></p>
+    <p class="footer-build" data-i18n="footer.tagline">Built with care · no tracking, no cookies.</p>
+  </footer>
+
+  <!-- One small JS file: theme toggle + language toggle + mobile nav. ~80 lines. -->
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>

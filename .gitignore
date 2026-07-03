@@ -1,0 +1,16 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*~
+
+# Local build/serve artifacts (none yet — static site)
+.sass-cache/
+.cache/
+
+# Draft / in-progress images before the meetup
+assets/images/work/*.tmp
+assets/images/work/*-draft.*
+
+# Local env overrides
+.env
+.env.local

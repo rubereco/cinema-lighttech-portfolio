@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0b0d"/>
+      <stop offset="100%" stop-color="#1c1816"/>
+    </linearGradient>
+    <linearGradient id="light" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd17a" stop-opacity="0.18"/>
+      <stop offset="50%" stop-color="#E8A33D" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#0b0b0d" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="0.5" cy="0.2" r="0.6">
+      <stop offset="0%" stop-color="#fff4dc" stop-opacity="0.55"/>
+      <stop offset="40%" stop-color="#E8A33D" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0b0b0d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- subtle light beam from top -->
+  <rect width="1200" height="630" fill="url(#lamp)"/>
+
+  <!-- film-perforation strip on left edge -->
+  <g fill="#0b0b0d" opacity="0.7">
+    <rect x="0" y="40" width="6" height="22" rx="2"/>
+    <rect x="0" y="84" width="6" height="22" rx="2"/>
+    <rect x="0" y="128" width="6" height="22" rx="2"/>
+    <rect x="0" y="172" width="6" height="22" rx="2"/>
+    <rect x="0" y="216" width="6" height="22" rx="2"/>
+    <rect x="0" y="260" width="6" height="22" rx="2"/>
+    <rect x="0" y="304" width="6" height="22" rx="2"/>
+    <rect x="0" y="348" width="6" height="22" rx="2"/>
+    <rect x="0" y="392" width="6" height="22" rx="2"/>
+    <rect x="0" y="436" width="6" height="22" rx="2"/>
+    <rect x="0" y="480" width="6" height="22" rx="2"/>
+    <rect x="0" y="524" width="6" height="22" rx="2"/>
+    <rect x="0" y="568" width="6" height="22" rx="2"/>
+  </g>
+
+  <!-- accent vertical bar -->
+  <rect x="120" y="220" width="6" height="200" fill="#E8A33D"/>
+
+  <!-- eyebrow / role -->
+  <text x="150" y="240" font-family="system-ui, -apple-system, sans-serif" font-size="22" letter-spacing="6" fill="#E8A33D" font-weight="600">GAFFER &amp; BEST BOY ELECTRIC</text>
+
+  <!-- main title -->
+  <text x="150" y="350" font-family="Anton, Impact, system-ui, sans-serif" font-size="96" fill="#f4f4f5" font-weight="400">TAREK RECOLONS</text>
+
+  <!-- subtitle -->
+  <text x="150" y="430" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#cfc8bf">High-End Cinematographic Lighting</text>
+
+  <!-- footer row: IMDb + features -->
+  <text x="150" y="555" font-family="system-ui, -apple-system, sans-serif" font-size="20" letter-spacing="3" fill="#9a938a" font-weight="500">FEATURE FILMS · SERIES · COMMERCIALS</text>
+  <text x="150" y="585" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#9a938a">Based in Spain · Available worldwide · imdb.com/name/nm5007366</text>
+</svg>

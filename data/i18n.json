@@ -1,0 +1,194 @@
+{
+  "_meta": {
+    "languages": ["en", "es"],
+    "defaultLanguage": "en",
+    "detectFromBrowser": true,
+    "notes": "Translations of UI strings. Film titles, director names, and proper nouns are NOT translated — those are kept as-is in both languages. To add a string: use data-i18n=\"key.path\" on the HTML element. Use data-i18n-html for content with HTML markup (about body). To force a different default per page, set <html lang=\"es\">."
+  },
+
+  "en": {
+    "nav": {
+      "work": "Work",
+      "about": "About",
+      "reel": "Showreel",
+      "rental": "Rental",
+      "contact": "Contact"
+    },
+    "brand": "Tarek Recolons",
+    "hero": {
+      "role": "Gaffer & Best Boy Electric",
+      "headline": "High-End Cinematographic Lighting.",
+      "tagline": "Technical and artistic solutions for international feature films and commercials. Based in Spain, available worldwide.",
+      "ctaPrimary": "View credits",
+      "ctaSecondary": "Rental kit"
+    },
+    "section": {
+      "skipToContent": "Skip to content"
+    },
+    "work": {
+      "title": "Selected Work",
+      "subtitle": "Feature films, series & selected commercials · 2012–2025",
+      "year": "Year",
+      "project": "Project",
+      "role": "Role",
+      "director": "Director / Production",
+      "type": "Type",
+      "typeFeature": "Feature",
+      "typeSeries": "Series",
+      "typeCommercial": "Commercial",
+      "viewOnIMDb": "Full filmography on IMDb →"
+    },
+    "about": {
+      "title": "About",
+      "body": "<p>With over a decade of experience in the electrical department, I specialize in major feature films and commercials. I've been part of technical crews on world-class projects such as <em>La Sociedad de la Nieve</em> and <em>Uncharted</em>.</p><p>My approach combines technical precision with artistic sensitivity, ensuring the Cinematographer's vision is executed efficiently and safely.</p>",
+      "statsYearsLabel": "Years experience",
+      "statsYearsValue": "10+",
+      "statsFilmsLabel": "Feature films",
+      "statsFilmsValue": "20+",
+      "statsAvailabilityLabel": "Availability",
+      "statsAvailabilityValue": "Global"
+    },
+    "reel": {
+      "title": "Showreel",
+      "placeholder": "Showreel goes here"
+    },
+    "rental": {
+      "title": "Kit & Rental",
+      "subtitle": "Lighting and grip available for dry hire or with operator.",
+      "filterAll": "All",
+      "filterLED": "LED",
+      "filterHMI": "HMI & Tungsten",
+      "filterGrip": "Grip",
+      "filterDistro": "Distro",
+      "requestCatalog": "Request full catalog",
+      "catLED": "LED Lighting",
+      "catGrip": "Grip & Stands",
+      "catPower": "Power & Distribution",
+      "descCStands": "Includes arm and knuckle (×10).",
+      "descDistro": "3-phase power distribution box.",
+      "descTextile": "Flags, floppies, and nets set."
+    },
+    "kit": {
+      "roleGaffer": "Gaffer",
+      "roleElectrician": "Electrician",
+      "roleElectrician2nd": "Electrician / 2nd Gaffer",
+      "roleRigging": "Rigging Electric",
+      "roleGrip": "Grip",
+      "roleSpark": "Spark",
+      "roleSparkDailies": "Spark (dailies)",
+      "roleLamp": "Lamp Operator"
+    },
+    "contact": {
+      "title": "Get in touch",
+      "lede": "Available for feature, series, and select commercial work.",
+      "emailLabel": "Email",
+      "imdbLabel": "IMDb",
+      "instagramLabel": "Instagram",
+      "requestCV": "Request CV"
+    },
+    "footer": {
+      "tagline": "Built with care · no tracking, no cookies."
+    },
+    "theme": {
+      "toggleLabel": "Switch theme"
+    },
+    "language": {
+      "toggleAria": "Switch language",
+      "en": "EN",
+      "es": "ES"
+    }
+  },
+
+  "es": {
+    "nav": {
+      "work": "Trabajo",
+      "about": "Sobre mí",
+      "reel": "Reel",
+      "rental": "Equipo",
+      "contact": "Contacto"
+    },
+    "brand": "Tarek Recolons",
+    "hero": {
+      "role": "Gaffer y Best Boy Electric",
+      "headline": "Iluminación cinematográfica de alto nivel.",
+      "tagline": "Soluciones técnicas y artísticas para largometrajes internacionales y publicidad. Desde España, disponible en todo el mundo.",
+      "ctaPrimary": "Ver créditos",
+      "ctaSecondary": "Equipo de alquiler"
+    },
+    "section": {
+      "skipToContent": "Saltar al contenido"
+    },
+    "work": {
+      "title": "Trabajo seleccionado",
+      "subtitle": "Largometrajes, series y publicidad seleccionada · 2012–2025",
+      "year": "Año",
+      "project": "Proyecto",
+      "role": "Rol",
+      "director": "Dirección / Producción",
+      "type": "Tipo",
+      "typeFeature": "Largometraje",
+      "typeSeries": "Serie",
+      "typeCommercial": "Comercial",
+      "viewOnIMDb": "Filmografía completa en IMDb →"
+    },
+    "about": {
+      "title": "Sobre mí",
+      "body": "<p>Con más de una década de experiencia en el departamento eléctrico, me especializo en largometrajes y producciones comerciales de gran formato. He formado parte de equipos técnicos en proyectos de primer nivel como <em>La Sociedad de la Nieve</em> y <em>Uncharted</em>.</p><p>Mi enfoque combina precisión técnica con sensibilidad artística, asegurando que la visión del director de fotografía se ejecute con eficiencia y seguridad.</p>",
+      "statsYearsLabel": "Años de experiencia",
+      "statsYearsValue": "10+",
+      "statsFilmsLabel": "Largometrajes",
+      "statsFilmsValue": "20+",
+      "statsAvailabilityLabel": "Disponibilidad",
+      "statsAvailabilityValue": "Global"
+    },
+    "reel": {
+      "title": "Reel",
+      "placeholder": "Aquí va el reel"
+    },
+    "rental": {
+      "title": "Equipo y alquiler",
+      "subtitle": "Iluminación y grip disponibles en alquiler o con operador.",
+      "filterAll": "Todo",
+      "filterLED": "LED",
+      "filterHMI": "HMI y Tungsteno",
+      "filterGrip": "Grip",
+      "filterDistro": "Distribución",
+      "requestCatalog": "Solicitar catálogo completo",
+      "catLED": "Iluminación LED",
+      "catGrip": "Grip y soportes",
+      "catPower": "Energía y distribución",
+      "descCStands": "Incluye brazo y rótula (×10).",
+      "descDistro": "Caja de distribución trifásica.",
+      "descTextile": "Juego de banderas, floppies y redes."
+    },
+    "kit": {
+      "roleGaffer": "Gaffer",
+      "roleElectrician": "Eléctrico",
+      "roleElectrician2nd": "Eléctrico / 2º Gaffer",
+      "roleRigging": "Eléctrico de rigging",
+      "roleGrip": "Grip",
+      "roleSpark": "Spark",
+      "roleSparkDailies": "Spark (dailies)",
+      "roleLamp": "Operador de lámpara"
+    },
+    "contact": {
+      "title": "Contacto",
+      "lede": "Disponible para largometrajes, series y producciones comerciales seleccionadas.",
+      "emailLabel": "Correo",
+      "imdbLabel": "IMDb",
+      "instagramLabel": "Instagram",
+      "requestCV": "Solicitar CV"
+    },
+    "footer": {
+      "tagline": "Hecho con cuidado · sin rastreo, sin cookies."
+    },
+    "theme": {
+      "toggleLabel": "Cambiar tema"
+    },
+    "language": {
+      "toggleAria": "Cambiar idioma",
+      "en": "EN",
+      "es": "ES"
+    }
+  }
+}
