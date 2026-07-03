@@ -144,6 +144,9 @@ button {
      so we can animate cleanly without a layout shift. */
   position: fixed;
   inset: 0;
+  /* Force full viewport height including on iOS Safari where 100vh is unreliable. */
+  min-height: 100vh;
+  min-height: 100dvh;
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -151,6 +154,7 @@ button {
   isolation: isolate;
   padding: 80px var(--pad-x) 24px; /* top padding leaves room for the sticky header */
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   /* Animation: fast fade + tiny scale. Total ~180ms — feels responsive. */
   opacity: 0;

@@ -48,18 +48,6 @@
       <span aria-hidden="true"></span>
     </button>
 
-    <nav class="nav" aria-label="Primary" data-nav>
-      <a href="#work"    style="--i: 0.04s" data-i18n="nav.work">Work</a>
-      <a href="#about"   style="--i: 0.08s" data-i18n="nav.about">About</a>
-      <a href="#reel"    style="--i: 0.12s" data-i18n="nav.reel">Showreel</a>
-      <a href="#rental"  style="--i: 0.16s" data-i18n="nav.rental">Rental</a>
-      <a href="#contact" style="--i: 0.20s" data-i18n="nav.contact">Contact</a>
-
-      <div class="nav-cta">
-        <a class="btn primary" href="mailto:contact@tarekrecolons.com" data-i18n="contact.requestCV">Request CV</a>
-      </div>
-    </nav>
-
     <div class="lang-toggle" role="group" aria-label="Language">
       <button type="button" data-lang="en" aria-pressed="true" data-i18n="language.en">EN</button>
       <button type="button" data-lang="es" aria-pressed="false" data-i18n="language.es">ES</button>
@@ -69,6 +57,24 @@
       <span aria-hidden="true">⇄</span> <span data-theme-label>Tungsten</span>
     </button>
   </header>
+
+  <!--
+    The nav is OUTSIDE the .site-header on purpose.
+    The header has backdrop-filter which creates a new containing block
+    for fixed-positioned descendants. Putting the nav there would make
+    inset:0 fill the header (~56px tall), not the viewport.
+  -->
+  <nav class="nav" aria-label="Primary" data-nav>
+    <a href="#work"    style="--i: 0.04s" data-i18n="nav.work">Work</a>
+    <a href="#about"   style="--i: 0.08s" data-i18n="nav.about">About</a>
+    <a href="#reel"    style="--i: 0.12s" data-i18n="nav.reel">Showreel</a>
+    <a href="#rental"  style="--i: 0.16s" data-i18n="nav.rental">Rental</a>
+    <a href="#contact" style="--i: 0.20s" data-i18n="nav.contact">Contact</a>
+
+    <div class="nav-cta">
+      <a class="btn primary" href="mailto:contact@tarekrecolons.com" data-i18n="contact.requestCV">Request CV</a>
+    </div>
+  </nav>
 
   <main id="main">
 
