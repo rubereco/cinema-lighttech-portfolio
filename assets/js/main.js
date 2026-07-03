@@ -145,7 +145,7 @@ function setupThemeToggle() {
 
 function setupMobileNav() {
   const toggleBtn = document.querySelector("[data-nav-toggle]");
-  const nav       = document.querySelector("[data-nav]");
+  const nav       = document.querySelector("[data-nav]"); // mobile nav
   if (!toggleBtn || !nav) return;
 
   function setOpen(isOpen) {

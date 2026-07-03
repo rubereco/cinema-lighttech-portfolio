@@ -48,6 +48,15 @@
       <span aria-hidden="true"></span>
     </button>
 
+    <!-- Desktop nav: inline horizontal, hidden on mobile via CSS. -->
+    <nav class="nav-desktop" aria-label="Primary" data-nav-desktop>
+      <a href="#work"    data-i18n="nav.work">Work</a>
+      <a href="#about"   data-i18n="nav.about">About</a>
+      <a href="#reel"    data-i18n="nav.reel">Showreel</a>
+      <a href="#rental"  data-i18n="nav.rental">Rental</a>
+      <a href="#contact" data-i18n="nav.contact">Contact</a>
+    </nav>
+
     <div class="lang-toggle" role="group" aria-label="Language">
       <button type="button" data-lang="en" aria-pressed="true" data-i18n="language.en">EN</button>
       <button type="button" data-lang="es" aria-pressed="false" data-i18n="language.es">ES</button>
@@ -59,12 +68,13 @@
   </header>
 
   <!--
-    The nav is OUTSIDE the .site-header on purpose.
-    The header has backdrop-filter which creates a new containing block
-    for fixed-positioned descendants. Putting the nav there would make
-    inset:0 fill the header (~56px tall), not the viewport.
+    Mobile nav: fullscreen overlay.
+    The desktop nav is rendered inside the header (inline).
+    The mobile nav is rendered as a sibling of <body> so it can fill the viewport
+    without being constrained by the header's backdrop-filter containing block.
+    Both navs share the same links but each has its own DOM element + CSS rules.
   -->
-  <nav class="nav" aria-label="Primary" data-nav>
+  <nav class="nav-mobile" aria-label="Primary mobile" data-nav>
     <a href="#work"    style="--i: 0.04s" data-i18n="nav.work">Work</a>
     <a href="#about"   style="--i: 0.08s" data-i18n="nav.about">About</a>
     <a href="#reel"    style="--i: 0.12s" data-i18n="nav.reel">Showreel</a>

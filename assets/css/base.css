@@ -96,13 +96,14 @@ button {
 
 /* ──────────────── Header + nav ──────────────── */
 
-/* MOBILE: nav collapses to a hamburger. Brand on the left, hamburger on the right. */
+/* MOBILE: brand on the left, hamburger on the right, lang-toggle hidden by default.
+   The full nav is in .nav-mobile (fullscreen overlay below this header). */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 50;
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto;
   grid-template-areas: "brand . navtoggle lang";
   align-items: center;
   gap: 12px;
@@ -115,9 +116,19 @@ button {
 
 /* While the mobile nav is open, lift the header above the overlay
    so the brand and lang toggle stay visible. */
-.site-header:has(+ .nav.is-open) {
+.site-header:has(+ .nav-mobile.is-open) {
   z-index: 110;
   background: var(--c-bg, #0b0b0d);
+}
+
+/* Desktop inline nav: hidden on mobile (handled in desktop @media block) */
+.nav-desktop {
+  display: none;
+}
+
+/* Theme toggle: hidden on mobile */
+.theme-toggle {
+  display: none;
 }
 
 .brand {
@@ -139,7 +150,7 @@ button {
    The nav element is OUT of the header grid (no grid-area) so it doesn't
    affect the header layout at all when hidden. */
 
-.nav {
+.nav-mobile {
   /* Hidden default — but use visibility:hidden + opacity:0 + pointer-events:none
      so we can animate cleanly without a layout shift. */
   position: fixed;
@@ -161,16 +172,19 @@ button {
   visibility: hidden;
   transform: scale(1.02);
   transition: opacity 0.18s ease, visibility 0s linear 0.18s, transform 0.18s ease;
+  /* Hide from screen readers when closed (a11y) */
+  pointer-events: none;
 }
 
-.nav.is-open {
+.nav-mobile.is-open {
   opacity: 1;
   visibility: visible;
   transform: scale(1);
   transition: opacity 0.18s ease, visibility 0s linear 0s, transform 0.18s ease;
+  pointer-events: auto;
 }
 
-.nav a {
+.nav-mobile a {
   display: block;
   padding: 18px 8px;
   font-family: "Anton", "Impact", system-ui, sans-serif;
@@ -186,28 +200,28 @@ button {
   transition: opacity 0.22s ease var(--i, 0s), transform 0.22s ease var(--i, 0s);
 }
 
-.nav.is-open a {
+.nav-mobile.is-open a {
   opacity: 1;
   transform: translateY(0);
 }
 
 /* When nav is closed, reverse the stagger timing so links slide out */
-.nav:not(.is-open) a {
+.nav-mobile:not(.is-open) a {
   transition: opacity 0.12s ease, transform 0.12s ease;
 }
 
-.nav a:hover, .nav a:focus-visible {
+.nav-mobile a:hover, .nav-mobile a:focus-visible {
   color: var(--c-accent, #E8A33D);
 }
 
 /* CTA pinned to bottom of the fullscreen menu, like the example screenshots. */
-.nav-cta {
+.nav-mobile .nav-cta {
   margin-top: auto;
   padding-top: 32px;
   text-align: center;
 }
 
-.nav-cta .btn {
+.nav-mobile .nav-cta .btn {
   width: 100%;
   max-width: 360px;
   font-family: "Anton", "Impact", system-ui, sans-serif;
@@ -220,12 +234,12 @@ button {
   transition: opacity 0.22s ease 0.24s, transform 0.22s ease 0.24s, background 0.18s ease, color 0.18s ease;
 }
 
-.nav.is-open .nav-cta .btn {
+.nav-mobile.is-open .nav-cta .btn {
   opacity: 1;
   transform: translateY(0);
 }
 
-.nav:not(.is-open) .nav-cta .btn {
+.nav-mobile:not(.is-open) .nav-cta .btn {
   transition: opacity 0.12s ease, transform 0.12s ease;
 }
 
@@ -817,49 +831,42 @@ button {
 @media (min-width: 900px) {
   /* Re-show the desktop nav. Hide the hamburger. */
   .site-header {
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: auto 1fr auto auto auto;
     grid-template-areas: "brand nav lang theme";
     padding: 18px 32px;
     gap: 20px;
   }
 
-  .nav {
-    position: static;
+  /* Desktop nav: inline horizontal links. */
+  .nav-desktop {
     display: flex;
     flex-direction: row;
-    background: none;
-    padding: 0;
-    inset: auto;
     gap: 24px;
     grid-area: nav;
     justify-content: center;
-    /* Reset mobile-only states */
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    overflow: visible;
-    /* The CTA at the bottom is mobile-only */
+    align-items: center;
   }
 
-  .nav a {
+  .nav-desktop a {
     padding: 0;
     font-size: 14px;
-    border: none;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--c-fg-dim, rgba(255,255,255,0.7));
-    /* Reset mobile-only animations */
-    opacity: 1;
-    transform: none;
+    border: none;
+    background: none;
     font-family: inherit;
+    font-weight: 500;
+    text-decoration: none;
   }
 
-  .nav a:hover {
+  .nav-desktop a:hover {
     color: var(--c-fg, #fff);
   }
 
-  /* Hide the bottom CTA on desktop — it only makes sense in the mobile overlay */
-  .nav-cta {
+  /* Mobile nav (fullscreen overlay) — hide entirely on desktop so it never
+     scrolls into view or renders at the wrong size. */
+  .nav-mobile {
     display: none;
   }
 
