@@ -436,24 +436,41 @@ button {
 
 /* ──────────────── Sections ──────────────── */
 
+/* Base .section: content is constrained and centered within the page.
+   On .section-alt we widen the section (background) but keep inner content constrained. */
 .section {
   padding: var(--section-pad-y) var(--pad-x);
   max-width: var(--container);
   margin-left: auto;
   margin-right: auto;
+  /* When a section is .section-alt we override max-width below; keep a fallback here. */
 }
 
+/* .section-alt: full-width dark band as background.
+   We DON'T use max-width:none + child-constraint pattern because that breaks
+   when direct children are display:flex or display:grid (they ignore parent max-width
+   when their width is determined by content). Instead, we use padding-x for the gutter
+   and rely on direct children to handle their own width. */
 .section-alt {
   background: var(--c-bg-alt, #141417);
   border-top: 1px solid var(--c-border, rgba(255,255,255,0.06));
   border-bottom: 1px solid var(--c-border, rgba(255,255,255,0.06));
+  /* Let the background span full width. */
   max-width: none;
+  /* Inner content sits inside var(--container) and is centered. */
+  padding-left: max(var(--pad-x), calc((100% - var(--container)) / 2));
+  padding-right: max(var(--pad-x), calc((100% - var(--container)) / 2));
 }
 
+/* Force all direct children of .section-alt to obey container width and center.
+   This overrides any width:100% or content-driven widths they might have. */
 .section-alt > * {
   max-width: var(--container);
-  margin-left: auto;
-  margin-right: auto;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 100%;
+  /* Prevent flex/grid from forcing content width to expand the container */
+  min-width: 0;
 }
 
 .section-cta {
