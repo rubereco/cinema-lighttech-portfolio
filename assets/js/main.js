@@ -43,28 +43,38 @@ const I18N = (() => {
     return browser.toLowerCase().startsWith("es") ? "es" : "en";
   }
 
-  /** Resolve "a.b.c" against the active language dictionary. */
+  /**
+   * Resolve "a.b.c" against the active language dictionary.
+   * Returns null (not the key) when missing, so callers can detect missing
+   * translations and keep the original fallback text instead of leaking keys.
+   */
   function t(key, lang) {
     const dict = strings[lang] || strings.en || {};
-    return key.split(".").reduce((acc, k) => (acc ? acc[k] : null), dict) ?? key;
+    const value = key.split(".").reduce((acc, k) => (acc && acc[k] !== undefined ? acc[k] : null), dict);
+    return (typeof value === "string") ? value : null;
   }
 
-  /** Apply all translations to the DOM. */
+  /** Apply all translations to the DOM.
+   *  If a translation is missing for the active language, the original
+   *  English text in the HTML is kept (it serves as a built-in fallback).
+   *  This means: even if data/i18n.json fails to load, the page renders
+   *  in English instead of showing raw keys like "work.title".
+   */
   function apply(lang) {
     document.documentElement.lang = lang;
 
-    // text content
+    // text content — only replace if we found a translation
     document.querySelectorAll("[data-i18n]").forEach((el) => {
       const key = el.getAttribute("data-i18n");
       const value = t(key, lang);
-      if (typeof value === "string") el.textContent = value;
+      if (value !== null) el.textContent = value;
     });
 
     // html content (for the about body, which has <em> tags)
     document.querySelectorAll("[data-i18n-html]").forEach((el) => {
       const key = el.getAttribute("data-i18n-html");
       const value = t(key, lang);
-      if (typeof value === "string") el.innerHTML = value;
+      if (value !== null) el.innerHTML = value;
     });
 
     // attribute translations, e.g. data-i18n-attr="aria-label:theme.toggleLabel"
@@ -73,7 +83,7 @@ const I18N = (() => {
         const [attr, key] = pair.split(":").map((s) => s.trim());
         if (!attr || !key) return;
         const value = t(key, lang);
-        if (typeof value === "string") el.setAttribute(attr, value);
+        if (value !== null) el.setAttribute(attr, value);
       });
     });
 
