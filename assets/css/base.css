@@ -270,22 +270,27 @@ button {
   border: 1px solid var(--c-border, rgba(255,255,255,0.18));
   border-radius: 999px;
   padding: 2px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .lang-toggle button {
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
-  color: var(--c-fg-dim, rgba(255,255,255,0.6));
+  color: var(--c-fg-dim, rgba(255,255,255,0.7));
   min-width: 36px;
   min-height: 32px;
+  /* remove inherited letter-spacing from .site-header if any */
+  letter-spacing: 0;
 }
 
 .lang-toggle button[aria-pressed="true"] {
   background: var(--c-accent, #E8A33D);
   color: var(--c-bg, #0b0b0d);
+}
+
+.lang-toggle button[aria-pressed="false"]:hover {
+  color: var(--c-fg, #f4f4f5);
 }
 
 /* theme toggle — desktop only, hidden on phone */
