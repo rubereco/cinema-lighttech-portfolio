@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id="p-uncharted-bts-1" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="p-the-bookshop-bts-1" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#1f2733"/>
       <stop offset="100%" stop-color="#2a3548"/>
     </linearGradient>
-    <pattern id="g-uncharted-bts-1" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+    <pattern id="g-the-bookshop-bts-1" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
       <circle cx="1" cy="1" r="0.6" fill="#ffffff" opacity="0.04"/>
     </pattern>
   </defs>
-  <rect width="800" height="800" fill="url(#p-uncharted-bts-1)"/>
-  <rect width="800" height="800" fill="url(#g-uncharted-bts-1)"/>
+  <rect width="800" height="800" fill="url(#p-the-bookshop-bts-1)"/>
+  <rect width="800" height="800" fill="url(#g-the-bookshop-bts-1)"/>
 
   <!-- Kind badge top-left -->
   <g transform="translate(36,36)">
-    <rect x="0" y="0" width="120" height="40" rx="20" fill="#8B7AB8" opacity="0.95"/>
+    <rect x="0" y="0" width="120" height="40" rx="20" fill="#B58A4E" opacity="0.95"/>
     <text x="60" y="27" text-anchor="middle" font-family="ui-sans-serif,system-ui" font-size="14" font-weight="700" fill="#0b0b0d" letter-spacing="3">BTS</text>
   </g>
 
@@ -24,14 +24,14 @@
 
   <!-- Camera/aperture icon centre -->
   <g transform="translate(400, 400)" opacity="0.2">
-    <circle cx="0" cy="0" r="90" fill="none" stroke="#8B7AB8" stroke-width="4"/>
-    <circle cx="0" cy="0" r="56" fill="none" stroke="#8B7AB8" stroke-width="3"/>
-    <circle cx="0" cy="0" r="22" fill="#8B7AB8"/>
+    <circle cx="0" cy="0" r="90" fill="none" stroke="#B58A4E" stroke-width="4"/>
+    <circle cx="0" cy="0" r="56" fill="none" stroke="#B58A4E" stroke-width="3"/>
+    <circle cx="0" cy="0" r="22" fill="#B58A4E"/>
   </g>
 
   <!-- Bottom caption -->
   <g transform="translate(36, 740)">
-    <text x="0" y="0" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="600" fill="#f4f4f4" opacity="0.85">Uncharted</text>
-    <text x="0" y="28" font-family="ui-sans-serif,system-ui" font-size="13" font-weight="500" fill="#8B7AB8" letter-spacing="3" opacity="0.8">2022 · BTS</text>
+    <text x="0" y="0" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="600" fill="#f4f4f4" opacity="0.85">The Bookshop</text>
+    <text x="0" y="28" font-family="ui-sans-serif,system-ui" font-size="13" font-weight="500" fill="#B58A4E" letter-spacing="3" opacity="0.8">2017 · BTS</text>
   </g>
 </svg>

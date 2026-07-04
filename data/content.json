@@ -73,14 +73,14 @@
       "title": "Els Mals Noms",
       "year": 2025,
       "role": "Gaffer",
-      "director": "—",
+      "director": "Marc Ortiz Prades",
       "status": "released",
-      "cover": "assets/projects/els-mals-noms-2025/cover.svg",
-      "fallbackCover": "assets/projects/els-mals-noms-2025/cover.svg",
+      "cover": "assets/projects/els-mals-noms-2025/cover.jpg",
+      "fallbackCover": "assets/projects/els-mals-noms-2025/cover.jpg",
       "accent": "#C77B3A",
       "summary": {
-        "en": "Gaffer on a Spanish-language feature. Replace this text with the real project notes.",
-        "es": "Gaffer en un largometraje en español. Reemplaza este texto con las notas reales del proyecto."
+        "en": "Gaffer on a Spanish-language feature.",
+        "es": "Gaffer en un largometraje en español."
       },
       "photos": [
         { "src": "assets/projects/els-mals-noms-2025/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
@@ -92,92 +92,71 @@
       ]
     },
     {
-      "slug": "la-sociedad-de-la-nieve-2023",
-      "title": "La Sociedad de la Nieve",
+      "slug": "calladita-2023",
+      "title": "Calladita",
       "year": 2023,
+      "role": "Gaffer",
+      "director": "Miguel Faus",
+      "status": "released",
+      "cover": "assets/projects/calladita-2023/cover.jpg",
+      "fallbackCover": "assets/projects/calladita-2023/cover.jpg",
+      "accent": "#7BA8C4",
+      "summary": {
+        "en": "Gaffer on Miguel Faus' debut feature.",
+        "es": "Gaffer en el ópera prima de Miguel Faus."
+      },
+      "photos": [
+        { "src": "assets/projects/calladita-2023/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/calladita-2023/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/calladita-2023/photo-03-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/calladita-2023/photo-04-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/calladita-2023/photo-05-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/calladita-2023/photo-06-process.svg", "kind": "process", "caption": "" }
+      ]
+    },
+    {
+      "slug": "the-bookshop-2017",
+      "title": "The Bookshop",
+      "year": 2017,
       "role": "Electrician",
-      "director": "J.A. Bayona",
+      "director": "Isabel Coixet",
       "status": "released",
-      "cover": "assets/projects/la-sociedad-de-la-nieve-2023/cover.svg",
-      "fallbackCover": "assets/projects/la-sociedad-de-la-nieve-2023/cover.svg",
-      "accent": "#5BA8C4",
+      "cover": "assets/projects/the-bookshop-2017/cover.jpg",
+      "fallbackCover": "assets/projects/the-bookshop-2017/cover.jpg",
+      "accent": "#B58A4E",
       "summary": {
-        "en": "Electrician on J.A. Bayona's survival drama. Replace this text with real notes from set.",
-        "es": "Electricista en el drama de supervivencia de J.A. Bayona. Reemplaza este texto con notas reales del rodaje."
+        "en": "Electrician on Isabel Coixet's adaptation.",
+        "es": "Electricista en la adaptación de Isabel Coixet."
       },
       "photos": [
-        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
-        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
-        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-03-bts.svg",     "kind": "bts",     "caption": "" },
-        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-04-still.svg",   "kind": "still",   "caption": "" },
-        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-05-still.svg",   "kind": "still",   "caption": "" },
-        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-06-process.svg", "kind": "process", "caption": "" }
+        { "src": "assets/projects/the-bookshop-2017/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/the-bookshop-2017/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/the-bookshop-2017/photo-03-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/the-bookshop-2017/photo-04-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/the-bookshop-2017/photo-05-process.svg", "kind": "process", "caption": "" }
       ]
     },
     {
-      "slug": "uncharted-2022",
-      "title": "Uncharted",
-      "year": 2022,
-      "role": "Rigging Electric",
-      "director": "Ruben Fleischer",
+      "slug": "boca-norte-2019",
+      "title": "Boca Norte",
+      "year": 2019,
+      "role": "Gaffer",
+      "director": "—",
       "status": "released",
-      "cover": "assets/projects/uncharted-2022/cover.svg",
-      "fallbackCover": "assets/projects/uncharted-2022/cover.svg",
-      "accent": "#8B7AB8",
+      "cover": "assets/projects/boca-norte-2019/cover.jpg",
+      "fallbackCover": "assets/projects/boca-norte-2019/cover.jpg",
+      "accent": "#8B4F75",
       "summary": {
-        "en": "Rigging Electric on the action feature. Replace this text with the real story.",
-        "es": "Rigging Electric en la película de acción. Reemplaza este texto con la historia real."
+        "en": "Gaffer on the Playz / RTVE series.",
+        "es": "Gaffer en la serie de Playz / RTVE."
       },
       "photos": [
-        { "src": "assets/projects/uncharted-2022/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
-        { "src": "assets/projects/uncharted-2022/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
-        { "src": "assets/projects/uncharted-2022/photo-03-still.svg",   "kind": "still",   "caption": "" },
-        { "src": "assets/projects/uncharted-2022/photo-04-still.svg",   "kind": "still",   "caption": "" },
-        { "src": "assets/projects/uncharted-2022/photo-05-process.svg", "kind": "process", "caption": "" }
-      ]
-    },
-    {
-      "slug": "a-monster-calls-2016",
-      "title": "A Monster Calls",
-      "year": 2016,
-      "role": "Spark",
-      "director": "J.A. Bayona",
-      "status": "released",
-      "cover": "assets/projects/a-monster-calls-2016/cover.svg",
-      "fallbackCover": "assets/projects/a-monster-calls-2016/cover.svg",
-      "accent": "#6B8E6B",
-      "summary": {
-        "en": "Spark on J.A. Bayona's fantasy drama. Replace this text with real notes.",
-        "es": "Spark en el drama fantástico de J.A. Bayona. Reemplaza este texto con notas reales."
-      },
-      "photos": [
-        { "src": "assets/projects/a-monster-calls-2016/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
-        { "src": "assets/projects/a-monster-calls-2016/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
-        { "src": "assets/projects/a-monster-calls-2016/photo-03-still.svg",   "kind": "still",   "caption": "" },
-        { "src": "assets/projects/a-monster-calls-2016/photo-04-still.svg",   "kind": "still",   "caption": "" },
-        { "src": "assets/projects/a-monster-calls-2016/photo-05-process.svg", "kind": "process", "caption": "" }
-      ]
-    },
-    {
-      "slug": "the-impossible-2012",
-      "title": "The Impossible",
-      "year": 2012,
-      "role": "Lamp Operator",
-      "director": "J.A. Bayona",
-      "status": "released",
-      "cover": "assets/projects/the-impossible-2012/cover.svg",
-      "fallbackCover": "assets/projects/the-impossible-2012/cover.svg",
-      "accent": "#9B7A5C",
-      "summary": {
-        "en": "Lamp Operator on J.A. Bayona's disaster drama. Replace this text with the real story.",
-        "es": "Lamp Operator en el drama de catástrofe de J.A. Bayona. Reemplaza este texto con la historia real."
-      },
-      "photos": [
-        { "src": "assets/projects/the-impossible-2012/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
-        { "src": "assets/projects/the-impossible-2012/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
-        { "src": "assets/projects/the-impossible-2012/photo-03-still.svg",   "kind": "still",   "caption": "" },
-        { "src": "assets/projects/the-impossible-2012/photo-04-still.svg",   "kind": "still",   "caption": "" },
-        { "src": "assets/projects/the-impossible-2012/photo-05-process.svg", "kind": "process", "caption": "" }
+        { "src": "assets/projects/boca-norte-2019/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/boca-norte-2019/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/boca-norte-2019/photo-03-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/boca-norte-2019/photo-04-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/boca-norte-2019/photo-05-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/boca-norte-2019/photo-06-process.svg", "kind": "process", "caption": "" }
       ]
     }
   ]
