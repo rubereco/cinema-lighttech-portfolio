@@ -1,10 +1,12 @@
 # Email & Domain Setup: Cloudflare routing + Gmail Send As for @recalone.com
 
-**⚠️ Note on domain name:** The user wrote `@recalone.com` in this request. The portfolio website itself is hosted on `tarekrecolons.com` (with `contact@tarekrecolons.com` as the listed contact). Confirm with the user whether `recalone.com` is:
-- A separate email-only domain (intentional)
-- A typo for `recolons.com` (matching the portfolio brand)
+**Context:** Tarek operates two separate digital identities:
+- **`tarekrecolons.com`** — his personal portfolio website (gaffer/lighting technician)
+- **`recalone.com`** — his enterprise / production company domain (a separate brand for the business entity)
 
-before any registrar/dns changes.
+This issue covers the **enterprise side only** (`recalone.com`). The personal portfolio (`tarekrecolons.com`) is already live at Cloudflare Pages and is unaffected.
+
+**Goal:** Make `recalone.com` a fully-functional email domain — receiving forwarded to existing Gmail accounts, and sending outbound "from" the custom domain.
 
 ## Tasks
 
@@ -61,4 +63,4 @@ before any registrar/dns changes.
 
 ## Status
 
-Pending domain-name confirmation from user + 2FA setup.
+Pending: 2FA enabled on both Gmail accounts, decision on display name and preferred "from" address.
