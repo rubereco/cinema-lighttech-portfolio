@@ -9,7 +9,19 @@ const I18N = (() => {
   const STORAGE_KEY = "tarek.lang";
   let strings = null;
 
+  // ─── Inline-first loader ────────────────────────────────────────────
+  // Read translations from an inline <script type="application/json"> block
+  // when present (file:// compatibility), fall back to fetch() for live deploys.
+  function readInline(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    try { return JSON.parse(el.textContent); }
+    catch (err) { console.warn(`[i18n] inline #${id} parse failed:`, err); return null; }
+  }
+
   async function load() {
+    strings = readInline("tarek-i18n");
+    if (strings) return;
     try {
       const res = await fetch("data/i18n.json", { cache: "no-store" });
       strings = await res.json();

@@ -45,7 +45,19 @@
   }
 
   // ─── Content loading ─────────────────────────────────────────────────
+  // Read content from an inline <script type="application/json"> block first
+  // (file:// compatibility — browsers block fetch() for local files).
+  // Falls back to fetch() for live deploys where the inline block is absent.
+  function readInline(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    try { return JSON.parse(el.textContent); }
+    catch (err) { console.warn(`[showcase] inline #${id} parse failed:`, err); return null; }
+  }
+
   async function loadContent() {
+    const inline = readInline("tarek-content");
+    if (inline) { CONTENT = inline; return; }
     try {
       const res = await fetch("data/content.json", { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
