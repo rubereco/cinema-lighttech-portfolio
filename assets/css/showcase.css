@@ -185,10 +185,11 @@
 }
 .project-head .project-cover {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 5;       /* portrait hero — matches 720×900 cover art */
   object-fit: cover;
   border-radius: 6px;
   background: var(--c-surface-2, #1c1c20);
+  max-height: 70vh;          /* don't dominate tall viewports */
 }
 .project-head .project-meta {
   display: flex;
@@ -234,11 +235,16 @@
 
 @media (min-width: 900px) {
   .project-head {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: 3rem;
     align-items: center;
   }
-  .project-head .project-cover { aspect-ratio: 16 / 10; }
+  .project-head .project-cover {
+    aspect-ratio: 4 / 5;     /* portrait on desktop too */
+    max-width: 520px;        /* cap width so it doesn't get absurdly tall */
+    max-height: 70vh;
+    margin-left: auto;
+  }
   .project-head .project-body { padding-right: 1rem; }
 }
 
