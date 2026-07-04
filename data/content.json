@@ -20,17 +20,17 @@
   },
 
   "work": [
-    { "year": 2025, "project": "Els Mals Noms",            "role": "Gaffer",                  "production": "Production",            "type": "feature" },
-    { "year": 2025, "project": "Un altre home",             "role": "Gaffer",                  "production": "Production",            "type": "feature" },
-    { "year": 2023, "project": "La Sociedad de la Nieve",   "role": "Electrician",             "production": "J.A. Bayona",           "type": "feature" },
-    { "year": 2023, "project": "Calladita",                 "role": "Gaffer",                  "production": "Miguel Faus",           "type": "feature" },
-    { "year": 2022, "project": "Uncharted",                 "role": "Rigging Electric",        "production": "Ruben Fleischer",      "type": "feature" },
-    { "year": 2022, "project": "Upon Entry",                "role": "Grip",                    "production": "Alejandro Rojas",      "type": "feature" },
-    { "year": 2021, "project": "L'última nit del karaoke",  "role": "Electrician / 2nd Gaffer","production": "TV Series",             "type": "series" },
-    { "year": 2021, "project": "Alizzz: Salir",             "role": "Gaffer",                  "production": "Music Video",           "type": "commercial" },
-    { "year": 2018, "project": "Jurassic World: Fallen Kingdom", "role": "Spark (dailies)",   "production": "J.A. Bayona",           "type": "feature" },
-    { "year": 2016, "project": "A Monster Calls",           "role": "Spark",                   "production": "J.A. Bayona",           "type": "feature" },
-    { "year": 2012, "project": "The Impossible",            "role": "Lamp Operator",           "production": "J.A. Bayona",           "type": "feature" }
+    { "year": 2025, "project": "Els Mals Noms",            "role": "Gaffer",                            "production": "Lamalanga Produccions Audiovisuals, Admirable Films",  "type": "Largometraje" },
+    { "year": 2025, "project": "Un altre home",             "role": "Gaffer",                            "production": "Oberon Media",                                        "type": "Largometraje" },
+    { "year": 2025, "project": "Lo que queda de ti",        "role": "Gaffer",                            "production": "Potenza Producciones",                                "type": "Largometraje" },
+    { "year": 2025, "project": "Parenostre",                "role": "Lighting Technician / Bestboy",     "production": "Minoria Absoluta, Lastor Media, Vilaüt Films",        "type": "Largometraje" },
+    { "year": 2023, "project": "Calladita",                 "role": "Gaffer",                            "production": "Miguel Faus",                                         "type": "Largometraje" },
+    { "year": 2022, "project": "Upon Entry",                "role": "Grip",                              "production": "Alejandro Rojas",                                     "type": "Largometraje" },
+    { "year": 2021, "project": "L'última nit del karaoke",  "role": "Electrician / 2nd Gaffer",          "production": "TV Series",                                          "type": "Serie TV" },
+    { "year": 2020, "project": "Coque",                     "role": "Gaffer",                            "production": "Somos Acme SL",                                       "type": "Cortometraje" },
+    { "year": 2019, "project": "Boca Norte",                "role": "Gaffer",                            "production": "Playz, RTVE",                                         "type": "Serie TV" },
+    { "year": 2017, "project": "The Bookshop",              "role": "Electrician Dailies",                "production": "Diagonal TV, A Contracorriente Films, Green Films",   "type": "Largometraje" },
+    { "year": 2017, "project": "The Bookshop",              "role": "Electrician",                       "production": "Diagonal TV, A Contracorriente Films, Green Films",   "type": "Largometraje" }
   ],
 
   "kit": [

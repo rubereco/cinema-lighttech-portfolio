@@ -12,26 +12,26 @@
   <rect width="800" height="800" fill="url(#g-uncharted-bts-1)"/>
 
   <!-- Kind badge top-left -->
-  <g transform="translate(40,40)">
+  <g transform="translate(36,36)">
     <rect x="0" y="0" width="120" height="40" rx="20" fill="#8B7AB8" opacity="0.95"/>
-    <text x="60" y="26" text-anchor="middle" font-family="ui-sans-serif,system-ui" font-size="14" font-weight="700" fill="#0b0b0d" letter-spacing="3">BTS</text>
+    <text x="60" y="27" text-anchor="middle" font-family="ui-sans-serif,system-ui" font-size="14" font-weight="700" fill="#0b0b0d" letter-spacing="3">BTS</text>
   </g>
 
   <!-- Frame number top-right (cinematic) -->
-  <g transform="translate(760,52)" opacity="0.6">
+  <g transform="translate(764, 56)" opacity="0.6">
     <text x="0" y="0" text-anchor="end" font-family="ui-monospace,monospace" font-size="14" fill="#f4f4f4" letter-spacing="2">002 / 005</text>
   </g>
 
   <!-- Camera/aperture icon centre -->
-  <g transform="translate(400,400)" opacity="0.18">
-    <circle cx="0" cy="0" r="80" fill="none" stroke="#8B7AB8" stroke-width="4"/>
-    <circle cx="0" cy="0" r="50" fill="none" stroke="#8B7AB8" stroke-width="3"/>
-    <circle cx="0" cy="0" r="20" fill="#8B7AB8"/>
+  <g transform="translate(400, 400)" opacity="0.2">
+    <circle cx="0" cy="0" r="90" fill="none" stroke="#8B7AB8" stroke-width="4"/>
+    <circle cx="0" cy="0" r="56" fill="none" stroke="#8B7AB8" stroke-width="3"/>
+    <circle cx="0" cy="0" r="22" fill="#8B7AB8"/>
   </g>
 
   <!-- Bottom caption -->
-  <g transform="translate(40,720)">
+  <g transform="translate(36, 740)">
     <text x="0" y="0" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="600" fill="#f4f4f4" opacity="0.85">Uncharted</text>
-    <text x="0" y="26" font-family="ui-sans-serif,system-ui" font-size="13" font-weight="500" fill="#8B7AB8" letter-spacing="3" opacity="0.8">2022 · BTS</text>
+    <text x="0" y="28" font-family="ui-sans-serif,system-ui" font-size="13" font-weight="500" fill="#8B7AB8" letter-spacing="3" opacity="0.8">2022 · BTS</text>
   </g>
 </svg>
