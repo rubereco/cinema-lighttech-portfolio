@@ -96,6 +96,10 @@ const I18N = (() => {
   return { load, apply, detectLanguage, t };
 })();
 
+// Expose for sibling scripts (e.g. showcase.js) so they can read translations
+// and the active language without re-loading i18n.json. Single source of truth.
+window.TarekI18N = I18N;
+
 /* ──────────────── Theme toggle ──────────────── */
 
 function setupThemeToggle() {
@@ -245,4 +249,7 @@ function setupYearStamp() {
   setupLanguageToggle();
   setupKitFilter();
   setupYearStamp();
+
+  // Signal sibling scripts that i18n is ready (showcase.js listens for this).
+  window.dispatchEvent(new CustomEvent("tarek:i18n-ready", { detail: { lang } }));
 })();

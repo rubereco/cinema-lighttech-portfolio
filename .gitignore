@@ -14,3 +14,4 @@ assets/images/work/*-draft.*
 # Local env overrides
 .env
 .env.local
+.preview/

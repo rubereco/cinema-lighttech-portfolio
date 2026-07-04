@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en" data-theme="tungsten">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0d" />
+
+  <title>Showcase — Tarek Recolons</title>
+  <meta name="description" content="Behind-the-scenes photography and stills from selected film projects — work in progress, process, and finished frames." />
+  <meta property="og:title" content="Showcase — Tarek Recolons" />
+  <meta property="og:description" content="Behind-the-scenes photography and stills from selected film projects." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/images/og-image.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Performance: preconnect + 1 display font only; body uses system stack. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+
+  <!-- Theme-agnostic layout + components. -->
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/showcase.css" />
+
+  <link rel="stylesheet" href="assets/css/tungsten.css" id="theme-css" />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b0b0d'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial' font-weight='900' font-size='28' fill='%23E8A33D'%3ETR%3C/text%3C/svg%3E" />
+</head>
+<body class="showcase-page">
+
+  <a href="#main" class="skip-link" data-i18n="section.skipToContent">Skip to content</a>
+
+  <header class="site-header" role="banner">
+    <a class="brand" href="index.html" data-i18n="brand">Tarek Recolons</a>
+
+    <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" data-nav-toggle>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+
+    <nav class="nav-desktop" aria-label="Primary" data-nav-desktop>
+      <a href="index.html#work"    data-i18n="nav.work">Work</a>
+      <a href="showcase.html" class="is-current" data-i18n="nav.showcase">Showcase</a>
+      <a href="index.html#about"   data-i18n="nav.about">About</a>
+      <a href="index.html#reel"    data-i18n="nav.reel">Showreel</a>
+      <a href="index.html#rental"  data-i18n="nav.rental">Rental</a>
+      <a href="index.html#contact" data-i18n="nav.contact">Contact</a>
+    </nav>
+
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true" data-i18n="language.en">EN</button>
+      <button type="button" data-lang="es" aria-pressed="false" data-i18n="language.es">ES</button>
+    </div>
+
+    <button class="theme-toggle" type="button" data-i18n-attr="aria-label:theme.toggleLabel" aria-label="Switch theme" data-theme-toggle>
+      <span aria-hidden="true">⇄</span> <span data-theme-label>Tungsten</span>
+    </button>
+  </header>
+
+  <nav class="nav-mobile" aria-label="Primary mobile" data-nav>
+    <a href="index.html#work"    style="--i: 0.04s" data-i18n="nav.work">Work</a>
+    <a href="showcase.html"      style="--i: 0.08s" class="is-current" data-i18n="nav.showcase">Showcase</a>
+    <a href="index.html#about"   style="--i: 0.12s" data-i18n="nav.about">About</a>
+    <a href="index.html#reel"    style="--i: 0.16s" data-i18n="nav.reel">Showreel</a>
+    <a href="index.html#rental"  style="--i: 0.20s" data-i18n="nav.rental">Rental</a>
+    <a href="index.html#contact" style="--i: 0.24s" data-i18n="nav.contact">Contact</a>
+
+    <div class="nav-cta">
+      <a class="btn primary" href="mailto:contact@tarekrecolons.com" data-i18n="contact.requestCV">Request CV</a>
+    </div>
+  </nav>
+
+  <main id="main">
+
+    <!-- ════════════════════════════════════════════════════════════════
+         VIEW 1 — FOLDER GRID (default; visible when no #project in URL)
+         ════════════════════════════════════════════════════════════════ -->
+
+    <section id="view-grid" class="showcase-hero section" data-view="grid">
+      <div class="container">
+        <header class="section-head showcase-head">
+          <span class="section-index">✦</span>
+          <h1 class="section-title" data-i18n="showcase.title">Showcase</h1>
+          <p class="section-subtitle" data-i18n="showcase.subtitle">Selected projects · behind-the-scenes, process, stills</p>
+        </header>
+      </div>
+
+      <div class="container">
+        <div class="showcase-grid" id="showcase-grid" role="list" aria-busy="true">
+          <!-- Rendered by showcase.js. Until JS loads, show a loading skeleton row. -->
+          <div class="showcase-skeleton" aria-hidden="true"></div>
+          <div class="showcase-skeleton" aria-hidden="true"></div>
+          <div class="showcase-skeleton" aria-hidden="true"></div>
+          <div class="showcase-skeleton" aria-hidden="true"></div>
+          <div class="showcase-skeleton" aria-hidden="true"></div>
+          <div class="showcase-skeleton" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         VIEW 2 — PER-PROJECT GALLERY (visible when URL has #<slug>)
+         ════════════════════════════════════════════════════════════════ -->
+
+    <section id="view-project" class="showcase-project" data-view="project" hidden>
+      <a class="showcase-back" href="showcase.html" data-i18n="showcase.backToFolders">← All projects</a>
+
+      <div class="container">
+        <header class="project-head" id="project-head">
+          <!-- Rendered by showcase.js -->
+        </header>
+
+        <nav class="project-tabs" id="project-tabs" role="tablist" aria-label="Photo filters">
+          <button type="button" role="tab" data-kind="all"      aria-selected="true"  data-i18n="showcase.tabAll">All</button>
+          <button type="button" role="tab" data-kind="bts"      aria-selected="false" data-i18n="showcase.tabBts">BTS</button>
+          <button type="button" role="tab" data-kind="still"    aria-selected="false" data-i18n="showcase.tabStill">Stills</button>
+          <button type="button" role="tab" data-kind="process"  aria-selected="false" data-i18n="showcase.tabProcess">Process</button>
+        </nav>
+
+        <div class="project-grid" id="project-grid" role="list" aria-busy="true">
+          <!-- Rendered by showcase.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         LIGHTBOX (hidden until a photo is clicked)
+         ════════════════════════════════════════════════════════════════ -->
+
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-caption" hidden>
+      <button class="lightbox-close" type="button" aria-label="Close" data-lightbox-close>×</button>
+      <button class="lightbox-prev"  type="button" aria-label="Previous" data-lightbox-prev>‹</button>
+      <button class="lightbox-next"  type="button" aria-label="Next"     data-lightbox-next>›</button>
+      <figure class="lightbox-figure">
+        <img id="lightbox-img" alt="" />
+        <figcaption id="lightbox-caption"></figcaption>
+      </figure>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>© <span id="year"></span> <span data-i18n="brand">Tarek Recolons</span> · <span data-i18n="footer.rights">All rights reserved</span></p>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- Reuse the same main.js for theme/lang/mobile-nav. -->
+  <script src="assets/js/main.js" defer></script>
+  <!-- Showcase-specific logic. -->
+  <script src="assets/js/showcase.js" defer></script>
+</body>
+</html>

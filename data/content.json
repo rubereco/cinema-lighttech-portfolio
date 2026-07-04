@@ -1,0 +1,184 @@
+{
+  "_meta": {
+    "purpose": "Site content editable by the portfolio owner (Tarek). i18n.json handles UI strings in EN/ES; this file holds the structured content (work credits, kit items, showcase projects). See README.md for the editing workflow.",
+    "version": "1.0",
+    "lastUpdated": "2026-07-04"
+  },
+
+  "contact": {
+    "email": "contact@tarekrecolons.com",
+    "imdbId": "nm5007366",
+    "imdbUrl": "https://www.imdb.com/name/nm5007366/",
+    "instagram": "tarekreco",
+    "instagramUrl": "https://www.instagram.com/tarekreco/"
+  },
+
+  "stats": {
+    "yearsExperience": "10+",
+    "featureFilms": "20+",
+    "availability": "Global"
+  },
+
+  "work": [
+    { "year": 2025, "project": "Els Mals Noms",            "role": "Gaffer",                  "production": "Production",            "type": "feature" },
+    { "year": 2025, "project": "Un altre home",             "role": "Gaffer",                  "production": "Production",            "type": "feature" },
+    { "year": 2023, "project": "La Sociedad de la Nieve",   "role": "Electrician",             "production": "J.A. Bayona",           "type": "feature" },
+    { "year": 2023, "project": "Calladita",                 "role": "Gaffer",                  "production": "Miguel Faus",           "type": "feature" },
+    { "year": 2022, "project": "Uncharted",                 "role": "Rigging Electric",        "production": "Ruben Fleischer",      "type": "feature" },
+    { "year": 2022, "project": "Upon Entry",                "role": "Grip",                    "production": "Alejandro Rojas",      "type": "feature" },
+    { "year": 2021, "project": "L'última nit del karaoke",  "role": "Electrician / 2nd Gaffer","production": "TV Series",             "type": "series" },
+    { "year": 2021, "project": "Alizzz: Salir",             "role": "Gaffer",                  "production": "Music Video",           "type": "commercial" },
+    { "year": 2018, "project": "Jurassic World: Fallen Kingdom", "role": "Spark (dailies)",   "production": "J.A. Bayona",           "type": "feature" },
+    { "year": 2016, "project": "A Monster Calls",           "role": "Spark",                   "production": "J.A. Bayona",           "type": "feature" },
+    { "year": 2012, "project": "The Impossible",            "role": "Lamp Operator",           "production": "J.A. Bayona",           "type": "feature" }
+  ],
+
+  "kit": [
+    { "name": "Astera Titan Tube Set",  "category": "led" },
+    { "name": "ARRI SkyPanel S60-C",    "category": "led" },
+    { "name": "Aputure 600d Pro",       "category": "led" },
+    { "name": "C-Stand Kit (American)", "category": "grip" },
+    { "name": "Distro Box 63A",         "category": "distro" },
+    { "name": "Black Textile Kit",      "category": "grip" }
+  ],
+
+  "showcase": [
+    {
+      "slug": "saw-2026",
+      "title": "Saw",
+      "year": 2026,
+      "role": "Gaffer",
+      "director": "(TBD)",
+      "status": "in-production",
+      "cover": "assets/projects/saw-2026/cover.svg",
+      "fallbackCover": "assets/projects/saw-2026/cover.svg",
+      "accent": "#E8A33D",
+      "summary": {
+        "en": "Currently working as Gaffer on Saw. Daily lighting setups, electrical department coordination, and pre-light planning.",
+        "es": "Actualmente trabajando como Gaffer en Saw. Iluminación diaria, coordinación del departamento eléctrico y planificación de pre-iluminación."
+      },
+      "photos": [
+        { "src": "assets/projects/saw-2026/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/saw-2026/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/saw-2026/photo-03-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/saw-2026/photo-04-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/saw-2026/photo-05-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/saw-2026/photo-06-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/saw-2026/photo-07-process.svg", "kind": "process", "caption": "" },
+        { "src": "assets/projects/saw-2026/photo-08-process.svg", "kind": "process", "caption": "" }
+      ]
+    },
+    {
+      "slug": "els-mals-noms-2025",
+      "title": "Els Mals Noms",
+      "year": 2025,
+      "role": "Gaffer",
+      "director": "—",
+      "status": "released",
+      "cover": "assets/projects/els-mals-noms-2025/cover.svg",
+      "fallbackCover": "assets/projects/els-mals-noms-2025/cover.svg",
+      "accent": "#C77B3A",
+      "summary": {
+        "en": "Gaffer on a Spanish-language feature. Replace this text with the real project notes.",
+        "es": "Gaffer en un largometraje en español. Reemplaza este texto con las notas reales del proyecto."
+      },
+      "photos": [
+        { "src": "assets/projects/els-mals-noms-2025/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/els-mals-noms-2025/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/els-mals-noms-2025/photo-03-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/els-mals-noms-2025/photo-04-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/els-mals-noms-2025/photo-05-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/els-mals-noms-2025/photo-06-process.svg", "kind": "process", "caption": "" }
+      ]
+    },
+    {
+      "slug": "la-sociedad-de-la-nieve-2023",
+      "title": "La Sociedad de la Nieve",
+      "year": 2023,
+      "role": "Electrician",
+      "director": "J.A. Bayona",
+      "status": "released",
+      "cover": "assets/projects/la-sociedad-de-la-nieve-2023/cover.svg",
+      "fallbackCover": "assets/projects/la-sociedad-de-la-nieve-2023/cover.svg",
+      "accent": "#5BA8C4",
+      "summary": {
+        "en": "Electrician on J.A. Bayona's survival drama. Replace this text with real notes from set.",
+        "es": "Electricista en el drama de supervivencia de J.A. Bayona. Reemplaza este texto con notas reales del rodaje."
+      },
+      "photos": [
+        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-03-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-04-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-05-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/la-sociedad-de-la-nieve-2023/photo-06-process.svg", "kind": "process", "caption": "" }
+      ]
+    },
+    {
+      "slug": "uncharted-2022",
+      "title": "Uncharted",
+      "year": 2022,
+      "role": "Rigging Electric",
+      "director": "Ruben Fleischer",
+      "status": "released",
+      "cover": "assets/projects/uncharted-2022/cover.svg",
+      "fallbackCover": "assets/projects/uncharted-2022/cover.svg",
+      "accent": "#8B7AB8",
+      "summary": {
+        "en": "Rigging Electric on the action feature. Replace this text with the real story.",
+        "es": "Rigging Electric en la película de acción. Reemplaza este texto con la historia real."
+      },
+      "photos": [
+        { "src": "assets/projects/uncharted-2022/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/uncharted-2022/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/uncharted-2022/photo-03-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/uncharted-2022/photo-04-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/uncharted-2022/photo-05-process.svg", "kind": "process", "caption": "" }
+      ]
+    },
+    {
+      "slug": "a-monster-calls-2016",
+      "title": "A Monster Calls",
+      "year": 2016,
+      "role": "Spark",
+      "director": "J.A. Bayona",
+      "status": "released",
+      "cover": "assets/projects/a-monster-calls-2016/cover.svg",
+      "fallbackCover": "assets/projects/a-monster-calls-2016/cover.svg",
+      "accent": "#6B8E6B",
+      "summary": {
+        "en": "Spark on J.A. Bayona's fantasy drama. Replace this text with real notes.",
+        "es": "Spark en el drama fantástico de J.A. Bayona. Reemplaza este texto con notas reales."
+      },
+      "photos": [
+        { "src": "assets/projects/a-monster-calls-2016/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/a-monster-calls-2016/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/a-monster-calls-2016/photo-03-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/a-monster-calls-2016/photo-04-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/a-monster-calls-2016/photo-05-process.svg", "kind": "process", "caption": "" }
+      ]
+    },
+    {
+      "slug": "the-impossible-2012",
+      "title": "The Impossible",
+      "year": 2012,
+      "role": "Lamp Operator",
+      "director": "J.A. Bayona",
+      "status": "released",
+      "cover": "assets/projects/the-impossible-2012/cover.svg",
+      "fallbackCover": "assets/projects/the-impossible-2012/cover.svg",
+      "accent": "#9B7A5C",
+      "summary": {
+        "en": "Lamp Operator on J.A. Bayona's disaster drama. Replace this text with the real story.",
+        "es": "Lamp Operator en el drama de catástrofe de J.A. Bayona. Reemplaza este texto con la historia real."
+      },
+      "photos": [
+        { "src": "assets/projects/the-impossible-2012/photo-01-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/the-impossible-2012/photo-02-bts.svg",     "kind": "bts",     "caption": "" },
+        { "src": "assets/projects/the-impossible-2012/photo-03-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/the-impossible-2012/photo-04-still.svg",   "kind": "still",   "caption": "" },
+        { "src": "assets/projects/the-impossible-2012/photo-05-process.svg", "kind": "process", "caption": "" }
+      ]
+    }
+  ]
+}
