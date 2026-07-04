@@ -6,9 +6,9 @@
 
 ## Three options to evaluate
 
-### Option 1: Decap CMS (formerly Netlify CMS)
+### Option 1: Decap CMS (formerly Netlify CMS) — **recommended**
 
-- **Pros:** Mature, free, open source, no backend required. Decap is Git-based — it commits directly to the repo, triggering Cloudflare Pages rebuilds automatically. Supports image upload (writes files into the repo). Works with any static host.
+- **Pros:** Mature, free, open source, no backend required. Git-based — commits directly to the repo, triggering Cloudflare Pages rebuilds automatically. Supports image upload (writes files into the repo). Works with any static host.
 - **Cons:** Admin UI requires a login. Decap needs GitHub OAuth to authenticate the editor (i.e. Tarek). User said "don't want a public web-login" — but Decap's login is private-by-default (you whitelist GitHub usernames, no public signup). Tarek would log in via GitHub → only he can access.
 - **Setup:** Add `admin/` folder with `index.html` + `config.yml`, deploy as `/admin` route on Cloudflare Pages.
 - **Cost:** Free.
@@ -32,7 +32,7 @@
 
 ## Recommendation
 
-**Decap CMS** is the best fit:
+**Decap CMS** is the best fit because:
 - Free and open source
 - Git-based (preserves the current "no build step" architecture)
 - Direct commit to repo → Cloudflare auto-deploys
@@ -43,29 +43,35 @@
 
 ## Tasks
 
-- [ ] **Confirm:** does Tarek have a GitHub account? (Yes — for committing changes today via rubereco.)
-- [ ] **Auth strategy:** Decide between
+- [ ] **Confirm:** does Tarek have a GitHub account?
+- [ ] **Auth strategy:** decide between
   - (a) **GitHub OAuth** (Tarek logs in via GitHub — private by default, no public signup)
-  - (b) **Netlify Identity** (requires using Netlify as auth broker, even if not hosting on Netlify)
+  - (b) **Netlify Identity** (uses Netlify as auth broker, even if not hosting on Netlify)
   - (c) **Custom OAuth provider** via Cloudflare Worker
-  - Recommend (a) — simplest, no extra services.
-- [ ] **Define the content schemas** in `admin/config.yml`:
+  - **Recommendation:** (a) — simplest, no extra services.
+- [ ] **Define content schemas** in `admin/config.yml`:
   - `work[]` — main page credits table
-  - `showcase[]` — showcase projects (title, year, cover image, photos, description)
+  - `showcase[]` — showcase projects (title, year, cover image, photos, description, type, directives, status)
   - `kit[]` — equipment list
-  - `partners[]` — partners & credits (issue #10 sub-task 5)
+  - `partners[]` — partners & credits (see issue #06)
   - `i18n` — translations (or skip — keep as raw JSON edit)
-- [ ] **Image handling:** Decide where uploaded photos land:
+- [ ] **Image handling:** decide where uploaded photos land:
   - (a) Committed to repo (current model — fine for <100 MB total)
-  - (b) Pushed to Cloudflare R2 (issue #02) for high-res originals
+  - (b) Pushed to Cloudflare R2 (see issue "Cloudflare R2") for high-res originals
 - [ ] **Set up `admin/` folder** with `index.html` + `config.yml`
-- [ ] **Configure GitHub OAuth app** for the portfolio domain
-- [ ] **Document the editor workflow** for Tarek (how to log in, how to add a project, how to upload a photo)
+- [ ] **Configure GitHub OAuth app** for the portfolio domain (callback URL: `https://tarekrecolons.com/admin/callback`)
+- [ ] **Document the editor workflow** for Tarek (how to log in, how to add a project, how to upload a photo, what fields are required)
 - [ ] **Test end-to-end:** Tarek adds a new work credit via the CMS → repo commit → Cloudflare rebuild → live site updated within 60s
 
 ## Migration plan
 
-Keep the Option A flow running in parallel for 2 weeks while Tarek learns the CMS. After confidence is built, retire Option A and have rubereco handle only the photo-resize / commit step (CMS auto-commits, but raw photos may still need pre-processing).
+Keep the Option A flow running in parallel for 2 weeks while Tarek learns the CMS. After confidence is built, retire Option A and have rubereco handle only the photo-resize / commit step (CMS auto-commits raw changes, but raw photos may still need pre-processing).
+
+## Affected files
+
+- `admin/index.html` (new — Decap admin loader)
+- `admin/config.yml` (new — content schemas)
+- `README.md` — document the new CMS workflow
 
 ## Status
 
