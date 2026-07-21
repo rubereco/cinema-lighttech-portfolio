@@ -892,7 +892,7 @@ button {
   }
 
   .theme-toggle {
-    display: inline-flex;
+    display: none;
     grid-area: theme;
   }
 
