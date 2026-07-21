@@ -15,7 +15,7 @@
 // The loaders (main.js, showcase.js) check for these inline blocks first,
 // fall back to fetch() if missing — so live deploys still pull fresh data.
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -59,7 +59,11 @@ console.log(`  content.json: ${Object.keys(content).join(", ")}`);
 console.log(`  i18n.json:    ${Object.keys(i18n).join(", ")}\n`);
 
 processFile("index.html",    "tarek-content", content, "tarek-i18n", i18n);
-processFile("showcase.html", "tarek-content", content, "tarek-i18n", i18n);
+if (existsSync(resolve(ROOT, "showcase.html"))) {
+  processFile("showcase.html", "tarek-content", content, "tarek-i18n", i18n);
+} else {
+  console.log("  - showcase.html (skipped — not on this branch)");
+}
 
 console.log("\n✓ Done. HTML files now work via file:// without fetch().");
 console.log("  Live deploys still fetch fresh data from /data/*.json (inline is fallback).");

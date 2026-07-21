@@ -12,19 +12,9 @@
   "en": {
     "nav": {
       "work": "Work",
-      "showcase": "Showcase",
       "about": "About",
       "rental": "Rental",
       "contact": "Contact"
-    },
-    "showcase": {
-      "title": "Showcase",
-      "subtitle": "Selected projects · behind-the-scenes, process, stills",
-      "backToFolders": "← All projects",
-      "tabAll": "All",
-      "tabBts": "BTS",
-      "tabStill": "Stills",
-      "tabProcess": "Process"
     },
     "brand": "Tarek Recolons",
     "hero": {
@@ -111,19 +101,9 @@
   "es": {
     "nav": {
       "work": "Trabajo",
-      "showcase": "Proyectos",
       "about": "Sobre mí",
       "rental": "Equipo",
       "contact": "Contacto"
-    },
-    "showcase": {
-      "title": "Proyectos",
-      "subtitle": "Proyectos seleccionados · detrás de cámaras, proceso, fotogramas",
-      "backToFolders": "← Todos los proyectos",
-      "tabAll": "Todo",
-      "tabBts": "BTS",
-      "tabStill": "Stills",
-      "tabProcess": "Proceso"
     },
     "footer": {
       "tagline": "Hecho con cuidado · sin rastreo, sin cookies.",
