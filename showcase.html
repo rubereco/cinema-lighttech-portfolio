@@ -30,7 +30,7 @@
   "_meta": {
     "purpose": "Site content editable by the portfolio owner (Tarek). i18n.json handles UI strings in EN/ES; this file holds the structured content (work credits, kit items, showcase projects). See README.md for the editing workflow.",
     "version": "1.0",
-    "lastUpdated": "2026-07-04"
+    "lastUpdated": "2026-07-21"
   },
   "contact": {
     "email": "contact@tarekrecolons.com",
@@ -41,7 +41,7 @@
   },
   "stats": {
     "yearsExperience": "10+",
-    "featureFilms": "20+",
+    "featureFilms": "10+",
     "availability": "Global"
   },
   "work": [
@@ -112,13 +112,6 @@
       "year": 2017,
       "project": "The Bookshop",
       "role": "Electrician Dailies",
-      "production": "Diagonal TV, A Contracorriente Films, Green Films",
-      "type": "Largometraje"
-    },
-    {
-      "year": 2017,
-      "project": "The Bookshop",
-      "role": "Electrician",
       "production": "Diagonal TV, A Contracorriente Films, Green Films",
       "type": "Largometraje"
     }
@@ -402,7 +395,8 @@
     ],
     "defaultLanguage": "en",
     "detectFromBrowser": true,
-    "notes": "Translations of UI strings. Film titles, director names, and proper nouns are NOT translated — those are kept as-is in both languages. To add a string: use data-i18n=\"key.path\" on the HTML element. Use data-i18n-html for content with HTML markup (about body). To force a different default per page, set <html lang=\"es\">."
+    "notes": "Translations of UI strings. Film titles, director names, and proper nouns are NOT translated — those are kept as-is in both languages. To add a string: use data-i18n=\"key.path\" on the HTML element. Use data-i18n-html for content with HTML markup (about body). To force a different default per page, set <html lang=\"es\">.",
+    "lastUpdated": "2026-07-21"
   },
   "en": {
     "nav": {
@@ -447,17 +441,13 @@
     },
     "about": {
       "title": "About",
-      "body": "<p>With over a decade of experience in the electrical department, I specialize in major feature films and commercials. I've been part of technical crews on world-class projects such as <em>La Sociedad de la Nieve</em> and <em>Uncharted</em>.</p><p>My approach combines technical precision with artistic sensitivity, ensuring the Cinematographer's vision is executed efficiently and safely.</p>",
+      "body": "<p>With over a decade of experience in the electrical department, I specialize in major feature films and commercials. I've been part of technical crews on international projects such as <em>The Bookshop</em>, <em>Calladita</em>, and <em>Boca Norte</em>.</p><p>My approach combines technical precision with artistic sensitivity, ensuring the Cinematographer's vision is executed efficiently and safely.</p>",
       "statsYearsLabel": "Years experience",
       "statsYearsValue": "10+",
       "statsFilmsLabel": "Feature films",
-      "statsFilmsValue": "20+",
+      "statsFilmsValue": "10+",
       "statsAvailabilityLabel": "Availability",
       "statsAvailabilityValue": "Global"
-    },
-    "reel": {
-      "title": "Showreel",
-      "placeholder": "Showreel goes here"
     },
     "rental": {
       "title": "Kit & Rental",
@@ -474,18 +464,6 @@
       "descCStands": "Includes arm and knuckle (×10).",
       "descDistro": "3-phase power distribution box.",
       "descTextile": "Flags, floppies, and nets set."
-    },
-    "kit": {
-      "roleGaffer": "Gaffer",
-      "roleElectrician": "Electrician",
-      "roleElectrician2nd": "Electrician / 2nd Gaffer",
-      "roleElectricianDailies": "Electrician (dailies)",
-      "roleLightingBestboy": "Lighting Technician / Bestboy",
-      "roleRigging": "Rigging Electric",
-      "roleGrip": "Grip",
-      "roleSpark": "Spark",
-      "roleSparkDailies": "Spark (dailies)",
-      "roleLamp": "Lamp Operator"
     },
     "contact": {
       "title": "Get in touch",
@@ -506,6 +484,18 @@
       "toggleAria": "Switch language",
       "en": "EN",
       "es": "ES"
+    },
+    "roles": {
+      "gaffer": "Gaffer",
+      "electrician": "Electrician",
+      "electrician2nd": "Electrician / 2nd Gaffer",
+      "electricianDailies": "Electrician (dailies)",
+      "lightingBestboy": "Lighting Technician / Bestboy",
+      "rigging": "Rigging Electric",
+      "grip": "Grip",
+      "spark": "Spark",
+      "sparkDailies": "Spark (dailies)",
+      "lamp": "Lamp Operator"
     }
   },
   "es": {
@@ -555,17 +545,13 @@
     },
     "about": {
       "title": "Sobre mí",
-      "body": "<p>Con más de una década de experiencia en el departamento eléctrico, me especializo en largometrajes y producciones comerciales de gran formato. He formado parte de equipos técnicos en proyectos de primer nivel como <em>La Sociedad de la Nieve</em> y <em>Uncharted</em>.</p><p>Mi enfoque combina precisión técnica con sensibilidad artística, asegurando que la visión del director de fotografía se ejecute con eficiencia y seguridad.</p>",
+      "body": "<p>Con más de una década de experiencia en el departamento eléctrico, me especializo en largometrajes y publicidad de gran nivel. He formado parte de equipos técnicos en proyectos internacionales como <em>The Bookshop</em>, <em>Calladita</em> y <em>Boca Norte</em>.</p><p>Mi enfoque combina precisión técnica con sensibilidad artística, asegurando que la visión del Director de Fotografía se ejecute con eficiencia y seguridad.</p>",
       "statsYearsLabel": "Años de experiencia",
       "statsYearsValue": "10+",
       "statsFilmsLabel": "Largometrajes",
-      "statsFilmsValue": "20+",
+      "statsFilmsValue": "10+",
       "statsAvailabilityLabel": "Disponibilidad",
       "statsAvailabilityValue": "Global"
-    },
-    "reel": {
-      "title": "Reel",
-      "placeholder": "Aquí va el reel"
     },
     "rental": {
       "title": "Equipo y alquiler",
@@ -583,18 +569,6 @@
       "descDistro": "Caja de distribución trifásica.",
       "descTextile": "Juego de banderas, floppies y redes."
     },
-    "kit": {
-      "roleGaffer": "Gaffer",
-      "roleElectrician": "Eléctrico",
-      "roleElectrician2nd": "Eléctrico / 2º Gaffer",
-      "roleElectricianDailies": "Eléctrico (dailies)",
-      "roleLightingBestboy": "Técnico de iluminación / Best Boy",
-      "roleRigging": "Eléctrico de rigging",
-      "roleGrip": "Grip",
-      "roleSpark": "Spark",
-      "roleSparkDailies": "Spark (dailies)",
-      "roleLamp": "Operador de lámpara"
-    },
     "contact": {
       "title": "Contacto",
       "lede": "Disponible para largometrajes, series y producciones comerciales seleccionadas.",
@@ -610,6 +584,18 @@
       "toggleAria": "Cambiar idioma",
       "en": "EN",
       "es": "ES"
+    },
+    "roles": {
+      "gaffer": "Gaffer",
+      "electrician": "Eléctrico",
+      "electrician2nd": "Eléctrico / 2º Gaffer",
+      "electricianDailies": "Eléctrico (dailies)",
+      "lightingBestboy": "Técnico de iluminación / Best Boy",
+      "rigging": "Eléctrico de rigging",
+      "grip": "Grip",
+      "spark": "Spark",
+      "sparkDailies": "Spark (dailies)",
+      "lamp": "Operador de lámpara"
     }
   }
 }
