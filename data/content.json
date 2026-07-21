@@ -2,7 +2,7 @@
   "_meta": {
     "purpose": "Site content editable by the portfolio owner (Tarek). i18n.json handles UI strings in EN/ES; this file holds the structured content (work credits, kit items, showcase projects). See README.md for the editing workflow.",
     "version": "1.0",
-    "lastUpdated": "2026-07-04"
+    "lastUpdated": "2026-07-21"
   },
 
   "contact": {
@@ -15,7 +15,7 @@
 
   "stats": {
     "yearsExperience": "10+",
-    "featureFilms": "20+",
+    "featureFilms": "10+",
     "availability": "Global"
   },
 
@@ -29,8 +29,7 @@
     { "year": 2021, "project": "L'última nit del karaoke",  "role": "Electrician / 2nd Gaffer",          "production": "TV Series",                                          "type": "Serie TV" },
     { "year": 2020, "project": "Coque",                     "role": "Gaffer",                            "production": "Somos Acme SL",                                       "type": "Cortometraje" },
     { "year": 2019, "project": "Boca Norte",                "role": "Gaffer",                            "production": "Playz, RTVE",                                         "type": "Serie TV" },
-    { "year": 2017, "project": "The Bookshop",              "role": "Electrician Dailies",                "production": "Diagonal TV, A Contracorriente Films, Green Films",   "type": "Largometraje" },
-    { "year": 2017, "project": "The Bookshop",              "role": "Electrician",                       "production": "Diagonal TV, A Contracorriente Films, Green Films",   "type": "Largometraje" }
+    { "year": 2017, "project": "The Bookshop",              "role": "Electrician Dailies",                "production": "Diagonal TV, A Contracorriente Films, Green Films",   "type": "Largometraje" }
   ],
 
   "kit": [
