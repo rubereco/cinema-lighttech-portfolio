@@ -34,7 +34,7 @@
   /** Category config. Single source of truth for section order, labels, and
    *  card layout. The order here is the order rendered on the page. */
   const CATEGORIES = [
-    { id: "equipment-house", labelKey: "partners.section.equipment", layout: "card-landscape" },
+    { id: "equipment-house", labelKey: "partners.section.equipment", layout: "card-landscape", defaultOpen: true },
     { id: "dp",              labelKey: "partners.section.dp",         layout: "card-wide" },
     { id: "rental",          labelKey: "partners.section.rental",     layout: "card-square" },
     { id: "partner",         labelKey: "partners.section.other",      layout: "card-default" },
