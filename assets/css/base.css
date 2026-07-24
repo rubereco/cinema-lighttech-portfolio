@@ -1071,14 +1071,14 @@ button {
   top: 50%;
   left: 0;
   right: 0;
-  height: 70px;
+  height: 85px;
   transform: translateY(-50%);
   background: linear-gradient(
     to right,
-    rgba(255, 248, 230, 0.45) 0%,
-    rgba(255, 248, 230, 0.18) 11%,
-    rgba(255, 248, 230, 0.04) 25%,
-    transparent 45%
+    rgba(255, 248, 230, 0.58) 0%,
+    rgba(255, 248, 230, 0.28) 15%,
+    rgba(255, 248, 230, 0.08) 40%,
+    transparent 70%
   );
   filter: blur(14px);
   mix-blend-mode: screen;
@@ -1091,10 +1091,10 @@ button {
 .page-beam--right::before {
   background: linear-gradient(
     to left,
-    rgba(255, 248, 230, 0.45) 0%,
-    rgba(255, 248, 230, 0.18) 11%,
-    rgba(255, 248, 230, 0.04) 25%,
-    transparent 45%
+    rgba(255, 248, 230, 0.58) 0%,
+    rgba(255, 248, 230, 0.28) 15%,
+    rgba(255, 248, 230, 0.08) 40%,
+    transparent 70%
   );
 }
 
@@ -1109,7 +1109,7 @@ button {
   width: 240px;
   height: 240px;
   transform: translate(-50%, -50%);
-  background: rgba(255, 248, 230, 0.82);
+  background: rgba(255, 248, 230, 0.45);
   -webkit-mask-image: url('../images/leaf-fade.svg');
   mask-image: url('../images/leaf-fade.svg');
   -webkit-mask-size: contain;
@@ -1118,7 +1118,7 @@ button {
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
   mask-position: center;
-  filter: blur(4px);
+  filter: blur(8px);
   mix-blend-mode: screen;
   pointer-events: none;
 }
