@@ -116,7 +116,9 @@
       "empty": "No partners listed yet.",
       "count": {
         "one": "collaboration",
-        "other": "collaborations"
+        "other": "collaborations",
+        "partner_one": "partner",
+        "partner_other": "partners"
       }
     }
   },
@@ -227,7 +229,9 @@
       "empty": "Aún no hay colaboradores listados.",
       "count": {
         "one": "colaboración",
-        "other": "colaboraciones"
+        "other": "colaboraciones",
+        "partner_one": "colaborador",
+        "partner_other": "colaboradores"
       }
     }
   }

@@ -489,7 +489,9 @@
       "empty": "No partners listed yet.",
       "count": {
         "one": "collaboration",
-        "other": "collaborations"
+        "other": "collaborations",
+        "partner_one": "partner",
+        "partner_other": "partners"
       }
     }
   },
@@ -600,7 +602,9 @@
       "empty": "Aún no hay colaboradores listados.",
       "count": {
         "one": "colaboración",
-        "other": "colaboraciones"
+        "other": "colaboraciones",
+        "partner_one": "colaborador",
+        "partner_other": "colaboradores"
       }
     }
   }
@@ -610,13 +614,18 @@
   <style>
     /* Partners page — local styles.
        ────────────────────────────────────────────────────────────────
-       Card layout is data-driven: each category in partners.js
-       (CATEGORIES) has a layout class. The 4 base layouts are:
-         .card-landscape — 4:3 photo (e.g. equipment houses)
-         .card-wide      — 16:9 photo (e.g. cinematographers)
-         .card-square    — 1:1 photo (e.g. logos)
-         .card-default   — 3:4 photo (e.g. people/docs)
-       Add a new category by adding a class here + a CATEGORIES entry. */
+       Layout is data-driven:
+       - The OUTER structure is a vertically-stacked foldable list of
+         categories (accordion). Each category is rendered with a button
+         toggle + collapsible body.
+       - The INNER content (partner cards) is a grid that adapts per
+         category via the layout class on each card:
+           .card-landscape — 4:3 photo (e.g. equipment houses)
+           .card-wide      — 16:9 photo (e.g. cinematographers)
+           .card-square    — 1:1 photo (e.g. logos)
+           .card-default   — 3:4 photo (e.g. people/docs)
+       Adding a new category = 1 entry in CATEGORIES + 1 i18n line +
+       optional CSS layout. No JS changes per category. */
 
     .partners-hero {
       padding: 2.5rem 1rem 1.5rem;
@@ -633,28 +642,95 @@
       max-width: 42rem;
       margin: 0;
     }
+
     .partners-content {
       max-width: 64rem;
       margin: 0 auto;
       padding: 0 1rem 4rem;
-      display: grid;
-      gap: 2.5rem;
+    }
+    .partners-accordion {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-top: 1px solid var(--c-border, rgba(255,255,255,0.08));
+    }
+
+    /* ─── Category section (header + collapsible body) ─────────────── */
+    .partners-section {
+      border-bottom: 1px solid var(--c-border, rgba(255,255,255,0.08));
+    }
+    .partners-section-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      width: 100%;
+      background: transparent;
+      border: none;
+      padding: 1.1rem 0.4rem;
+      text-align: left;
+      cursor: pointer;
+      color: var(--c-fg, #f4f4f4);
+      font-family: inherit;
+      transition: color 0.15s;
+    }
+    .partners-section-toggle:hover,
+    .partners-section-toggle:focus-visible {
+      color: var(--c-accent, #E8A33D);
+      outline: none;
+    }
+    .partners-section-toggle:focus-visible {
+      outline: 2px solid var(--c-accent, #E8A33D);
+      outline-offset: 2px;
+      border-radius: 4px;
     }
     .partners-section-title {
-      font-size: 0.78rem;
+      flex: 1;
+      font-size: 0.85rem;
+      font-weight: 700;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--c-fg-muted, #9b9b9e);
-      margin: 0 0 1rem;
-      border-bottom: 1px solid var(--c-border, rgba(255,255,255,0.08));
-      padding-bottom: 0.5rem;
+      margin: 0;
+      color: inherit;
     }
+    .partners-section-meta {
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: var(--c-fg-muted, #9b9b9e);
+      text-transform: lowercase;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+    .partners-section-chevron {
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+      margin-left: 0.2rem;
+    }
+    .partners-section-toggle[aria-expanded="true"] .partners-section-chevron {
+      transform: rotate(-135deg);
+    }
+    .partners-section-body {
+      padding: 0 0.4rem 1.6rem;
+    }
+    .partners-section-body[hidden] {
+      display: none;
+    }
+
+    /* ─── Partner cards (inside an expanded section) ───────────────── */
     .partner-list {
       list-style: none;
       margin: 0;
       padding: 0;
       display: grid;
       gap: 0.9rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 720px) {
+      .partner-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
     }
     .partner-card {
       background: var(--c-surface, rgba(255,255,255,0.03));
@@ -723,27 +799,14 @@
       color: var(--c-fg-muted, #9b9b9e);
       font-style: italic;
       margin: 0;
+      padding: 0.5rem 0;
     }
 
-    /* ─── Per-category photo aspect ratios ─────────────────────────── */
-    /* Landscape: 4:3 — equipment houses, wide subject matter */
+    /* ─── Per-category photo aspect ratios ──────────────────────── */
     .partner-card.card-landscape .partner-photo { aspect-ratio: 4 / 3; }
-    /* Wide: 16:9 — cinematographers, action shots */
-    .partner-card.card-wide .partner-photo { aspect-ratio: 16 / 9; }
-    /* Square: 1:1 — logos, balanced compositions */
-    .partner-card.card-square .partner-photo { aspect-ratio: 1 / 1; }
-    /* Default: 3:4 — portrait, people, charts */
-    .partner-card.card-default .partner-photo { aspect-ratio: 3 / 4; }
-
-    /* ─── Responsive grid ─────────────────────────────────────────── */
-    @media (min-width: 720px) {
-      .partners-content { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; }
-      .partners-section { break-inside: avoid; }
-      .partner-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-    }
-    @media (min-width: 1100px) {
-      .partners-content { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem; }
-    }
+    .partner-card.card-wide      .partner-photo { aspect-ratio: 16 / 9; }
+    .partner-card.card-square    .partner-photo { aspect-ratio: 1 / 1; }
+    .partner-card.card-default   .partner-photo { aspect-ratio: 3 / 4; }
   </style>
 </head>
 <body>

@@ -26,6 +26,11 @@
    *  is expected to keep descriptions under this limit. */
   const MAX_DESCRIPTION_CHARS = 250;
 
+  /** Default collapsed state for each category. Override per category via
+   *  the CATEGORIES entry's `defaultOpen: true`. Categories without
+   *  coverage (no partners) are auto-collapsed so the empty state is hidden. */
+  const DEFAULT_OPEN = false;
+
   /** Category config. Single source of truth for section order, labels, and
    *  card layout. The order here is the order rendered on the page. */
   const CATEGORIES = [
@@ -172,14 +177,38 @@
   function sectionHtml(category, items, lang) {
     const label = (category.labelKey && t(category.labelKey, lang)) || category.id;
     const empty = t("partners.empty", lang) || "No partners listed yet.";
+    const bodyId = `partners-section-body-${category.id}`;
+
+    // Empty categories stay collapsed so the empty message is hidden by
+    // default — less visual noise. Real categories are collapsed by default
+    // unless the config explicitly sets defaultOpen: true.
+    const isOpen = items.length > 0 && (category.defaultOpen === true || DEFAULT_OPEN);
+
     const inner = items.length
       ? `<ul class="partner-list" role="list">${items.map(p => `<li>${partnerCardHtml(p, category)}</li>`).join("")}</ul>`
       : `<p class="partner-empty">${escapeText(empty)}</p>`;
+
+    const countWord = items.length === 1
+      ? (t("partners.count.partner_one", lang) || "partner")
+      : (t("partners.count.partner_other", lang) || "partners");
+    const meta = items.length > 0
+      ? `<span class="partners-section-meta">${items.length} ${escapeText(countWord)}</span>`
+      : "";
+
     return `
-      <section class="partners-section" data-type="${escapeAttr(category.id)}">
-        <h2 class="partners-section-title">${escapeText(label)}</h2>
-        ${inner}
-      </section>
+      <li class="partners-section" data-type="${escapeAttr(category.id)}">
+        <button class="partners-section-toggle"
+                type="button"
+                aria-expanded="${isOpen ? "true" : "false"}"
+                aria-controls="${escapeAttr(bodyId)}">
+          <span class="partners-section-title">${escapeText(label)}</span>
+          ${meta}
+          <span class="partners-section-chevron" aria-hidden="true"></span>
+        </button>
+        <div class="partners-section-body" id="${escapeAttr(bodyId)}"${isOpen ? "" : " hidden"}>
+          ${inner}
+        </div>
+      </li>
     `;
   }
 
@@ -194,8 +223,23 @@
       const items = partners.filter(p => p.type === category.id);
       return sectionHtml(category, items, lang);
     }).join("");
-    target.innerHTML = html;
+    target.innerHTML = `<ul class="partners-accordion" role="list">${html}</ul>`;
     target.setAttribute("aria-busy", "false");
+    attachToggleHandlers(target);
+  }
+
+  /** Wire click + keyboard handlers to each section toggle.
+   *  Native <button> already handles Enter/Space — we just need to keep
+   *  aria-expanded and the [hidden] attribute in sync. */
+  function attachToggleHandlers(scope) {
+    scope.querySelectorAll(".partners-section-toggle").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const expanded = btn.getAttribute("aria-expanded") === "true";
+        btn.setAttribute("aria-expanded", expanded ? "false" : "true");
+        const body = document.getElementById(btn.getAttribute("aria-controls"));
+        if (body) body.hidden = expanded;
+      });
+    });
   }
 
   // ─── Boot ─────────────────────────────────────────────────────────────
