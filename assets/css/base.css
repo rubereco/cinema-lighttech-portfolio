@@ -1024,3 +1024,83 @@ button {
 
   /* Larger touch target for hero CTA already there */
 }
+/* ════════════════════════════════════════════════════════════════════════
+   Page beams — two soft white rays framing the active section.
+   ════════════════════════════════════════════════════════════════════════
+   Each beam is a horizontal gradient that fades from a bright soft white
+   at the source edge to transparent at the target. The beam is rotated
+   (via JS-set --angle) around its source edge so the bright end stays
+   off-screen and the faded end points at the active section.
+
+   - .page-beam--left:  source at left edge (0% 50%), bright on left
+   - .page-beam--right: source at right edge (100% 50%), bright on right
+   - Both use mix-blend-mode: screen so they add to the dark background
+     without blowing out the content
+   - opacity transitions from 0 → 1 when the first section becomes active
+   - transform transitions over 1.2s ease so the rotation feels smooth
+   - pointer-events: none so the beams never interfere with clicks
+*/
+
+.page-beams {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.page-beam {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0% 50%;
+  --angle: 0deg;
+  transform: rotate(var(--angle));
+  transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.page-beam.is-active {
+  opacity: 1;
+}
+
+.page-beam::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 110px;
+  transform: translateY(-50%);
+  background: linear-gradient(
+    to right,
+    rgba(255, 248, 230, 0.42) 0%,
+    rgba(255, 248, 230, 0.22) 25%,
+    rgba(255, 248, 230, 0.08) 60%,
+    transparent 100%
+  );
+  filter: blur(18px);
+  mix-blend-mode: screen;
+}
+
+.page-beam--right {
+  transform-origin: 100% 50%;
+}
+
+.page-beam--right::before {
+  background: linear-gradient(
+    to left,
+    rgba(255, 248, 230, 0.42) 0%,
+    rgba(255, 248, 230, 0.22) 25%,
+    rgba(255, 248, 230, 0.08) 60%,
+    transparent 100%
+  );
+}
+
+/* Reduced motion: skip the rotation animation. */
+@media (prefers-reduced-motion: reduce) {
+  .page-beam {
+    transition: none;
+  }
+}

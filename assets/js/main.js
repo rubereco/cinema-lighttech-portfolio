@@ -264,7 +264,87 @@ function setupYearStamp() {
   setupLanguageToggle();
   setupKitFilter();
   setupYearStamp();
+  setupPageBeams();
 
   // Signal sibling scripts that i18n is ready (showcase.js listens for this).
   window.dispatchEvent(new CustomEvent("tarek:i18n-ready", { detail: { lang } }));
 })();
+
+/* ──────────────── Page beams (main page only) ──────────────── */
+
+/**
+ * Two soft white rays rotate to point at the section currently centered
+ * in the viewport. The source of each beam is off-screen (left or right
+ * edge); only the beam itself is visible. The beam rotates around the
+ * source edge so the bright end stays anchored and the faded end tracks
+ * the active section.
+ *
+ * Math:
+ *   - Left beam:  default direction = 0° (pointing right).
+ *     Rotation = atan2(targetY − sourceY, targetX − sourceX) in degrees.
+ *   - Right beam: default direction = 180° (pointing left).
+ *     Rotation = atan2(targetY − sourceY, targetX − sourceX) − 180°.
+ *
+ * The page-beams container only exists on index.html, so this is a no-op
+ * on showcase.html / partners.html.
+ */
+function setupPageBeams() {
+  const container = document.querySelector(".page-beams");
+  if (!container) return;
+
+  const leftBeam  = container.querySelector(".page-beam--left");
+  const rightBeam = container.querySelector(".page-beam--right");
+  if (!leftBeam || !rightBeam) return;
+
+  const sections = Array.from(document.querySelectorAll("main section[id]"));
+  if (!sections.length) return;
+
+  lastActive = null;
+  let activeSection = null;
+  let rafId = null;
+
+  function update() {
+    rafId = null;
+    const viewportH = window.innerHeight;
+    const viewportW = window.innerWidth;
+    const centerY = viewportH / 2;
+
+    // Pick the section whose center is closest to the viewport's vertical center.
+    let best = sections[0];
+    let bestDist = Infinity;
+    for (const section of sections) {
+      const r = section.getBoundingClientRect();
+      const distance = Math.abs((r.top + r.height / 2) - centerY);
+      if (distance < bestDist) {
+        bestDist = distance;
+        best = section;
+      }
+    }
+
+    if (best !== activeSection) {
+      activeSection = best;
+      leftBeam.classList.add("is-active");
+      rightBeam.classList.add("is-active");
+    }
+
+    const rect = best.getBoundingClientRect();
+    const targetX = rect.left + rect.width / 2;
+    const targetY = rect.top + rect.height / 2;
+
+    // Source positions: at the off-screen left and right edges, at centerY.
+    const sourceY = centerY;
+    const leftAngle  = Math.atan2(targetY - sourceY, targetX)                * 180 / Math.PI;
+    const rightAngle = Math.atan2(targetY - sourceY, targetX - viewportW) * 180 / Math.PI - 180;
+
+    leftBeam.style.setProperty("--angle",  `${leftAngle.toFixed(2)}deg`);
+    rightBeam.style.setProperty("--angle", `${rightAngle.toFixed(2)}deg`);
+  }
+
+  function onScroll() {
+    if (rafId === null) rafId = requestAnimationFrame(update);
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  update();
+}

@@ -623,6 +623,19 @@
 </head>
 <body>
 
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       PAGE BEAMS — two soft white rays that frame the active section.
+       Each beam emerges from off-screen (left or right edge) and rotates
+       to point at the section currently centered in the viewport.
+       Source is off-screen; only the beam is visible. JS computes the
+       rotation angle from the source edge to the section center. See
+       `setupPageBeams()` in main.js for the math.
+       ═════════════════════════════════════════════════════════════════════╖ -->
+  <div class="page-beams" aria-hidden="true">
+    <div class="page-beam page-beam--left"></div>
+    <div class="page-beam page-beam--right"></div>
+  </div>
+
   <!-- ───────────────────────────── SKIP LINK ───────────────────────────── -->
   <a href="#main" class="skip-link" data-i18n="section.skipToContent">Skip to content</a>
 
