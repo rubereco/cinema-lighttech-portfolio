@@ -1098,27 +1098,28 @@ button {
   );
 }
 
-/* The source — a soft elliptical glow at the source edge. Pure CSS
-   radial gradient, no mask. Wider than the beam end, brighter at the
-   center, fades smoothly. Concentrates volume at the source without
-   imposing any shape. */
+/* The source — a cone of light expanding outward from the source edge.
+   Pure CSS radial gradient with the hot spot pushed to the source side,
+   so the cone radiates inward (lens-flare / spotlight cone shape). The
+   main beam (::before) continues from the cone's tip toward the target. */
 .page-beam::after {
   content: '';
   position: absolute;
   top: 50%;
   left: 0;
-  width: 380px;
-  height: 220px;
-  transform: translate(-30%, -50%);
+  width: 520px;
+  height: 260px;
+  transform: translate(-15%, -50%);
   background: radial-gradient(
-    ellipse at center,
-    rgba(255, 248, 230, 0.85) 0%,
-    rgba(255, 248, 230, 0.55) 18%,
-    rgba(255, 248, 230, 0.22) 42%,
-    rgba(255, 248, 230, 0.05) 70%,
+    ellipse at 15% 50%,
+    rgba(255, 248, 230, 0.95) 0%,
+    rgba(255, 248, 230, 0.70) 12%,
+    rgba(255, 248, 230, 0.38) 28%,
+    rgba(255, 248, 230, 0.15) 50%,
+    rgba(255, 248, 230, 0.04) 75%,
     transparent 100%
   );
-  filter: blur(10px);
+  filter: blur(12px);
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -1126,7 +1127,16 @@ button {
 .page-beam--right::after {
   left: auto;
   right: 0;
-  transform: translate(30%, -50%);
+  transform: translate(15%, -50%);
+  background: radial-gradient(
+    ellipse at 85% 50%,
+    rgba(255, 248, 230, 0.95) 0%,
+    rgba(255, 248, 230, 0.70) 12%,
+    rgba(255, 248, 230, 0.38) 28%,
+    rgba(255, 248, 230, 0.15) 50%,
+    rgba(255, 248, 230, 0.04) 75%,
+    transparent 100%
+  );
 }
 
 /* Reduced motion: skip the rotation animation. */
