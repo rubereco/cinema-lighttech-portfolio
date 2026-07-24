@@ -340,9 +340,12 @@ function setupPageBeams() {
     // to -180 and back), which caused the right beam to do a full 360
     // loop when the target crossed the beam's horizontal axis. Fix: flip
     // the x-component so it's always positive for the right beam, putting
-    // the angle in (-90, +90) with no discontinuity.
-    const leftAngle  = Math.atan2(targetY - sourceY, targetX)             * 180 / Math.PI;
-    const rightAngle = Math.atan2(targetY - sourceY, viewportW - targetX) * 180 / Math.PI;
+    // the angle in (-90, +90) with no discontinuity. Then NEGATE the angle
+    // because the right beam's rotation origin is on the right edge — the
+    // same numerical angle would rotate the strip in the opposite visual
+    // direction (the right edge's frame is mirrored from the left's).
+    const leftAngle  = Math.atan2(targetY - sourceY, targetX)              * 180 / Math.PI;
+    const rightAngle = -Math.atan2(targetY - sourceY, viewportW - targetX) * 180 / Math.PI;
 
     leftBeam.style.setProperty("--angle",  `${leftAngle.toFixed(2)}deg`);
     rightBeam.style.setProperty("--angle", `${rightAngle.toFixed(2)}deg`);
