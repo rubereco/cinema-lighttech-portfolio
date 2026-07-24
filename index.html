@@ -35,7 +35,7 @@
   "_meta": {
     "purpose": "Site content editable by the portfolio owner (Tarek). i18n.json handles UI strings in EN/ES; this file holds the structured content (work credits, kit items, showcase projects). See README.md for the editing workflow.",
     "version": "1.0",
-    "lastUpdated": "2026-07-21"
+    "lastUpdated": "2026-07-24"
   },
   "contact": {
     "email": "tarek@recalone.com",
@@ -326,7 +326,8 @@
         }
       ]
     }
-  ]
+  ],
+  "partners": []
 }
 </script>
   <script type="application/json" id="tarek-i18n">
@@ -347,7 +348,8 @@
       "showcase": "Showcase",
       "about": "About",
       "rental": "Rental",
-      "contact": "Contact"
+      "contact": "Contact",
+      "partners": "Partners"
     },
     "showcase": {
       "title": "Showcase",
@@ -434,6 +436,17 @@
       "spark": "Spark",
       "sparkDailies": "Spark (dailies)",
       "lamp": "Lamp Operator"
+    },
+    "partners": {
+      "pageTitle": "Partners & Credits",
+      "intro": "The equipment houses, rental partners, and cinematographers I work with.",
+      "section": {
+        "equipment": "Equipment Houses",
+        "rental": "Rental Partners",
+        "dp": "Cinematographers",
+        "other": "Other Partners"
+      },
+      "empty": "No partners listed yet."
     }
   },
   "es": {
@@ -442,7 +455,8 @@
       "showcase": "Proyectos",
       "about": "Sobre mí",
       "rental": "Equipo",
-      "contact": "Contacto"
+      "contact": "Contacto",
+      "partners": "Colaboradores"
     },
     "showcase": {
       "title": "Proyectos",
@@ -529,6 +543,17 @@
       "spark": "Spark",
       "sparkDailies": "Spark (dailies)",
       "lamp": "Operador de lámpara"
+    },
+    "partners": {
+      "pageTitle": "Colaboradores y Créditos",
+      "intro": "Las casas de equipos, partners de alquiler y directores de fotografía con los que trabajo.",
+      "section": {
+        "equipment": "Casas de Equipos",
+        "rental": "Partners de Alquiler",
+        "dp": "Directores de Fotografía",
+        "other": "Otros Colaboradores"
+      },
+      "empty": "Aún no hay colaboradores listados."
     }
   }
 }
@@ -553,11 +578,12 @@
 
     <!-- Desktop nav: inline horizontal, hidden on mobile via CSS. -->
     <nav class="nav-desktop" aria-label="Primary" data-nav-desktop>
-      <a href="#work"        data-i18n="nav.work">Work</a>
+      <a href="#work"         data-i18n="nav.work">Work</a>
       <a href="showcase.html" data-i18n="nav.showcase">Showcase</a>
-      <a href="#about"       data-i18n="nav.about">About</a>
-      <a href="#rental"      data-i18n="nav.rental">Rental</a>
-      <a href="#contact"     data-i18n="nav.contact">Contact</a>
+      <a href="#about"        data-i18n="nav.about">About</a>
+      <a href="partners.html" data-i18n="nav.partners">Partners</a>
+      <a href="#rental"       data-i18n="nav.rental">Rental</a>
+      <a href="#contact"      data-i18n="nav.contact">Contact</a>
     </nav>
 
     <div class="lang-toggle" role="group" aria-label="Language">
@@ -581,8 +607,9 @@
     <a href="#work"          style="--i: 0.04s" data-i18n="nav.work">Work</a>
     <a href="showcase.html"  style="--i: 0.08s" data-i18n="nav.showcase">Showcase</a>
     <a href="#about"         style="--i: 0.12s" data-i18n="nav.about">About</a>
-    <a href="#rental"        style="--i: 0.16s" data-i18n="nav.rental">Rental</a>
-    <a href="#contact"       style="--i: 0.20s" data-i18n="nav.contact">Contact</a>
+    <a href="partners.html"  style="--i: 0.16s" data-i18n="nav.partners">Partners</a>
+    <a href="#rental"        style="--i: 0.20s" data-i18n="nav.rental">Rental</a>
+    <a href="#contact"       style="--i: 0.24s" data-i18n="nav.contact">Contact</a>
 
   </nav>
 

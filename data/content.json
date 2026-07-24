@@ -2,7 +2,7 @@
   "_meta": {
     "purpose": "Site content editable by the portfolio owner (Tarek). i18n.json handles UI strings in EN/ES; this file holds the structured content (work credits, kit items, showcase projects). See README.md for the editing workflow.",
     "version": "1.0",
-    "lastUpdated": "2026-07-21"
+    "lastUpdated": "2026-07-24"
   },
   "contact": {
     "email": "tarek@recalone.com",
@@ -293,5 +293,6 @@
         }
       ]
     }
-  ]
+  ],
+  "partners": []
 }

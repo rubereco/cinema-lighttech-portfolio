@@ -201,6 +201,9 @@ function setupLanguageToggle() {
       I18N.apply(lang);
       // re-apply theme so its label also updates to the new language
       setupThemeToggleRefresh();
+      // Notify sibling scripts (showcase.js, partners.js) that the active
+      // language changed so they can re-render dynamic content.
+      window.dispatchEvent(new CustomEvent("tarek:i18n-change", { detail: { lang } }));
     });
   });
 }

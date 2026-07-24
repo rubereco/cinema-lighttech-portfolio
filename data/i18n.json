@@ -15,7 +15,8 @@
       "showcase": "Showcase",
       "about": "About",
       "rental": "Rental",
-      "contact": "Contact"
+      "contact": "Contact",
+      "partners": "Partners"
     },
     "showcase": {
       "title": "Showcase",
@@ -102,6 +103,17 @@
       "spark": "Spark",
       "sparkDailies": "Spark (dailies)",
       "lamp": "Lamp Operator"
+    },
+    "partners": {
+      "pageTitle": "Partners & Credits",
+      "intro": "The equipment houses, rental partners, and cinematographers I work with.",
+      "section": {
+        "equipment": "Equipment Houses",
+        "rental": "Rental Partners",
+        "dp": "Cinematographers",
+        "other": "Other Partners"
+      },
+      "empty": "No partners listed yet."
     }
   },
   "es": {
@@ -110,7 +122,8 @@
       "showcase": "Proyectos",
       "about": "Sobre mí",
       "rental": "Equipo",
-      "contact": "Contacto"
+      "contact": "Contacto",
+      "partners": "Colaboradores"
     },
     "showcase": {
       "title": "Proyectos",
@@ -197,6 +210,17 @@
       "spark": "Spark",
       "sparkDailies": "Spark (dailies)",
       "lamp": "Operador de lámpara"
+    },
+    "partners": {
+      "pageTitle": "Colaboradores y Créditos",
+      "intro": "Las casas de equipos, partners de alquiler y directores de fotografía con los que trabajo.",
+      "section": {
+        "equipment": "Casas de Equipos",
+        "rental": "Partners de Alquiler",
+        "dp": "Directores de Fotografía",
+        "other": "Otros Colaboradores"
+      },
+      "empty": "Aún no hay colaboradores listados."
     }
   }
 }

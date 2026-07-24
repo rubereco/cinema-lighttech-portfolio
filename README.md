@@ -19,6 +19,7 @@ Static portfolio site. No build step, no framework, no tracking, no cookies.
 |---|---|
 | `index.html` | Single-page bio + work credits + kit + contact |
 | `showcase.html` | Visual projects gallery (folder grid → per-project photos) |
+| `partners.html` | Partners & Credits (equipment houses, DPs, rental partners) |
 
 ## File map
 
@@ -26,10 +27,11 @@ Static portfolio site. No build step, no framework, no tracking, no cookies.
 cinema-lighttech-portfolio/
 ├── index.html                  ← THE page. All sections. Single file.
 ├── showcase.html               ← Visual projects gallery (folder grid + per-project)
+├── partners.html               ← Partners & Credits (equipment houses, DPs, rental)
 ├── codebase_index.json         ← AI navigation map (read first in AI sessions)
 ├── data/
 │   ├── i18n.json               ← EN + ES UI strings (~80 keys)
-│   └── content.json            ← Structured content: work, kit, showcase, contact
+│   └── content.json            ← Structured content: work, kit, showcase, partners, contact
 ├── assets/
 │   ├── css/
 │   │   ├── base.css            ← mobile-first layout + components
@@ -38,7 +40,8 @@ cinema-lighttech-portfolio/
 │   │   └── anamorphic.css      ← alt theme (cool anamorphic look)
 │   ├── js/
 │   │   ├── main.js             ← i18n + theme + nav + kit filter
-│   │   └── showcase.js         ← showcase render + lazy load + lightbox + hash routing
+│   │   ├── showcase.js         ← showcase render + lazy load + lightbox + hash routing
+│   │   └── partners.js         ← partners render (typed, language-aware)
 │   ├── images/                 ← hero photo + og-image
 │   └── projects/               ← ONE folder per project (cover + photos)
 │       ├── saw-2026/
