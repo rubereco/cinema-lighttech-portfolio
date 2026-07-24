@@ -113,7 +113,11 @@
         "dp": "Cinematographers",
         "other": "Other Partners"
       },
-      "empty": "No partners listed yet."
+      "empty": "No partners listed yet.",
+      "count": {
+        "one": "collaboration",
+        "other": "collaborations"
+      }
     }
   },
   "es": {
@@ -220,7 +224,11 @@
         "dp": "Directores de Fotografía",
         "other": "Otros Colaboradores"
       },
-      "empty": "Aún no hay colaboradores listados."
+      "empty": "Aún no hay colaboradores listados.",
+      "count": {
+        "one": "colaboración",
+        "other": "colaboraciones"
+      }
     }
   }
 }

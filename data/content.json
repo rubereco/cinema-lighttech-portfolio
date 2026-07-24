@@ -1,7 +1,7 @@
 {
   "_meta": {
     "purpose": "Site content editable by the portfolio owner (Tarek). i18n.json handles UI strings in EN/ES; this file holds the structured content (work credits, kit items, showcase projects). See README.md for the editing workflow.",
-    "version": "1.0",
+    "version": "1.1",
     "lastUpdated": "2026-07-24"
   },
   "contact": {
@@ -294,5 +294,54 @@
       ]
     }
   ],
-  "partners": []
+  "partners": [
+    {
+      "type": "equipment-house",
+      "name": "Movie-men",
+      "photo": "assets/images/partners/movie-men.jpg",
+      "count": 12,
+      "description": {
+        "en": "Industry-leading equipment rental house based in Madrid. Reliable power distribution units, generators, and full lighting packages for film and commercial productions.",
+        "es": "Casa líder de alquiler de equipos en Madrid. Unidades de distribución de energía, generadores y paquetes completos de iluminación para producciones cinematográficas y publicitarias."
+      },
+      "url": "https://example.com",
+      "label": "Website"
+    },
+    {
+      "type": "dp",
+      "name": "Joan Pradells",
+      "photo": "assets/images/partners/joan-pradells.jpg",
+      "count": 4,
+      "description": {
+        "en": "Cinematographer with a knack for natural light and texture. Repeated collaborations on intimate narrative projects.",
+        "es": "Director de fotografía con ojo para la luz natural y la textura. Colaboraciones repetidas en proyectos narrativos íntimos."
+      },
+      "url": "https://example.com",
+      "label": "Portfolio"
+    },
+    {
+      "type": "rental",
+      "name": "Quim Casanova",
+      "photo": "assets/images/partners/quim-casanova.jpg",
+      "count": 7,
+      "description": {
+        "en": "Independent rental partner for specialty grip and lighting modifiers. Quick turnaround, well-maintained gear.",
+        "es": "Partner independiente de alquiler para grip especializado y modificadores de iluminación. Respuesta rápida, equipo bien mantenido."
+      },
+      "url": "https://example.com",
+      "label": "Website"
+    },
+    {
+      "type": "partner",
+      "name": "Mercadona",
+      "photo": "assets/images/partners/mercadona.jpg",
+      "count": 2,
+      "description": {
+        "en": "Commercial production partner. Lighting and grip for in-store campaigns and serial content.",
+        "es": "Partner de producción comercial. Iluminación y grip para campañas en tienda y contenido serial."
+      },
+      "url": "https://example.com",
+      "label": "Website"
+    }
+  ]
 }

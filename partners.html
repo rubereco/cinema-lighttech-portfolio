@@ -25,7 +25,7 @@
 {
   "_meta": {
     "purpose": "Site content editable by the portfolio owner (Tarek). i18n.json handles UI strings in EN/ES; this file holds the structured content (work credits, kit items, showcase projects). See README.md for the editing workflow.",
-    "version": "1.0",
+    "version": "1.1",
     "lastUpdated": "2026-07-24"
   },
   "contact": {
@@ -318,7 +318,56 @@
       ]
     }
   ],
-  "partners": []
+  "partners": [
+    {
+      "type": "equipment-house",
+      "name": "Movie-men",
+      "photo": "assets/images/partners/movie-men.jpg",
+      "count": 12,
+      "description": {
+        "en": "Industry-leading equipment rental house based in Madrid. Reliable power distribution units, generators, and full lighting packages for film and commercial productions.",
+        "es": "Casa líder de alquiler de equipos en Madrid. Unidades de distribución de energía, generadores y paquetes completos de iluminación para producciones cinematográficas y publicitarias."
+      },
+      "url": "https://example.com",
+      "label": "Website"
+    },
+    {
+      "type": "dp",
+      "name": "Joan Pradells",
+      "photo": "assets/images/partners/joan-pradells.jpg",
+      "count": 4,
+      "description": {
+        "en": "Cinematographer with a knack for natural light and texture. Repeated collaborations on intimate narrative projects.",
+        "es": "Director de fotografía con ojo para la luz natural y la textura. Colaboraciones repetidas en proyectos narrativos íntimos."
+      },
+      "url": "https://example.com",
+      "label": "Portfolio"
+    },
+    {
+      "type": "rental",
+      "name": "Quim Casanova",
+      "photo": "assets/images/partners/quim-casanova.jpg",
+      "count": 7,
+      "description": {
+        "en": "Independent rental partner for specialty grip and lighting modifiers. Quick turnaround, well-maintained gear.",
+        "es": "Partner independiente de alquiler para grip especializado y modificadores de iluminación. Respuesta rápida, equipo bien mantenido."
+      },
+      "url": "https://example.com",
+      "label": "Website"
+    },
+    {
+      "type": "partner",
+      "name": "Mercadona",
+      "photo": "assets/images/partners/mercadona.jpg",
+      "count": 2,
+      "description": {
+        "en": "Commercial production partner. Lighting and grip for in-store campaigns and serial content.",
+        "es": "Partner de producción comercial. Iluminación y grip para campañas en tienda y contenido serial."
+      },
+      "url": "https://example.com",
+      "label": "Website"
+    }
+  ]
 }
 </script>
   <script type="application/json" id="tarek-i18n">
@@ -437,7 +486,11 @@
         "dp": "Cinematographers",
         "other": "Other Partners"
       },
-      "empty": "No partners listed yet."
+      "empty": "No partners listed yet.",
+      "count": {
+        "one": "collaboration",
+        "other": "collaborations"
+      }
     }
   },
   "es": {
@@ -544,18 +597,30 @@
         "dp": "Directores de Fotografía",
         "other": "Otros Colaboradores"
       },
-      "empty": "Aún no hay colaboradores listados."
+      "empty": "Aún no hay colaboradores listados.",
+      "count": {
+        "one": "colaboración",
+        "other": "colaboraciones"
+      }
     }
   }
 }
 </script>
 
   <style>
-    /* Page-local styles. Cards share the existing .link-arrow visual.
-       Section spacing follows the same rhythm as index.html sections. */
+    /* Partners page — local styles.
+       ────────────────────────────────────────────────────────────────
+       Card layout is data-driven: each category in partners.js
+       (CATEGORIES) has a layout class. The 4 base layouts are:
+         .card-landscape — 4:3 photo (e.g. equipment houses)
+         .card-wide      — 16:9 photo (e.g. cinematographers)
+         .card-square    — 1:1 photo (e.g. logos)
+         .card-default   — 3:4 photo (e.g. people/docs)
+       Add a new category by adding a class here + a CATEGORIES entry. */
+
     .partners-hero {
       padding: 2.5rem 1rem 1.5rem;
-      max-width: 60rem;
+      max-width: 64rem;
       margin: 0 auto;
     }
     .partners-hero h1 {
@@ -569,7 +634,7 @@
       margin: 0;
     }
     .partners-content {
-      max-width: 60rem;
+      max-width: 64rem;
       margin: 0 auto;
       padding: 0 1rem 4rem;
       display: grid;
@@ -589,19 +654,40 @@
       margin: 0;
       padding: 0;
       display: grid;
-      gap: 0.6rem;
+      gap: 0.9rem;
     }
     .partner-card {
       background: var(--c-surface, rgba(255,255,255,0.03));
       border: 1px solid var(--c-border, rgba(255,255,255,0.06));
-      border-radius: 8px;
-      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .partner-card:hover,
+    .partner-card:focus-within {
+      border-color: var(--c-accent, #E8A33D);
+      transform: translateY(-1px);
+    }
+    .partner-photo {
+      background: var(--c-bg-2, rgba(255,255,255,0.04));
+      overflow: hidden;
+    }
+    .partner-photo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    .partner-body {
+      padding: 0.85rem 1rem 1rem;
     }
     .partner-card-head {
       display: flex;
       flex-wrap: wrap;
       align-items: baseline;
-      gap: 0.4rem 0.8rem;
+      gap: 0.35rem 0.8rem;
+      margin-bottom: 0.4rem;
     }
     .partner-name {
       font-weight: 600;
@@ -613,18 +699,23 @@
       color: var(--c-accent, #E8A33D);
     }
     .partner-link-label {
-      font-size: 0.7rem;
+      font-size: 0.66rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--c-fg-muted, #9b9b9e);
     }
-    .partner-location {
-      font-size: 0.82rem;
+    .partner-count {
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
       color: var(--c-fg-muted, #9b9b9e);
+      padding: 0.18rem 0.45rem;
+      border: 1px solid var(--c-border, rgba(255,255,255,0.12));
+      border-radius: 999px;
+      white-space: nowrap;
     }
-    .partner-notes {
-      margin: 0.5rem 0 0;
-      font-size: 0.92rem;
+    .partner-desc {
+      margin: 0;
+      font-size: 0.88rem;
       color: var(--c-fg-muted, #c8c8c8);
       line-height: 1.45;
     }
@@ -633,9 +724,25 @@
       font-style: italic;
       margin: 0;
     }
+
+    /* ─── Per-category photo aspect ratios ─────────────────────────── */
+    /* Landscape: 4:3 — equipment houses, wide subject matter */
+    .partner-card.card-landscape .partner-photo { aspect-ratio: 4 / 3; }
+    /* Wide: 16:9 — cinematographers, action shots */
+    .partner-card.card-wide .partner-photo { aspect-ratio: 16 / 9; }
+    /* Square: 1:1 — logos, balanced compositions */
+    .partner-card.card-square .partner-photo { aspect-ratio: 1 / 1; }
+    /* Default: 3:4 — portrait, people, charts */
+    .partner-card.card-default .partner-photo { aspect-ratio: 3 / 4; }
+
+    /* ─── Responsive grid ─────────────────────────────────────────── */
     @media (min-width: 720px) {
-      .partners-content { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem 2.5rem; }
+      .partners-content { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; }
       .partners-section { break-inside: avoid; }
+      .partner-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    }
+    @media (min-width: 1100px) {
+      .partners-content { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem; }
     }
   </style>
 </head>
