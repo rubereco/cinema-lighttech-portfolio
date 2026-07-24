@@ -1099,27 +1099,38 @@ button {
 }
 
 /* The source — a cone of light expanding outward from the source edge.
-   Pure CSS radial gradient with the hot spot pushed to the source side,
-   so the cone radiates inward (lens-flare / spotlight cone shape). The
-   main beam (::before) continues from the cone's tip toward the target. */
+   Two stacked radial gradients (CSS-only, no SVG):
+     1. Small bright concentrated spot at the source (the "tip" of the cone)
+     2. Wider, more diffuse elliptical halo extending outward (the "spread")
+   The combination reads as a cone of light — bright concentrated source
+   with a wider cone of light radiating outward. The main beam (::before)
+   continues from the cone's tip toward the target. */
 .page-beam::after {
   content: '';
   position: absolute;
   top: 50%;
   left: 0;
-  width: 520px;
-  height: 260px;
-  transform: translate(-15%, -50%);
-  background: radial-gradient(
-    ellipse at 15% 50%,
-    rgba(255, 248, 230, 0.95) 0%,
-    rgba(255, 248, 230, 0.70) 12%,
-    rgba(255, 248, 230, 0.38) 28%,
-    rgba(255, 248, 230, 0.15) 50%,
-    rgba(255, 248, 230, 0.04) 75%,
-    transparent 100%
-  );
-  filter: blur(12px);
+  width: 720px;
+  height: 240px;
+  transform: translate(-10%, -50%);
+  background:
+    /* layer 1 (top): bright concentrated tip at the source */
+    radial-gradient(
+      ellipse 120px 90px at 0% 50%,
+      rgba(255, 248, 230, 0.95) 0%,
+      rgba(255, 248, 230, 0.65) 30%,
+      transparent 70%
+    ),
+    /* layer 2 (bottom): wider cone of light extending outward */
+    radial-gradient(
+      ellipse at 5% 50%,
+      rgba(255, 248, 230, 0.55) 0%,
+      rgba(255, 248, 230, 0.30) 18%,
+      rgba(255, 248, 230, 0.12) 40%,
+      rgba(255, 248, 230, 0.03) 65%,
+      transparent 85%
+    );
+  filter: blur(10px);
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -1127,16 +1138,22 @@ button {
 .page-beam--right::after {
   left: auto;
   right: 0;
-  transform: translate(15%, -50%);
-  background: radial-gradient(
-    ellipse at 85% 50%,
-    rgba(255, 248, 230, 0.95) 0%,
-    rgba(255, 248, 230, 0.70) 12%,
-    rgba(255, 248, 230, 0.38) 28%,
-    rgba(255, 248, 230, 0.15) 50%,
-    rgba(255, 248, 230, 0.04) 75%,
-    transparent 100%
-  );
+  transform: translate(-10%, -50%);
+  background:
+    radial-gradient(
+      ellipse 120px 90px at 100% 50%,
+      rgba(255, 248, 230, 0.95) 0%,
+      rgba(255, 248, 230, 0.65) 30%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse at 95% 50%,
+      rgba(255, 248, 230, 0.55) 0%,
+      rgba(255, 248, 230, 0.30) 18%,
+      rgba(255, 248, 230, 0.12) 40%,
+      rgba(255, 248, 230, 0.03) 65%,
+      transparent 85%
+    );
 }
 
 /* Reduced motion: skip the rotation animation. */
