@@ -26,7 +26,6 @@
   // ─── State ────────────────────────────────────────────────────────────
   let CONTENT = null;
   let currentProjectSlug = null;
-  let currentFilter = "all";
   let lightboxIndex = -1;
 
   // ─── DOM refs (resolved once on boot) ────────────────────────────────
@@ -38,7 +37,6 @@
     dom.grid         = document.getElementById("showcase-grid");
     dom.projectHead  = document.getElementById("project-head");
     dom.projectGrid  = document.getElementById("project-grid");
-    dom.projectTabs  = document.getElementById("project-tabs");
     dom.lightbox     = document.getElementById("lightbox");
     dom.lightboxImg  = document.getElementById("lightbox-img");
     dom.lightboxCap  = document.getElementById("lightbox-caption");
@@ -172,19 +170,10 @@
       </div>
     `;
 
-    currentFilter = "all";
     renderProjectPhotos(project);
-
-    // Update tab buttons state
-    if (dom.projectTabs) {
-      dom.projectTabs.querySelectorAll("button").forEach((b) => {
-        b.setAttribute("aria-selected", b.dataset.kind === "all" ? "true" : "false");
-      });
-    }
 
     setupLazyImages(dom.projectHead, /* eagerCount */ 1);
     setupLazyImages(dom.projectGrid, /* eagerCount */ 4);
-    setupProjectTabs(project);
     setupPhotoClicks(project);
 
     // Lazy-load the cover image immediately (it has loading=eager)
@@ -208,41 +197,16 @@
   }
 
   function photoTileHtml(photo, index) {
-    const kind = photo.kind || "bts";
     const caption = photo.caption || "";
     // Tiles: lazy by default (cover image is the only eager one)
     return `
-      <figure class="photo-tile" role="listitem" data-kind="${escapeAttr(kind)}" data-index="${index}">
-        <span class="photo-kind">${escapeText(kind)}</span>
+      <figure class="photo-tile" role="listitem" data-index="${index}">
         <img alt="${escapeAttr(caption)}"
              loading="lazy" decoding="async"
              data-src="${escapeAttr(photo.src)}"
              src="${escapeAttr(placeholderCover('tile'))}">
       </figure>
     `;
-  }
-
-  // ─── Tabs ────────────────────────────────────────────────────────────
-  function setupProjectTabs(project) {
-    if (!dom.projectTabs) return;
-    dom.projectTabs.querySelectorAll("button").forEach((btn) => {
-      btn.onclick = () => {
-        const kind = btn.dataset.kind;
-        currentFilter = kind;
-        dom.projectTabs.querySelectorAll("button").forEach((b) => {
-          b.setAttribute("aria-selected", b === btn ? "true" : "false");
-        });
-        filterProjectPhotos();
-      };
-    });
-  }
-
-  function filterProjectPhotos() {
-    if (!dom.projectGrid) return;
-    dom.projectGrid.querySelectorAll(".photo-tile").forEach((tile) => {
-      const match = currentFilter === "all" || tile.dataset.kind === currentFilter;
-      tile.classList.toggle("is-hidden", !match);
-    });
   }
 
   // ─── Lazy image loading (IntersectionObserver) ───────────────────────
@@ -306,19 +270,14 @@
   // ─── Lightbox ────────────────────────────────────────────────────────
   function setupPhotoClicks(project) {
     if (!dom.projectGrid) return;
-    dom.projectGrid.querySelectorAll(".photo-tile").forEach((tile) => {
-      tile.addEventListener("click", () => {
-        // Index within the *currently filtered* set so prev/next respects the tab
-        const visible = Array.from(dom.projectGrid.querySelectorAll(".photo-tile"))
-          .filter((t) => !t.classList.contains("is-hidden"));
-        const idx = visible.indexOf(tile);
-        if (idx >= 0) openLightbox(project, idx, visible);
-      });
+    const tiles = Array.from(dom.projectGrid.querySelectorAll(".photo-tile"));
+    tiles.forEach((tile, idx) => {
+      tile.addEventListener("click", () => openLightbox(project, idx, tiles));
     });
   }
 
-  function openLightbox(project, idx, visibleTiles) {
-    const tile = visibleTiles[idx];
+  function openLightbox(project, idx, tiles) {
+    const tile = tiles[idx];
     const img = tile.querySelector("img");
     const caption = img.alt || project.title;
     dom.lightboxImg.src = img.currentSrc || img.src;
@@ -328,7 +287,7 @@
     document.body.style.overflow = "hidden";
     lightboxIndex = idx;
     lightboxState.project = project;
-    lightboxState.visibleTiles = visibleTiles;
+    lightboxState.tiles = tiles;
   }
 
   function closeLightbox() {
@@ -340,12 +299,12 @@
     lightboxIndex = -1;
   }
 
-  const lightboxState = { project: null, visibleTiles: [] };
+  const lightboxState = { project: null, tiles: [] };
 
   function lightboxStep(delta) {
     if (lightboxIndex < 0) return;
-    const next = (lightboxIndex + delta + lightboxState.visibleTiles.length) % lightboxState.visibleTiles.length;
-    const tile = lightboxState.visibleTiles[next];
+    const next = (lightboxIndex + delta + lightboxState.tiles.length) % lightboxState.tiles.length;
+    const tile = lightboxState.tiles[next];
     const img = tile.querySelector("img");
     dom.lightboxImg.src = img.currentSrc || img.src;
     dom.lightboxImg.alt = img.alt || lightboxState.project.title;

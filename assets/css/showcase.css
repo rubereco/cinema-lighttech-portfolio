@@ -248,35 +248,6 @@
   .project-head .project-body { padding-right: 1rem; }
 }
 
-/* ─── Project tabs ──────────────────────────────────────────────────── */
-
-.project-tabs {
-  display: flex;
-  gap: 0.4rem;
-  margin: 0.5rem 0 1.25rem 0;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--c-border, rgba(255,255,255,0.08));
-  padding-bottom: 0.5rem;
-}
-.project-tabs button {
-  background: transparent;
-  border: 1px solid var(--c-border, rgba(255,255,255,0.12));
-  color: var(--c-fg-muted, #9b9b9e);
-  padding: 0.5rem 0.9rem;
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-.project-tabs button:hover { color: var(--c-fg, #f4f4f4); }
-.project-tabs button[aria-selected="true"] {
-  background: var(--c-fg, #f4f4f4);
-  color: var(--c-bg, #0b0b0d);
-  border-color: var(--c-fg, #f4f4f4);
-}
-
 /* ─── Project photo grid ────────────────────────────────────────────── */
 
 .project-grid {
@@ -312,26 +283,6 @@
 }
 .photo-tile img.is-loaded { opacity: 1; }
 .photo-tile:hover img.is-loaded { transform: scale(1.04); }
-
-.photo-tile .photo-kind {
-  position: absolute;
-  top: 0.45rem; left: 0.45rem;
-  z-index: 1;
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  padding: 0.25rem 0.45rem;
-  border-radius: 3px;
-  background: rgba(11, 11, 13, 0.7);
-  color: #f4f4f4;
-  backdrop-filter: blur(4px);
-  text-transform: uppercase;
-}
-
-/* Hidden by filter (kept in DOM for layout transitions) */
-.photo-tile.is-hidden {
-  display: none;
-}
 
 /* ─── Lightbox ──────────────────────────────────────────────────────── */
 

@@ -19,12 +19,8 @@
     },
     "showcase": {
       "title": "Showcase",
-      "subtitle": "Selected projects · behind-the-scenes, process, stills",
-      "backToFolders": "← All projects",
-      "tabAll": "All",
-      "tabBts": "BTS",
-      "tabStill": "Stills",
-      "tabProcess": "Process"
+      "subtitle": "Selected projects · visual stories from set",
+      "backToFolders": "← All projects"
     },
     "brand": "Tarek Recolons",
     "hero": {
@@ -118,12 +114,8 @@
     },
     "showcase": {
       "title": "Proyectos",
-      "subtitle": "Proyectos seleccionados · detrás de cámaras, proceso, fotogramas",
-      "backToFolders": "← Todos los proyectos",
-      "tabAll": "Todo",
-      "tabBts": "BTS",
-      "tabStill": "Stills",
-      "tabProcess": "Proceso"
+      "subtitle": "Proyectos seleccionados · historias visuales del rodaje",
+      "backToFolders": "← Todos los proyectos"
     },
     "footer": {
       "tagline": "Hecho con cuidado · sin rastreo, sin cookies.",
