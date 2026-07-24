@@ -333,8 +333,16 @@ function setupPageBeams() {
 
     // Source positions: at the off-screen left and right edges, at centerY.
     const sourceY = centerY;
-    const leftAngle  = Math.atan2(targetY - sourceY, targetX)                * 180 / Math.PI;
-    const rightAngle = Math.atan2(targetY - sourceY, targetX - viewportW) * 180 / Math.PI - 180;
+    // Both beams rotate around their respective edges so the bright source
+    // stays at the edge and the beam swings inward toward the target.
+    //
+    // atan2(y, x) has a discontinuity at y = 0 when x < 0 (jumps from +180
+    // to -180 and back), which caused the right beam to do a full 360
+    // loop when the target crossed the beam's horizontal axis. Fix: flip
+    // the x-component so it's always positive for the right beam, putting
+    // the angle in (-90, +90) with no discontinuity.
+    const leftAngle  = Math.atan2(targetY - sourceY, targetX)             * 180 / Math.PI;
+    const rightAngle = Math.atan2(targetY - sourceY, viewportW - targetX) * 180 / Math.PI;
 
     leftBeam.style.setProperty("--angle",  `${leftAngle.toFixed(2)}deg`);
     rightBeam.style.setProperty("--angle", `${rightAngle.toFixed(2)}deg`);
