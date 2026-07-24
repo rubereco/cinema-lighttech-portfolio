@@ -1071,16 +1071,16 @@ button {
   top: 50%;
   left: 0;
   right: 0;
-  height: 85px;
+  height: 60px;
   transform: translateY(-50%);
   background: linear-gradient(
     to right,
-    rgba(255, 248, 230, 0.58) 0%,
-    rgba(255, 248, 230, 0.28) 15%,
-    rgba(255, 248, 230, 0.08) 40%,
-    transparent 70%
+    rgba(255, 248, 230, 0.62) 0%,
+    rgba(255, 248, 230, 0.32) 18%,
+    rgba(255, 248, 230, 0.10) 45%,
+    transparent 75%
   );
-  filter: blur(14px);
+  filter: blur(12px);
   mix-blend-mode: screen;
 }
 
@@ -1091,34 +1091,34 @@ button {
 .page-beam--right::before {
   background: linear-gradient(
     to left,
-    rgba(255, 248, 230, 0.58) 0%,
-    rgba(255, 248, 230, 0.28) 15%,
-    rgba(255, 248, 230, 0.08) 40%,
-    transparent 70%
+    rgba(255, 248, 230, 0.62) 0%,
+    rgba(255, 248, 230, 0.32) 18%,
+    rgba(255, 248, 230, 0.10) 45%,
+    transparent 75%
   );
 }
 
-/* The fan/boule — a short burst of light at the source. Rotates with the beam.
-   Sits on top of the beam (::after) so the bright point is visible at the
-   source edge. */
+/* The source — a soft elliptical glow at the source edge. Pure CSS
+   radial gradient, no mask. Wider than the beam end, brighter at the
+   center, fades smoothly. Concentrates volume at the source without
+   imposing any shape. */
 .page-beam::after {
   content: '';
   position: absolute;
   top: 50%;
   left: 0;
-  width: 240px;
-  height: 240px;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 248, 230, 0.45);
-  -webkit-mask-image: url('../images/leaf-fade.svg');
-  mask-image: url('../images/leaf-fade.svg');
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  filter: blur(8px);
+  width: 380px;
+  height: 220px;
+  transform: translate(-30%, -50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 248, 230, 0.85) 0%,
+    rgba(255, 248, 230, 0.55) 18%,
+    rgba(255, 248, 230, 0.22) 42%,
+    rgba(255, 248, 230, 0.05) 70%,
+    transparent 100%
+  );
+  filter: blur(10px);
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -1126,7 +1126,7 @@ button {
 .page-beam--right::after {
   left: auto;
   right: 0;
-  transform: translate(50%, -50%);
+  transform: translate(30%, -50%);
 }
 
 /* Reduced motion: skip the rotation animation. */
