@@ -1107,66 +1107,33 @@ body { -ms-overflow-style: none; }
   mix-blend-mode: screen;
 }
 
-/* The hot spot — moves vertically with scroll. Three visual components:
-     ::before = horizontal ray (perpendicular to beam)
-     ::after  = bright core + halo (radial, pure white at centre) */
+/* The hot spot — a real lens-flare IMAGE (not CSS gradients).
+   The image was generated via image_generate to match the user's reference:
+   bright white-cream core, wide horizontal halo, thin horizontal streak,
+   soft fade at all edges. Source: assets/images/scroll-flare.jpg (1280x720).
+
+   The image has a dark background. mix-blend-mode: screen hides it
+   (dark pixels blend to invisible) and the bright flare pixels add light
+   to whatever's behind. The result reads as the same flare shape on
+   any background.
+
+   The .scroll-spot element is 480x270 (16:9 — the image's aspect ratio).
+   It's wider than the indicator (8px) so the flare extends into the page.
+   It's centered on the beam via left: 50%, margin-left: -240px. */
 .scroll-spot {
   position: absolute;
-  left: 0;
+  left: 50%;
   top: 0;
-  width: 100%;
-  height: 200px;
+  width: 480px;
+  height: 270px;
+  margin-left: -240px;
   pointer-events: none;
   transform: translateY(0);
   transition: transform 0.14s cubic-bezier(0.2, 0, 0.1, 1);
-}
-
-/* The horizontal ray — the lens-flare streak perpendicular to the beam.
-   Wide linear-gradient that fades at both ends, blurred for soft edges.
-   This is the visual signature of the reference image. */
-.scroll-spot::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 460px;
-  height: 14px;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(255, 248, 230, 0.35) 12%,
-    rgba(255, 248, 230, 0.8)  30%,
-    rgba(255, 255, 255, 1)    50%,
-    rgba(255, 248, 230, 0.8)  70%,
-    rgba(255, 248, 230, 0.35) 88%,
-    transparent 100%
-  );
-  filter: blur(3px);
-  mix-blend-mode: screen;
-}
-
-/* The bright core + halo — a radial gradient that peaks at pure white
-   at the very centre and fades to transparent at the edges. */
-.scroll-spot::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 220px;
-  height: 220px;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(
-    circle at center,
-    rgba(255, 255, 255, 1)    0%,
-    rgba(255, 252, 245, 1)    8%,
-    rgba(255, 248, 230, 0.75) 20%,
-    rgba(255, 248, 230, 0.45) 36%,
-    rgba(255, 248, 230, 0.2)  54%,
-    rgba(255, 248, 230, 0.08) 70%,
-    transparent               88%
-  );
-  filter: blur(6px);
+  background-image: url('../images/scroll-flare.jpg');
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
   mix-blend-mode: screen;
 }
 
