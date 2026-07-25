@@ -270,14 +270,15 @@ function setupYearStamp() {
   window.dispatchEvent(new CustomEvent("tarek:i18n-ready", { detail: { lang } }));
 })();
 
-/* ──────────────── Custom scroll light (all pages) ──────────────── */
+/* ──────────────── Scroll indicator: full-height beam + moving hot spot ── */
 
 /**
- * Two soft vertical light traces, one per side, replace the native
- * scrollbar. Position tracks scroll progress; height scales with
- * viewport/document ratio. Both ends fade to transparent via a mask
- * so neither the bar nor its halo has a hard edge — reads as a light
- * trace, not a shiny scrollbar.
+ * Vertical scroll indicator modelled on a long light beam with a focal
+ * hot spot. Each side (left + right) has:
+ *   - A faint full-viewport-height beam that fades softly at the top
+ *     and bottom of the viewport (the "track" of light)
+ *   - A bright hot spot at the current scroll position with a wide
+ *     glow halo extending perpendicular to the beam (the "source")
  *
  * Elements are appended to <body> on boot so this works on every page
  * (index, showcase, partners) without per-page HTML changes.
@@ -285,17 +286,33 @@ function setupYearStamp() {
  * Hidden when the page fits in the viewport (scrollable <= 0).
  */
 function setupScrollLight() {
-  // Create the two mirror lights (one per side). Reuse if already present.
-  const lights = ["scroll-light--left", "scroll-light--right"].map((cls) => {
-    let el = document.querySelector("." + cls);
-    if (!el) {
-      el = document.createElement("div");
-      el.className = "scroll-light " + cls;
-      el.setAttribute("aria-hidden", "true");
-      document.body.appendChild(el);
+  // Create the two mirror indicators (one per side). Reuse if already present.
+  const indicators = ["scroll-indicator--left", "scroll-indicator--right"].map((cls) => {
+    let ind = document.querySelector("." + cls);
+    if (!ind) {
+      ind = document.createElement("div");
+      ind.className = "scroll-indicator " + cls;
+      ind.setAttribute("aria-hidden", "true");
+
+      const beam = document.createElement("div");
+      beam.className = "scroll-beam";
+      ind.appendChild(beam);
+
+      const spot = document.createElement("div");
+      spot.className = "scroll-spot";
+      ind.appendChild(spot);
+
+      document.body.appendChild(ind);
     }
-    return el;
+    return ind;
   });
+
+  // All hot-spot elements (one per indicator) — share the same translateY.
+  const spots = indicators.map((ind) => ind.querySelector(".scroll-spot"));
+
+  // Spot height matches CSS (.scroll-spot height: 100px). Read once; CSS
+  // changes would require updating this constant.
+  const SPOT_H = 100;
 
   let rafId = null;
 
@@ -307,21 +324,18 @@ function setupScrollLight() {
 
     if (scrollable <= 0) {
       // Page fits in viewport — nothing to scroll, hide the indicator.
-      for (const l of lights) l.style.opacity = "0";
+      for (const ind of indicators) ind.style.opacity = "0";
       return;
     }
 
-    for (const l of lights) l.style.opacity = "1";
+    for (const ind of indicators) ind.style.opacity = "1";
 
-    const progress   = window.scrollY / scrollable;           // 0..1
-    const thumbH     = Math.max(60, (viewH / docH) * viewH);  // min 60px
-    const trackRange = viewH - thumbH;                        // travel distance
-    const thumbTop   = progress * trackRange;                 // px from top
+    const progress = window.scrollY / scrollable;            // 0..1
+    const trackRange = viewH - SPOT_H;                       // travel distance
+    const spotTop = progress * trackRange;                   // px from top
 
-    // Mirror: both lights share the same height and top position.
-    for (const l of lights) {
-      l.style.height    = thumbH + "px";
-      l.style.transform = `translateY(${thumbTop}px)`;
+    for (const spot of spots) {
+      spot.style.transform = `translateY(${spotTop}px)`;
     }
   }
 

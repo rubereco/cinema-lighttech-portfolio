@@ -1026,19 +1026,27 @@ button {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   Custom scrollbar — two soft vertical light traces, one per side.
+   Scroll indicator — full-height beam + moving hot spot.
 
-   Two mirror lights replace the native scrollbar:
-     - Position (top → bottom of viewport) tracks scroll progress
-     - Height scales with viewport/document ratio
-     - Both ends fade to transparent via `mask-image`, so neither the bar
-       nor its glow has a hard edge — reads as a light trace, not a bar
-     - mix-blend-mode: screen + box-shadow halo so it adds light to bg
-     - No track: the lights float, no rail needed
+   Modelled on the user-provided reference: a long thin beam that spans the
+   full height of the viewport with a bright hot spot at the current scroll
+   position. The hot spot has a glow halo that radiates perpendicular to
+   the beam (into the page content area).
 
-   Scrollbar is hidden on all pages (CSS below) so the lights are the
-   only scroll indicator. JS appends two `.scroll-light` elements to
-   <body> on boot (see `setupScrollLight()` in main.js) — one per side.
+   Structure (per side):
+     .scroll-indicator        — fixed column on the side, full viewport height
+     .scroll-beam            — fills the column, faint vertical beam that
+                                fades softly at top/bottom of viewport and
+                                has soft horizontal edges
+     .scroll-spot            — absolutely positioned, top set by JS based on
+                                scroll progress. Has ::before (wide glow halo
+                                perpendicular to the beam) and ::after (small
+                                bright core ON the beam, the "source").
+
+   The scrollbar is hidden on all pages so this is the only scroll indicator.
+   JS appends two `.scroll-indicator` elements to <body> on boot (see
+   `setupScrollLight()` in main.js) so it works on every page without
+   per-page HTML changes.
 */
 
 /* Hide native scrollbar everywhere — Firefox, WebKit, legacy IE/Edge. */
@@ -1046,97 +1054,118 @@ html { scrollbar-width: none; }
 html::-webkit-scrollbar { display: none; }
 body { -ms-overflow-style: none; }
 
-.scroll-light {
+.scroll-indicator {
   position: fixed;
   top: 0;
-  width: 4px;                              /* a touch wider — pairs with the soft edges */
-  height: 80px;                            /* overridden by JS */
+  bottom: 0;
+  width: 4px;
   pointer-events: none;
   z-index: 100;
-  /* Two stacked backgrounds, modelled on a horizontal light beam:
-       - top layer: a tight bright radial-gradient ("the source") at the
-         centre of the bar, peaking at full opacity and fading to transp
-         — this is the focal point of the beam
-       - bottom layer: a soft linear-gradient along the bar's length
-         ("the beam") so the source isn't floating in nothing
-     Together they read as a vertical light beam with a bright source
-     in the middle and a soft halo radiating outward. */
-  background:
-    radial-gradient(
-      circle 45px at center,
-      rgba(255, 248, 230, 1)    0%,
-      rgba(255, 248, 230, 0.85) 10%,
-      rgba(255, 248, 230, 0.55) 22%,
-      rgba(255, 248, 230, 0.3)  38%,
-      rgba(255, 248, 230, 0.12) 55%,
-      transparent               75%
-    ),
-    linear-gradient(
-      to bottom,
-      rgba(255, 248, 230, 0.4)  0%,
-      rgba(255, 248, 230, 0.65) 50%,
-      rgba(255, 248, 230, 0.4)  100%
-    );
-  /* Two-layer mask: horizontal fade on the sides + vertical fade at
-     top/bottom. They combine multiplicatively, so the bar fades softly
-     in BOTH directions and the box-shadow glow follows the same fade
-     (no hard edge anywhere). The fades are kept gentle — the bar's
-     center stays mostly visible, just with a soft halo on each side. */
-  -webkit-mask-image:
-    linear-gradient(
-      to right,
-      transparent 0%,
-      rgba(0, 0, 0, 0.25) 18%,
-      black 38%,
-      black 62%,
-      rgba(0, 0, 0, 0.25) 82%,
-      transparent 100%
-    ),
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(0, 0, 0, 0.25) 18%,
-      black 38%,
-      black 62%,
-      rgba(0, 0, 0, 0.25) 82%,
-      transparent 100%
-    );
-          mask-image:
-    linear-gradient(
-      to right,
-      transparent 0%,
-      rgba(0, 0, 0, 0.25) 18%,
-      black 38%,
-      black 62%,
-      rgba(0, 0, 0, 0.25) 82%,
-      transparent 100%
-    ),
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(0, 0, 0, 0.25) 18%,
-      black 38%,
-      black 62%,
-      rgba(0, 0, 0, 0.25) 82%,
-      transparent 100%
-    );
-  box-shadow:
-    0 0 9px  rgba(255, 248, 230, 0.45),    /* tight bright halo  */
-    0 0 24px rgba(255, 248, 230, 0.18);    /* wide diffuse glow  */
-  mix-blend-mode: screen;
-  transform: translateY(0);
-  transition:
-    opacity 250ms ease,
-    transform 0.12s cubic-bezier(0.2, 0, 0.1, 1);
-  opacity: 0;                              /* shown by JS once scroll state is known */
-  will-change: transform, opacity;
+  overflow: visible;            /* let the spot's glow extend into the page */
+  opacity: 0;                   /* shown by JS once scroll state is known */
+  transition: opacity 300ms ease;
 }
 
-.scroll-light--left  { left:  8px; }
-.scroll-light--right { right: 8px; }
+.scroll-indicator--left  { left: 10px;  }
+.scroll-indicator--right { right: 10px; }
+
+/* The faint vertical beam — the "track" of light. Fills the indicator
+   and fades softly at the top/bottom of the viewport (linear-gradient
+   background). The horizontal mask softens the beam's side edges so it
+   reads as a soft column of light, not a hard line. */
+.scroll-beam {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 248, 230, 0)     0%,
+    rgba(255, 248, 230, 0.18)  5%,
+    rgba(255, 248, 230, 0.32)  20%,
+    rgba(255, 248, 230, 0.4)   50%,
+    rgba(255, 248, 230, 0.32)  80%,
+    rgba(255, 248, 230, 0.18)  95%,
+    rgba(255, 248, 230, 0)     100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 30%,
+    black 50%,
+    rgba(0, 0, 0, 0.35) 70%,
+    transparent 100%
+  );
+          mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 30%,
+    black 50%,
+    rgba(0, 0, 0, 0.35) 70%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+}
+
+/* The hot spot — moves vertically based on scroll. Sits ON the beam
+   (left:0, width:100% of the 4px indicator). Its ::before is a wide
+   horizontal glow halo extending into the page; its ::after is a small
+   bright core right on the beam, the "source" of the beam. */
+.scroll-spot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100px;
+  pointer-events: none;
+  transform: translateY(0);
+  transition: transform 0.12s cubic-bezier(0.2, 0, 0.1, 1);
+}
+
+/* The glow halo — wide horizontal ellipse centered on the beam.
+   This is what gives the "light bursting perpendicular to the beam"
+   feel that the user-provided reference has. */
+.scroll-spot::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 240px;
+  height: 110px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 248, 230, 1)    0%,
+    rgba(255, 248, 230, 0.85) 12%,
+    rgba(255, 248, 230, 0.55) 26%,
+    rgba(255, 248, 230, 0.3)  44%,
+    rgba(255, 248, 230, 0.12) 62%,
+    transparent               82%
+  );
+  filter: blur(4px);
+  mix-blend-mode: screen;
+}
+
+/* The bright core — a small bright rectangle right on the beam.
+   This is the "source" of the beam (the white core in the reference). */
+.scroll-spot::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 248, 230, 1) 30%,
+    rgba(255, 248, 230, 1) 70%,
+    transparent 100%
+  );
+  filter: blur(1.2px);
+  mix-blend-mode: screen;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .scroll-light {
-    transition: opacity 150ms linear;
-  }
+  .scroll-indicator { transition: opacity 150ms linear; }
+  .scroll-spot      { transition: transform 0s linear; }
 }
