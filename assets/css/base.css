@@ -1150,13 +1150,16 @@ body { -ms-overflow-style: none; }
   mix-blend-mode: screen;
 }
 
-/* The bright core — small, intense, pure white at the centre. */
+/* The bright core — a small OVAL, wider than tall (matches the halo's
+   horizontal orientation, more elegant than a perfect circle).
+   Smaller than before: 50×26 (was 70×70). Pure white stays at the
+   very centre, falls off into the warm cream halo around it. */
 .scroll-spot::after {
   content: '';
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    circle 35px at center,
+    ellipse 25px 13px at center,
     rgba(255, 255, 255, 1)    0%,
     rgba(255, 255, 255, 1)    18%,
     rgba(255, 252, 245, 0.92) 42%,
