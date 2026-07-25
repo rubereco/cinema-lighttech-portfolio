@@ -1150,16 +1150,16 @@ body { -ms-overflow-style: none; }
   mix-blend-mode: screen;
 }
 
-/* The bright core — a small OVAL, wider than tall (matches the halo's
-   horizontal orientation, more elegant than a perfect circle).
-   Smaller than before: 50×26 (was 70×70). Pure white stays at the
-   very centre, falls off into the warm cream halo around it. */
+/* The bright core — a small OVAL, TALLER than wide (vertical axis,
+   not lateral). Was a horizontal oval (50×26) — the user wanted it
+   flipped 90° to the vertical axis for a more elegant lens-flare feel.
+   Size kept modest (26×50) so it stays a focal point, not a streak. */
 .scroll-spot::after {
   content: '';
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    ellipse 25px 13px at center,
+    ellipse 13px 25px at center,
     rgba(255, 255, 255, 1)    0%,
     rgba(255, 255, 255, 1)    18%,
     rgba(255, 252, 245, 0.92) 42%,
