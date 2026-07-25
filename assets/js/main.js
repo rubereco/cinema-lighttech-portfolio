@@ -273,33 +273,29 @@ function setupYearStamp() {
 /* ──────────────── Custom scroll light (all pages) ──────────────── */
 
 /**
- * Vertical light on the right edge that replaces the native scrollbar.
- * The thumb position represents scroll progress (top = page top, bottom
- * = page bottom); the thumb height represents the viewport/document
- * ratio (short thumb = long page, tall thumb = short page). A faint
- * vertical track sits behind it so the thumb has a "rail" to slide on.
+ * Two soft vertical light traces, one per side, replace the native
+ * scrollbar. Position tracks scroll progress; height scales with
+ * viewport/document ratio. Both ends fade to transparent via a mask
+ * so neither the bar nor its halo has a hard edge — reads as a light
+ * trace, not a shiny scrollbar.
  *
- * The .scroll-track and .scroll-light elements are appended to <body>
- * on boot so this works on every page (index, showcase, partners)
- * without per-page HTML changes.
+ * Elements are appended to <body> on boot so this works on every page
+ * (index, showcase, partners) without per-page HTML changes.
  *
  * Hidden when the page fits in the viewport (scrollable <= 0).
  */
 function setupScrollLight() {
-  let track = document.querySelector(".scroll-track");
-  let light = document.querySelector(".scroll-light");
-  if (!light) {
-    light = document.createElement("div");
-    light.className = "scroll-light";
-    light.setAttribute("aria-hidden", "true");
-    document.body.appendChild(light);
-  }
-  if (!track) {
-    track = document.createElement("div");
-    track.className = "scroll-track";
-    track.setAttribute("aria-hidden", "true");
-    document.body.appendChild(track);
-  }
+  // Create the two mirror lights (one per side). Reuse if already present.
+  const lights = ["scroll-light--left", "scroll-light--right"].map((cls) => {
+    let el = document.querySelector("." + cls);
+    if (!el) {
+      el = document.createElement("div");
+      el.className = "scroll-light " + cls;
+      el.setAttribute("aria-hidden", "true");
+      document.body.appendChild(el);
+    }
+    return el;
+  });
 
   let rafId = null;
 
@@ -311,21 +307,22 @@ function setupScrollLight() {
 
     if (scrollable <= 0) {
       // Page fits in viewport — nothing to scroll, hide the indicator.
-      light.style.opacity = "0";
-      track.style.opacity = "0";
+      for (const l of lights) l.style.opacity = "0";
       return;
     }
 
-    light.style.opacity = "1";
-    track.style.opacity = "1";
+    for (const l of lights) l.style.opacity = "1";
 
-    const progress   = window.scrollY / scrollable;             // 0..1
-    const thumbH     = Math.max(48, (viewH / docH) * viewH);    // min 48px tall
-    const trackRange = viewH - thumbH;                          // travel distance
-    const thumbTop   = progress * trackRange;                   // px from top
+    const progress   = window.scrollY / scrollable;           // 0..1
+    const thumbH     = Math.max(60, (viewH / docH) * viewH);  // min 60px
+    const trackRange = viewH - thumbH;                        // travel distance
+    const thumbTop   = progress * trackRange;                 // px from top
 
-    light.style.height    = thumbH + "px";
-    light.style.transform = `translateY(${thumbTop}px)`;
+    // Mirror: both lights share the same height and top position.
+    for (const l of lights) {
+      l.style.height    = thumbH + "px";
+      l.style.transform = `translateY(${thumbTop}px)`;
+    }
   }
 
   function onScroll() {
