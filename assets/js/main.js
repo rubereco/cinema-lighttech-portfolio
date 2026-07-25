@@ -312,7 +312,7 @@ function setupScrollLight() {
 
   // Spot height matches CSS (.scroll-spot height: 100px). Read once; CSS
   // changes would require updating this constant.
-  const SPOT_H = 270;   // matches .scroll-spot height (480x270 image container)
+  const SPOT_H = 240;   // matches .scroll-spot height (600x240)
 
   let rafId = null;
 

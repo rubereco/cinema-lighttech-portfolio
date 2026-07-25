@@ -1107,33 +1107,63 @@ body { -ms-overflow-style: none; }
   mix-blend-mode: screen;
 }
 
-/* The hot spot — a real lens-flare IMAGE (not CSS gradients).
-   The image was generated via image_generate to match the user's reference:
-   bright white-cream core, wide horizontal halo, thin horizontal streak,
-   soft fade at all edges. Source: assets/images/scroll-flare.jpg (1280x720).
+/* The hot spot — a lens-flare effect built from pure CSS gradients.
+   Modelled on the user's reference: bright white-cream core, wide
+   horizontally-elongated halo (the lens-flare signature), soft fade
+   at all edges. The .scroll-spot is wider than the indicator so the
+   flare extends into the page; it's centered on the beam via left: 50%
+   + margin-left: -300px.
 
-   The image has a dark background. mix-blend-mode: screen hides it
-   (dark pixels blend to invisible) and the bright flare pixels add light
-   to whatever's behind. The result reads as the same flare shape on
-   any background.
-
-   The .scroll-spot element is 480x270 (16:9 — the image's aspect ratio).
-   It's wider than the indicator (8px) so the flare extends into the page.
-   It's centered on the beam via left: 50%, margin-left: -240px. */
+   The reference's vertical streak rotated 90° is the .scroll-beam
+   (always visible). The hot spot adds:
+     ::before = wide soft halo (horizontal ellipse, big blur)
+     ::after  = small bright pure-white core (sharp)
+   No images, no SVG. Just two stacked radial-gradients. */
 .scroll-spot {
   position: absolute;
   left: 50%;
   top: 0;
-  width: 480px;
-  height: 270px;
-  margin-left: -240px;
+  width: 600px;
+  height: 240px;
+  margin-left: -300px;
   pointer-events: none;
   transform: translateY(0);
   transition: transform 0.14s cubic-bezier(0.2, 0, 0.1, 1);
-  background-image: url('../images/scroll-flare.jpg');
-  background-size: contain;
-  background-position: center center;
-  background-repeat: no-repeat;
+}
+
+/* The halo — horizontally-elongated soft glow, the dominant visual.
+   600x220 ellipse, fading smoothly from 0.85 (centre) to transparent. */
+.scroll-spot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 300px 110px at center,
+    rgba(255, 248, 230, 0.85)  0%,
+    rgba(255, 248, 230, 0.6)  15%,
+    rgba(255, 248, 230, 0.3)  35%,
+    rgba(255, 248, 230, 0.12) 55%,
+    rgba(255, 248, 230, 0.04) 78%,
+    rgba(255, 248, 230, 0)   100%
+  );
+  filter: blur(6px);
+  mix-blend-mode: screen;
+}
+
+/* The bright core — small, intense, pure white at the centre. */
+.scroll-spot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle 35px at center,
+    rgba(255, 255, 255, 1)    0%,
+    rgba(255, 255, 255, 1)    18%,
+    rgba(255, 252, 245, 0.92) 42%,
+    rgba(255, 248, 230, 0.55) 70%,
+    transparent               100%
+  );
+  filter: blur(1.5px);
   mix-blend-mode: screen;
 }
 
