@@ -391,10 +391,10 @@ function setupLensFlares() {
   if (!flares.length) return;
 
   const MAX_ACTIVE       = 3;
-  const MIN_INTERVAL_MS  = 700;     // min ms between spawns (rate limit)
+  const MIN_INTERVAL_MS  = 950;     // min ms between spawns (rate limit)
   const SPAWN_CHANCE     = 0.8;     // chance per scroll event past the floor
-  const BLOOM_MS         = 520;     // matches CSS bloom transition
-  const HOLD_MS          = 250;     // pause at peak before fading
+  const BLOOM_MS         = 700;     // matches CSS bloom transition
+  const HOLD_MS          = 300;     // pause at peak before fading
   const FADE_MS          = 900;     // matches CSS fade transition
 
   let lastSpawnAt = 0;
@@ -430,10 +430,11 @@ function setupLensFlares() {
     // look identical without being so tilted they look broken.
     const rot = (Math.random() - 0.5) * 70;
 
-    // Size variant — mostly small, occasionally a bigger one for variety.
+    // Size variant — most are small "curious pops"; bigger ones are rare
+    // accents. User feedback: subtle background, not prominent foreground.
     const sizeRoll = Math.random();
-    const size = sizeRoll < 0.55 ? "sm"
-               : sizeRoll < 0.92 ? "md"
+    const size = sizeRoll < 0.70 ? "sm"
+               : sizeRoll < 0.95 ? "md"
                : "lg";
 
     flare.style.setProperty("--x", `${x}%`);

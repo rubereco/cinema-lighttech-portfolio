@@ -1164,7 +1164,15 @@ button {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   Lens flares — scroll-triggered bloom + fade atmospheric effect.
+   Lens flares — scroll-triggered ambient background pops.
+
+   Designed as subtle, curious little glints in the background rather
+   than a prominent foreground effect. Tone:
+     - peak halo opacity 0.6 (was 0.95)
+     - peak streak opacity 0.45 (was 0.9)
+     - size 50–150px (was 100–260px); mostly sm (70%)
+     - bloom scale 0.5→1 (was 0.25→1); 600ms (was 380ms)
+     - spawn interval 950ms (was 700ms); rarer than v1
 
    - Container is full-viewport, pointer-events: none, z-index above
      page beams. Each .lens-flare is a 0×0 anchor positioned at the
@@ -1199,7 +1207,7 @@ button {
   pointer-events: none;
   mix-blend-mode: screen;
   --rot: 0deg;
-  --scale: 0.25;
+  --scale: 0.5;
   transform: scale(var(--scale));
   transition:
     opacity 500ms ease-out,
@@ -1211,21 +1219,21 @@ button {
   opacity: 1;
   --scale: 1;
   transition:
-    opacity 380ms ease-out,
-    transform 520ms cubic-bezier(0.2, 0, 0.1, 1);
+    opacity 600ms ease-out,
+    transform 700ms cubic-bezier(0.2, 0, 0.1, 1);
 }
 
 .lens-flare.is-fading {
   opacity: 0;
-  --scale: 1.35;
+  --scale: 1.15;
   transition:
     opacity 900ms ease-in,
     transform 900ms ease-out;
 }
 
-/* Halo: bright concentrated center, quick falloff into a soft glow.
-   Sized via [data-size] on the parent; rotation applied here so it
-   rotates with the streak (always aligned). */
+/* Halo: soft warm center, quick falloff into a faint glow. Sized via
+   [data-size] on the parent; rotation applied here so it rotates with
+   the streak (always aligned). */
 .lens-flare::before {
   content: '';
   position: absolute;
@@ -1236,18 +1244,18 @@ button {
   transform: translate(-50%, -50%) rotate(var(--rot));
   background: radial-gradient(
     circle at center,
-    rgba(255, 248, 230, 0.95) 0%,
-    rgba(255, 248, 230, 0.55) 8%,
-    rgba(255, 248, 230, 0.25) 22%,
-    rgba(255, 248, 230, 0.08) 45%,
-    transparent 70%
+    rgba(255, 248, 230, 0.6) 0%,
+    rgba(255, 248, 230, 0.28) 12%,
+    rgba(255, 248, 230, 0.12) 28%,
+    rgba(255, 248, 230, 0.04) 48%,
+    transparent 72%
   );
   border-radius: 50%;
-  filter: blur(3px);
+  filter: blur(4px);
 }
 
-/* Streak: thin horizontal anamorphic line. Rotates with the halo so
-   the streak stays aligned to the lens axis. */
+/* Streak: subtle anamorphic glint. Much softer than the halo so the
+   flare reads as "a curious pop" rather than "a bright lens flare". */
 .lens-flare::after {
   content: '';
   position: absolute;
@@ -1259,22 +1267,22 @@ button {
   background: linear-gradient(
     to right,
     transparent 0%,
-    rgba(255, 248, 230, 0.7) 25%,
-    rgba(255, 248, 230, 0.9) 50%,
-    rgba(255, 248, 230, 0.7) 75%,
+    rgba(255, 248, 230, 0.32) 28%,
+    rgba(255, 248, 230, 0.45) 50%,
+    rgba(255, 248, 230, 0.32) 72%,
     transparent 100%
   );
-  filter: blur(0.6px);
+  filter: blur(1px);
 }
 
-/* Size variants — most flares are small (the user said "little").
-   sm ~55%, md ~35%, lg ~10% per spawn roll in JS. */
-.lens-flare[data-size="sm"]::before { width: 100px; height: 100px; }
-.lens-flare[data-size="sm"]::after  { width: 140px; }
-.lens-flare[data-size="md"]::before { width: 170px; height: 170px; }
-.lens-flare[data-size="md"]::after  { width: 220px; }
-.lens-flare[data-size="lg"]::before { width: 260px; height: 260px; }
-.lens-flare[data-size="lg"]::after  { width: 320px; }
+/* Size variants — most flares are small ("little pops"). Tuned so even
+   the largest variant is still subtle. sm ~70%, md ~25%, lg ~5%. */
+.lens-flare[data-size="sm"]::before { width: 50px;  height: 50px;  }
+.lens-flare[data-size="sm"]::after  { width: 70px; }
+.lens-flare[data-size="md"]::before { width: 90px;  height: 90px;  }
+.lens-flare[data-size="md"]::after  { width: 120px; height: 1.5px; }
+.lens-flare[data-size="lg"]::before { width: 150px; height: 150px; }
+.lens-flare[data-size="lg"]::after  { width: 200px; height: 2px;   }
 
 /* Reduced motion: instant on/off, no bloom or scale drift. */
 @media (prefers-reduced-motion: reduce) {
