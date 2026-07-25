@@ -1024,273 +1024,70 @@ button {
 
   /* Larger touch target for hero CTA already there */
 }
-/* ════════════════════════════════════════════════════════════════════════
-   Page beams — two soft white rays framing the active section.
-   ════════════════════════════════════════════════════════════════════════
-   Each beam is a horizontal gradient that fades from a bright soft white
-   at the source edge to transparent at the target. The beam is rotated
-   (via JS-set --angle) around its source edge so the bright end stays
-   off-screen and the faded end points at the active section.
 
-   - .page-beam--left:  source at left edge (0% 50%), bright on left
-   - .page-beam--right: source at right edge (100% 50%), bright on right
-   - Both use mix-blend-mode: screen so they add to the dark background
-     without blowing out the content
-   - opacity transitions from 0 → 1 when the first section becomes active
-   - transform transitions over 1.2s ease so the rotation feels smooth
-   - pointer-events: none so the beams never interfere with clicks
+/* ════════════════════════════════════════════════════════════════════════
+   Custom scrollbar — vertical light on the right edge.
+
+   Replaces the native scrollbar with a thin warm-cream light that:
+     - Thumb position represents vertical scroll position (top → bottom)
+     - Thumb height represents viewport/document ratio (long doc → short thumb)
+     - Track is a barely-visible vertical line that gives the thumb a "rail"
+     - mix-blend-mode: screen + box-shadow glow so it adds light to the bg
+
+   Scrollbar is hidden on all pages (CSS below) so the light is the only
+   scroll indicator. JS appends .scroll-track + .scroll-light to <body>
+   dynamically on boot (see `setupScrollLight()` in main.js) so it works
+   on every page without per-page HTML changes.
 */
 
-.page-beams {
+/* Hide native scrollbar everywhere — Firefox, WebKit, legacy IE/Edge. */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
+body { -ms-overflow-style: none; }
+
+.scroll-track {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 8px;
+  width: 1px;
+  height: 100vh;
+  background: rgba(255, 248, 230, 0.08);
   pointer-events: none;
-  z-index: 1;
-  overflow: hidden;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 200ms ease;
 }
 
-.page-beam {
-  position: absolute;
-  inset: 0;
-  transform-origin: 0% 50%;
-  --angle: 0deg;
-  transform: rotate(var(--angle));
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0.1, 1);
-  opacity: 0;
+.scroll-light {
+  position: fixed;
+  top: 0;
+  right: 6px;            /* slight overlap onto the track for alignment */
+  width: 4px;
+  height: 80px;          /* overridden by JS: viewport/document ratio */
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 101;          /* above the track */
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 248, 230, 0.85) 0%,
+    rgba(255, 248, 230, 1)    20%,
+    rgba(255, 248, 230, 1)    80%,
+    rgba(255, 248, 230, 0.85) 100%
+  );
+  box-shadow:
+    0 0 6px  rgba(255, 248, 230, 0.55),
+    0 0 14px rgba(255, 248, 230, 0.25);
+  mix-blend-mode: screen;
+  transform: translateY(0);
+  transition:
+    opacity 200ms ease,
+    transform 0.12s cubic-bezier(0.2, 0, 0.1, 1);
+  opacity: 0;            /* shown by JS once scroll state is known */
   will-change: transform, opacity;
-  pointer-events: none;
 }
 
-.page-beam.is-active {
-  opacity: 1;
-}
-
-.page-beam::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 60px;
-  transform: translateY(-50%);
-  background: linear-gradient(
-    to right,
-    rgba(255, 248, 230, 0.62) 0%,
-    rgba(255, 248, 230, 0.32) 18%,
-    rgba(255, 248, 230, 0.10) 45%,
-    transparent 75%
-  );
-  filter: blur(12px);
-  mix-blend-mode: screen;
-}
-
-.page-beam--right {
-  transform-origin: 100% 50%;
-}
-
-.page-beam--right::before {
-  background: linear-gradient(
-    to left,
-    rgba(255, 248, 230, 0.62) 0%,
-    rgba(255, 248, 230, 0.32) 18%,
-    rgba(255, 248, 230, 0.10) 45%,
-    transparent 75%
-  );
-}
-
-/* The source — a cone of light expanding outward from the source edge.
-   Two stacked radial gradients (CSS-only, no SVG):
-     1. Small bright concentrated spot at the source (the "tip" of the cone)
-     2. Wider, more diffuse elliptical halo extending outward (the "spread")
-   The combination reads as a cone of light — bright concentrated source
-   with a wider cone of light radiating outward. The main beam (::before)
-   continues from the cone's tip toward the target. */
-.page-beam::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 720px;
-  height: 240px;
-  transform: translate(-10%, -50%);
-  background:
-    /* layer 1 (top): bright concentrated tip at the source */
-    radial-gradient(
-      ellipse 120px 90px at 0% 50%,
-      rgba(255, 248, 230, 0.95) 0%,
-      rgba(255, 248, 230, 0.65) 30%,
-      transparent 70%
-    ),
-    /* layer 2 (bottom): wider cone of light extending outward */
-    radial-gradient(
-      ellipse at 5% 50%,
-      rgba(255, 248, 230, 0.55) 0%,
-      rgba(255, 248, 230, 0.30) 18%,
-      rgba(255, 248, 230, 0.12) 40%,
-      rgba(255, 248, 230, 0.03) 65%,
-      transparent 85%
-    );
-  filter: blur(10px);
-  mix-blend-mode: screen;
-  pointer-events: none;
-}
-
-.page-beam--right::after {
-  left: auto;
-  right: 0;
-  transform: translate(-10%, -50%);
-  background:
-    radial-gradient(
-      ellipse 120px 90px at 100% 50%,
-      rgba(255, 248, 230, 0.95) 0%,
-      rgba(255, 248, 230, 0.65) 30%,
-      transparent 70%
-    ),
-    radial-gradient(
-      ellipse at 95% 50%,
-      rgba(255, 248, 230, 0.55) 0%,
-      rgba(255, 248, 230, 0.30) 18%,
-      rgba(255, 248, 230, 0.12) 40%,
-      rgba(255, 248, 230, 0.03) 65%,
-      transparent 85%
-    );
-}
-
-/* Reduced motion: skip the rotation animation. */
 @media (prefers-reduced-motion: reduce) {
-  .page-beam {
-    transition: none;
-  }
-}
-
-/* ════════════════════════════════════════════════════════════════════════
-   Lens flares — scroll-triggered ambient background pops.
-
-   Designed as subtle, curious little glints in the background rather
-   than a prominent foreground effect. Tone:
-     - peak halo opacity 0.6 (was 0.95)
-     - peak streak opacity 0.45 (was 0.9)
-     - size 50–150px (was 100–260px); mostly sm (70%)
-     - bloom scale 0.5→1 (was 0.25→1); 600ms (was 380ms)
-     - spawn interval 950ms (was 700ms); rarer than v1
-
-   - Container is full-viewport, pointer-events: none, z-index above
-     page beams. Each .lens-flare is a 0×0 anchor positioned at the
-     random viewport coordinates (--x, --y) with mix-blend-mode: screen
-     so the flare adds light instead of overlaying it.
-   - The flare has two parts:
-       ::before — the soft halo (radial gradient, blurred)
-       ::after  — the anamorphic streak (thin horizontal gradient)
-     Both inherit the parent's transform scale and add their own rotation.
-   - Bloom (is-active) and fade (is-fading) drive opacity + scale on the
-     parent. The pseudo-elements follow along via transform inheritance.
-   - Random rotation (-35° to +35°) and size variant (data-size) are set
-     by JS per spawn, so flares never repeat the same orientation.
-   - `prefers-reduced-motion` collapses the bloom/fade to a single fade.
-*/
-
-.lens-flares {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;            /* above page beams (z=1), below content */
-  overflow: hidden;
-}
-
-.lens-flare {
-  position: absolute;
-  left: var(--x, 50%);
-  top: var(--y, 50%);
-  width: 0;
-  height: 0;
-  opacity: 0;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  --rot: 0deg;
-  --scale: 0.5;
-  transform: scale(var(--scale));
-  transition:
-    opacity 500ms ease-out,
-    transform 500ms cubic-bezier(0.2, 0, 0.1, 1);
-  will-change: opacity, transform;
-}
-
-.lens-flare.is-active {
-  opacity: 1;
-  --scale: 1;
-  transition:
-    opacity 600ms ease-out,
-    transform 700ms cubic-bezier(0.2, 0, 0.1, 1);
-}
-
-.lens-flare.is-fading {
-  opacity: 0;
-  --scale: 1.15;
-  transition:
-    opacity 900ms ease-in,
-    transform 900ms ease-out;
-}
-
-/* Halo: soft warm center, quick falloff into a faint glow. Sized via
-   [data-size] on the parent; rotation applied here so it rotates with
-   the streak (always aligned). */
-.lens-flare::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 180px;
-  height: 180px;
-  transform: translate(-50%, -50%) rotate(var(--rot));
-  background: radial-gradient(
-    circle at center,
-    rgba(255, 248, 230, 0.6) 0%,
-    rgba(255, 248, 230, 0.28) 12%,
-    rgba(255, 248, 230, 0.12) 28%,
-    rgba(255, 248, 230, 0.04) 48%,
-    transparent 72%
-  );
-  border-radius: 50%;
-  filter: blur(4px);
-}
-
-/* Streak: subtle anamorphic glint. Much softer than the halo so the
-   flare reads as "a curious pop" rather than "a bright lens flare". */
-.lens-flare::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 220px;
-  height: 2px;
-  transform: translate(-50%, -50%) rotate(var(--rot));
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(255, 248, 230, 0.32) 28%,
-    rgba(255, 248, 230, 0.45) 50%,
-    rgba(255, 248, 230, 0.32) 72%,
-    transparent 100%
-  );
-  filter: blur(1px);
-}
-
-/* Size variants — most flares are small ("little pops"). Tuned so even
-   the largest variant is still subtle. sm ~70%, md ~25%, lg ~5%. */
-.lens-flare[data-size="sm"]::before { width: 50px;  height: 50px;  }
-.lens-flare[data-size="sm"]::after  { width: 70px; }
-.lens-flare[data-size="md"]::before { width: 90px;  height: 90px;  }
-.lens-flare[data-size="md"]::after  { width: 120px; height: 1.5px; }
-.lens-flare[data-size="lg"]::before { width: 150px; height: 150px; }
-.lens-flare[data-size="lg"]::after  { width: 200px; height: 2px;   }
-
-/* Reduced motion: instant on/off, no bloom or scale drift. */
-@media (prefers-reduced-motion: reduce) {
-  .lens-flare,
-  .lens-flare.is-active,
-  .lens-flare.is-fading {
+  .scroll-light {
     transition: opacity 150ms linear;
-    transform: none;
-    --scale: 1;
   }
 }
