@@ -1162,3 +1162,127 @@ button {
     transition: none;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   Lens flares — scroll-triggered bloom + fade atmospheric effect.
+
+   - Container is full-viewport, pointer-events: none, z-index above
+     page beams. Each .lens-flare is a 0×0 anchor positioned at the
+     random viewport coordinates (--x, --y) with mix-blend-mode: screen
+     so the flare adds light instead of overlaying it.
+   - The flare has two parts:
+       ::before — the soft halo (radial gradient, blurred)
+       ::after  — the anamorphic streak (thin horizontal gradient)
+     Both inherit the parent's transform scale and add their own rotation.
+   - Bloom (is-active) and fade (is-fading) drive opacity + scale on the
+     parent. The pseudo-elements follow along via transform inheritance.
+   - Random rotation (-35° to +35°) and size variant (data-size) are set
+     by JS per spawn, so flares never repeat the same orientation.
+   - `prefers-reduced-motion` collapses the bloom/fade to a single fade.
+*/
+
+.lens-flares {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;            /* above page beams (z=1), below content */
+  overflow: hidden;
+}
+
+.lens-flare {
+  position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  --rot: 0deg;
+  --scale: 0.25;
+  transform: scale(var(--scale));
+  transition:
+    opacity 500ms ease-out,
+    transform 500ms cubic-bezier(0.2, 0, 0.1, 1);
+  will-change: opacity, transform;
+}
+
+.lens-flare.is-active {
+  opacity: 1;
+  --scale: 1;
+  transition:
+    opacity 380ms ease-out,
+    transform 520ms cubic-bezier(0.2, 0, 0.1, 1);
+}
+
+.lens-flare.is-fading {
+  opacity: 0;
+  --scale: 1.35;
+  transition:
+    opacity 900ms ease-in,
+    transform 900ms ease-out;
+}
+
+/* Halo: bright concentrated center, quick falloff into a soft glow.
+   Sized via [data-size] on the parent; rotation applied here so it
+   rotates with the streak (always aligned). */
+.lens-flare::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%) rotate(var(--rot));
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 248, 230, 0.95) 0%,
+    rgba(255, 248, 230, 0.55) 8%,
+    rgba(255, 248, 230, 0.25) 22%,
+    rgba(255, 248, 230, 0.08) 45%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  filter: blur(3px);
+}
+
+/* Streak: thin horizontal anamorphic line. Rotates with the halo so
+   the streak stays aligned to the lens axis. */
+.lens-flare::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 220px;
+  height: 2px;
+  transform: translate(-50%, -50%) rotate(var(--rot));
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 248, 230, 0.7) 25%,
+    rgba(255, 248, 230, 0.9) 50%,
+    rgba(255, 248, 230, 0.7) 75%,
+    transparent 100%
+  );
+  filter: blur(0.6px);
+}
+
+/* Size variants — most flares are small (the user said "little").
+   sm ~55%, md ~35%, lg ~10% per spawn roll in JS. */
+.lens-flare[data-size="sm"]::before { width: 100px; height: 100px; }
+.lens-flare[data-size="sm"]::after  { width: 140px; }
+.lens-flare[data-size="md"]::before { width: 170px; height: 170px; }
+.lens-flare[data-size="md"]::after  { width: 220px; }
+.lens-flare[data-size="lg"]::before { width: 260px; height: 260px; }
+.lens-flare[data-size="lg"]::after  { width: 320px; }
+
+/* Reduced motion: instant on/off, no bloom or scale drift. */
+@media (prefers-reduced-motion: reduce) {
+  .lens-flare,
+  .lens-flare.is-active,
+  .lens-flare.is-fading {
+    transition: opacity 150ms linear;
+    transform: none;
+    --scale: 1;
+  }
+}

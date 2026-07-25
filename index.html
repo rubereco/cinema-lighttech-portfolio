@@ -636,6 +636,22 @@
     <div class="page-beam page-beam--right"></div>
   </div>
 
+  <!-- ════════════════════════════════════════════════════════════════════
+       LENS FLARES — small warm-white flares that bloom in and fade out as
+       the user scrolls. Pool of 6 reusable elements; max 3 active at once;
+       random position + rotation + size so the pattern doesn't repeat.
+       Triggered by scroll (see `setupLensFlares()` in main.js). Pure CSS
+       radial gradient + anamorphic streak; no SVG, no images.
+       ════════════════════════════════════════════════════════════════════ -->
+  <div class="lens-flares" aria-hidden="true">
+    <div class="lens-flare"></div>
+    <div class="lens-flare"></div>
+    <div class="lens-flare"></div>
+    <div class="lens-flare"></div>
+    <div class="lens-flare"></div>
+    <div class="lens-flare"></div>
+  </div>
+
   <!-- ───────────────────────────── SKIP LINK ───────────────────────────── -->
   <a href="#main" class="skip-link" data-i18n="section.skipToContent">Skip to content</a>
 

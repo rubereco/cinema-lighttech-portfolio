@@ -265,6 +265,7 @@ function setupYearStamp() {
   setupKitFilter();
   setupYearStamp();
   setupPageBeams();
+  setupLensFlares();
 
   // Signal sibling scripts that i18n is ready (showcase.js listens for this).
   window.dispatchEvent(new CustomEvent("tarek:i18n-ready", { detail: { lang } }));
@@ -358,4 +359,113 @@ function setupPageBeams() {
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll);
   update();
+}
+
+/* ──────────────── Lens flares (main page only) ──────────────── */
+
+/**
+ * Small warm-white flares that bloom in and fade out as the user scrolls.
+ * Triggered by scroll events; pool of 6 reusable elements, max 3 active at
+ * any time. Random position, rotation, and size so the pattern never
+ * repeats. The .lens-flares container only exists on index.html, so this
+ * is a no-op on showcase.html / partners.html.
+ *
+ * Lifecycle per flare (driven by CSS classes):
+ *   1. JS sets --x, --y, --rot, data-size (random per spawn)
+ *   2. Add .is-active → CSS blooms opacity 0→1 and scale 0.25→1 (~520ms)
+ *   3. After BLOOM_MS + HOLD_MS, replace .is-active with .is-fading
+ *      → CSS fades opacity 1→0 and grows scale 1→1.35 (~900ms)
+ *   4. Total lifetime ≈ 1.7s; flare is then available in the pool again.
+ *
+ * Throttling:
+ *   - MIN_INTERVAL_MS: floor between spawns (scroll can fire 60+ Hz)
+ *   - MAX_ACTIVE: cap on simultaneous flares
+ *   - SPAWN_CHANCE: per-scroll-event probability once the floor clears,
+ *     so the rhythm feels organic rather than mechanical
+ */
+function setupLensFlares() {
+  const container = document.querySelector(".lens-flares");
+  if (!container) return;
+
+  const flares = Array.from(container.querySelectorAll(".lens-flare"));
+  if (!flares.length) return;
+
+  const MAX_ACTIVE       = 3;
+  const MIN_INTERVAL_MS  = 700;     // min ms between spawns (rate limit)
+  const SPAWN_CHANCE     = 0.8;     // chance per scroll event past the floor
+  const BLOOM_MS         = 520;     // matches CSS bloom transition
+  const HOLD_MS          = 250;     // pause at peak before fading
+  const FADE_MS          = 900;     // matches CSS fade transition
+
+  let lastSpawnAt = 0;
+
+  function isBusy(flare) {
+    return flare.classList.contains("is-active") ||
+           flare.classList.contains("is-fading");
+  }
+
+  function activeCount() {
+    let n = 0;
+    for (const f of flares) if (isBusy(f)) n++;
+    return n;
+  }
+
+  function spawnFlare() {
+    const now = performance.now();
+    if (now - lastSpawnAt < MIN_INTERVAL_MS) return;
+    if (activeCount() >= MAX_ACTIVE) return;
+    if (Math.random() > SPAWN_CHANCE) return;
+
+    const flare = flares.find((f) => !isBusy(f));
+    if (!flare) return;
+
+    // Random position in viewport, avoiding extreme edges where it would
+    // look like a UI artifact. x: 12-88%, y: 18-82% (avoiding header/hero
+    // text band on top and footer/CTA band on bottom).
+    const x = 12 + Math.random() * 76;
+    const y = 18 + Math.random() * 64;
+
+    // Random rotation: real lens flares rotate with the light source
+    // orientation. Tilt them anywhere in (-35°, +35°) so they don't all
+    // look identical without being so tilted they look broken.
+    const rot = (Math.random() - 0.5) * 70;
+
+    // Size variant — mostly small, occasionally a bigger one for variety.
+    const sizeRoll = Math.random();
+    const size = sizeRoll < 0.55 ? "sm"
+               : sizeRoll < 0.92 ? "md"
+               : "lg";
+
+    flare.style.setProperty("--x", `${x}%`);
+    flare.style.setProperty("--y", `${y}%`);
+    flare.style.setProperty("--rot", `${rot.toFixed(1)}deg`);
+    flare.dataset.size = size;
+
+    // Restart the bloom animation cleanly if this flare was just used.
+    // Removing and re-adding the class in the same frame collapses the
+    // transition; we toggle through a hidden state to force a reflow.
+    flare.classList.remove("is-active");
+    flare.classList.remove("is-fading");
+    // force reflow so the next class addition restarts the transition
+    void flare.offsetWidth;
+    flare.classList.add("is-active");
+
+    lastSpawnAt = now;
+
+    // Schedule the fade-out
+    setTimeout(() => {
+      flare.classList.remove("is-active");
+      flare.classList.add("is-fading");
+    }, BLOOM_MS + HOLD_MS);
+
+    // Schedule cleanup so this flare re-enters the pool
+    setTimeout(() => {
+      flare.classList.remove("is-fading");
+    }, BLOOM_MS + HOLD_MS + FADE_MS);
+  }
+
+  // Scroll listener — passive for perf. We don't need to throttle via
+  // rAF because spawnFlare()'s own gates (time + active count + chance)
+  // already handle rate limiting cheaply.
+  window.addEventListener("scroll", spawnFlare, { passive: true });
 }
