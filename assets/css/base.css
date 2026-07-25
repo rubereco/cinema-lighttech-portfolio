@@ -1049,7 +1049,7 @@ body { -ms-overflow-style: none; }
 .scroll-light {
   position: fixed;
   top: 0;
-  width: 3px;                              /* thin — reads as a trace, not a bar */
+  width: 4px;                              /* a touch wider — pairs with the soft edges */
   height: 80px;                            /* overridden by JS */
   pointer-events: none;
   z-index: 100;
@@ -1059,29 +1059,45 @@ body { -ms-overflow-style: none; }
     rgba(255, 248, 230, 0.85) 50%,
     rgba(255, 248, 230, 0.5)  100%
   );
-  /* Mask fades the whole element (background + box-shadow glow) at the
-     top and bottom so neither the bar nor its halo has a hard edge.
-     0%/100% = fully transparent, ~25%/75% = fully opaque, smooth in
-     between. The bar reads as "a vertical light trace" instead of
-     "a tiny rectangle with rounded corners". */
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.25) 18%,
-    black 38%,
-    black 62%,
-    rgba(0, 0, 0, 0.25) 82%,
-    transparent 100%
-  );
-          mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.25) 18%,
-    black 38%,
-    black 62%,
-    rgba(0, 0, 0, 0.25) 82%,
-    transparent 100%
-  );
+  /* Two-layer mask: horizontal fade on the sides + vertical fade at
+     top/bottom. They combine multiplicatively, so the bar fades softly
+     in BOTH directions and the box-shadow glow follows the same fade
+     (no hard edge anywhere). The fades are kept gentle — the bar's
+     center stays mostly visible, just with a soft halo on each side. */
+  -webkit-mask-image:
+    linear-gradient(
+      to right,
+      transparent 0%,
+      black 28%,
+      black 72%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.25) 18%,
+      black 38%,
+      black 62%,
+      rgba(0, 0, 0, 0.25) 82%,
+      transparent 100%
+    );
+          mask-image:
+    linear-gradient(
+      to right,
+      transparent 0%,
+      black 28%,
+      black 72%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.25) 18%,
+      black 38%,
+      black 62%,
+      rgba(0, 0, 0, 0.25) 82%,
+      transparent 100%
+    );
   box-shadow:
     0 0 9px  rgba(255, 248, 230, 0.45),    /* tight bright halo  */
     0 0 24px rgba(255, 248, 230, 0.18);    /* wide diffuse glow  */
