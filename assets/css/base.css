@@ -108,16 +108,16 @@ button {
   align-items: center;
   gap: 12px;
   padding: 14px var(--pad-x);
-  /* Minimalist transparent header: dark gradient at top fading to fully
-     transparent at the bottom. The gradient + backdrop-filter gives
-     legibility over both dark hero images AND bright content scrolling
-     underneath. No hard border at the bottom — the gradient is the
-     visual edge. */
+  /* Minimalist transparent header: strong dark shade at the top fading
+     to fully transparent at the bottom. Visible dark band on any
+     backdrop; clean transparent edge with no hard border. */
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.55) 0%,
-    rgba(0, 0, 0, 0.30) 60%,
-    rgba(0, 0, 0, 0)   100%
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.70) 30%,
+    rgba(0, 0, 0, 0.45) 60%,
+    rgba(0, 0, 0, 0.20) 85%,
+    rgba(0, 0, 0, 0)    100%
   );
   backdrop-filter: saturate(140%) blur(0px);
   -webkit-backdrop-filter: saturate(140%) blur(0px);
@@ -127,15 +127,15 @@ button {
 }
 
 /* Scrolled state — JS adds .is-scrolled once window.scrollY > 4.
-   Stronger backdrop blur for content legibility when the user scrolls
-   and random sections pass under the header. */
+   Solid dark band + frosted-glass blur for content legibility when
+   the user scrolls and random sections pass under the header. */
 .site-header.is-scrolled {
   backdrop-filter: saturate(140%) blur(14px);
   -webkit-backdrop-filter: saturate(140%) blur(14px);
   background: linear-gradient(
     to bottom,
-    rgba(11, 11, 13, 0.78) 0%,
-    rgba(11, 11, 13, 0.55) 100%
+    rgba(11, 11, 13, 0.92) 0%,
+    rgba(11, 11, 13, 0.88) 100%
   );
   padding-top: 10px;
   padding-bottom: 10px;
