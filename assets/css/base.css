@@ -108,21 +108,25 @@ button {
   align-items: center;
   gap: 12px;
   padding: 14px var(--pad-x);
-  /* Multi-band glass: 3 zones, each with its own alpha + blur.
-     - Band 1 (TOP, 0–10%): ::before,  alpha 0.10, blur 1px
-     - Band 2 (MID, 10–75%): ::after, alpha 0.20→0.30, blur 4px
-     - Band 3 (EDGE, 75–100%): element's own bg, alpha 0.80, blur 8px
-     The element's bg draws first, then ::before, then ::after,
-     then content. Bands cover non-overlapping zones so layering
-     order doesn't matter visually. isolation creates a stacking
-     context so the z-index:-1 pseudos stay inside the header. */
+  /* Multi-band glass: 3 zones, INVERTED — dense frost at top fading
+     to transparent at bottom (header floats over hero without a
+     hard edge). Each band has its own alpha + blur; smooth gradient
+     transitions between bands so there's no visible step.
+     - Band 1 (TOP, 0–10%):  element bg, alpha 0.80, blur 8px  (heavy)
+     - Band 2 (MID, 10–75%): ::after, alpha 0.20→0.30, blur 4px (frost)
+     - Band 3 (BOTTOM, 75–100%): ::before, alpha 0.10, blur 1px  (clear)
+     Element's bg draws first; ::before renders BEFORE ::after in
+     source order, so we use ::before for the BOTTOM band (clearest)
+     and ::after for the MID band (middle), letting the element's
+     own bg handle the heavy TOP band visually. */
   isolation: isolate;
+  overflow: hidden;
   background: linear-gradient(
     to bottom,
-    transparent 0%,
-    transparent 75%,
-    rgba(11, 11, 13, 0.80) 75%,
-    rgba(11, 11, 13, 0.80) 100%
+    rgba(11, 11, 13, 0.80) 0%,
+    rgba(11, 11, 13, 0.80) 10%,
+    transparent 10%,
+    transparent 100%
   );
   backdrop-filter: saturate(180%) blur(8px);
   -webkit-backdrop-filter: saturate(180%) blur(8px);
@@ -131,24 +135,29 @@ button {
               backdrop-filter 220ms ease;
 }
 
-/* Band 1 — TOP (0–10% of header height). Barely-there frost.
-   Lets the hero bleed through almost completely; just a hint of
-   surface so the navbar reads as "there's a glass here." */
+/* Band 3 — BOTTOM (75–100% of header height). Barely-there frost
+   at the trailing edge so the header fades cleanly into the page
+   with no visible boundary. Sits behind the element's content. */
 .site-header::before {
   content: "";
   position: absolute;
-  inset: 0 0 90% 0;
+  inset: 75% 0 0 0;
   z-index: -1;
-  background: rgba(11, 11, 13, 0.10);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(11, 11, 13, 0.10) 100%
+  );
   backdrop-filter: saturate(180%) blur(1px);
   -webkit-backdrop-filter: saturate(180%) blur(1px);
   pointer-events: none;
 }
 
 /* Band 2 — MID (10–75%). The actual frosted-glass surface.
-   Smooth gradient from 0.20 → 0.30 alpha so there's no hard step
-   between bands. Single blur radius — backdrop-filter can't
-   vary within one element. */
+   Smooth gradient from 0.30 → 0.20 alpha so the band blends
+   seamlessly into the heavy top (0.80) and clear bottom (0.10).
+   Single blur radius — backdrop-filter can't vary within one
+   element. */
 .site-header::after {
   content: "";
   position: absolute;
@@ -156,8 +165,8 @@ button {
   z-index: -1;
   background: linear-gradient(
     to bottom,
-    rgba(11, 11, 13, 0.20) 0%,
-    rgba(11, 11, 13, 0.30) 100%
+    rgba(11, 11, 13, 0.30) 0%,
+    rgba(11, 11, 13, 0.20) 100%
   );
   backdrop-filter: saturate(180%) blur(4px);
   -webkit-backdrop-filter: saturate(180%) blur(4px);
@@ -168,7 +177,11 @@ button {
    Bump every band up so the whole header reads as stronger glass
    when content is scrolling underneath. */
 .site-header.is-scrolled::before {
-  background: rgba(11, 11, 13, 0.25);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(11, 11, 13, 0.25) 100%
+  );
   backdrop-filter: saturate(180%) blur(3px);
   -webkit-backdrop-filter: saturate(180%) blur(3px);
 }
@@ -176,8 +189,8 @@ button {
 .site-header.is-scrolled::after {
   background: linear-gradient(
     to bottom,
-    rgba(11, 11, 13, 0.40) 0%,
-    rgba(11, 11, 13, 0.55) 100%
+    rgba(11, 11, 13, 0.55) 0%,
+    rgba(11, 11, 13, 0.40) 100%
   );
   backdrop-filter: saturate(180%) blur(8px);
   -webkit-backdrop-filter: saturate(180%) blur(8px);
@@ -186,10 +199,10 @@ button {
 .site-header.is-scrolled {
   background: linear-gradient(
     to bottom,
-    transparent 0%,
-    transparent 75%,
-    rgba(11, 11, 13, 0.92) 75%,
-    rgba(11, 11, 13, 0.92) 100%
+    rgba(11, 11, 13, 0.92) 0%,
+    rgba(11, 11, 13, 0.92) 10%,
+    transparent 10%,
+    transparent 100%
   );
   backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
