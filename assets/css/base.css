@@ -576,6 +576,7 @@ button {
 .section-posters.is-visible .section-chrome { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   .section-chrome { transition: none; }
+  .site-header { transition: none; }
 }
 
 /* ──────────────── Work / poster wall ──────────────── */
