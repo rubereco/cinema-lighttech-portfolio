@@ -97,9 +97,9 @@ button {
 /* ──────────────── Header + nav ──────────────── */
 
 /* ==========================================
-   SITE HEADER — Windshield Solarband Glass
+   SITE HEADER — Windshield Solarband Glass (INVERTED)
    Single backdrop-filter layer on ::before with mask-image to vary
-   blur density top-to-bottom (clear top, dense bottom). No multi-
+   blur density top-to-bottom (DENSE top, clear bottom). No multi-
    layer compositing seams — the mask does what stacked pseudos
    were trying to do, but cleanly.
    ========================================== */
@@ -121,7 +121,7 @@ button {
 
 /* Background overlay — handles the solarband color & glass blur.
    Single layer; the mask-image modulates where the backdrop-filter
-   actually applies (light at top → full strength at 40% down). */
+   actually applies (FULL at top → weaker toward 60% down). */
 .site-header::before {
   content: "";
   position: absolute;
@@ -129,34 +129,36 @@ button {
   z-index: -1;
   pointer-events: none;
 
-  /* Smooth Solarband Gradient Curve:
-     0%–15%   : Crystal Clear (0–4% opacity)
-     15%–75%  : Translucent, not dark (22–48% opacity)
-     75%–100% : Darkish finish (75–92% opacity) */
+  /* Smooth Solarband Gradient Curve (inverted):
+     0%–15%   : Dark solarband (92–75% opacity)
+     15%–75%  : Translucent fade (48–22% opacity)
+     75%–100% : Crystal clear (4–0% opacity) */
   background: linear-gradient(
     to bottom,
-    rgba(11, 11, 13, 0)    0%,
-    rgba(11, 11, 13, 0.04) 15%,
-    rgba(11, 11, 13, 0.22) 35%,
-    rgba(11, 11, 13, 0.48) 65%,
-    rgba(11, 11, 13, 0.75) 85%,
-    rgba(11, 11, 13, 0.92) 100%
+    rgba(11, 11, 13, 0.92) 0%,
+    rgba(11, 11, 13, 0.75) 15%,
+    rgba(11, 11, 13, 0.48) 35%,
+    rgba(11, 11, 13, 0.22) 65%,
+    rgba(11, 11, 13, 0.04) 85%,
+    rgba(11, 11, 13, 0)    100%
   );
 
   /* Single glass blur layer — avoids multi-layer edge artifacts.
-     Mask makes the blur weaker at top, stronger toward the bottom. */
+     Mask makes the blur FULL at top, weaker toward the bottom
+     (the navbar reads as a dark solarband at the very top, fading
+     to a clear edge where it meets the page). */
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
 
   -webkit-mask-image: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 1)   40%
+    rgba(0, 0, 0, 1)   0%,
+    rgba(0, 0, 0, 0.3) 60%
   );
   mask-image: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 1)   40%
+    rgba(0, 0, 0, 1)   0%,
+    rgba(0, 0, 0, 0.3) 60%
   );
 
   transition: background 220ms ease, backdrop-filter 220ms ease,
@@ -180,11 +182,11 @@ button {
 .site-header.is-scrolled::before {
   background: linear-gradient(
     to bottom,
-    rgba(11, 11, 13, 0.05) 0%,
-    rgba(11, 11, 13, 0.15) 15%,
-    rgba(11, 11, 13, 0.45) 40%,
-    rgba(11, 11, 13, 0.78) 75%,
-    rgba(11, 11, 13, 0.98) 100%
+    rgba(11, 11, 13, 0.98) 0%,
+    rgba(11, 11, 13, 0.78) 25%,
+    rgba(11, 11, 13, 0.45) 60%,
+    rgba(11, 11, 13, 0.15) 85%,
+    rgba(11, 11, 13, 0.05) 100%
   );
 
   backdrop-filter: saturate(180%) blur(16px);
