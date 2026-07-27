@@ -113,6 +113,10 @@ button {
   align-items: center;
   gap: 12px;
   padding: 14px var(--pad-x);
+  /* Baseline tint so the navbar never goes fully transparent — keeps
+     a touch of dark even at the bottom edge. The ::before solarband
+     sits on top and ramps from dense top to this baseline at bottom. */
+  background: rgba(11, 11, 13, 0.10);
   isolation: isolate;
   overflow: hidden;
   border-bottom: none;
@@ -175,6 +179,7 @@ button {
    Slightly higher density when page content scrolls underneath.
    ========================================== */
 .site-header.is-scrolled {
+  background: rgba(11, 11, 13, 0.18);
   padding-top: 10px;
   padding-bottom: 10px;
 }
