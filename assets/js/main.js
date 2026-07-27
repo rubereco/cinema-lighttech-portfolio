@@ -245,6 +245,37 @@ function setupKitFilter() {
   });
 }
 
+/* ──────────────── Header scroll state ──────────────── */
+/* Toggle .is-scrolled on .site-header once the user has scrolled more
+   than 4px. The CSS uses this class to swap from a fully transparent
+   gradient backdrop to a stronger frosted-glass blur, so content
+   scrolling under the header stays legible. rAF-throttled. */
+
+function setupHeaderScroll() {
+  const header = document.querySelector(".site-header");
+  if (!header) return;
+
+  let ticking = false;
+  let scrolled = false;          // cache to avoid touching the DOM every frame
+
+  function update() {
+    const next = window.scrollY > 4;
+    if (next !== scrolled) {
+      scrolled = next;
+      header.classList.toggle("is-scrolled", scrolled);
+    }
+    ticking = false;
+  }
+
+  window.addEventListener("scroll", () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }, { passive: true });
+
+  update();   // set initial state in case the page loads scrolled
+}
+
 /* ──────────────── Year stamp ──────────────── */
 
 function setupYearStamp() {
@@ -264,6 +295,7 @@ function setupYearStamp() {
   setupLanguageToggle();
   setupKitFilter();
   setupYearStamp();
+  setupHeaderScroll();
   setupSectionChrome();
 
   // Render the poster wall (work.json × films.json) after data is ready.

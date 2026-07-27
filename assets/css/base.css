@@ -108,10 +108,37 @@ button {
   align-items: center;
   gap: 12px;
   padding: 14px var(--pad-x);
-  background: rgba(11, 11, 13, 0.85);
-  backdrop-filter: saturate(140%) blur(12px);
-  -webkit-backdrop-filter: saturate(140%) blur(12px);
-  border-bottom: 1px solid var(--c-border, rgba(255,255,255,0.08));
+  /* Minimalist transparent header: dark gradient at top fading to fully
+     transparent at the bottom. The gradient + backdrop-filter gives
+     legibility over both dark hero images AND bright content scrolling
+     underneath. No hard border at the bottom — the gradient is the
+     visual edge. */
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.30) 60%,
+    rgba(0, 0, 0, 0)   100%
+  );
+  backdrop-filter: saturate(140%) blur(0px);
+  -webkit-backdrop-filter: saturate(140%) blur(0px);
+  border-bottom: none;
+  transition: backdrop-filter 220ms ease, background 220ms ease,
+              padding 220ms ease;
+}
+
+/* Scrolled state — JS adds .is-scrolled once window.scrollY > 4.
+   Stronger backdrop blur for content legibility when the user scrolls
+   and random sections pass under the header. */
+.site-header.is-scrolled {
+  backdrop-filter: saturate(140%) blur(14px);
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
+  background: linear-gradient(
+    to bottom,
+    rgba(11, 11, 13, 0.78) 0%,
+    rgba(11, 11, 13, 0.55) 100%
+  );
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 /* While the mobile nav is open, lift the header above the overlay
@@ -135,8 +162,13 @@ button {
   grid-area: brand;
   font-weight: 700;
   letter-spacing: 0.02em;
-  font-size: 17px;
+  font-size: 16px;
   white-space: nowrap;
+  /* Subtle dark text-shadow keeps the brand legible when scrolling over
+     bright content (e.g. bright poster gradients, light-bg sections).
+     0 1px 2px = a soft drop shadow; matches the cinematic vibe without
+     looking like an outline. */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 /* ──────────────── Mobile nav overlay ────────────────
@@ -281,11 +313,14 @@ button {
 .lang-toggle {
   grid-area: lang;
   display: inline-flex;
-  border: 1px solid var(--c-border, rgba(255,255,255,0.18));
+  border: 1px solid color-mix(in srgb, var(--c-fg, #fff) 18%, transparent);
   border-radius: 999px;
   padding: 2px;
   font-size: 12px;
   font-weight: 700;
+  background: color-mix(in srgb, #000 18%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .lang-toggle button {
@@ -313,9 +348,12 @@ button {
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  border: 1px solid var(--c-border, rgba(255,255,255,0.18));
+  border: 1px solid color-mix(in srgb, var(--c-fg, #fff) 18%, transparent);
   border-radius: 999px;
   font-size: 13px;
+  background: color-mix(in srgb, #000 18%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* ──────────────── Hero ──────────────── */
@@ -954,19 +992,26 @@ button {
 
   .nav-desktop a {
     padding: 0;
-    font-size: 14px;
-    letter-spacing: 0.06em;
+    font-size: 13px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--c-fg-dim, rgba(255,255,255,0.7));
+    color: var(--c-fg-dim, rgba(255,255,255,0.78));
     border: none;
     background: none;
     font-family: inherit;
     font-weight: 500;
     text-decoration: none;
+    /* Subtle text-shadow keeps nav links readable when the user scrolls
+       and bright content (poster gradients, light-bg sections) passes
+       under the header. Soft drop shadow, no outline. */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    transition: color 160ms ease, text-shadow 160ms ease;
   }
 
-  .nav-desktop a:hover {
+  .nav-desktop a:hover,
+  .nav-desktop a:focus-visible {
     color: var(--c-fg, #fff);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
   }
 
   /* Mobile nav (fullscreen overlay) — hide entirely on desktop so it never
