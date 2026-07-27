@@ -108,24 +108,24 @@ button {
   align-items: center;
   gap: 12px;
   padding: 14px var(--pad-x);
-  /* Fully transparent at the top — let the page bg show through.
-     No visible band, no edge. The dark you see is the page's own
-     --theme-bg. */
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  /* Glassy: subtle dark tint + strong backdrop blur. The blur is
+     always on so the navbar looks like a frosted-glass surface
+     over the hero. */
+  background: rgba(11, 11, 13, 0.32);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
   border-bottom: none;
   transition: backdrop-filter 220ms ease, background 220ms ease,
               padding 220ms ease;
 }
 
 /* Scrolled state — JS adds .is-scrolled once window.scrollY > 4.
-   Frosted-glass blur for content legibility when the user scrolls
-   and random sections pass under the header. */
+   Slightly stronger tint + blur so content scrolling under the
+   header stays legible. */
 .site-header.is-scrolled {
-  backdrop-filter: saturate(140%) blur(14px);
-  -webkit-backdrop-filter: saturate(140%) blur(14px);
-  background: rgba(11, 11, 13, 0.72);
+  background: rgba(11, 11, 13, 0.55);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   padding-top: 10px;
   padding-bottom: 10px;
 }
