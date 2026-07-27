@@ -1,0 +1,70 @@
+{
+  "_meta": {
+    "lastUpdated": "2026-07-27",
+    "version": "1.0"
+  },
+  "people": [
+    {
+      "id": "tarek-recolons",
+      "name": "Tarek Recolons",
+      "kind": "subject",
+      "portrait": null,
+      "imdb": "nm5007366",
+      "imdbUrl": "https://www.imdb.com/name/nm5007366/",
+      "instagram": "tarekreco",
+      "instagramUrl": "https://www.instagram.com/tarekreco/"
+    },
+    {
+      "id": "alejandro-rojas",
+      "name": "Alejandro Rojas",
+      "kind": "director",
+      "portrait": null
+    },
+    {
+      "id": "isabel-coixet",
+      "name": "Isabel Coixet",
+      "kind": "director",
+      "portrait": null
+    },
+    {
+      "id": "joan-pradells",
+      "name": "Joan Pradells",
+      "kind": "collaborator",
+      "relationship": "dp",
+      "portrait": "assets/images/partners/joan-pradells.jpg",
+      "count": 4,
+      "description": {
+        "en": "Cinematographer with a knack for natural light and texture. Repeated collaborations on intimate narrative projects.",
+        "es": "Director de fotografía con ojo para la luz natural y la textura. Colaboraciones repetidas en proyectos narrativos íntimos."
+      },
+      "url": "https://example.com",
+      "urlLabel": "Portfolio"
+    },
+    {
+      "id": "marc-ortiz-prades",
+      "name": "Marc Ortiz Prades",
+      "kind": "director",
+      "portrait": null
+    },
+    {
+      "id": "miguel-faus",
+      "name": "Miguel Faus",
+      "kind": "director",
+      "portrait": null
+    },
+    {
+      "id": "quim-casanova",
+      "name": "Quim Casanova",
+      "kind": "collaborator",
+      "relationship": "rental",
+      "portrait": "assets/images/partners/quim-casanova.jpg",
+      "count": 7,
+      "description": {
+        "en": "Independent rental partner for specialty grip and lighting modifiers. Quick turnaround, well-maintained gear.",
+        "es": "Partner independiente de alquiler para grip especializado y modificadores de iluminación. Respuesta rápida, equipo bien mantenido."
+      },
+      "url": "https://example.com",
+      "urlLabel": "Website"
+    }
+  ]
+}

@@ -1,18 +1,24 @@
 /* ════════════════════════════════════════════════════════════════════════
-   partners.js — render the Partners & Credits page from content.json.
+   partners.js — render the Partners & Credits page from data/people.json + data/companies.json.
 
    Architecture (incremental, easy to maintain):
    - Categories are defined in CATEGORIES below. Each has:
-       id        — matches partner.type in content.json
-       labelKey  — i18n key for the section header
-       layout    — CSS class that defines the card's photo aspect ratio
-                   ("landscape", "wide", "square", "default")
+       source        — "companies" (match by `kind`) or "people" (match by `relationship`)
+       id            — discriminator against the source; for source:companies this
+                       is matched against company.kind; for source:people the match
+                       requires kind==="collaborator" + relationship===id.
+       labelKey      — i18n key for the section header
+       layout        — CSS class that defines the card's image aspect ratio
+                       ("landscape", "wide", "square", "default")
    - To add a new category:
-       1. Add an entry to CATEGORIES
+       1. Add an entry to CATEGORIES (pick source: "companies" or "people")
        2. Add a line in data/i18n.json (en + es) under partners.section.*
        3. Add a CSS rule for the layout class (or reuse an existing one)
    - To remove a category: just delete its CATEGORIES entry. Partners with
-     that type will silently fall through to the orphaned list.
+     that kind/relationship will silently not render.
+   - The data layer is two entities: people (data/people.json, kind: collaborator)
+     and companies (data/companies.json). The composePartners() function
+     merges them into a uniform partners[] list, filtered per category by source.
    - The renderer is fully data-driven. No per-category JS code.
 
    Loads inline-first (file:// compatibility) with fetch() fallback.
@@ -32,15 +38,24 @@
   const DEFAULT_OPEN = false;
 
   /** Category config. Single source of truth for section order, labels, and
-   *  card layout. The order here is the order rendered on the page. */
+   *  card layout. The order here is the order rendered on the page.
+   *
+   *  Each category is a view over the *partners* page composition:
+   *    source: "companies" → match companies by `kind` === id
+   *    source: "people"   → match people with kind="collaborator" and `relationship` === id
+   *  The two source kinds keep people (with their kind: collaborator distinction)
+   *  and companies cleanly separated at the storage layer.
+   */
   const CATEGORIES = [
-    { id: "equipment-house", labelKey: "partners.section.equipment", layout: "card-landscape", defaultOpen: true },
-    { id: "dp",              labelKey: "partners.section.dp",         layout: "card-wide" },
-    { id: "rental",          labelKey: "partners.section.rental",     layout: "card-square" },
-    { id: "partner",         labelKey: "partners.section.other",      layout: "card-default" },
+    { id: "equipment-house",    source: "companies", labelKey: "partners.section.equipment", layout: "card-landscape", defaultOpen: true },
+    { id: "dp",                 source: "people",   relationship: "dp",     labelKey: "partners.section.dp",     layout: "card-wide" },
+    { id: "rental",             source: "people",   relationship: "rental", labelKey: "partners.section.rental", layout: "card-square" },
+    { id: "commercial-partner", source: "companies", labelKey: "partners.section.other",   layout: "card-default" },
   ];
 
   // ─── Loaders ──────────────────────────────────────────────────────────
+  // Reads both inline blocks (file://) or fetches (live deploy). The two
+  // entities compose on the page; see `composePartners()` below.
 
   function readInline(id) {
     const el = document.getElementById(id);
@@ -49,17 +64,63 @@
     catch (err) { console.warn(`[partners] inline #${id} parse failed:`, err); return null; }
   }
 
-  async function loadContent() {
-    const inline = readInline("tarek-content");
+  async function loadBlock(id, fallbackPath) {
+    const inline = readInline(id);
     if (inline) return inline;
     try {
-      const res = await fetch("data/content.json", { cache: "no-store" });
+      const res = await fetch(fallbackPath, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
-      console.error("[partners] failed to load content.json:", err);
-      return { partners: [] };
+      console.error(`[partners] failed to load ${fallbackPath}:`, err);
+      return null;
     }
+  }
+
+  async function loadContent() {
+    const [peopleData, companiesData] = await Promise.all([
+      loadBlock("tarek-people",    "data/people.json"),
+      loadBlock("tarek-companies", "data/companies.json"),
+    ]);
+    return composePartners(peopleData, companiesData);
+  }
+
+  /** Merge people + companies into a single shape the renderer understands.
+   *  People with `kind: "collaborator"` and companies of any `kind` are the
+   *  only entries that show up here. Film-credit people (subject, director,
+   *  dop, gaffer, electrics) are not part of the partners page. */
+  function composePartners(peopleData, companiesData) {
+    const collaborators = (peopleData?.people ?? []).filter((p) => p.kind === "collaborator");
+    const companies = companiesData?.companies ?? [];
+    return {
+      partners: [
+        ...companies.map((c) => ({
+          id: c.id,
+          name: c.name,
+          kind: c.kind,                       // discriminator for category match
+          image: c.logo ?? null,
+          imageAlt: c.logoAlt ?? null,
+          count: c.count ?? 0,
+          description: c.description ?? { en: "", es: "" },
+          url: c.url ?? null,
+          urlLabel: c.urlLabel ?? null,
+          origin: "company",
+        })),
+        ...collaborators.map((p) => ({
+          id: p.id,
+          name: p.name,
+          kind: p.kind,                       // "collaborator"
+          relationship: p.relationship,       // "dp" | "rental"
+          image: p.portrait ?? null,
+          imageAlt: null,
+          count: p.count ?? 0,
+          description: p.description ?? { en: "", es: "" },
+          url: p.url ?? null,
+          urlLabel: p.urlLabel ?? null,
+          origin: "person",
+        })),
+      ],
+    };
   }
 
   // Inline i18n block — partners.html works even if main.js fails.
@@ -130,7 +191,7 @@
   function linkFor(partner) {
     const name = nameFor(partner);
     if (!name) return "";
-    const label = partner.label || "Website";
+    const label = partner.urlLabel || partner.label || "Website";
     if (!partner.url) {
       return `<span class="partner-name">${escapeText(name)}</span>`;
     }
@@ -145,7 +206,7 @@
   /**
    * Renders a single partner card using the layout class from the category
    * config. The layout only affects the photo's aspect ratio and grid span;
-   * the card content (photo, name, count, description, link) is identical.
+   * the card content (image, name, count, description, link) is identical.
    * That way, "format per category" is purely a CSS concern.
    */
   function partnerCardHtml(partner, category) {
@@ -153,15 +214,19 @@
     const name = nameFor(partner);
     const desc = descriptionFor(partner, lang);
     const count = countFor(partner, lang);
-    const photo = partner.photo || "";
-    const alt = partner.photoAlt || `${name}`;
+    const image = partner.image || "";
+    const alt = partner.imageAlt || partner.name || "";
+
+    const dataType = partner.origin === "person"
+      ? partner.relationship || partner.kind
+      : partner.kind;
 
     return `
-      <article class="partner-card ${category.layout}" data-type="${escapeAttr(partner.type)}">
+      <article class="partner-card ${category.layout}" data-type="${escapeAttr(dataType)}">
         <div class="partner-photo">
           <img alt="${escapeAttr(alt)}"
                loading="lazy" decoding="async"
-               src="${escapeAttr(photo)}">
+               src="${escapeAttr(image)}">
         </div>
         <div class="partner-body">
           <header class="partner-card-head">
@@ -219,8 +284,14 @@
     if (!target) return;
     const lang = getActiveLang();
     const partners = content.partners || [];
-    const html = CATEGORIES.map(category => {
-      const items = partners.filter(p => p.type === category.id);
+    const html = CATEGORIES.map((category) => {
+      // Filter by source first (companies / people), then by kind or relationship
+      // depending on the source. Two-step keeps page-config declarative.
+      const items = partners.filter((p) => {
+        if (category.source === "companies") return p.kind === category.id;
+        if (category.source === "people")     return p.kind === "collaborator" && p.relationship === category.id;
+        return false;
+      });
       return sectionHtml(category, items, lang);
     }).join("");
     target.innerHTML = `<ul class="partners-accordion" role="list">${html}</ul>`;

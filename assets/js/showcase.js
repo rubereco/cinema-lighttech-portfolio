@@ -24,8 +24,12 @@
   "use strict";
 
   // ─── State ────────────────────────────────────────────────────────────
-  let CONTENT = null;
-  let currentProjectSlug = null;
+  // Loaded data (split across multiple blocks for the lite-DB layout):
+  //   DATA.projects = data/showcase.json → list of rich project presentations (filmId-pointer)
+  //   DATA.films    = data/films.json    → canonical film records (title, year, credits)
+  //   DATA.people   = data/people.json   → people (id, name, kind, portrait, …)
+  const DATA = { projects: [], films: [], people: [] };
+  let currentProjectId = null;
   let lightboxIndex = -1;
 
   // ─── DOM refs (resolved once on boot) ────────────────────────────────
@@ -42,10 +46,10 @@
     dom.lightboxCap  = document.getElementById("lightbox-caption");
   }
 
-  // ─── Content loading ─────────────────────────────────────────────────
-  // Read content from an inline <script type="application/json"> block first
-  // (file:// compatibility — browsers block fetch() for local files).
-  // Falls back to fetch() for live deploys where the inline block is absent.
+  // ─── Loaders ──────────────────────────────────────────────────────────
+  // Each block id corresponds to one inline <script type="application/json">
+  // injected by scripts/inline-content.mjs (for file:// previews). On live
+  // deploys the inline block can be absent; we fall back to fetch().
   function readInline(id) {
     const el = document.getElementById(id);
     if (!el) return null;
@@ -53,18 +57,35 @@
     catch (err) { console.warn(`[showcase] inline #${id} parse failed:`, err); return null; }
   }
 
-  async function loadContent() {
-    const inline = readInline("tarek-content");
-    if (inline) { CONTENT = inline; return; }
+  async function loadBlock(id, fallbackPath) {
+    const inline = readInline(id);
+    if (inline) return inline;
     try {
-      const res = await fetch("data/content.json", { cache: "no-store" });
+      const res = await fetch(fallbackPath, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      CONTENT = await res.json();
+      return await res.json();
     } catch (err) {
-      console.error("[showcase] failed to load content.json:", err);
-      CONTENT = { showcase: [] };
+      console.error(`[showcase] failed to load ${fallbackPath}:`, err);
+      return null;
     }
   }
+
+  async function loadContent() {
+    const [showcaseData, filmsData, peopleData] = await Promise.all([
+      loadBlock("tarek-showcase", "data/showcase.json"),
+      loadBlock("tarek-films",    "data/films.json"),
+      loadBlock("tarek-people",   "data/people.json"),
+    ]);
+    DATA.projects = showcaseData?.projects ?? [];
+    DATA.films    = filmsData?.films      ?? [];
+    DATA.people   = peopleData?.people    ?? [];
+  }
+
+  // ─── Lookups ──────────────────────────────────────────────────────────
+  function getFilm(filmId)     { return DATA.films.find((f) => f.id === filmId); }
+  function getPerson(personId) { return DATA.people.find((p) => p.id === personId); }
+  function getProject(id)      { return DATA.projects.find((p) => p.filmId === id); }
+  function resolveNames(ids)   { return (ids ?? []).map((id) => getPerson(id)?.name ?? id); }
 
   function getActiveLang() {
     return document.documentElement.lang || "en";
@@ -73,7 +94,7 @@
   // ─── Folder grid render ──────────────────────────────────────────────
   function renderGrid() {
     if (!dom.grid) return;
-    const projects = CONTENT?.showcase || [];
+    const projects = DATA.projects;
     dom.grid.setAttribute("aria-busy", "false");
 
     if (projects.length === 0) {
@@ -87,36 +108,39 @@
   }
 
   function folderCardHtml(p, index, lang) {
+    const film = getFilm(p.filmId);
     const accent = p.accent || "#E8A33D";
     const statusClass = p.status === "released" ? "is-released" : "";
     const statusLabel = p.status === "released"
       ? (lang === "es" ? "Estrenada" : "Released")
       : (lang === "es" ? "En producción" : "In production");
-    const role = p.role || "";
-    const year = p.year || "";
-    const cover = p.cover || "";
-    const summary = (p.summary && (p.summary[lang] || p.summary.en)) || "";
+    const title = film?.title ?? "";
+    const roleLabel = (lang === "es" && film?.role) ? translateRole(film.role) : (film?.role ?? "");
+    const year = film?.year ?? "";
+    const cover = p.cover ?? "";
+    const directorNames = resolveNames(film?.credits?.director);
 
     // Eager-load the first 2 covers (above the fold on most phones); rest lazy.
     const eager = index < 2 ? "eager" : "lazy";
 
     return `
       <a class="folder-card" role="listitem"
-         href="#${escapeAttr(p.slug)}"
+         href="#${escapeAttr(p.filmId)}"
          style="--folder-accent: ${escapeAttr(accent)}"
-         aria-label="${escapeAttr(p.title)} (${year})">
+         aria-label="${escapeAttr(title)} (${year})">
         <img class="folder-cover" alt=""
              loading="${eager}" decoding="async"
              data-src="${escapeAttr(cover)}"
-             src="${escapeAttr(placeholderCover(p.slug))}">
+             src="${escapeAttr(placeholderCover(p.filmId))}">
         <span class="folder-status ${statusClass}">${escapeText(statusLabel)}</span>
         <span class="folder-overlay">
           <span class="folder-meta">
             <span class="folder-accent" aria-hidden="true"></span>
             <span>${escapeText(String(year))}</span>
+            ${directorNames.length ? `<span aria-hidden="true">·</span><span>${escapeText(directorNames.join(", "))}</span>` : ""}
           </span>
-          <h2 class="folder-title">${escapeText(p.title)}</h2>
-          <p class="folder-role">${escapeText(role)}</p>
+          <h2 class="folder-title">${escapeText(title)}</h2>
+          <p class="folder-role">${escapeText(roleLabel || "")}</p>
         </span>
       </a>
     `;
@@ -133,13 +157,16 @@
   }
 
   // ─── Project view render ─────────────────────────────────────────────
-  function renderProject(slug) {
-    const project = (CONTENT?.showcase || []).find((p) => p.slug === slug);
+  function renderProject(id) {
+    const project = getProject(id);
     if (!project) {
-      // Unknown slug → fall back to grid (e.g. stale link)
+      // Unknown filmId → fall back to grid (e.g. stale link)
       location.hash = "";
       return;
     }
+    const film = getFilm(project.filmId);
+    const title = film?.title ?? "(unknown)";
+    const year  = film?.year  ?? "";
 
     const lang = getActiveLang();
     const accent = project.accent || "#E8A33D";
@@ -148,24 +175,27 @@
       ? (lang === "es" ? "Estrenada" : "Released")
       : (lang === "es" ? "En producción" : "In production");
     const statusClass = project.status === "released" ? "is-released" : "";
-    const roleLabel = (lang === "es" && project.role) ? translateRole(project.role) : project.role;
+    const roleLabel = (lang === "es" && film?.role) ? translateRole(film.role) : (film?.role ?? "");
+    const directorNames = resolveNames(film?.credits?.director);
 
     dom.projectHead.style.setProperty("--project-accent", accent);
     dom.projectHead.innerHTML = `
       <img class="project-cover" alt=""
            loading="eager" decoding="async"
            data-src="${escapeAttr(project.cover)}"
-           src="${escapeAttr(placeholderCover(project.slug))}">
+           src="${escapeAttr(placeholderCover(project.filmId))}">
       <div class="project-body">
         <div class="project-meta">
           <span class="project-accent" aria-hidden="true"></span>
-          <span>${escapeText(String(project.year))}</span>
+          <span>${escapeText(String(year))}</span>
           <span aria-hidden="true">·</span>
           <span>${escapeText(roleLabel || "")}</span>
-          ${project.director ? `<span aria-hidden="true">·</span><span>${escapeText(project.director)}</span>` : ""}
+          ${directorNames.length
+            ? `<span aria-hidden="true">·</span><span>${escapeText(directorNames.join(", "))}</span>`
+            : ""}
           <span class="project-status ${statusClass}">${escapeText(statusLabel)}</span>
         </div>
-        <h1 class="project-title">${escapeText(project.title)}</h1>
+        <h1 class="project-title">${escapeText(title)}</h1>
         ${summary ? `<p class="project-subtitle">${escapeText(summary)}</p>` : ""}
       </div>
     `;
@@ -174,7 +204,7 @@
 
     setupLazyImages(dom.projectHead, /* eagerCount */ 1);
     setupLazyImages(dom.projectGrid, /* eagerCount */ 4);
-    setupPhotoClicks(project);
+    setupPhotoClicks(project, title);
 
     // Lazy-load the cover image immediately (it has loading=eager)
     const coverImg = dom.projectHead.querySelector(".project-cover");
@@ -182,8 +212,8 @@
       swapInImage(coverImg);
     }
 
-    currentProjectSlug = slug;
-    document.title = `${project.title} (${project.year}) — Tarek Recolons`;
+    currentProjectId = id;
+    document.title = `${title} (${year}) — Tarek Recolons`;
   }
 
   function renderProjectPhotos(project) {
@@ -268,18 +298,19 @@
   }
 
   // ─── Lightbox ────────────────────────────────────────────────────────
-  function setupPhotoClicks(project) {
+  // Lightbox stores the project title for fallback alt/caption text.
+  function setupPhotoClicks(project, projectTitle) {
     if (!dom.projectGrid) return;
     const tiles = Array.from(dom.projectGrid.querySelectorAll(".photo-tile"));
     tiles.forEach((tile, idx) => {
-      tile.addEventListener("click", () => openLightbox(project, idx, tiles));
+      tile.addEventListener("click", () => openLightbox(project, idx, tiles, projectTitle));
     });
   }
 
-  function openLightbox(project, idx, tiles) {
+  function openLightbox(project, idx, tiles, projectTitle) {
     const tile = tiles[idx];
     const img = tile.querySelector("img");
-    const caption = img.alt || project.title;
+    const caption = img.alt || projectTitle || "";
     dom.lightboxImg.src = img.currentSrc || img.src;
     dom.lightboxImg.alt = caption;
     dom.lightboxCap.textContent = caption;
@@ -287,6 +318,7 @@
     document.body.style.overflow = "hidden";
     lightboxIndex = idx;
     lightboxState.project = project;
+    lightboxState.projectTitle = projectTitle || "";
     lightboxState.tiles = tiles;
   }
 
@@ -299,7 +331,7 @@
     lightboxIndex = -1;
   }
 
-  const lightboxState = { project: null, tiles: [] };
+  const lightboxState = { project: null, projectTitle: "", tiles: [] };
 
   function lightboxStep(delta) {
     if (lightboxIndex < 0) return;
@@ -307,8 +339,9 @@
     const tile = lightboxState.tiles[next];
     const img = tile.querySelector("img");
     dom.lightboxImg.src = img.currentSrc || img.src;
-    dom.lightboxImg.alt = img.alt || lightboxState.project.title;
-    dom.lightboxCap.textContent = img.alt || lightboxState.project.title;
+    const fallback = img.alt || lightboxState.projectTitle || "";
+    dom.lightboxImg.alt = fallback;
+    dom.lightboxCap.textContent = fallback;
     lightboxIndex = next;
   }
 
@@ -333,7 +366,7 @@
   // ─── Hash routing ────────────────────────────────────────────────────
   function handleRoute() {
     const hash = location.hash.replace(/^#/, "");
-    if (hash && CONTENT?.showcase?.some((p) => p.slug === hash)) {
+    if (hash && DATA.projects.some((p) => p.filmId === hash)) {
       dom.gridView.hidden = true;
       dom.projectView.hidden = false;
       renderProject(hash);
@@ -341,8 +374,8 @@
     } else {
       dom.gridView.hidden = false;
       dom.projectView.hidden = true;
-      currentProjectSlug = null;
-      if (CONTENT) document.title = "Showcase — Tarek Recolons";
+      currentProjectId = null;
+      if (DATA.projects.length) document.title = "Showcase — Tarek Recolons";
     }
   }
 
@@ -357,7 +390,7 @@
 
     // Re-render project view when language changes
     window.addEventListener("tarek:i18n-change", () => {
-      if (currentProjectSlug) renderProject(currentProjectSlug);
+      if (currentProjectId) renderProject(currentProjectId);
     });
   }
 

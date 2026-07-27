@@ -1,0 +1,214 @@
+{
+  "_meta": {
+    "lastUpdated": "2026-07-27",
+    "version": "1.0"
+  },
+  "films": [
+    {
+      "id": "saw-2026",
+      "title": "Saw",
+      "year": 2026,
+      "type": null,
+      "role": "Gaffer",
+      "credits": {
+        "production": [],
+        "director": [],
+        "dop": [],
+        "gaffer": [
+          "tarek-recolons"
+        ],
+        "electrics": []
+      }
+    },
+    {
+      "id": "els-mals-noms-2025",
+      "title": "Els Mals Noms",
+      "year": 2025,
+      "type": "Largometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [
+          "Lamalanga Produccions Audiovisuals",
+          "Admirable Films"
+        ],
+        "director": [
+          "marc-ortiz-prades"
+        ],
+        "dop": [],
+        "gaffer": [
+          "tarek-recolons"
+        ],
+        "electrics": []
+      },
+      "poster": "assets/projects/els-mals-noms-2025/poster.jpg"
+    },
+    {
+      "id": "lo-que-queda-de-ti-2025",
+      "title": "Lo que queda de ti",
+      "year": 2025,
+      "type": "Largometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [
+          "Potenza Producciones"
+        ],
+        "director": [],
+        "dop": [],
+        "gaffer": [
+          "tarek-recolons"
+        ],
+        "electrics": []
+      },
+      "poster": "assets/projects/lo-que-queda-de-ti-2025/poster.jpg"
+    },
+    {
+      "id": "parenostre-2025",
+      "title": "Parenostre",
+      "year": 2025,
+      "type": "Largometraje",
+      "role": "Lighting Technician / Bestboy",
+      "credits": {
+        "production": [
+          "Minoria Absoluta",
+          "Lastor Media",
+          "Vilaüt Films"
+        ],
+        "director": [],
+        "dop": [],
+        "gaffer": [],
+        "electrics": []
+      },
+      "poster": "assets/projects/parenostre-2025/poster.jpg"
+    },
+    {
+      "id": "un-altre-home-2025",
+      "title": "Un altre home",
+      "year": 2025,
+      "type": "Largometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [
+          "Oberon Media"
+        ],
+        "director": [],
+        "dop": [],
+        "gaffer": [
+          "tarek-recolons"
+        ],
+        "electrics": []
+      },
+      "poster": "assets/projects/un-altre-home-2025/poster.jpg"
+    },
+    {
+      "id": "calladita-2023",
+      "title": "Calladita",
+      "year": 2023,
+      "type": "Largometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [],
+        "director": [
+          "miguel-faus"
+        ],
+        "dop": [],
+        "gaffer": [
+          "tarek-recolons"
+        ],
+        "electrics": []
+      },
+      "poster": "assets/projects/calladita-2023/poster.jpg"
+    },
+    {
+      "id": "upon-entry-2022",
+      "title": "Upon Entry",
+      "year": 2022,
+      "type": "Largometraje",
+      "role": "Grip",
+      "credits": {
+        "production": [],
+        "director": [
+          "alejandro-rojas"
+        ],
+        "dop": [],
+        "gaffer": [],
+        "electrics": []
+      },
+      "poster": "assets/projects/upon-entry-2022/poster.jpg"
+    },
+    {
+      "id": "lultima-nit-del-karaoke-2021",
+      "title": "L'última nit del karaoke",
+      "year": 2021,
+      "type": "Serie TV",
+      "role": "Electrician / 2nd Gaffer",
+      "credits": {
+        "production": [],
+        "director": [],
+        "dop": [],
+        "gaffer": [],
+        "electrics": []
+      },
+      "poster": "assets/projects/lultima-nit-del-karaoke-2021/poster.jpg"
+    },
+    {
+      "id": "coque-2020",
+      "title": "Coque",
+      "year": 2020,
+      "type": "Cortometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [
+          "Somos Acme SL"
+        ],
+        "director": [],
+        "dop": [],
+        "gaffer": [
+          "tarek-recolons"
+        ],
+        "electrics": []
+      },
+      "poster": "assets/projects/coque-2020/poster.jpg"
+    },
+    {
+      "id": "boca-norte-2019",
+      "title": "Boca Norte",
+      "year": 2019,
+      "type": "Serie TV",
+      "role": "Gaffer",
+      "credits": {
+        "production": [
+          "Playz",
+          "RTVE"
+        ],
+        "director": [],
+        "dop": [],
+        "gaffer": [
+          "tarek-recolons"
+        ],
+        "electrics": []
+      },
+      "poster": "assets/projects/boca-norte-2019/poster.jpg"
+    },
+    {
+      "id": "the-bookshop-2017",
+      "title": "The Bookshop",
+      "year": 2017,
+      "type": "Largometraje",
+      "role": "Electrician Dailies",
+      "credits": {
+        "production": [
+          "Diagonal TV",
+          "A Contracorriente Films",
+          "Green Films"
+        ],
+        "director": [
+          "isabel-coixet"
+        ],
+        "dop": [],
+        "gaffer": [],
+        "electrics": []
+      },
+      "poster": "assets/projects/the-bookshop-2017/poster.jpg"
+    }
+  ]
+}
