@@ -517,6 +517,94 @@ button {
   text-align: left;
 }
 
+/* In-section chrome: bottom-left IMDb link + bottom-right "next section" arrow.
+   JS in main.js (#setupSectionChrome) toggles between `position: fixed`
+   (docked to viewport bottom while reading the section) and `position: absolute`
+   (snapped to section's bottom edge once the user has scrolled past it).
+   The opacity fade is driven by `.is-visible` on the parent section. */
+.section-chrome {
+  left: 0;
+  right: 0;
+  padding: 18px max(20px, 4vw);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;         /* center pills vertically — was flex-end */
+  pointer-events: none;        /* container is a no-op; children opt back in */
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+  z-index: 50;
+  will-change: transform, position;
+}
+.section-posters.is-visible .section-chrome { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .section-chrome { transition: none; }
+}
+
+/* ──────────────── Work / poster wall ──────────────── */
+
+.section-link {
+  pointer-events: auto;        /* re-enable clicks on the actual links */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  /* Fixed pill height regardless of content (text vs icon-only). Both pills
+     lock to this exact height — text auto-centers via flex + box-sizing. */
+  min-height: 44px;
+  font-size: 14px;
+  line-height: 1;              /* so the text line-box = font-size; predictable centering */
+  color: var(--c-fg-dim, rgba(255,255,255,0.7));
+  text-decoration: none;
+  padding: 0 16px;             /* horizontal only; height is set by min-height */
+  border-radius: 999px;
+  box-sizing: border-box;      /* include border + padding inside the 44px */
+  background: color-mix(in srgb, var(--c-surface, #0b0b0d) 78%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in srgb, var(--c-fg, #fff) 8%, transparent);
+  transition: color 180ms ease, transform 180ms ease, background 180ms ease;
+}
+.section-link:hover,
+.section-link:focus-visible {
+  color: var(--c-accent, #E8A33D);
+  background: color-mix(in srgb, var(--c-surface, #0b0b0d) 92%, transparent);
+}
+.section-link-left {
+  /* the IMDb link keeps its underline like the original link-arrow */
+  border-bottom-color: color-mix(in srgb, var(--c-fg, #fff) 8%, transparent);
+}
+.section-link-left:hover,
+.section-link-left:focus-visible {
+  border-bottom-color: var(--c-accent, #E8A33D);
+}
+
+/* Both pills share the same .section-link rules above — no per-side overrides
+   so they always render at identical height (44px) regardless of content
+   (text vs icon). The .next-arrow is an 18px square; its inner SVG inherits
+   this size (no explicit width/height attrs on the SVG itself). */
+.next-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+.next-arrow svg {
+  width: 100%;
+  height: 100%;
+}
+/* Gentle pulse to invite the tap on big sections / mobile */
+@keyframes section-chrome-pulse {
+  0%, 100% { transform: translateY(0); opacity: 0.85; }
+  50%      { transform: translateY(3px); opacity: 1; }
+}
+.section-link-next .next-arrow { animation: section-chrome-pulse 2.2s ease-in-out infinite; }
+.section-link-next:hover .next-arrow,
+.section-link-next:focus-visible .next-arrow { animation: none; transform: translateY(2px); }
+@media (prefers-reduced-motion: reduce) {
+  .section-link-next .next-arrow { animation: none; }
+}
+
 .link-arrow {
   display: inline-flex;
   align-items: center;
@@ -1026,151 +1114,137 @@ button {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   Scroll indicator — full-height beam + cinematic hot spot at scroll.
 
-   Modelled on the user-provided reference: a long vertical beam spanning
-   the full viewport height, with a focal hot spot at the current scroll
-   position. The hot spot has THREE visible components:
-     1. A bright white circular core (the "source" — the brightest pixel)
-     2. A soft circular halo around the core
-     3. A horizontal RAY extending perpendicular to the beam (the lens-flare
-        streak — the visual signature of the reference image)
+/* ──────────────── Work / poster wall ──────────────── */
+/* Every film the same size, same aspect (2:3). Mobile-first: 1 column full-width.
+   Gap is intentionally small so the section reads as a wall, not a list.
+   Click target is the <a class="poster-link"> wrapping each tile. */
 
-   Structure (per side):
-     .scroll-indicator        — fixed column on the side, full viewport height
-     .scroll-beam            — fills the column, bright vertical beam that
-                                fades softly at top/bottom of viewport
-     .scroll-spot            — absolutely positioned, top set by JS based on
-                                scroll progress. Contains:
-                                  ::before = horizontal ray (perpendicular
-                                            to the beam, fades at both ends)
-                                  ::after  = bright core + halo (radial gradient
-                                             with pure white at the very centre)
+.section-posters {
+  /* break the standard `.section` padding so posters can go edge-to-edge */
+  padding-left: 0;
+  padding-right: 0;
+  /* containing block so .section-chrome can switch to position:absolute inside */
+  position: relative;
+}
 
-   The scrollbar is hidden on all pages so this is the only scroll indicator.
-   JS appends two `.scroll-indicator` elements to <body> on boot.
-*/
+.section-posters > .section-head {
+  /* keep the header inside normal section padding; only the wall goes full-bleed */
+  padding-left: max(20px, 4vw);
+  padding-right: max(20px, 4vw);
+}
 
-/* Hide native scrollbar everywhere — Firefox, WebKit, legacy IE/Edge. */
-html { scrollbar-width: none; }
-html::-webkit-scrollbar { display: none; }
-body { -ms-overflow-style: none; }
+.poster-wall {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;            /* mobile: 1 column */
+  gap: max(4px, 0.4vw);                   /* tiny gap by default */
+}
 
-.scroll-indicator {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  width: 8px;
-  pointer-events: none;
-  z-index: 100;
-  overflow: visible;
+.poster-wall > li {
+  margin: 0;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  background: var(--c-surface, #0b0b0d);  /* placeholder color until the image loads */
+}
+
+.poster-link {
+  display: block;
+  position: relative;
+  aspect-ratio: 2 / 3;                    /* 2:3 movie-poster ratio */
+  text-decoration: none;
+  color: inherit;
+}
+
+.poster-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  /* cover = every tile fills the same 2:3 frame regardless of source ratio */
+  transition: transform 350ms ease;
+}
+
+.poster-meta {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 1.4rem max(0.9rem, 2.5vw) 1.6rem;     /* more bottom air vs. floating chrome */
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  background: linear-gradient(to top,
+    rgba(0, 0, 0, 0.88) 0%,
+    rgba(0, 0, 0, 0.6) 35%,
+    rgba(0, 0, 0, 0.15) 80%,
+    rgba(0, 0, 0, 0) 100%);
+  color: #fff;
   opacity: 0;
-  transition: opacity 300ms ease;
-}
-
-.scroll-indicator--left  { left: 16px;  }
-.scroll-indicator--right { right: 16px; }
-
-/* The vertical beam — clearly visible. Fades softly at top/bottom of
-   viewport via the linear-gradient background. Mask softens the side
-   edges so the beam reads as a soft column of light, not a hard line. */
-.scroll-beam {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 248, 230, 0)     0%,
-    rgba(255, 248, 230, 0.5)   5%,
-    rgba(255, 248, 230, 0.85)  20%,
-    rgba(255, 252, 245, 1)     50%,
-    rgba(255, 248, 230, 0.85)  80%,
-    rgba(255, 248, 230, 0.5)   95%,
-    rgba(255, 248, 230, 0)     100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(0, 0, 0, 0.3) 25%,
-    black 50%,
-    rgba(0, 0, 0, 0.3) 75%,
-    transparent 100%
-  );
-          mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(0, 0, 0, 0.3) 25%,
-    black 50%,
-    rgba(0, 0, 0, 0.3) 75%,
-    transparent 100%
-  );
-  filter: blur(0.6px);
-  mix-blend-mode: screen;
-}
-
-/* The hot spot — a lens-flare effect built from pure CSS gradients.
-   Modelled on the user's reference: bright white-cream core, wide
-   horizontally-elongated halo (the lens-flare signature), soft fade
-   at all edges. The .scroll-spot is wider than the indicator so the
-   flare extends into the page; it's centered on the beam via left: 50%
-   + margin-left: -300px.
-
-   The reference's vertical streak rotated 90° is the .scroll-beam
-   (always visible). The hot spot adds:
-     ::before = wide soft halo (horizontal ellipse, big blur)
-     ::after  = small bright pure-white core (sharp)
-   No images, no SVG. Just two stacked radial-gradients. */
-.scroll-spot {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 600px;
-  height: 240px;
-  margin-left: -300px;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 220ms ease;
   pointer-events: none;
-  transform: translateY(0);
-  transition: transform 0.14s cubic-bezier(0.2, 0, 0.1, 1);
 }
 
-/* The halo — horizontally-elongated soft glow, the dominant visual.
-   600x220 ellipse, fading smoothly from 0.85 (centre) to transparent. */
-.scroll-spot::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 300px 110px at center,
-    rgba(255, 248, 230, 0.85)  0%,
-    rgba(255, 248, 230, 0.6)  15%,
-    rgba(255, 248, 230, 0.3)  35%,
-    rgba(255, 248, 230, 0.12) 55%,
-    rgba(255, 248, 230, 0.04) 78%,
-    rgba(255, 248, 230, 0)   100%
-  );
-  filter: blur(6px);
-  mix-blend-mode: screen;
+.poster-title {
+  font-family: var(--font-display, inherit);
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
-/* The bright core — a small OVAL, TALLER than wide (vertical axis,
-   not lateral). Was a horizontal oval (50×26) — the user wanted it
-   flipped 90° to the vertical axis for a more elegant lens-flare feel.
-   Size kept modest (26×50) so it stays a focal point, not a streak. */
-.scroll-spot::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 13px 25px at center,
-    rgba(255, 255, 255, 1)    0%,
-    rgba(255, 255, 255, 1)    18%,
-    rgba(255, 252, 245, 0.92) 42%,
-    rgba(255, 248, 230, 0.55) 70%,
-    transparent               100%
-  );
-  filter: blur(1.5px);
-  mix-blend-mode: screen;
+.poster-subtitle {
+  font-size: clamp(0.78rem, 1.2vw, 0.875rem);
+  opacity: 0.85;
+  font-weight: 400;
 }
 
+/* Hover/touch/keyboard reveal — desktop mouseover and focus-within, but
+   also forced-visible on touch devices (mobile) so titles are always legible. */
+.poster-link:hover .poster-meta,
+.poster-link:focus-visible .poster-meta,
+.poster-link:focus-within .poster-meta,
+@media (hover: none) {
+  .poster-meta { opacity: 1; transform: translateY(0); }
+}
+
+.poster-link:hover .poster-img,
+.poster-link:focus-visible .poster-img { transform: scale(1.03); }
+
+/* Tablet — 3 columns */
+@media (min-width: 720px) {
+  .poster-wall {
+    grid-template-columns: repeat(3, 1fr);
+    gap: max(6px, 0.3vw);
+  }
+}
+
+/* Desktop — 3 columns (10 films = 3×4 grid, last row has 1 cell — bigger portraits) */
+@media (min-width: 1024px) {
+  .poster-wall {
+    grid-template-columns: repeat(3, 1fr);
+    gap: max(6px, 0.4vw);
+  }
+  /* On wider screens, lift the title treatment a bit */
+  .poster-title { font-size: clamp(1rem, 1.1vw, 1.25rem); }
+}
+
+/* Reduced motion: drop the hover zoom */
 @media (prefers-reduced-motion: reduce) {
-  .scroll-indicator { transition: opacity 150ms linear; }
-  .scroll-spot      { transition: transform 0s linear; }
+  .poster-img,
+  .poster-meta { transition: none; }
+  .poster-link:hover .poster-img,
+  .poster-link:focus-visible .poster-img { transform: none; }
+}
+
+/* @media (hover: none) is a separate rule; group it as a base override so
+   touch devices always see the title overlay. */
+@media (hover: none) {
+  .poster-meta {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
