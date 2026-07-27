@@ -665,14 +665,9 @@ button {
   color: var(--c-accent, #E8A33D);
   background: color-mix(in srgb, var(--c-surface, #0b0b0d) 92%, transparent);
 }
-.section-link-left {
-  /* the IMDb link keeps its underline like the original link-arrow */
-  border-bottom-color: color-mix(in srgb, var(--c-fg, #fff) 8%, transparent);
-}
-.section-link-left:hover,
-.section-link-left:focus-visible {
-  border-bottom-color: var(--c-accent, #E8A33D);
-}
+/* .section-link-left has no special border treatment — the IMDb pill
+   uses .section-link's frosted border on all sides equally. The orange
+   comes from .link-arrow's color rule (text only, no underline). */
 
 /* Both pills share the same .section-link rules above — no per-side overrides
    so they always render at identical height (44px) regardless of content
@@ -708,6 +703,15 @@ button {
   color: var(--c-accent, #E8A33D);
   border-bottom: 1px solid currentColor;
   padding-bottom: 2px;
+}
+
+/* When .link-arrow is used inside a .section-link pill (the IMDb link
+   in the work section), drop the orange underline — the pill itself
+   has its own subtle frosted border from .section-link. The text
+   stays orange (it IS a link). */
+.section-link.link-arrow {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 /* ──────────────── Work / credits ──────────────── */
