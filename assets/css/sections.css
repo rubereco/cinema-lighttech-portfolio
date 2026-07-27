@@ -1,0 +1,446 @@
+/* ════════════════════════════════════════════════════════════════════════
+   sections.css — per-page section styling.
+   These rules are specific to each section of the index page.
+   If you add a new section, give it its own labeled block here.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ──────────────── Hero ──────────────── */
+
+/* MOBILE hero: text first, full-bleed image as a smaller banner above. */
+.hero {
+  position: relative;
+  min-height: 70vh;
+  display: grid;
+  grid-template-rows: 40vh auto;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero-with-image {
+  /* default for mobile: image is on top, content below */
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-bg {
+  position: relative;
+  width: 100%;
+  height: 40vh;
+  overflow: hidden;
+}
+
+.hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-bg-tint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 100%);
+}
+
+.hero-content {
+  padding: 32px var(--pad-x) 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 12px;
+  color: var(--c-fg-muted);
+}
+
+.display {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  /* Mobile: ~36px. Big enough to be a headline, fits without overflow. */
+  font-size: clamp(32px, 9vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.lede {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--c-fg);
+  max-width: var(--measure);
+}
+
+.hero-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ──────────────── Work / poster wall ────────────────
+   Every film the same size, same aspect (2:3). Mobile-first: 1 column full-width.
+   Gap is intentionally small so the section reads as a wall, not a list.
+   Click target is the <a class="poster-link"> wrapping each tile.
+   The actual pill-chrome (IMDb, next-section) lives in components.css. */
+
+.section-posters {
+  /* break the standard `.section` padding so posters can go edge-to-edge */
+  padding-left: 0;
+  padding-right: 0;
+  /* containing block so .section-chrome can switch to position:absolute inside */
+  position: relative;
+}
+
+.section-posters > .section-head {
+  /* keep the header inside normal section padding; only the wall goes full-bleed */
+  padding-left: max(20px, 4vw);
+  padding-right: max(20px, 4vw);
+}
+
+.poster-wall {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;            /* mobile: 1 column */
+  gap: max(4px, 0.4vw);                   /* tiny gap by default */
+}
+
+.poster-wall > li {
+  margin: 0;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  background: var(--c-surface);           /* placeholder color until the image loads */
+}
+
+.poster-link {
+  display: block;
+  position: relative;
+  aspect-ratio: 2 / 3;                    /* 2:3 movie-poster ratio */
+  text-decoration: none;
+  color: inherit;
+}
+
+.poster-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  /* cover = every tile fills the same 2:3 frame regardless of source ratio */
+  transition: transform 350ms ease;
+}
+
+.poster-meta {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 1.4rem max(0.9rem, 2.5vw) 1.6rem;     /* more bottom air vs. floating chrome */
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  background: linear-gradient(to top,
+    rgba(0, 0, 0, 0.88) 0%,
+    rgba(0, 0, 0, 0.6) 35%,
+    rgba(0, 0, 0, 0.15) 80%,
+    rgba(0, 0, 0, 0) 100%);
+  color: #fff;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 220ms ease;
+  pointer-events: none;
+}
+
+.poster-title {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+/* Hover/touch/keyboard reveal — desktop mouseover and focus-within, but
+   also forced-visible on touch devices (mobile) so titles are always legible. */
+.poster-link:hover .poster-meta,
+.poster-link:focus-visible .poster-meta,
+.poster-link:focus-within .poster-meta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.poster-link:hover .poster-img,
+.poster-link:focus-visible .poster-img { transform: scale(1.03); }
+
+/* ──────────────── About ──────────────── */
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+}
+
+.about-body {
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.about-body p {
+  margin: 0 0 14px;
+}
+
+.about-body em {
+  color: var(--c-accent);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.about-stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 20px;
+  background: var(--c-card-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+}
+
+.about-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.about-stats dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-fg-muted);
+}
+
+.about-stats dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--c-accent);
+}
+
+/* ──────────────── Kit ──────────────── */
+
+.kit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  /* horizontal scroll fallback if it gets crowded */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.kit-filters::-webkit-scrollbar { display: none; }
+
+.kit-pill {
+  padding: 10px 16px;
+  min-height: 40px;
+  border: 1px solid color-mix(in srgb, var(--c-fg) 18%, transparent);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.kit-pill.is-active {
+  background: var(--c-accent);
+  color: var(--c-bg);
+  border-color: transparent;
+}
+
+.kit-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.kit-item {
+  padding: 20px;
+  background: var(--c-card-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+}
+
+.kit-h {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.kit-cat {
+  margin: 0 0 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-accent);
+}
+
+.kit-desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--c-fg-dim);
+  line-height: 1.5;
+}
+
+/* ──────────────── Contact ──────────────── */
+
+.contact-list {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: var(--c-card-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+}
+
+.contact-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-fg-muted);
+}
+
+.contact-value {
+  font-size: 16px;
+  word-break: break-word;
+  color: var(--c-fg);
+  font-weight: 500;
+}
+
+.contact-value:hover {
+  color: var(--c-accent);
+}
+
+/* ──────────────── Desktop layout ──────────────── */
+@media (min-width: 900px) {
+  /* Hero: full-bleed image background, content overlaid */
+  .hero {
+    grid-template-rows: auto;
+    min-height: 92vh;
+  }
+
+  .hero-with-image {
+    display: block;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 96px 32px 96px;
+    min-height: 92vh;
+    align-content: center;
+  }
+
+  .display {
+    font-size: clamp(48px, 7vw, 84px);
+    max-width: 14ch;
+  }
+
+  .lede {
+    font-size: 17px;
+    max-width: var(--measure);
+  }
+
+  .hero-cta {
+    flex-direction: row;
+    gap: 14px;
+  }
+
+  /* Tablet — 3 columns */
+  .poster-wall {
+    grid-template-columns: repeat(3, 1fr);
+    gap: max(6px, 0.3vw);
+  }
+
+  /* Desktop — 3 columns (10 films = 3×4 grid, last row has 1 cell — bigger portraits) */
+  @media (min-width: 1024px) {
+    .poster-wall {
+      grid-template-columns: repeat(3, 1fr);
+      gap: max(6px, 0.4vw);
+    }
+    .poster-title { font-size: clamp(1rem, 1.1vw, 1.25rem); }
+  }
+
+  /* About: 2-col */
+  .about-grid {
+    grid-template-columns: 1fr 2fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  .about-body {
+    grid-column: 2;
+    max-width: none;
+  }
+
+  .about-stats {
+    grid-column: 2;
+    max-width: 36rem;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Kit grid: 3-col on desktop */
+  .kit-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  /* Contact list: 3-col */
+  .contact-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+}
+
+/* Touch devices: always show poster titles */
+@media (hover: none) {
+  .poster-meta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion: drop poster hover zoom */
+@media (prefers-reduced-motion: reduce) {
+  .poster-img,
+  .poster-meta { transition: none; }
+  .poster-link:hover .poster-img,
+  .poster-link:focus-visible .poster-img { transform: none; }
+}

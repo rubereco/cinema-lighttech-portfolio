@@ -112,51 +112,6 @@ const I18N = (() => {
 // and the active language without re-loading i18n.json. Single source of truth.
 window.TarekI18N = I18N;
 
-/* ──────────────── Theme toggle ──────────────── */
-
-function setupThemeToggle() {
-  const STORAGE_KEY = "tarek.theme";
-  const THEMES = {
-    tungsten:  { css: "assets/css/tungsten.css",  label: { en: "Tungsten",  es: "Tungsteno"  } },
-    anamorphic:{ css: "assets/css/anamorphic.css", label: { en: "Anamorphic", es: "Anamorfico" } },
-  };
-
-  const cssLink   = document.getElementById("theme-css");
-  const toggleBtn = document.querySelector("[data-theme-toggle]");
-  const labelEl   = document.querySelector("[data-theme-label]");
-  if (!cssLink || !toggleBtn) return;
-
-  const order = ["tungsten", "anamorphic"];
-
-  function currentTheme() {
-    return document.documentElement.dataset.theme || "tungsten";
-  }
-
-  function applyTheme(name) {
-    const theme = THEMES[name];
-    if (!theme) return;
-    cssLink.setAttribute("href", theme.css);
-    document.documentElement.dataset.theme = name;
-    try { localStorage.setItem(STORAGE_KEY, name); } catch {}
-    if (labelEl) {
-      const lang = document.documentElement.lang || "en";
-      labelEl.textContent = theme.label[lang] || theme.label.en;
-    }
-  }
-
-  // Restore saved theme (or default)
-  let saved = null;
-  try { saved = localStorage.getItem(STORAGE_KEY); } catch {}
-  if (saved && THEMES[saved]) applyTheme(saved);
-
-  // Click cycles through themes
-  toggleBtn.addEventListener("click", () => {
-    const idx = order.indexOf(currentTheme());
-    const next = order[(idx + 1) % order.length];
-    applyTheme(next);
-  });
-}
-
 /* ──────────────── Mobile nav toggle ──────────────── */
 
 function setupMobileNav() {
@@ -199,25 +154,11 @@ function setupLanguageToggle() {
       const lang = btn.getAttribute("data-lang");
       try { localStorage.setItem("tarek.lang", lang); } catch {}
       I18N.apply(lang);
-      // re-apply theme so its label also updates to the new language
-      setupThemeToggleRefresh();
       // Notify sibling scripts (showcase.js, partners.js) that the active
       // language changed so they can re-render dynamic content.
       window.dispatchEvent(new CustomEvent("tarek:i18n-change", { detail: { lang } }));
     });
   });
-}
-
-/* Re-apply current theme (so labels update with language change). */
-function setupThemeToggleRefresh() {
-  const STORAGE_KEY = "tarek.theme";
-  const saved = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch { return null; } })();
-  const name = saved || document.documentElement.dataset.theme || "tungsten";
-  const labelEl = document.querySelector("[data-theme-label]");
-  if (!labelEl) return;
-  const labels = { tungsten: { en: "Tungsten", es: "Tungsteno" }, anamorphic: { en: "Anamorphic", es: "Anamorfico" } };
-  const lang = document.documentElement.lang || "en";
-  labelEl.textContent = labels[name]?.[lang] || labels[name]?.en || name;
 }
 
 /* ──────────────── Kit filter (one category at a time) ──────────────── */
@@ -290,7 +231,6 @@ function setupYearStamp() {
   const lang = I18N.detectLanguage();
   I18N.apply(lang);
 
-  setupThemeToggle();
   setupMobileNav();
   setupLanguageToggle();
   setupKitFilter();

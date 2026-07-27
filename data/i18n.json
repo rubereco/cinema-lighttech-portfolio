@@ -85,9 +85,6 @@
       "tagline": "Built with care · no tracking, no cookies.",
       "rights": "All rights reserved"
     },
-    "theme": {
-      "toggleLabel": "Switch theme"
-    },
     "language": {
       "toggleAria": "Switch language",
       "en": "EN",
@@ -198,9 +195,6 @@
       "emailLabel": "Correo",
       "imdbLabel": "IMDb",
       "instagramLabel": "Instagram"
-    },
-    "theme": {
-      "toggleLabel": "Cambiar tema"
     },
     "language": {
       "toggleAria": "Cambiar idioma",

@@ -1,7 +1,9 @@
 /* ════════════════════════════════════════════════════════════════════════
    showcase.css — folder grid + per-project gallery + lightbox.
    Mobile-first (same convention as base.css). Desktop kicks in at 900px.
-   Theme tokens come from base.css via CSS variables — no overrides here.
+   Design tokens come from tokens.css (--c-*, --font-display, etc.).
+   The .site-footer rule below overrides layout.css to add showcase-only
+   margin-top + slightly tighter padding (showcase has its own visual flow).
    ════════════════════════════════════════════════════════════════════════ */
 
 /* ─── Hero header ───────────────────────────────────────────────────── */

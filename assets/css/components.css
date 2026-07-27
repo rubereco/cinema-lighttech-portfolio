@@ -1,0 +1,179 @@
+/* ════════════════════════════════════════════════════════════════════════
+   components.css — reusable UI primitives.
+   Buttons, links, pill chrome. These appear in multiple sections.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ──────────────── Buttons ──────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Touch targets: minimum 44×44px per Apple HIG / Material */
+  min-height: 48px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  border: 1px solid transparent;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.btn.primary {
+  background: var(--c-accent);
+  color: var(--c-bg);
+}
+
+.btn.primary:hover {
+  background: var(--c-accent-strong);
+}
+
+.btn.ghost {
+  border-color: var(--c-border-strong);
+  color: var(--c-fg);
+}
+
+.btn.ghost:hover {
+  border-color: var(--c-fg);
+}
+
+/* ──────────────── In-section chrome pills ────────────────
+   Floating pill-style links used as bottom-of-section chrome
+   (e.g. "View on IMDb →" inside the work section).
+   The chrome container (`.section-chrome`) is positioned by main.js
+   as either fixed or absolute depending on scroll state.
+   See nav.css for related reduced-motion handling. */
+
+.section-link {
+  pointer-events: auto;        /* re-enable clicks on the actual links */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  /* Fixed pill height regardless of content (text vs icon-only). Both pills
+     lock to this exact height — text auto-centers via flex + box-sizing. */
+  min-height: 44px;
+  font-size: 14px;
+  line-height: 1;              /* so the text line-box = font-size; predictable centering */
+  color: var(--c-fg-dim);
+  text-decoration: none;
+  padding: 0 16px;             /* horizontal only; height is set by min-height */
+  border-radius: 999px;
+  box-sizing: border-box;      /* include border + padding inside the 44px */
+  background: color-mix(in srgb, var(--c-surface) 78%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* Buddie: "ugly static border" — replace with a soft white glow that
+     reads as light leaking out from behind the pill. Borderless so the
+     glow is the only edge cue. */
+  border: none;
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.12),
+    0 0 28px rgba(255, 255, 255, 0.06);
+  transition: color 180ms ease, transform 180ms ease, background 180ms ease,
+              box-shadow 180ms ease, filter 180ms ease;
+}
+.section-link:hover,
+.section-link:focus-visible {
+  color: var(--c-accent);
+  background: color-mix(in srgb, var(--c-surface) 92%, transparent);
+  filter: brightness(1.08);
+}
+
+/* IMDb pill — orange glow to match its orange text. Same borderless
+   treatment as the next-arrow pill but the glow hue is the accent. */
+.section-link.link-arrow {
+  border-bottom: none;
+  padding-bottom: 0;
+  box-shadow:
+    0 0 12px rgba(232, 163, 61, 0.22),
+    0 0 28px rgba(232, 163, 61, 0.10);
+}
+.section-link.link-arrow:hover,
+.section-link.link-arrow:focus-visible {
+  box-shadow:
+    0 0 16px rgba(232, 163, 61, 0.40),
+    0 0 36px rgba(232, 163, 61, 0.18);
+}
+
+/* Next-arrow icon container (inside the next-section pill) */
+.next-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+.next-arrow svg {
+  width: 100%;
+  height: 100%;
+}
+/* Gentle pulse to invite the tap on big sections / mobile */
+@keyframes section-chrome-pulse {
+  0%, 100% { transform: translateY(0); opacity: 0.85; }
+  50%      { transform: translateY(3px); opacity: 1; }
+}
+.section-link-next .next-arrow { animation: section-chrome-pulse 2.2s ease-in-out infinite; }
+.section-link-next:hover .next-arrow,
+.section-link-next:focus-visible .next-arrow { animation: none; transform: translateY(2px); }
+@media (prefers-reduced-motion: reduce) {
+  .section-link-next .next-arrow { animation: none; }
+}
+
+/* ──────────────── In-section chrome container ────────────────
+   bottom-left IMDb link + bottom-right "next section" arrow.
+   JS in main.js toggles between `position: fixed`
+   (docked to viewport bottom while reading the section) and `position: absolute`
+   (snapped to section's bottom edge once the user has scrolled past it).
+   The opacity fade is driven by `.is-visible` on the parent section. */
+.section-chrome {
+  left: 0;
+  right: 0;
+  padding: 18px max(20px, 4vw);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;         /* center pills vertically — was flex-end */
+  pointer-events: none;        /* container is a no-op; children opt back in */
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+  z-index: 50;
+  will-change: transform, position;
+}
+.section-posters.is-visible .section-chrome { opacity: 1; }
+
+/* ──────────────── Inline link with arrow ────────────────
+   Used by partner-name links on the partners page. Always orange
+   text + orange underline. (When the same class is applied to a
+   `.section-link` pill, the pill overrides the underline — see above.) */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--c-accent);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+}
+
+/* ──────────────── Reduced motion ──────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .section-chrome { transition: none; }
+  .site-header { transition: none; }
+}
+
+/* Desktop: re-enable btn hover transitions */
+@media (min-width: 900px) {
+  .btn {
+    min-height: 44px;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+}

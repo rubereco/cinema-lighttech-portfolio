@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="tungsten">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -17,8 +17,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="assets/css/base.css" />
-  <link rel="stylesheet" href="assets/css/tungsten.css" id="theme-css" />
+  <!-- CSS is split by responsibility. Order matters:
+       reset → tokens → layout → nav → components → sections. -->
+  <link rel="stylesheet" href="assets/css/reset.css" />
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
+  <link rel="stylesheet" href="assets/css/nav.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/sections.css" />
+  
 
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b0b0d'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial' font-weight='900' font-size='28' fill='%23E8A33D'%3ETR%3C/text%3C/svg%3E" />
   <script type="application/json" id="tarek-i18n">
@@ -108,9 +115,6 @@
     "footer": {
       "tagline": "Built with care · no tracking, no cookies.",
       "rights": "All rights reserved"
-    },
-    "theme": {
-      "toggleLabel": "Switch theme"
     },
     "language": {
       "toggleAria": "Switch language",
@@ -222,9 +226,6 @@
       "emailLabel": "Correo",
       "imdbLabel": "IMDb",
       "instagramLabel": "Instagram"
-    },
-    "theme": {
-      "toggleLabel": "Cambiar tema"
     },
     "language": {
       "toggleAria": "Cambiar idioma",
@@ -1077,10 +1078,6 @@
       <button type="button" data-lang="en" aria-pressed="true" data-i18n="language.en">EN</button>
       <button type="button" data-lang="es" aria-pressed="false" data-i18n="language.es">ES</button>
     </div>
-
-    <button class="theme-toggle" type="button" data-i18n-attr="aria-label:theme.toggleLabel" aria-label="Switch theme" data-theme-toggle>
-      <span aria-hidden="true">⇄</span> <span data-theme-label>Tungsten</span>
-    </button>
   </header>
 
   <nav class="nav-mobile" aria-label="Primary mobile" data-nav>
