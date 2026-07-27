@@ -108,24 +108,91 @@ button {
   align-items: center;
   gap: 12px;
   padding: 14px var(--pad-x);
-  /* Glassy: subtle dark tint + strong backdrop blur. The blur is
-     always on so the navbar looks like a frosted-glass surface
-     over the hero. */
-  background: rgba(11, 11, 13, 0.32);
-  backdrop-filter: saturate(180%) blur(16px);
-  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  /* Multi-band glass: 3 zones, each with its own alpha + blur.
+     - Band 1 (TOP, 0–10%): ::before,  alpha 0.10, blur 1px
+     - Band 2 (MID, 10–75%): ::after, alpha 0.20→0.30, blur 4px
+     - Band 3 (EDGE, 75–100%): element's own bg, alpha 0.80, blur 8px
+     The element's bg draws first, then ::before, then ::after,
+     then content. Bands cover non-overlapping zones so layering
+     order doesn't matter visually. isolation creates a stacking
+     context so the z-index:-1 pseudos stay inside the header. */
+  isolation: isolate;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 75%,
+    rgba(11, 11, 13, 0.80) 75%,
+    rgba(11, 11, 13, 0.80) 100%
+  );
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
   border-bottom: none;
-  transition: backdrop-filter 220ms ease, background 220ms ease,
-              padding 220ms ease;
+  transition: padding 220ms ease, background 220ms ease,
+              backdrop-filter 220ms ease;
+}
+
+/* Band 1 — TOP (0–10% of header height). Barely-there frost.
+   Lets the hero bleed through almost completely; just a hint of
+   surface so the navbar reads as "there's a glass here." */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 90% 0;
+  z-index: -1;
+  background: rgba(11, 11, 13, 0.10);
+  backdrop-filter: saturate(180%) blur(1px);
+  -webkit-backdrop-filter: saturate(180%) blur(1px);
+  pointer-events: none;
+}
+
+/* Band 2 — MID (10–75%). The actual frosted-glass surface.
+   Smooth gradient from 0.20 → 0.30 alpha so there's no hard step
+   between bands. Single blur radius — backdrop-filter can't
+   vary within one element. */
+.site-header::after {
+  content: "";
+  position: absolute;
+  inset: 10% 0 25% 0;
+  z-index: -1;
+  background: linear-gradient(
+    to bottom,
+    rgba(11, 11, 13, 0.20) 0%,
+    rgba(11, 11, 13, 0.30) 100%
+  );
+  backdrop-filter: saturate(180%) blur(4px);
+  -webkit-backdrop-filter: saturate(180%) blur(4px);
+  pointer-events: none;
 }
 
 /* Scrolled state — JS adds .is-scrolled once window.scrollY > 4.
-   Slightly stronger tint + blur so content scrolling under the
-   header stays legible. */
+   Bump every band up so the whole header reads as stronger glass
+   when content is scrolling underneath. */
+.site-header.is-scrolled::before {
+  background: rgba(11, 11, 13, 0.25);
+  backdrop-filter: saturate(180%) blur(3px);
+  -webkit-backdrop-filter: saturate(180%) blur(3px);
+}
+
+.site-header.is-scrolled::after {
+  background: linear-gradient(
+    to bottom,
+    rgba(11, 11, 13, 0.40) 0%,
+    rgba(11, 11, 13, 0.55) 100%
+  );
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+}
+
 .site-header.is-scrolled {
-  background: rgba(11, 11, 13, 0.55);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 75%,
+    rgba(11, 11, 13, 0.92) 75%,
+    rgba(11, 11, 13, 0.92) 100%
+  );
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
   padding-top: 10px;
   padding-bottom: 10px;
 }
