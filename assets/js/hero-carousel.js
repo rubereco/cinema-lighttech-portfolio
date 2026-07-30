@@ -1,145 +1,154 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — mouse-move parallax on the hero SVG carousel.
+   hero-carousel.js — scroll-linked sideways parallax for the hero side panels.
    ────────────────────────────────────────────────────────────────────────
-   Why this exists
-   ────────────────
-   The hero has an SVG carousel layer (7 BTS photos as 2 rows of clipped
-   tiles). We want the tiles to drift slightly with the cursor — a subtle
-   parallax effect that responds to the user without hijacking the page.
-
-   Why mouse-move instead of wheel/touch/drag (the original code's idea)
-   ────────────────────────────────────────────────────────────────────────
-   Wheel/touch/drag capture would steal page scroll while the cursor is
-   over the hero. On a portfolio where visitors scroll into the page,
-   that's a footgun. Mouse-move keeps scroll working normally.
-
    How it works
    ────────────
-   1. On init, place tiles at staggered base positions via GSAP `set()`,
-      remembering each tile's baseX/baseY and a "depth" multiplier.
-   2. On `mousemove` over `.hero`, RAF-throttle and shift each tile by
-      `(cursor - center) * depth`. r1 tiles move less (depth 25), r2
-      tiles move more (depth 55) — closer tiles move more, classic
-      parallax.
-   3. On `mouseleave`, ease every tile back to its base position.
+   The hero is split into three vertical regions:
+     • LEFT side panel  — SVG with BTS tiles, scrolls LEFT as page scrolls
+     • MIDDLE           — text + EVF portrait, scrolls normally with page
+     • RIGHT side panel — SVG with BTS tiles, scrolls RIGHT as page scrolls
 
-   Reduced-motion
+   The LEFT strip and RIGHT strip both start at their initial x-position
+   (the staggered layout baked into the SVG). On each scroll event we
+   translate them horizontally based on `window.scrollY`. The page's
+   vertical scroll is untouched — this is pure scroll-linked animation, not
+   event capture. Wheel over the middle still scrolls the page exactly as
+   it always has.
+
+   Why scroll-linked, not wheel-capture or mouse-move
+   ──────────────────────────────────────────────────
+   Wheel/touch/drag capture would steal page scroll over the entire hero,
+   so visitors couldn't scroll into the page without moving their cursor
+   off the hero. Mouse-move parallax is subtle but doesn't match the
+   "one big image at a time scrolling sideways" effect the user wanted.
+   Scroll-linked gives both: the tiles respond visibly to scroll, AND the
+   page scrolls normally everywhere.
+
+   Tile layout
+   ───────────
+   Tiles are positioned in the SVG viewBox (1800 × 1800) using GSAP `set`
+   during init. Each `<image>` carries clip-path + width/height attributes
+   via `attr{}`. The strip is the parent `<g class="hl-strip">` /
+   `<g class="hr-strip">` — we translate the strip as a whole.
+
+   Reduced motion
    ──────────────
-   The whole effect is gated by `prefers-reduced-motion: reduce`. If the
-   user opts out, we still position the tiles for a nice static layout
-   but skip the mousemove listener entirely.
+   If `prefers-reduced-motion: reduce` matches, we still position tiles
+   in their initial layout but skip the scroll listener entirely. The
+   hero shows the staggered tile pattern statically.
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
 
+  // Speed at which tiles translate per pixel of page scroll.
+  // 0.5 means a 1000-pixel page scroll shifts tiles by 500px sideways.
+  // Tuned to feel responsive without being disorienting.
+  var SCROLL_SPEED = 0.55;
+
   function init() {
-    var hero = document.querySelector('.hero');
-    var carousel = document.querySelector('.hero-carousel');
-    var svg = document.getElementById('hero-carousel-svg');
-    if (!hero || !carousel || !svg) return;
+    var leftStrip = document.querySelector('.hero-side-left .hl-strip');
+    var rightStrip = document.querySelector('.hero-side-right .hr-strip');
+    if (!leftStrip || !rightStrip) return;
     if (typeof gsap === 'undefined') return; // GSAP CDN failed; bail silently
 
-    var r1 = Array.prototype.slice.call(svg.querySelectorAll('.hc-row-1 image'));
-    var r2 = Array.prototype.slice.call(svg.querySelectorAll('.hc-row-2 image'));
-    var allTiles = r1.concat(r2);
+    // ─── Left panel tile positions ───────────────────────────────────
+    // Row 1: 3 big tiles spread across the strip (top quarter).
+    // Row 2: 1 small tile in the gap between big tiles (lower third).
+    var leftRow1 = leftStrip.querySelectorAll('.hl-row-1 image');
+    var leftRow2 = leftStrip.querySelectorAll('.hl-row-2 image');
 
-    // SVG attribute defaults — width/height/clip-path/preserveAspectRatio
-    // are set as attributes (not CSS) because GSAP's attr{} tween reads
-    // SVG attributes natively.
-    gsap.set('.hc-row-1 image', {
+    gsap.set(leftRow1, {
       attr: {
-        width: 380,
-        height: 380,
-        'clip-path': 'url(#hc-cp1)',
+        width: 240,
+        height: 240,
+        'clip-path': 'url(#hl-cp1)',
         preserveAspectRatio: 'xMidYMid slice'
       }
     });
-    gsap.set('.hc-row-2 image', {
+    gsap.set(leftRow2, {
       attr: {
-        width: 220,
-        height: 220,
-        'clip-path': 'url(#hc-cp2)',
+        width: 160,
+        height: 160,
+        'clip-path': 'url(#hl-cp2)',
         preserveAspectRatio: 'xMidYMid slice'
       }
     });
 
-    // Staggered base positions across the SVG viewBox (1600 × 900).
-    // r1 has 4 tiles: spread across, slight vertical jitter for visual
-    // interest. r2 has 3 tiles: lower band, wider horizontal jitter.
-    r1.forEach(function (img, i) {
-      var x = 40 + i * 410;                  // 4 tiles across
-      var y = 30 + (i % 2 === 0 ? 0 : 50);   // zigzag vertical
-      gsap.set(img, { x: x, y: y });
-      img.dataset.baseX = String(x);
-      img.dataset.baseY = String(y);
-      img.dataset.depth = '25';
+    // Stagger: tile-1, tile-2, tile-3 on the top row with small y jitter.
+    leftRow1.forEach(function (img, i) {
+      gsap.set(img, { x: 300 + i * 600, y: 120 + (i % 2 === 0 ? 0 : 80) });
+    });
+    // Tile-4 (small) in the gap between tile-1 and tile-2.
+    leftRow2.forEach(function (img, i) {
+      gsap.set(img, { x: 620 + i * 480, y: 1180 + (i * 40) });
     });
 
-    r2.forEach(function (img, i) {
-      var x = 220 + i * 420;
-      var y = 540 + (i * 35);
-      gsap.set(img, { x: x, y: y });
-      img.dataset.baseX = String(x);
-      img.dataset.baseY = String(y);
-      img.dataset.depth = '55';
+    // ─── Right panel tile positions ──────────────────────────────────
+    var rightRow1 = rightStrip.querySelectorAll('.hr-row-1 image');
+    var rightRow2 = rightStrip.querySelectorAll('.hr-row-2 image');
+
+    gsap.set(rightRow1, {
+      attr: {
+        width: 240,
+        height: 240,
+        'clip-path': 'url(#hr-cp1)',
+        preserveAspectRatio: 'xMidYMid slice'
+      }
+    });
+    gsap.set(rightRow2, {
+      attr: {
+        width: 160,
+        height: 160,
+        'clip-path': 'url(#hr-cp2)',
+        preserveAspectRatio: 'xMidYMid slice'
+      }
     });
 
-    // Reduced-motion users see the staggered layout but no parallax.
+    // 2 big tiles on the right row.
+    rightRow1.forEach(function (img, i) {
+      gsap.set(img, { x: 300 + i * 600, y: 100 + (i % 2 === 0 ? 0 : 60) });
+    });
+    // 1 small tile in the gap between big tiles.
+    rightRow2.forEach(function (img, i) {
+      gsap.set(img, { x: 540 + i * 480, y: 1180 });
+    });
+
+    // ─── Reduced-motion guard ────────────────────────────────────────
     var prefersReduced = window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
 
-    // Mouse-move parallax. RAF-throttled so we never compute more than
-    // once per frame, regardless of how many mousemove events fire.
+    // ─── Scroll-linked animation ─────────────────────────────────────
+    // On scroll, translate LEFT strip leftward and RIGHT strip rightward.
+    // RAF-throttled so we never compute more than once per frame.
     var rafId = null;
+    var lastScrollY = -1;
 
-    hero.addEventListener('mousemove', function (e) {
+    function update() {
+      var scrollY = window.scrollY || window.pageYOffset || 0;
+      if (scrollY === lastScrollY) { rafId = null; return; }
+      lastScrollY = scrollY;
+
+      var offset = scrollY * SCROLL_SPEED;
+      gsap.set(leftStrip,  { x: -offset });
+      gsap.set(rightStrip, { x:  offset });
+      rafId = null;
+    }
+
+    function onScroll() {
       if (rafId) return;
-      rafId = requestAnimationFrame(function () {
-        var rect = hero.getBoundingClientRect();
-        var nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;   // -1..+1
-        var ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      rafId = requestAnimationFrame(update);
+    }
 
-        allTiles.forEach(function (tile) {
-          var depth = parseFloat(tile.dataset.depth);
-          var baseX = parseFloat(tile.dataset.baseX);
-          var baseY = parseFloat(tile.dataset.baseY);
-          gsap.to(tile, {
-            x: baseX + nx * depth,
-            y: baseY + ny * depth * 0.4,
-            duration: 0.7,
-            ease: 'power2.out',
-            overwrite: 'auto'
-          });
-        });
-        rafId = null;
-      });
-    });
-
-    hero.addEventListener('mouseleave', function () {
-      allTiles.forEach(function (tile) {
-        var baseX = parseFloat(tile.dataset.baseX);
-        var baseY = parseFloat(tile.dataset.baseY);
-        gsap.to(tile, {
-          x: baseX,
-          y: baseY,
-          duration: 1.0,
-          ease: 'power3.out',
-          overwrite: 'auto'
-        });
-      });
-    });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    // Apply the current scroll position immediately on init so the hero
+    // doesn't "snap" if the user reloads partway down the page.
+    update();
   }
 
-  // Wait for both DOM and the GSAP CDN script to be ready. GSAP is loaded
-  // with `defer`, so it runs in document order — but we still guard in
-  // case the CDN is slow or blocked.
   function boot() {
     if (typeof gsap === 'undefined') {
-      // Try one more time after a short delay; if still no GSAP, give up.
-      setTimeout(function () {
-        if (typeof gsap !== 'undefined') init();
-      }, 300);
+      setTimeout(function () { if (typeof gsap !== 'undefined') init(); }, 300);
       return;
     }
     init();
