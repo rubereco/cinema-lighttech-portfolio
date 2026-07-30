@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.4).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.5).
    ────────────────────────────────────────────────────────────────────────
    Inspired by creativeocean's "Carousel w/ GSAP Observer" pen
    (https://codepen.io/creativeocean/pen/wvYoyrb). v3.4 addresses the
@@ -120,28 +120,36 @@
   var debugLogged = 0;
 
   function positionTiles(stage) {
-    var big = stage.querySelectorAll('.hc-r1 image');
-    var small = stage.querySelectorAll('.hc-r2 image');
+    var allTiles = stage.querySelectorAll('.hc-row image');
+    var big = stage.querySelectorAll('image[data-size="big"]');
+    var small = stage.querySelectorAll('image[data-size="small"]');
 
-    gsap.set(stage.querySelectorAll('image'), {
+    gsap.set(allTiles, {
       attr: { preserveAspectRatio: 'xMidYMid slice' }
     });
     gsap.set(big, {
       attr: { width: '500', height: '500', 'clip-path': 'url(#hc-cp1)' },
       y: 200
     });
+    // v3.5: smalls scattered vertically across the full hero height
+    // (y: 200-700, was y: 200-450 which clustered them in a row at
+    // the top). Opacity 0.9 so the bigs show through where they
+    // overlap, creating a layered composition.
     gsap.set(small, {
-      attr: { width: '200', height: '200', 'clip-path': 'url(#hc-cp2)' },
-      y: function () { return gsap.utils.random(200, 450); }
+      attr: { width: '200', height: '200', 'clip-path': 'url(#hc-cp2)', opacity: 0.9 },
+      y: function () { return gsap.utils.random(200, 700); }
     });
 
-    return Array.prototype.slice.call(big).concat(Array.prototype.slice.call(small));
+    return Array.prototype.slice.call(allTiles);
   }
 
   function buildTimelines(tiles) {
+    // v3.5: returns [{tl, isBig}, ...] so the scrub function can pick
+    // the right step per tile (regardless of DOM order).
     var tls = [];
     var total = tiles.length;
     tiles.forEach(function (img, i) {
+      var isBig = img.getAttribute('data-size') === 'big';
       var tl = gsap.timeline({
         defaults: { duration: 1, ease: 'none' },
         paused: true,
@@ -149,16 +157,19 @@
       });
       tl.fromTo(img, { x: X_MIN }, { x: X_MAX });
       tl.progress(i / total);
-      tls.push(tl);
+      tls.push({ tl: tl, isBig: isBig });
     });
     return tls;
   }
 
   function scrub(tls, dir) {
+    // dir = +1 (next/forward) or -1 (prev/backward).
+    // v3.5: use per-tile isBig (not array index) so the step matches
+    // the tile size, regardless of the interleaved DOM order.
     var sign = dir > 0 ? '+' : '-=';
-    tls.forEach(function (tl, i) {
-      var step = i < 3 ? BIG_STEP : SMALL_STEP;
-      gsap.to(tl, {
+    tls.forEach(function (entry) {
+      var step = entry.isBig ? BIG_STEP : SMALL_STEP;
+      gsap.to(entry.tl, {
         progress: sign + step,
         modifiers: { progress: function (p) { return gsap.utils.wrap(0, 1, p); } },
         ease: 'back.out(5)',
