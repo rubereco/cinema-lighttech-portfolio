@@ -917,10 +917,41 @@
          Desktop (≥900px) flips to overlay via CSS.
          ════════════════════════════════════════════════════════════════ -->
     <section id="top" class="hero hero-with-image">
+      <!-- Layer 1: hero-forest as the FIRST MAIN photo (background, unchanged). -->
       <div class="hero-bg" aria-hidden="true">
         <img src="assets/images/hero-forest.jpg" alt="" loading="eager" />
         <div class="hero-bg-tint"></div>
       </div>
+
+      <!-- Layer 2: SVG carousel — 7 BTS photos as scattered tiles, mouse-move parallax.
+           Decorative wallpaper behind everything else. -->
+      <div class="hero-carousel" aria-hidden="true">
+        <svg id="hero-carousel-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="hc-cp1"><rect width="380" height="380" rx="22"/></clipPath>
+            <clipPath id="hc-cp2"><rect width="220" height="220" rx="18"/></clipPath>
+          </defs>
+          <g class="hc-row hc-row-1">
+            <image href="assets/hero/carousel/01-tunnel.jpg" />
+            <image href="assets/hero/carousel/02-astera-bar.jpg" />
+            <image href="assets/hero/carousel/03-red-ladder.jpg" />
+            <image href="assets/hero/carousel/04-monitor-bar.jpg" />
+          </g>
+          <g class="hc-row hc-row-2">
+            <image href="assets/hero/carousel/05-hk-cinema.jpg" />
+            <image href="assets/hero/carousel/06-lantern-stairs.jpg" />
+            <image href="assets/hero/carousel/07-headphones-blue.jpg" />
+          </g>
+        </svg>
+      </div>
+
+      <!-- Layer 3: EVF portrait — the SECOND MAIN photo, foreground.
+           Mobile: full-width near the bottom. Desktop: floating card on the right. -->
+      <div class="hero-second-main">
+        <img src="assets/hero/main.jpg" alt="Tarek Recolons framed by a camera viewfinder" loading="eager" />
+      </div>
+
+      <!-- Layer 4: hero text content (on top of everything). -->
       <div class="hero-content">
         <p class="eyebrow" data-i18n="hero.role">Gaffer &amp; Best Boy Electric</p>
         <h1 class="display" data-i18n="hero.headline">High-End Cinematographic Lighting.</h1>
@@ -1085,6 +1116,10 @@
   </footer>
 
   <!-- One small JS file: theme toggle + language toggle + mobile nav. ~80 lines. -->
+  <!-- GSAP from CDN — used by hero-carousel.js for the parallax timeline.
+       No npm install per project convention (static site, no build step). -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+  <script src="assets/js/hero-carousel.js" defer></script>
   <script src="assets/js/main.js" defer></script>
 </body>
 </html>

@@ -42,6 +42,79 @@
   background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 100%);
 }
 
+/* ──────────────── Hero: SVG carousel layer ────────────────
+   Decorative wallpaper behind the hero. Sits above hero-bg, below the EVF
+   portrait and the text. Mouse-move parallax is handled in hero-carousel.js.
+   pointer-events:none so tiles never block the CTAs or scroll gestures. */
+.hero-carousel {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.62;            /* tiles are decorative, not foreground */
+  mix-blend-mode: screen;   /* lifts over the dark hero-forest background */
+}
+
+.hero-carousel svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Respect reduced-motion: no parallax, but the staggered layout still shows. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-carousel { opacity: 0.45; }
+}
+
+/* ──────────────── Hero: EVF portrait (second main) ────────────────
+   The "second main photo" — sits between the carousel and the text.
+   Mobile: full-width band near the bottom. Desktop: floating card on the right. */
+.hero-second-main {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.hero-second-main img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Mobile: full-width band near the bottom of the hero, sitting on top of
+   the hero-bg banner area. Height matches the visual weight of the text. */
+@media (max-width: 899px) {
+  .hero-second-main {
+    top: 4vh;
+    left: 16px;
+    right: 16px;
+    height: 30vh;
+    max-height: 220px;
+  }
+}
+
+/* Desktop: floating card on the right, vertically centered. Text occupies
+   the left ~60%. Portrait never overlaps the hero text or CTAs. */
+@media (min-width: 900px) {
+  .hero-second-main {
+    top: 50%;
+    right: 5vw;
+    transform: translateY(-50%);
+    width: 24vw;
+    max-width: 360px;
+    min-width: 260px;
+    aspect-ratio: 3 / 4;
+  }
+}
+
 .hero-content {
   padding: 32px var(--pad-x) 56px;
   display: flex;
@@ -359,7 +432,7 @@
 
   .hero-content {
     position: relative;
-    z-index: 2;
+    z-index: 3;       /* sits above the carousel (z:1) and the EVF portrait (z:2) */
     max-width: 60rem;
     margin: 0 auto;
     padding: 96px 32px 96px;
