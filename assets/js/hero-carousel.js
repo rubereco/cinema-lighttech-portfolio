@@ -1,14 +1,35 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.1).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.2).
    ────────────────────────────────────────────────────────────────────────
    Inspired by creativeocean's "Carousel w/ GSAP Observer" pen
-   (https://codepen.io/creativeocean/pen/wvYoyrb). v3.1 adds the band-
-   based zone detection that v3 was missing: wheeling over the SIDES
-   of the hero scrubs the carousel, wheeling over the MIDDLE scrolls
-   the page.
+   (https://codepen.io/creativeocean/pen/wvYoyrb). v3.1 added the band-
+   based zone detection. v3.2 fixes a mouse-wheel bug.
 
-   Layout
-   ──────
+   v3.2 BUG FIX
+   ────────────
+   Buddie reported: "when scrolling the images go flying towards the
+   left. i try to scroll the other way and its impossible they stay left."
+
+   Root cause: GSAP Observer fires BOTH onWheel AND onUp/onDown for the
+   SAME wheel event (the wheel's deltaY is interpreted as an up/down
+   gesture direction by Observer). v3.1 had onUp:scrub(-1) and
+   onDown:scrub(+1) on top of onWheel, so each wheel event was double-
+   scrubbing. Depending on the mouse's deltaY sign convention, the
+   directional handlers could DOMINATE over onWheel — and the directional
+   default (onUp: LEFT) caused the tiles to drift left no matter which
+   way the user scrolled.
+
+   Fix:
+   1. Removed onUp and onDown entirely. They're not needed for a
+      horizontal carousel — vertical swipe gestures should scroll the
+      page (natural behavior), not scrub the carousel.
+   2. Use self.deltaY (GSAP-computed) with self.event.deltaY fallback.
+   3. Guard against deltaY === 0 so phantom events (some mice send a
+      0-delta event at the start of a wheel burst) don't push the
+      tiles one direction.
+
+   Layout (unchanged from v3.1)
+   ────────────────────────────
    Outer 20% on each side of the hero (min 100px) = CAROUSEL band.
    Middle 60% of the hero = PAGE band (text + CTAs live here).
    The cursor changes to ew-resize in the carousel bands so the
@@ -137,7 +158,7 @@
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
 
-    // ── Band-based zone detection ────────────────────────────────────
+    // ── Band-based zone detection ────────────────────────────────
     // inCarouselBand flips true when the cursor (or touch) is in the
     // outer 20% of the hero on either side, false when it's in the
     // middle. Observer handlers check this flag to decide whether to
@@ -169,24 +190,34 @@
     hero.addEventListener('touchend', leaveBand);
     hero.addEventListener('touchcancel', leaveBand);
 
-    // ── Observer ────────────────────────────────────────────────────
-    // Note: NO `preventDefault: true` on the config. Events pass through
-    // to the page by default. We conditionally preventDefault inside
+    // ── Observer ────────────────────────────────────────────────
+    // No `preventDefault: true` on the config — events pass through to
+    // the page by default. We conditionally preventDefault inside
     // `onWheel` ONLY when the cursor is in the carousel band.
-    // The directional handlers (onLeft/Right/Up/Down) cover touch/drag/
-    // keyboard arrow gestures and also check the band flag.
+    //
+    // v3.2: REMOVED onUp and onDown. They were firing alongside onWheel
+    // for the same wheel event (GSAP treats wheel deltaY as an up/down
+    // gesture direction). The double-scrub caused the tiles to drift
+    // left on Buddie's mouse regardless of wheel direction. For a
+    // horizontal carousel, vertical swipes should scroll the page, not
+    // the carousel — that's the natural behavior on touch devices too.
     Observer.create({
       target: hero,
       type: 'wheel,touch,drag,pointer',
       onWheel: function (self) {
         if (!inCarouselBand) return;
+        // Use GSAP-computed self.deltaY with the raw event's deltaY as
+        // a fallback. Guard against 0 so phantom events (some mice send
+        // a 0-delta first event) don't push the tiles.
+        var deltaY = (self.deltaY !== undefined) ? self.deltaY
+                    : (self.event && self.event.deltaY);
+        if (!deltaY) return;
         self.event.preventDefault();
-        scrub(tls, self.event.deltaY > 0 ? +1 : -1);
+        scrub(tls, deltaY > 0 ? +1 : -1);
       },
       onLeft:  function () { if (inCarouselBand) scrub(tls, -1); },
-      onRight: function () { if (inCarouselBand) scrub(tls, +1); },
-      onUp:    function () { if (inCarouselBand) scrub(tls, -1); },
-      onDown:  function () { if (inCarouselBand) scrub(tls, +1); }
+      onRight: function () { if (inCarouselBand) scrub(tls, +1); }
+      // onUp / onDown intentionally omitted. See v3.2 BUG FIX note above.
     });
   }
 
