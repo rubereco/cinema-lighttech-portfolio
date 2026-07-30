@@ -916,42 +916,41 @@
          Mobile-first: image above, content below.
          Desktop (≥900px) flips to overlay via CSS.
          ════════════════════════════════════════════════════════════════ -->
-    <section id="top" class="hero hero-with-image">
-      <!-- Layer 1: hero-forest as the FIRST MAIN photo (background, unchanged). -->
-      <div class="hero-bg" aria-hidden="true">
-        <img src="assets/images/hero-forest.jpg" alt="" loading="eager" />
-        <div class="hero-bg-tint"></div>
-      </div>
+    <section id="top" class="hero">
+      <!-- Hero = full-bleed SVG carousel (CodePen-style).
+           7 tiles total: 3 big + 4 small, two staggered rows.
+           EVF portrait is the 2nd BIG tile (the "second main photo").
+           Text floats centered on top via .hero-text.
+           Black background; the tiles are the entire visual.
+           Wheel/touch/drag OVER the hero scrubs the carousel horizontally
+           (Observer captures these events). Outside the hero, the page
+           scrolls normally. -->
+      <svg class="hero-carousel" id="hero-carousel-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <clipPath id="hc-cp1"><rect width="500" height="500" rx="22"/></clipPath>
+          <clipPath id="hc-cp2"><rect width="200" height="200" rx="16"/></clipPath>
+        </defs>
+        <!-- Row 1: 3 BIG tiles. EVF portrait is the 2nd big tile. -->
+        <g class="hc-row hc-r1">
+          <image href="assets/hero/carousel/01-tunnel.jpg" />
+          <image href="assets/hero/main.jpg" />
+          <image href="assets/hero/carousel/02-astera-bar.jpg" />
+        </g>
+        <!-- Row 2: 4 SMALL tiles scattered at random y for that "floating in
+             the black space" feel from the inspiration pen. -->
+        <g class="hc-row hc-r2">
+          <image href="assets/hero/carousel/03-red-ladder.jpg" />
+          <image href="assets/hero/carousel/04-monitor-bar.jpg" />
+          <image href="assets/hero/carousel/05-hk-cinema.jpg" />
+          <image href="assets/hero/carousel/06-lantern-stairs.jpg" />
+        </g>
+      </svg>
 
-      <!-- Layer 2: SVG carousel — 7 BTS photos as scattered tiles, mouse-move parallax.
-           Decorative wallpaper behind everything else. -->
-      <div class="hero-carousel" aria-hidden="true">
-        <svg id="hero-carousel-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <clipPath id="hc-cp1"><rect width="380" height="380" rx="22"/></clipPath>
-            <clipPath id="hc-cp2"><rect width="220" height="220" rx="18"/></clipPath>
-          </defs>
-          <g class="hc-row hc-row-1">
-            <image href="assets/hero/carousel/01-tunnel.jpg" />
-            <image href="assets/hero/carousel/02-astera-bar.jpg" />
-            <image href="assets/hero/carousel/03-red-ladder.jpg" />
-            <image href="assets/hero/carousel/04-monitor-bar.jpg" />
-          </g>
-          <g class="hc-row hc-row-2">
-            <image href="assets/hero/carousel/05-hk-cinema.jpg" />
-            <image href="assets/hero/carousel/06-lantern-stairs.jpg" />
-            <image href="assets/hero/carousel/07-headphones-blue.jpg" />
-          </g>
-        </svg>
-      </div>
+      <!-- Dark overlay: keeps the centered text legible against moving tiles.
+           pointer-events: none so it never blocks Observer or clicks. -->
+      <div class="hero-overlay" aria-hidden="true"></div>
 
-      <!-- Layer 3: EVF portrait — the SECOND MAIN photo, foreground.
-           Mobile: full-width near the bottom. Desktop: floating card on the right. -->
-      <div class="hero-second-main">
-        <img src="assets/hero/main.jpg" alt="Tarek Recolons framed by a camera viewfinder" loading="eager" />
-      </div>
-
-      <!-- Layer 4: hero text content (on top of everything). -->
+      <!-- Text content — centered on top of the carousel. -->
       <div class="hero-content">
         <p class="eyebrow" data-i18n="hero.role">Gaffer &amp; Best Boy Electric</p>
         <h1 class="display" data-i18n="hero.headline">High-End Cinematographic Lighting.</h1>
@@ -1116,9 +1115,11 @@
   </footer>
 
   <!-- One small JS file: theme toggle + language toggle + mobile nav. ~80 lines. -->
-  <!-- GSAP from CDN — used by hero-carousel.js for the parallax timeline.
+  <!-- GSAP from CDN — used by hero-carousel.js for the Observer-driven tile scrub.
+       Observer plugin is a separate file; both are required for the carousel.
        No npm install per project convention (static site, no build step). -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Observer.min.js" defer></script>
   <script src="assets/js/hero-carousel.js" defer></script>
   <script src="assets/js/main.js" defer></script>
 </body>
