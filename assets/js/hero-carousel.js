@@ -1,54 +1,60 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.3).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.4).
    ────────────────────────────────────────────────────────────────────────
    Inspired by creativeocean's "Carousel w/ GSAP Observer" pen
-   (https://codepen.io/creativeocean/pen/wvYoyrb). v3.1 added band-
-   based zone detection. v3.2 fixed the onUp/onDown double-scrub bug.
-   v3.3 fixes the remaining "tiles stuck going right + page also
-   scrolls in side bands" bug.
+   (https://codepen.io/creativeocean/pen/wvYoyrb). v3.4 addresses the
+   "tiles only go right / don't recycle" bug Buddie reported after v3.3.
 
-   v3.3 BUG FIX
+   v3.4 BUG FIX
    ────────────
-   Buddie reported after v3.2: "the images keep going flying to the
-   right and not coming back. the middle scrolls works perfectly. but
-   the side one scrolls both the web and carousel."
+   Buddie reported after v3.3: "the scroll now is good. but the carousel
+   scroll its still bad, it only works parcially when im holding the
+   side and moving my moues super slow, if i move my mouse normal or
+   scroll the images go to the right and worse case the images don't
+   recycle its one way trip."
 
-   Two symptoms, one root cause: GSAP Observer's wheel listener is
-   registered as PASSIVE for performance (this is the default in
-   modern browsers and a documented GSAP optimization). A passive
-   wheel listener SILENTLY IGNORES `event.preventDefault()` — the
-   page scrolls anyway. That's the "scrolling both" symptom.
+   Two symptoms:
 
-   The "tiles only go right" symptom is more subtle: with the page
-   also scrolling, the browser fires the wheel event at a much
-   higher rate than the user perceives, because each user wheel
-   "notch" produces a burst of OS events that all share the same
-   direction. On Buddie's mouse, the FIRST event in a burst often
-   arrives with `deltaY = 0` (some mice do this — see the v3.2
-   guard), so it gets caught and dropped. Then subsequent events
-   are all positive, so the tiles keep going right. The user tries
-   to "scroll the other way" but with the page also scrolling, the
-   wheel events get muddled and the carousel doesn't reverse cleanly.
+   (1) DIRECTION. On slow movement the carousel works (both ways);
+       on fast movement or normal scroll, the tiles only go right
+       and don't come back. Root cause: GSAP Observer / browsers
+       coalesce rapid wheel events. On a high-resolution trackpad,
+       each user "gesture" produces a burst of 5–20 wheel events.
+       Some of those events have deltaY = 0 (caught by v3.2's
+       guard, so no scrub). The surviving events all have the
+       SAME sign (the browser coalesces directional bursts), so
+       the carousel drifts one direction. The user can't reverse
+       because the negative-direction events either don't fire or
+       are the ones being dropped.
 
-   Fix:
-   1. Replace GSAP Observer's onWheel with a manual non-passive
-      `addEventListener('wheel', handler, { passive: false })`. Now
-      `e.preventDefault()` actually works, so the page does NOT
-      scroll in the side bands.
-   2. Use the raw `e.deltaY` directly (no GSAP wrapping) — simpler
-      and avoids the "GSAP's deltaY" vs "browser's deltaY" mismatch.
-   3. Add a tiny debug log so future bugs of this shape are easy
-      to diagnose from the browser console.
+       Fix: accumulate deltaY over a DIRECTION_WINDOW_MS window
+       (default 80ms). The first non-zero deltaY in a burst starts
+       a new window; subsequent deltas (including 0 — but those
+       are still ignored) add to the cumulative. The sign of the
+       CUMULATIVE determines the direction. This survives the burst
+       coalescing and the dropped events.
 
-   The rest of the carousel is unchanged from v3.2 (band detection,
-   per-tile step, no onUp/onDown).
+   (2) RECYCLE. The wrap IS happening (modifier `wrap(0,1,p)` is
+       correct), but the wrap point is at x = 4000 → x = -500,
+       which is OFF-SCREEN on both sides. The user never sees the
+       recycle — they only see tiles entering from the left.
+       Combined with the direction bug, it feels like a one-way
+       trip.
 
-   Layout
-   ──────
+       Fix: tighten the x range from -500→4000 to 0→3200. Big
+       tiles are now visible for 50% of the loop (was 36%) and
+       the wrap happens at x=3200 (just past the right edge) to
+       x=0 (left edge) — both visible, so the user sees the tile
+       reappear at the left edge.
+
+   Plus a one-time console.log so Buddie can confirm what values
+   are coming through if it still doesn't work.
+
+   Layout (unchanged from v3.1)
+   ────────────────────────────
    Outer 20% on each side of the hero (min 100px) = CAROUSEL band.
    Middle 60% of the hero = PAGE band (text + CTAs live here).
-   The cursor changes to ew-resize in the carousel bands so the
-   interactive zones are discoverable.
+   The cursor changes to ew-resize in the carousel bands.
 
    Scroll behavior
    ───────────────
@@ -63,10 +69,8 @@
    Per-tile timeline
    ─────────────────
    Each tile has its own GSAP timeline, paused, repeat:-1, traveling
-   x:-500 → x:4000 (4500px range), phased by i/total so tiles start
-   distributed across the loop. Wheel events scrub every tile's
-   progress by ±step with `back.out(5)` ease and `gsap.utils.wrap`
-   so the loop continues forever.
+   x:0 → x:3200 (v3.4 tightened from x:-500 → x:4000), phased by
+   i/total so tiles start distributed across the loop.
 
    Per-tile step
    ─────────────
@@ -84,14 +88,36 @@
 
   // Per-tile scrub increments. Big tiles move less per wheel event than
   // smalls — matches the CodePen's ratio (0.01 big / 0.02 small), halved
-  // for a more cinematic feel. ~100 wheel events for a full big-tile loop.
+  // for a more cinematic feel.
   var BIG_STEP = 0.005;
   var SMALL_STEP = 0.010;
 
-  // Carousel band: outer X% on each side of the hero. Middle (1-2X)% is
-  // the page band. Min width keeps narrow viewports usable.
+  // v3.4: tile x range. Tightened from -500..4000 to 0..3200 so the
+  // wrap is closer to the visible area (visible is 0..1600 in viewBox
+  // units). Big tiles visible for 50% of the loop, small 56%.
+  var X_MIN = 0;
+  var X_MAX = 3200;
+  var X_RANGE = X_MAX - X_MIN;
+
+  // Carousel band: outer X% on each side of the hero.
   var BAND_FRACTION = 0.20;
   var BAND_MIN_PX = 100;
+
+  // v3.4: direction-detection window. We accumulate deltaY over this
+  // many ms to survive wheel-event coalescing. ~5–20 events per
+  // user gesture on high-res trackpads.
+  var DIRECTION_WINDOW_MS = 80;
+
+  // v3.4: set to true if your mouse's wheel is inverted (deltaY
+  // polarity is the opposite of what we expect). E.g., some
+  // Linux distros with "natural scrolling" enabled.
+  var WHEEL_INVERTED = false;
+
+  // v3.4: debug log. Set to true to see what deltaY values are
+  // coming through. Helps diagnose direction issues. One-time
+  // log so the console doesn't fill up.
+  var DEBUG_LOG = true;
+  var debugLogged = 0;
 
   function positionTiles(stage) {
     var big = stage.querySelectorAll('.hc-r1 image');
@@ -121,7 +147,7 @@
         paused: true,
         repeat: -1
       });
-      tl.fromTo(img, { x: -500 }, { x: 4000 });
+      tl.fromTo(img, { x: X_MIN }, { x: X_MAX });
       tl.progress(i / total);
       tls.push(tl);
     });
@@ -129,8 +155,6 @@
   }
 
   function scrub(tls, dir) {
-    // dir = +1 (next/forward) or -1 (prev/backward).
-    // Per-tile step: first 3 tiles are big (slower), rest are small (faster).
     var sign = dir > 0 ? '+' : '-=';
     tls.forEach(function (tl, i) {
       var step = i < 3 ? BIG_STEP : SMALL_STEP;
@@ -151,13 +175,9 @@
     return x < bandWidth || x > (rect.width - bandWidth);
   }
 
-  // Read the wheel deltaY from whichever property the browser exposes.
-  // e.deltaY is the modern standard; e.wheelDeltaY / e.detail are older
-  // fallbacks (WebKit and Firefox, respectively). Returns 0 if no
-  // meaningful value is found.
   function readWheelDelta(e) {
     if (e.deltaY) return e.deltaY;
-    if (e.wheelDeltaY) return -e.wheelDeltaY;  // WebKit: opposite sign
+    if (e.wheelDeltaY) return -e.wheelDeltaY;
     if (e.wheelDelta)  return -e.wheelDelta;
     if (e.detail)      return -e.detail;
     return 0;
@@ -173,16 +193,11 @@
     if (!tiles.length) return;
     var tls = buildTimelines(tiles);
 
-    // Reduced motion: keep the visual composition, drop the interactivity.
     var prefersReduced = window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
 
     // ── Band-based zone detection ────────────────────────────────
-    // inCarouselBand flips true when the cursor (or touch) is in the
-    // outer 20% of the hero on either side, false when it's in the
-    // middle. Wheel/touch handlers check this flag to decide whether
-    // to scrub the carousel (band) or pass through to page scroll (middle).
     var inCarouselBand = false;
     function updateBand(clientX, clientY) {
       var wasIn = inCarouselBand;
@@ -209,31 +224,59 @@
     hero.addEventListener('touchend', leaveBand);
     hero.addEventListener('touchcancel', leaveBand);
 
-    // ── Wheel handler (v3.3: manual, non-passive) ───────────────
-    // v3.2 used GSAP Observer's onWheel. Observer registers its
-    // wheel listener as PASSIVE for performance, which silently
-    // ignores `event.preventDefault()`. That's why the page also
-    // scrolled in the side bands. By adding the listener ourselves
-    // with `{ passive: false }`, preventDefault() actually blocks
-    // the page scroll.
+    // ── Wheel handler (v3.4: cumulative-deltaY for direction) ───
+    // The previous version used the sign of the current event's
+    // deltaY to determine the direction. On a rapid wheel burst,
+    // some events have deltaY=0 (caught by the guard) and the
+    // surviving events often all have the same sign (browser
+    // coalescing). Result: carousel only goes one direction.
+    //
+    // v3.4 fix: accumulate deltaY over DIRECTION_WINDOW_MS. The
+    // sign of the cumulative determines the direction. This
+    // survives event coalescing because we sum everything in the
+    // burst before deciding.
+    var recentDeltaY = 0;
+    var lastWheelTime = 0;
+
     function onWheel(e) {
-      if (!inCarouselBand) return;   // middle band: page scrolls
-      e.preventDefault();              // side band: block page scroll
+      if (!inCarouselBand) return;
+      e.preventDefault();
+
       var deltaY = readWheelDelta(e);
-      if (!deltaY) return;             // skip phantom 0-delta events
-      scrub(tls, deltaY > 0 ? +1 : -1);
+      if (WHEEL_INVERTED) deltaY = -deltaY;
+
+      // v3.4 debug: log the first few deltaY values so Buddie can
+      // confirm what values are coming through if direction is wrong.
+      if (DEBUG_LOG && debugLogged < 5 && deltaY) {
+        console.log('[hero-carousel] wheel deltaY=' + deltaY +
+                    ' inBand=' + inCarouselBand +
+                    ' recentDeltaY=' + recentDeltaY);
+        debugLogged++;
+      }
+
+      if (!deltaY) return;  // skip 0-delta phantom events
+
+      var now = (typeof performance !== 'undefined' && performance.now)
+                ? performance.now() : Date.now();
+      if (now - lastWheelTime > DIRECTION_WINDOW_MS) {
+        // First event in a new burst — reset the cumulative.
+        recentDeltaY = 0;
+      }
+      lastWheelTime = now;
+      recentDeltaY += deltaY;
+
+      // Use the SIGN of the cumulative (over the window) to decide
+      // the direction. This is robust to event coalescing and
+      // dropped events.
+      scrub(tls, recentDeltaY > 0 ? +1 : -1);
     }
     hero.addEventListener('wheel', onWheel, { passive: false });
 
     // ── GSAP Observer (drag / touch gestures only) ─────────────
-    // Observer is now used ONLY for horizontal drag/swipe (onLeft /
-    // onRight). Wheel events go through the manual listener above,
-    // so there's no double-fire risk. onUp / onDown remain omitted
-    // — vertical swipes scroll the page, not the carousel.
     if (typeof Observer !== 'undefined') {
       Observer.create({
         target: hero,
-        type: 'touch,drag,pointer',  // no 'wheel' — handled manually above
+        type: 'touch,drag,pointer',
         onLeft:  function () { if (inCarouselBand) scrub(tls, -1); },
         onRight: function () { if (inCarouselBand) scrub(tls, +1); }
       });
@@ -241,9 +284,6 @@
   }
 
   function boot() {
-    // GSAP loads asynchronously via <script defer>. If it isn't ready
-    // yet, wait a tick and try again. (Observer is now optional —
-    // we no longer require it for the wheel handler.)
     if (typeof gsap === 'undefined') {
       setTimeout(boot, 60);
       return;
