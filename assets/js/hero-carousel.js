@@ -1,35 +1,44 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.9.1).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.9.2).
    ────────────────────────────────────────────────────────────────────────
-   v3.9 → v3.9.1 (Buddie QA pass on v3.9):
+   v3.9.1 → v3.9.2 (Buddie QA pass on v3.9.1):
 
-   v3.9 misread "move them a little with a random" as per-frame
-   jitter, but Buddie clarified: no constant motion — each small
-   should just SPAWN at a different position from the others. So
-   v3.9.1:
-   • drops the per-frame Y wobble (smalls are fully static now)
-   • widens each small's spawn y to a wide random range
-     (SMALL_Y_MIN..SMALL_Y_MAX, default 50..650) so they look
-     scattered, not aligned
-   • distributes x evenly across the loop with a ±30px offset so
-     they're not on a perfect grid line either
+   v3.9.1 misread Buddie's intent. Two corrections:
 
-   Also, Buddie caught that the wrap still had a big gap between
-   the last big and the first: with BIG_SPACING=900 and 3 bigs,
-   big 2 ended at 2300 and big 0's right clone was at 3600 (a
-   1300px gap with smalls scattered in it). That didn't look like
-   a "continuous" carousel. v3.9.1 makes the bigs abut:
-   • BIG_SPACING = BIG_WIDTH = 500, so bigs tile back-to-back
-   • loop = bigCount × BIG_SPACING (= 1500 for 3 bigs), with no
-     trailing slot
-   • big 0's right clone starts exactly where big 2 ends, so the
-     loop reads as a continuous ribbon
+   1. BIGS NEED GAPS, NOT ABUTMENT. v3.9.1 set BIG_SPACING = 500
+      (= BIG_WIDTH) so the bigs tiled back-to-back, closing a
+      perceived "phantom" slot. But Buddie wanted the GAPS back —
+      the original v3.5+ look with 400px gaps between bigs. v3.9.2
+      restores BIG_SPACING = 900.
 
-   v3.9 fixes that stayed:
+   2. THE PHANTOM WAS THE WRAP, NOT THE BIGS. The "blank/null
+      photo" Buddie saw at the loop boundary wasn't a missing big
+      — it was a 100px empty band AFTER the last tile, where the
+      v3.8 hard-coded X_RANGE = 4 × BIG_SPACING = 3600 left a
+      3500..3600 gap. v3.9.2 fixes this by computing X_RANGE from
+      the actual layout:
+        X_RANGE = (bigCount - 1) × BIG_SPACING + BIG_WIDTH
+      For 3 bigs at BIG_SPACING=900, X_RANGE = 2300. Big 0's right
+      clone starts at 2300, abutting big 2's end — the wrap is
+      seamless, no empty band. (Same fix for the smalls, which
+      Buddie suspected had the same issue: smalls are placed within
+      [0, X_RANGE - SMALL_WIDTH], so the wrap is always determined
+      by the bigs and the area after the last small is covered by
+      big 2.)
+
+   Smalls: each at a unique (x, y) with random y (in
+   [SMALL_Y_MIN..SMALL_Y_MAX]) and "a little random" x (slot-based,
+   ±30px offset). No per-frame jitter — positions are static.
+
+   v3.9.1 fix that stayed:
+   • Smalls spawn at clearly distinct positions (wide y range,
+     slot+offset x), so the row reads as scattered, not a grid.
+   • No per-frame motion.
+
+   v3.9 fix that stayed:
    • Drag works anywhere in the hero (band only gates WHEEL).
-   • inCarouselBand is updated on pointerdown / touchstart too, so
-     drag is fresh at press time.
-   • X_RANGE is computed from the layout, not hard-coded.
+   • inCarouselBand updates on pointerdown / touchstart so drag
+     is fresh at press time.
 
    What stayed the same (still true from v3.8):
    • Phase-based scrub (global phase, lerped to currentPhase, tile
@@ -73,13 +82,15 @@
   var SMALL_WIDTH = 200;
   var SMALL_HEIGHT = 200;
 
-  // Loop length. Bigs abut perfectly: BIG_SPACING = BIG_WIDTH, so
-  // big i+1 starts exactly where big i ends. The loop is exactly
-  // bigCount × BIG_SPACING — no trailing gap, no "phantom" slot
-  // where a missing big would go. (Buddie's QA on v3.9: "the gap
-  // between the last of the big images and the first is not solved".)
-  // X_RANGE is computed inside buildLayout() = last big's right edge.
-  var BIG_SPACING = 500;
+  // Big spacing. The original v3.5+ layout had gaps between bigs
+  // (BIG_SPACING = 900) so smalls could fit in the gaps. v3.9 tried
+  // BIG_SPACING = BIG_WIDTH = 500 (bigs abutting) to close a perceived
+  // "phantom" slot, but Buddie's QA clarified that's not what they
+  // wanted — they want the GAPS back. The real "phantom" was a 100px
+  // empty band AFTER the last tile, before the loop wrapped. The fix
+  // for that is in buildLayout(): X_RANGE is computed from the actual
+  // rightmost tile's right edge, not hard-coded.
+  var BIG_SPACING = 900;
   var X_RANGE = BIG_SPACING * 4; // upper bound; buildLayout() refines it
 
   // Y positions
@@ -129,12 +140,17 @@
     if (bigCount === 0) return [];
 
     // Compute X_RANGE so the loop ends exactly at the last big's
-    // right edge. Bigs are now continuous (BIG_SPACING = BIG_WIDTH),
-    // so the loop is exactly bigCount × BIG_SPACING. Smalls are
-    // placed within the loop (x in [0, X_RANGE - SMALL_WIDTH]), so
-    // they don't extend X_RANGE.
-    //   For 3 bigs: X_RANGE = 2*500 + 500 = 1500
-    //   Big 0's right clone starts at 1500, abutting big 2's end.
+    // right edge. This is the key fix for the "ghost photo" bug:
+    // previously X_RANGE was hard-coded to 4 × BIG_SPACING = 3600,
+    // but with 3 bigs + 4 smalls the last tile ended at 3500, leaving
+    // a 100px empty band before the wrap. Now X_RANGE is the actual
+    // rightmost tile (the last big) so the wrap is seamless — the
+    // right clone of big 0 starts exactly where big 2 ends.
+    //   For 3 bigs at BIG_SPACING=900: X_RANGE = 2*900 + 500 = 2300
+    //   For 4 bigs at BIG_SPACING=900: X_RANGE = 3*900 + 500 = 3200
+    // Smalls are placed within [0, X_RANGE - SMALL_WIDTH] with random
+    // x/y, so they never extend the loop — the wrap is always
+    // determined by the bigs.
     var lastBigEnd = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
     X_RANGE = lastBigEnd;
 
@@ -170,8 +186,9 @@
     }
 
     // Bigs: evenly distributed at 0, BIG_SPACING, 2*BIG_SPACING, ...
-    // (Last position is (bigCount-1) * BIG_SPACING; remaining space
-    // in the loop is the trailing gap for extra smalls.)
+    // The last big ends at (bigCount-1) × BIG_SPACING + BIG_WIDTH,
+    // which is also X_RANGE — the loop ends exactly there, no
+    // trailing empty band.
     bigs.forEach(function (tile, i) {
       var x = i * BIG_SPACING;
       pushThree(tile, 'big', x, BIG_Y, BIG_PHASE_FRAC);
