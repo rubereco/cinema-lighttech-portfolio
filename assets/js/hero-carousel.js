@@ -1,49 +1,45 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.1).
    ────────────────────────────────────────────────────────────────────────
-   v3.9.3 → v3.10 (Buddie: "add the carousel to the mobile version"):
+   v3.9.3 → v3.10 → v3.10.1 (Buddie: "add the carousel to the
+   mobile version"):
 
    v3.9.3 ran the carousel on desktop only — on mobile (≤767px) the
    CSS hid the SVG and the hero got a static background image
-   (hero-forest.jpg) instead. v3.10 brings the carousel to mobile:
+   (hero-forest.jpg) instead. v3.10 tried a 2/3 split layout
+   (carousel top, text content bottom), but Buddie pushed back:
+   "the front text is like splitted of the carousel it looks so
+   bad". v3.10.1 reverts to the same layout as desktop — carousel
+   fills the full hero, text content is overlaid on top (centered,
+   with the dark gradient for legibility). The split is gone.
 
-   • The .hero element becomes a flex column on mobile. The SVG
-     carousel sits in the top 2/3 and the text content sits in the
-     bottom 1/3 (CTAs "View credits" / "Rental kit" stay tappable).
-     The dark gradient overlay is re-anchored to cover just the
-     carousel area, not the full hero.
-   • The tile layout is scaled down on mobile (SCALE = 0.4) so the
-     tiles fit the much narrower visible region. With viewBox
-     0–1600 and a 375-wide phone viewport, the slice-cropped visible
-     region is only ~625 SVG units wide — without scaling, the
-     tiles would be off-screen. With SCALE=0.4 the bigs are 200×200,
-     smalls 80×80, spacing 360, and the visible region shows 1.5–2
-     bigs at load; the rest come in via touch-scroll.
+   What v3.10 still keeps (the useful parts):
+   • SCALE = 0.4 on mobile. Every layout constant (BIG_WIDTH,
+     BIG_SPACING, SMALL_WIDTH, BIG_Y, SMALL_Y_MIN/MAX,
+     INITIAL_OFFSET, WRAP_MARGIN, SMALL_X_OFFSET_RANGE) is
+     multiplied by SCALE so bigs come out at 200×200, smalls at
+     80×80, spacing 360, etc. Without scaling, the tiles would
+     be off-screen on a 375-wide phone (the slice-cropped visible
+     region in the 1600-wide viewBox is only ~625 SVG units).
    • INITIAL_OFFSET is recomputed dynamically on mobile to center
-     the scaled tile span at x=800 in the viewBox. The desktop
-     value (200) is preserved — Buddie's "more centered, not at the
-     start" from v3.9.3 still applies on desktop.
-   • The clip-paths (hc-cp1, hc-cp2) are recreated at runtime in
-     setupClipPaths() with the SCALED sizes so the rounded corners
-     still match. The HTML has the desktop-size clip-paths as a
-     no-JS fallback; the JS overwrites them on init.
-   • Touch events are gated by inCarouselArea: on mobile, drags
-     and flings only respond in the top 2/3 of the hero, so the
-     CTAs in the bottom 1/3 stay tappable. Desktop is unaffected
-     (gate is always true there).
-   • DRAG_SENSITIVITY and the parallax stepFracs (BIG_PHASE_FRAC,
-     SMALL_PHASE_FRAC) stay the same — they translate phase to
-     SVG units, which are scaled by the SVG's own viewBox-to-pixel
-     transform, so the perceived feel is consistent across desktop
-     and mobile.
+     the scaled tile span at x=800. Desktop keeps the v3.9.3 value.
+   • setupClipPaths() recreates the <defs><clipPath> elements at
+     runtime with the SCALED sizes (and proportional rx), so
+     mobile tiles still have rounded corners. The HTML keeps the
+     desktop-size clip-paths as a no-JS fallback.
+   • The 'if (window.innerWidth < MOBILE_MAX_WIDTH) return;' skip
+     in init() is removed — the carousel now runs on every viewport.
 
-   v3.9.3 fixes that stayed:
-   • INITIAL_OFFSET + WRAP_MARGIN (left margin + wrap gap) — the
-     desktop layout keeps the v3.9.3 values (200 / 200), mobile
-     gets its own computed values.
-   • Smalls spawn at clearly distinct (x, y), no per-frame jitter.
-   • Drag works anywhere on desktop (band only gates WHEEL).
-   • inCarouselBand updates on pointerdown / touchstart.
+   What v3.10.1 removes (the parts that broke the UX):
+   • The .hero flex column layout on mobile (carousel top 2/3,
+     content bottom 1/3). The split felt disjointed.
+   • The inCarouselArea touch gate. It was meant to keep the
+     bottom-1/3 CTAs tappable, but since the split is gone the
+     carousel is the full hero and the gate was just blocking
+     drags everywhere on mobile. Buddie: "when i dragg it with
+     the mouse it doesn't even move". Now drags work anywhere in
+     the hero; CTAs still work because taps (no drag) don't fire
+     onDrag, so the click reaches the link.
 
    What stayed the same (still true from v3.8):
    • Phase-based scrub (global phase, lerped to currentPhase).
@@ -396,22 +392,6 @@
       hero.style.cursor = 'default';
     }
 
-    // === Mobile area gate (v3.10+) ===
-    // On mobile, .hero is a flex column with the carousel in the
-    // top 2/3 and the text content in the bottom 1/3. The carousel
-    // should only respond to touches in the top 2/3 — the bottom
-    // 1/3 has the CTAs ("View credits", "Rental kit") and we don't
-    // want to steal taps there. On desktop, the gate is always true.
-    var inCarouselArea = true;
-    function updateCarouselArea(clientX, clientY) {
-      if (!isMobile) { inCarouselArea = true; return; }
-      var rect = hero.getBoundingClientRect();
-      // Top 2/3 of the hero. Math is the same on any viewport since
-      // the hero is the reference for both clientY and the area.
-      inCarouselArea = clientY >= rect.top &&
-                        clientY <= rect.top + rect.height * (2 / 3);
-    }
-
     hero.addEventListener('mousemove', function (e) {
       updateBand(e.clientX, e.clientY);
     });
@@ -422,7 +402,6 @@
     // drag would silently no-op.
     hero.addEventListener('pointerdown', function (e) {
       updateBand(e.clientX, e.clientY);
-      updateCarouselArea(e.clientX, e.clientY);
     });
     hero.addEventListener('touchmove', function (e) {
       if (e.touches && e.touches[0]) {
@@ -432,7 +411,6 @@
     hero.addEventListener('touchstart', function (e) {
       if (e.touches && e.touches[0]) {
         updateBand(e.touches[0].clientX, e.touches[0].clientY);
-        updateCarouselArea(e.touches[0].clientX, e.touches[0].clientY);
       }
     }, { passive: true });
     hero.addEventListener('touchend', leaveBand);
@@ -465,10 +443,6 @@
     // mouse wheel turns produce big moves).
     function onWheel(e) {
       if (!inCarouselBand) return;
-      // v3.10+: on mobile, also gate on the carousel area (top 2/3)
-      // so a wheel/touchpad over the content area scrolls the page
-      // instead of the carousel. On desktop this is always true.
-      if (!inCarouselArea) return;
       e.preventDefault();
       var deltaY = readWheelDelta(e);
       if (WHEEL_INVERTED) deltaY = -deltaY;
@@ -496,28 +470,21 @@
         // so it doesn't double-count.
         preventDefault: false,
         onPress: function () {
-          // On mobile, the carousel lives in the top 2/3 of the hero.
-          // If the press started in the bottom 1/3 (the CTA area), the
-          // user is reaching for a button — don't steal the gesture.
-          // On desktop, inCarouselArea stays true.
-          if (!inCarouselArea) return;
           // Capture phase at press time so onDrag has a stable base
           // even if the user starts a drag before any mousemove fires.
           dragStartPhase = phase;
         },
         onDrag: function (self) {
-          if (!inCarouselArea) return;
           // self.deltaX is total horizontal drag distance since start.
           // Drag right (positive) → tiles move right → phase grows.
           phase = dragStartPhase + self.deltaX * DRAG_SENSITIVITY / 1000;
         },
         // onLeft/onRight: discrete gestures (fling past threshold).
-        // Only bump phase if the fling started inside the band AND
-        // inside the mobile carousel area — outside either, the user
-        // is just trying to scroll the page and we shouldn't move
-        // the carousel.
-        onLeft:  function () { if (inCarouselBand && inCarouselArea) phase -= 50; },
-        onRight: function () { if (inCarouselBand && inCarouselArea) phase += 50; }
+        // Only bump phase if the fling started inside the band —
+        // outside the band, the user is just trying to scroll the
+        // page and we shouldn't move the carousel.
+        onLeft:  function () { if (inCarouselBand) phase -= 50; },
+        onRight: function () { if (inCarouselBand) phase += 50; }
       });
     }
 

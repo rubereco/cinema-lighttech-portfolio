@@ -44,39 +44,19 @@
 }
 
 /* ──────────────── Mobile hero (≤767px) ────────────────
-   v3.10+: the carousel now runs on mobile too. The hero becomes a
-   vertical flex stack so the SVG carousel sits in the top 2/3 and
-   the text content sits in the bottom 1/3. The JS scales the tile
-   layout down (SCALE=0.4) and centers it in the visible region
-   (~625 SVG units wide after slice-cropping the 1600-wide viewBox
-   to the 375-wide mobile viewport), so 1.5–2 bigs are visible at
-   load and the rest come in via touch-scroll.
-
-   The dark gradient overlay above the carousel is re-anchored to
-   the top 2/3 (the carousel area) instead of the full hero. The
-   .hero-content block uses a darker vertical gradient so the text
-   reads cleanly against its own dark background in the bottom 1/3. */
+   v3.10.1: same layout as desktop — carousel fills the full hero,
+   text content overlaid on top (centered). The 2/3 split layout
+   from v3.10 (carousel top, text bottom) was scrapped because the
+   split felt disjointed. The tile layout is still scaled in JS
+   (SCALE=0.4) so the tiles fit the narrow mobile viewport, but
+   everything else uses the desktop structure. */
 @media (max-width: 767px) {
   .hero {
     cursor: default;
     background-color: #0b0b0d;
-    display: flex;
-    flex-direction: column;
-    min-height: 100dvh;
   }
-  .hero-carousel {
-    display: block;
-    position: relative;
-    inset: auto;
-    flex: 0 0 66.6667%;
-    width: 100%;
-    height: auto;
-  }
-  .hero-overlay {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 66.6667%;
+  .hero-content {
+    padding: 24px var(--pad-x) 32px;
   }
 }
 
@@ -116,16 +96,11 @@
   );
 }
 
-/* On mobile the .hero-content lives in the bottom 1/3 of the hero
-   (the carousel takes the top 2/3). Drop the desktop 100dvh min-height
-   and pin it to the bottom third with flex sizing. The dark vertical
-   gradient gives the text block its own background so the headline
-   and CTAs read cleanly without the carousel behind them. */
+/* On mobile, .hero-content is overlaid on the carousel (same as
+   desktop). The dark vertical gradient gives the headline and CTAs
+   extra legibility against the moving tiles behind them. */
 @media (max-width: 767px) {
   .hero-content {
-    min-height: auto;
-    flex: 0 0 33.3333%;
-    padding: 24px var(--pad-x) 32px;
     background: linear-gradient(
       180deg,
       rgba(0, 0, 0, 0.55) 0%,
