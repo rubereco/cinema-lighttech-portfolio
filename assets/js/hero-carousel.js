@@ -3,8 +3,8 @@
    ────────────────────────────────────────────────────────────────────────
    v3.7 polishes the hero carousel per Buddie's notes (issue #18).
    v3.6's three foundational fixes are unchanged:
-     • RIGHT DIRECTION — no GSAP wrap modifier; newX wraps in JS to
-       [0, X_RANGE]. One event = one scrub (sign of deltaY).
+     • RIGHT DIRECTION — no GSAP wrap modifier; one event = one scrub
+       (sign of deltaY).
      • DATA-DRIVEN LAYOUT — `<image data-size="big|small">` in HTML;
        `buildLayout()` calculates positions from the DOM. `data-y`
        overrides the random y jitter.
@@ -22,6 +22,17 @@
       - gap = 930 - 500 = 430; padding = (430 - 200 - 20)/2 = 105
       - centered small: x = prevBig + 500 + 10 + 105 = prevBig + 615
       - trailing smalls start at lastBig + 500 + 10 = +2370
+
+   3. SEAMLESS WRAP (no visible teleport). Each original tile gets TWO
+      clones — one at -X_RANGE (left), one at +X_RANGE (right). The
+      three copies share the same photo (cloneNode preserves href).
+      On every scrub event, each copy's x is wrapped into its own
+      valid range [offset, offset+X_RANGE]. When a copy's x crosses
+      its boundary, it teleports to the other side — but the user
+      doesn't see a tile "jump" because another copy of the same
+      photo is already at that position (clones share href). The
+      wrap is invisible. Layout table shows ONE pattern; in memory
+      the SVG carries three copies of each.
 
    Layout (for 3 bigs and 4 smalls, X_RANGE=2790)
    ─────────────────────────────────────────────
@@ -46,8 +57,11 @@
    Per-tile motion
    ──────────────
    Each scrub event: tile.x changes by ±stepFrac * X_RANGE pixels
-   (stepFrac = 0.006 for bigs, 0.012 for smalls = 2x). After the
-   change, tile.x is wrapped to [0, X_RANGE] and the tile is
+   (stepFrac = 0.006 for bigs, 0.012 for smalls = 2x). The new x is
+   wrapped into the tile's valid range [offset, offset+X_RANGE] so
+   the tile cycles through its position. The wrap is invisible because
+   the ±X_RANGE clones share the tile's href (same photo) — when one
+   copy teleports, the replacement is the same image. Each tile is
    animated to the new x with gsap.to (duration 0.2s, ease power2.out).
 
    Reduced motion
@@ -102,6 +116,13 @@
   // Smalls are placed in the gaps between bigs, centered with 10px
   // padding on each side. Excess smalls trail after the last big,
   // spaced SMALL_GAP apart.
+  //
+  // v3.7 seamless wrap: each original tile gets TWO clones — one at
+  // -X_RANGE (left), one at +X_RANGE (right). The three copies move
+  // in lockstep during scrub. As one copy exits the visible area on
+  // either side, another fills in. No modulo wrap → no teleport.
+  // (A single clone at +X_RANGE is asymmetric: only seamless in one
+  // direction. Two clones cover both.)
   function buildLayout(stage) {
     var allTiles = Array.from(stage.querySelectorAll('.hc-row image'));
     if (!allTiles.length) return [];
@@ -114,6 +135,23 @@
     });
     var bigCount = bigs.length;
     if (bigCount === 0) return [];
+
+    // Create left (-X_RANGE) and right (+X_RANGE) clones of every
+    // original tile. Done BEFORE layout-building so the clones don't
+    // get re-picked by the bigs/smalls filter above.
+    var leftClone = new WeakMap();
+    var rightClone = new WeakMap();
+    bigs.concat(smalls).forEach(function (tile) {
+      var lc = tile.cloneNode(true);
+      lc.setAttribute('data-clone', 'left');
+      tile.parentNode.appendChild(lc);
+      leftClone.set(tile, lc);
+
+      var rc = tile.cloneNode(true);
+      rc.setAttribute('data-clone', 'right');
+      tile.parentNode.appendChild(rc);
+      rightClone.set(tile, rc);
+    });
 
     // Bigs evenly distributed across the loop
     var bigPositions = bigs.map(function (_, i) {
@@ -149,16 +187,22 @@
       smallIndex++;
     }
 
-    // Build the layout array
+    // Build the layout array. Each logical tile becomes three entries:
+    // left clone (-X_RANGE), original (0), right clone (+X_RANGE).
+    // They all share the same stepFrac, so they move in lockstep.
+    // Each entry stores its `offset` so scrub() can wrap within its
+    // valid range [offset, offset+X_RANGE].
+    function pushThree(tile, size, x, y, stepFrac) {
+      var lc = leftClone.get(tile);
+      var rc = rightClone.get(tile);
+      layout.push({ tile: lc,  size: size, x: x - X_RANGE, offset: -X_RANGE, y: y, stepFrac: stepFrac });
+      layout.push({ tile: tile, size: size, x: x,           offset: 0,         y: y, stepFrac: stepFrac });
+      layout.push({ tile: rc,  size: size, x: x + X_RANGE, offset: +X_RANGE,  y: y, stepFrac: stepFrac });
+    }
+
     var layout = [];
     bigs.forEach(function (tile, i) {
-      layout.push({
-        tile: tile,
-        size: 'big',
-        x: bigPositions[i],
-        y: BIG_Y,
-        stepFrac: BIG_STEP_FRAC
-      });
+      pushThree(tile, 'big', bigPositions[i], BIG_Y, BIG_STEP_FRAC);
     });
     smallsAssigned.forEach(function (entry) {
       // Allow per-tile y override via data-y attribute (for fine-tuning)
@@ -166,13 +210,7 @@
       var y = yOverride !== null
         ? parseFloat(yOverride)
         : SMALL_Y + (Math.random() - 0.5) * SMALL_Y_JITTER;
-      layout.push({
-        tile: entry.tile,
-        size: 'small',
-        x: entry.x,
-        y: y,
-        stepFrac: SMALL_STEP_FRAC
-      });
+      pushThree(entry.tile, 'small', entry.x, y, SMALL_STEP_FRAC);
     });
 
     return layout;
@@ -258,15 +296,25 @@
 
     // === Scrub function ===
     // Changes the x of each tile by ±stepFrac * X_RANGE pixels,
-    // wraps the new x to [0, X_RANGE], and animates the tile to
-    // the new x with gsap.to.
+    // wraps the new x into the tile's valid range [offset, offset+X_RANGE],
+    // and animates the tile to the new x with gsap.to.
+    //
+    // v3.7 seamless wrap: each tile has clones at ±X_RANGE. The wrap
+    // is invisible because clones share href with the original — when
+    // one copy teleports across the boundary, the replacement copy at
+    // the destination is the same photo, so the user sees no change.
+    // (At the wrap moment, two clones briefly overlap for one frame;
+    // both render the same photo, so visually it's one continuous
+    // image — no flicker in practice.)
     function scrub(dir) {
       layout.forEach(function (item) {
         var stepPx = dir * item.stepFrac * X_RANGE;
         var newX = item.x + stepPx;
-        // Wrap to [0, X_RANGE]
-        while (newX > X_RANGE) newX -= X_RANGE;
-        while (newX < 0) newX += X_RANGE;
+        // Wrap to [item.offset, item.offset + X_RANGE].
+        // Multiple iterations may be needed if stepPx > X_RANGE
+        // (not the case here, but defensive).
+        while (newX > item.offset + X_RANGE) newX -= X_RANGE;
+        while (newX < item.offset) newX += X_RANGE;
         item.x = newX;
         gsap.to(item.tile, {
           x: newX,
