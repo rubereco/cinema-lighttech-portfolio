@@ -1,41 +1,46 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.9.2).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.9.3).
    ────────────────────────────────────────────────────────────────────────
-   v3.9.1 → v3.9.2 (Buddie QA pass on v3.9.1):
+   v3.9.2 → v3.9.3 (Buddie QA pass on v3.9.2):
 
-   v3.9.1 misread Buddie's intent. Two corrections:
+   v3.9.2 closed the "phantom photo" bug but the loop was too tight:
+   • Big 0 was flush against the left edge on load
+     (Buddie: "add a margin to the first photo" / "more centered
+     when first loaded or at least not at the start").
+   • Big 0's right clone abutted big 2 at the wrap point — no
+     visual breathing room (Buddie: "the last and the first photos
+     always are together").
 
-   1. BIGS NEED GAPS, NOT ABUTMENT. v3.9.1 set BIG_SPACING = 500
-      (= BIG_WIDTH) so the bigs tiled back-to-back, closing a
-      perceived "phantom" slot. But Buddie wanted the GAPS back —
-      the original v3.5+ look with 400px gaps between bigs. v3.9.2
-      restores BIG_SPACING = 900.
+   v3.9.3 introduces two new layout constants:
+   • INITIAL_OFFSET (200) — the first big's x. Shifts the whole
+     layout right, so big 0 isn't at x=0 on load. 200 = a
+     comfortable "breath" without making big 0 feel off-center.
+   • WRAP_MARGIN (200) — trailing space after the last big, so
+     big 0's right clone starts 200px after big 2 ends. 200 = a
+     small but visible gap at the loop point.
 
-   2. THE PHANTOM WAS THE WRAP, NOT THE BIGS. The "blank/null
-      photo" Buddie saw at the loop boundary wasn't a missing big
-      — it was a 100px empty band AFTER the last tile, where the
-      v3.8 hard-coded X_RANGE = 4 × BIG_SPACING = 3600 left a
-      3500..3600 gap. v3.9.2 fixes this by computing X_RANGE from
-      the actual layout:
-        X_RANGE = (bigCount - 1) × BIG_SPACING + BIG_WIDTH
-      For 3 bigs at BIG_SPACING=900, X_RANGE = 2300. Big 0's right
-      clone starts at 2300, abutting big 2's end — the wrap is
-      seamless, no empty band. (Same fix for the smalls, which
-      Buddie suspected had the same issue: smalls are placed within
-      [0, X_RANGE - SMALL_WIDTH], so the wrap is always determined
-      by the bigs and the area after the last small is covered by
-      big 2.)
+   The X_RANGE formula is updated to include the wrap margin:
+     X_RANGE = (bigCount - 1) × BIG_SPACING + BIG_WIDTH + WRAP_MARGIN
+   For 3 bigs at BIG_SPACING=900, WRAP_MARGIN=200:
+     X_RANGE = 1800 + 500 + 200 = 2500
+     big 0 at 200–700, big 1 at 1100–1600, big 2 at 2000–2500
+     big 0's right clone at 2700, with 200px gap after big 2.
+   Note: INITIAL_OFFSET does NOT enter X_RANGE — it just shifts
+   the bigs right. The loop length is determined by the bigs' span
+   plus the wrap margin.
 
-   Smalls: each at a unique (x, y) with random y (in
-   [SMALL_Y_MIN..SMALL_Y_MAX]) and "a little random" x (slot-based,
-   ±30px offset). No per-frame jitter — positions are static.
+   Smalls are placed in the content area [INITIAL_OFFSET,
+   X_RANGE - WRAP_MARGIN - SMALL_WIDTH] with random x/y, so they
+   stay inside the visible/active region and don't drift into
+   the padding.
 
-   v3.9.1 fix that stayed:
+   v3.9.2 fix that stayed:
+   • X_RANGE is computed from the actual layout, not hard-coded.
+
+   v3.9 / v3.9.1 fixes that stayed:
    • Smalls spawn at clearly distinct positions (wide y range,
      slot+offset x), so the row reads as scattered, not a grid.
    • No per-frame motion.
-
-   v3.9 fix that stayed:
    • Drag works anywhere in the hero (band only gates WHEEL).
    • inCarouselBand updates on pointerdown / touchstart so drag
      is fresh at press time.
@@ -93,6 +98,19 @@
   var BIG_SPACING = 900;
   var X_RANGE = BIG_SPACING * 4; // upper bound; buildLayout() refines it
 
+  // Left margin: how far right the first big is from x=0 on load.
+  // Buddie's QA on v3.9.2: "add a margin to the first photo" /
+  // "the first photo more centered when first loaded or at least
+  // not at the start of the page". 200 = a comfortable "breath"
+  // without making big 0 feel off-center.
+  var INITIAL_OFFSET = 200;
+
+  // Wrap margin: trailing space AFTER the last big, before the
+  // loop wraps. So big 0's right clone doesn't start right where
+  // big 2 ends (Buddie's QA: "the last and the first photos always
+  // are together"). 200 = a small visible gap at the wrap point.
+  var WRAP_MARGIN = 200;
+
   // Y positions
   var BIG_Y = 200;
   // (Each small spawns at a random y in [SMALL_Y_MIN, SMALL_Y_MAX]
@@ -139,20 +157,22 @@
     var bigCount = bigs.length;
     if (bigCount === 0) return [];
 
-    // Compute X_RANGE so the loop ends exactly at the last big's
-    // right edge. This is the key fix for the "ghost photo" bug:
-    // previously X_RANGE was hard-coded to 4 × BIG_SPACING = 3600,
-    // but with 3 bigs + 4 smalls the last tile ended at 3500, leaving
-    // a 100px empty band before the wrap. Now X_RANGE is the actual
-    // rightmost tile (the last big) so the wrap is seamless — the
-    // right clone of big 0 starts exactly where big 2 ends.
-    //   For 3 bigs at BIG_SPACING=900: X_RANGE = 2*900 + 500 = 2300
-    //   For 4 bigs at BIG_SPACING=900: X_RANGE = 3*900 + 500 = 3200
-    // Smalls are placed within [0, X_RANGE - SMALL_WIDTH] with random
-    // x/y, so they never extend the loop — the wrap is always
-    // determined by the bigs.
-    var lastBigEnd = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
-    X_RANGE = lastBigEnd;
+    // Compute X_RANGE = (bigs' span) + WRAP_MARGIN.
+    // Two things make the loop look right:
+    //  • The bigs start at INITIAL_OFFSET, not at x=0 (left margin).
+    //  • The loop has WRAP_MARGIN of trailing space, so big 0's
+    //    right clone doesn't start right where big 2 ends.
+    //   For 3 bigs at BIG_SPACING=900, INITIAL_OFFSET=200,
+    //   WRAP_MARGIN=200:
+    //     big 0 at 200–700, big 1 at 1100–1600, big 2 at 2000–2500
+    //     X_RANGE = 2*900 + 500 + 200 = 2500  (initial offset does
+    //       NOT enter here — it just shifts the layout right)
+    //     big 0's right clone starts at 200+2500=2700, with a
+    //     200px gap after big 2's right edge (2500). ✓
+    // Smalls are placed in the content area [INITIAL_OFFSET,
+    // X_RANGE - WRAP_MARGIN - SMALL_WIDTH] with random x/y.
+    var bigsSpan = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
+    X_RANGE = bigsSpan + WRAP_MARGIN;
 
     // Create left (-X_RANGE) and right (+X_RANGE) clones of every
     // original tile. The clones share the same href (cloneNode(true)
@@ -185,27 +205,28 @@
       layout.push({ tile: rc,  size: size, baseX: baseX, offset: +X_RANGE, y: y, stepFrac: stepFrac });
     }
 
-    // Bigs: evenly distributed at 0, BIG_SPACING, 2*BIG_SPACING, ...
-    // The last big ends at (bigCount-1) × BIG_SPACING + BIG_WIDTH,
-    // which is also X_RANGE — the loop ends exactly there, no
-    // trailing empty band.
+    // Bigs: start at INITIAL_OFFSET (left margin), then spaced by
+    // BIG_SPACING. With 3 bigs at BIG_SPACING=900 and
+    // INITIAL_OFFSET=200: big 0 at 200, big 1 at 1100, big 2 at 2000.
     bigs.forEach(function (tile, i) {
-      var x = i * BIG_SPACING;
+      var x = INITIAL_OFFSET + i * BIG_SPACING;
       pushThree(tile, 'big', x, BIG_Y, BIG_PHASE_FRAC);
     });
 
-    // Smalls: each at a unique (x, y) so the row reads as a
-    // scattered set, not a grid. X is evenly distributed across the
-    // loop with a small ±30px random offset (avoids landing on a
-    // perfect grid line). Y is a wide random in [SMALL_Y_MIN,
+    // Smalls: each at a unique (x, y) in the CONTENT area (not in
+    // the left/right padding). X is evenly distributed across the
+    // content area with a small ±30px random offset (avoids landing
+    // on a perfect grid line). Y is a wide random in [SMALL_Y_MIN,
     // SMALL_Y_MAX] so each small sits at a clearly different vertical
     // position. No per-frame jitter — positions are fixed at init.
     // data-y attribute still overrides the random y for fine-tuning.
-    var xSlotWidth = (X_RANGE - SMALL_WIDTH) / smalls.length;
+    var smallsLeft = INITIAL_OFFSET;
+    var smallsRight = X_RANGE - WRAP_MARGIN - SMALL_WIDTH;
+    var xSlotWidth = (smallsRight - smallsLeft) / smalls.length;
     smalls.forEach(function (tile, i) {
-      var xSlot = (i + 0.5) * xSlotWidth;
+      var xSlot = smallsLeft + (i + 0.5) * xSlotWidth;
       var xOffset = (Math.random() - 0.5) * 60; // ±30px
-      var x = Math.max(0, Math.min(X_RANGE - SMALL_WIDTH, xSlot + xOffset));
+      var x = Math.max(smallsLeft, Math.min(smallsRight, xSlot + xOffset));
 
       var yOverride = tile.getAttribute('data-y');
       var y = yOverride !== null
