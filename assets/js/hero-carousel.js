@@ -299,41 +299,36 @@
     // wraps the new x into the tile's valid range [offset, offset+X_RANGE],
     // and animates the tile to the new x with gsap.to.
     //
-    // v3.7 seamless wrap: each tile has clones at ±X_RANGE. The wrap
-    // is invisible because clones share href with the original — when
-    // one copy teleports across the boundary, the replacement copy at
-    // the destination is the same photo, so the user sees no change.
+    // v3.7 seamless wrap: each tile has clones at ±X_RANGE, and they
+    // move in lockstep. When any copy wraps, all copies of the same
+    // original wrap simultaneously (same stepPx, same valid-range
+    // boundary). So when a copy slides off one edge, its sibling
+    // copies slide off the *opposite* edge at the same time — the
+    // user sees a continuous slide without ever seeing two copies of
+    // the same photo at the destination simultaneously.
     //
-    // v3.7.1 polish: when a tile wraps, we jump its x instantly
-    // (duration 0) instead of animating. Without this, the gsap tween
-    // would slide the wrapping tile across the visible area over
-    // 0.2s — passing through the destination where a same-photo
-    // clone already sits, briefly producing a "doubled photo" effect.
-    // Jumping the wrap keeps the destination photo visually continuous.
+    // Asymmetry: scrubbing LEFT wraps off-screen at x≈-5 → off-screen
+    // at x≈2785 (no visible event — the slide-in from the right edge
+    // looks smooth). Scrubbing RIGHT wraps off-screen at x≈2780 →
+    // in-view at x≈5 (visible event — the tile slides in from the
+    // right edge across the full screen). This is the intended
+    // behavior; the slide keeps the entrance smooth.
     function scrub(dir) {
       layout.forEach(function (item) {
         var stepPx = dir * item.stepFrac * X_RANGE;
         var newX = item.x + stepPx;
-        // Detect wrap BEFORE applying modulo (item.offset .. +X_RANGE).
-        var wrapped = newX > item.offset + X_RANGE || newX < item.offset;
+        // Wrap into the tile's valid range [offset, offset+X_RANGE].
+        // Multiple iterations may be needed if stepPx > X_RANGE
+        // (not the case here, but defensive).
         while (newX > item.offset + X_RANGE) newX -= X_RANGE;
         while (newX < item.offset) newX += X_RANGE;
         item.x = newX;
-        if (wrapped) {
-          // Instant jump — kill any in-progress tween for this tile.
-          gsap.to(item.tile, {
-            x: newX,
-            duration: 0,
-            overwrite: true
-          });
-        } else {
-          gsap.to(item.tile, {
-            x: newX,
-            duration: SCRUB_DURATION,
-            ease: SCRUB_EASE,
-            overwrite: 'auto'
-          });
-        }
+        gsap.to(item.tile, {
+          x: newX,
+          duration: SCRUB_DURATION,
+          ease: SCRUB_EASE,
+          overwrite: 'auto'
+        });
       });
     }
 
