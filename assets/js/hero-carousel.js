@@ -303,25 +303,37 @@
     // is invisible because clones share href with the original — when
     // one copy teleports across the boundary, the replacement copy at
     // the destination is the same photo, so the user sees no change.
-    // (At the wrap moment, two clones briefly overlap for one frame;
-    // both render the same photo, so visually it's one continuous
-    // image — no flicker in practice.)
+    //
+    // v3.7.1 polish: when a tile wraps, we jump its x instantly
+    // (duration 0) instead of animating. Without this, the gsap tween
+    // would slide the wrapping tile across the visible area over
+    // 0.2s — passing through the destination where a same-photo
+    // clone already sits, briefly producing a "doubled photo" effect.
+    // Jumping the wrap keeps the destination photo visually continuous.
     function scrub(dir) {
       layout.forEach(function (item) {
         var stepPx = dir * item.stepFrac * X_RANGE;
         var newX = item.x + stepPx;
-        // Wrap to [item.offset, item.offset + X_RANGE].
-        // Multiple iterations may be needed if stepPx > X_RANGE
-        // (not the case here, but defensive).
+        // Detect wrap BEFORE applying modulo (item.offset .. +X_RANGE).
+        var wrapped = newX > item.offset + X_RANGE || newX < item.offset;
         while (newX > item.offset + X_RANGE) newX -= X_RANGE;
         while (newX < item.offset) newX += X_RANGE;
         item.x = newX;
-        gsap.to(item.tile, {
-          x: newX,
-          duration: SCRUB_DURATION,
-          ease: SCRUB_EASE,
-          overwrite: 'auto'
-        });
+        if (wrapped) {
+          // Instant jump — kill any in-progress tween for this tile.
+          gsap.to(item.tile, {
+            x: newX,
+            duration: 0,
+            overwrite: true
+          });
+        } else {
+          gsap.to(item.tile, {
+            x: newX,
+            duration: SCRUB_DURATION,
+            ease: SCRUB_EASE,
+            overwrite: 'auto'
+          });
+        }
       });
     }
 
