@@ -44,26 +44,40 @@
 }
 
 /* ──────────────── Mobile hero (≤767px) ────────────────
-   On phones the SVG carousel collapses to tiles so small they look
-   like noise. Hide the SVG and give the hero a single background
-   image instead. The carousel JS also self-skips below 768px
-   (see MOBILE_MAX_WIDTH in hero-carousel.js), so no wasted work.
+   v3.10+: the carousel now runs on mobile too. The hero becomes a
+   vertical flex stack so the SVG carousel sits in the top 2/3 and
+   the text content sits in the bottom 1/3. The JS scales the tile
+   layout down (SCALE=0.4) and centers it in the visible region
+   (~625 SVG units wide after slice-cropping the 1600-wide viewBox
+   to the 375-wide mobile viewport), so 1.5–2 bigs are visible at
+   load and the rest come in via touch-scroll.
 
-   The image is positioned and sized to cover the hero regardless of
-   the device aspect — `cover` lets it crop, `center` keeps the subject
-   (the figure in hero-forest.jpg) in frame on both portrait phones
-   and landscape tablets. The dark gradient overlay above provides
-   text legibility. */
+   The dark gradient overlay above the carousel is re-anchored to
+   the top 2/3 (the carousel area) instead of the full hero. The
+   .hero-content block uses a darker vertical gradient so the text
+   reads cleanly against its own dark background in the bottom 1/3. */
 @media (max-width: 767px) {
   .hero {
     cursor: default;
     background-color: #0b0b0d;
-    background-image: url('../images/hero-forest.jpg');
-    background-size: cover;
-    background-position: center 30%;
-    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
   }
-  .hero-carousel { display: none; }
+  .hero-carousel {
+    display: block;
+    position: relative;
+    inset: auto;
+    flex: 0 0 66.6667%;
+    width: 100%;
+    height: auto;
+  }
+  .hero-overlay {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 66.6667%;
+  }
 }
 
 .hero-overlay {
@@ -102,11 +116,16 @@
   );
 }
 
-/* On mobile we use a static background image. Boost the chip darker
-   so the headline reads cleanly against photographic content, and
-   widen the radial to cover more of the screen. */
+/* On mobile the .hero-content lives in the bottom 1/3 of the hero
+   (the carousel takes the top 2/3). Drop the desktop 100dvh min-height
+   and pin it to the bottom third with flex sizing. The dark vertical
+   gradient gives the text block its own background so the headline
+   and CTAs read cleanly without the carousel behind them. */
 @media (max-width: 767px) {
   .hero-content {
+    min-height: auto;
+    flex: 0 0 33.3333%;
+    padding: 24px var(--pad-x) 32px;
     background: linear-gradient(
       180deg,
       rgba(0, 0, 0, 0.55) 0%,

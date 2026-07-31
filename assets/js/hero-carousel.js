@@ -1,65 +1,76 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.9.3).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10).
    ────────────────────────────────────────────────────────────────────────
-   v3.9.2 → v3.9.3 (Buddie QA pass on v3.9.2):
+   v3.9.3 → v3.10 (Buddie: "add the carousel to the mobile version"):
 
-   v3.9.2 closed the "phantom photo" bug but the loop was too tight:
-   • Big 0 was flush against the left edge on load
-     (Buddie: "add a margin to the first photo" / "more centered
-     when first loaded or at least not at the start").
-   • Big 0's right clone abutted big 2 at the wrap point — no
-     visual breathing room (Buddie: "the last and the first photos
-     always are together").
+   v3.9.3 ran the carousel on desktop only — on mobile (≤767px) the
+   CSS hid the SVG and the hero got a static background image
+   (hero-forest.jpg) instead. v3.10 brings the carousel to mobile:
 
-   v3.9.3 introduces two new layout constants:
-   • INITIAL_OFFSET (200) — the first big's x. Shifts the whole
-     layout right, so big 0 isn't at x=0 on load. 200 = a
-     comfortable "breath" without making big 0 feel off-center.
-   • WRAP_MARGIN (200) — trailing space after the last big, so
-     big 0's right clone starts 200px after big 2 ends. 200 = a
-     small but visible gap at the loop point.
+   • The .hero element becomes a flex column on mobile. The SVG
+     carousel sits in the top 2/3 and the text content sits in the
+     bottom 1/3 (CTAs "View credits" / "Rental kit" stay tappable).
+     The dark gradient overlay is re-anchored to cover just the
+     carousel area, not the full hero.
+   • The tile layout is scaled down on mobile (SCALE = 0.4) so the
+     tiles fit the much narrower visible region. With viewBox
+     0–1600 and a 375-wide phone viewport, the slice-cropped visible
+     region is only ~625 SVG units wide — without scaling, the
+     tiles would be off-screen. With SCALE=0.4 the bigs are 200×200,
+     smalls 80×80, spacing 360, and the visible region shows 1.5–2
+     bigs at load; the rest come in via touch-scroll.
+   • INITIAL_OFFSET is recomputed dynamically on mobile to center
+     the scaled tile span at x=800 in the viewBox. The desktop
+     value (200) is preserved — Buddie's "more centered, not at the
+     start" from v3.9.3 still applies on desktop.
+   • The clip-paths (hc-cp1, hc-cp2) are recreated at runtime in
+     setupClipPaths() with the SCALED sizes so the rounded corners
+     still match. The HTML has the desktop-size clip-paths as a
+     no-JS fallback; the JS overwrites them on init.
+   • Touch events are gated by inCarouselArea: on mobile, drags
+     and flings only respond in the top 2/3 of the hero, so the
+     CTAs in the bottom 1/3 stay tappable. Desktop is unaffected
+     (gate is always true there).
+   • DRAG_SENSITIVITY and the parallax stepFracs (BIG_PHASE_FRAC,
+     SMALL_PHASE_FRAC) stay the same — they translate phase to
+     SVG units, which are scaled by the SVG's own viewBox-to-pixel
+     transform, so the perceived feel is consistent across desktop
+     and mobile.
 
-   The X_RANGE formula is updated to include the wrap margin:
-     X_RANGE = (bigCount - 1) × BIG_SPACING + BIG_WIDTH + WRAP_MARGIN
-   For 3 bigs at BIG_SPACING=900, WRAP_MARGIN=200:
-     X_RANGE = 1800 + 500 + 200 = 2500
-     big 0 at 200–700, big 1 at 1100–1600, big 2 at 2000–2500
-     big 0's right clone at 2700, with 200px gap after big 2.
-   Note: INITIAL_OFFSET does NOT enter X_RANGE — it just shifts
-   the bigs right. The loop length is determined by the bigs' span
-   plus the wrap margin.
-
-   Smalls are placed in the content area [INITIAL_OFFSET,
-   X_RANGE - WRAP_MARGIN - SMALL_WIDTH] with random x/y, so they
-   stay inside the visible/active region and don't drift into
-   the padding.
-
-   v3.9.2 fix that stayed:
-   • X_RANGE is computed from the actual layout, not hard-coded.
-
-   v3.9 / v3.9.1 fixes that stayed:
-   • Smalls spawn at clearly distinct positions (wide y range,
-     slot+offset x), so the row reads as scattered, not a grid.
-   • No per-frame motion.
-   • Drag works anywhere in the hero (band only gates WHEEL).
-   • inCarouselBand updates on pointerdown / touchstart so drag
-     is fresh at press time.
+   v3.9.3 fixes that stayed:
+   • INITIAL_OFFSET + WRAP_MARGIN (left margin + wrap gap) — the
+     desktop layout keeps the v3.9.3 values (200 / 200), mobile
+     gets its own computed values.
+   • Smalls spawn at clearly distinct (x, y), no per-frame jitter.
+   • Drag works anywhere on desktop (band only gates WHEEL).
+   • inCarouselBand updates on pointerdown / touchstart.
 
    What stayed the same (still true from v3.8):
-   • Phase-based scrub (global phase, lerped to currentPhase, tile
-     x = baseX + currentPhase * stepFrac via gsap.set).
-   • Mobile-aware: viewports < 768px skip the carousel entirely.
-   • Band-based zones for WHEEL: outer 20% scrubs, middle 60%
-     passes wheel to the page.
+   • Phase-based scrub (global phase, lerped to currentPhase).
+   • Band-based wheel zones (outer 20% scrubs, middle 60% scrolls
+     the page). On mobile the wheel rarely fires, so this is
+     effectively a desktop-only behavior.
    • Data-driven layout: `<image data-size="big|small">` in HTML.
-   • Seamless wrap: each original tile gets two clones (±X_RANGE).
+   • Seamless wrap: each tile gets two clones (±X_RANGE).
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
 
-  // Mobile breakpoint: below this width we skip the carousel entirely
-  // (CSS hides the SVG and the .hero gets a background image instead).
+  // Mobile breakpoint: below this width the layout switches to a
+  // mobile-optimized version (smaller tile scale, flex column hero,
+  // touch events restricted to the top 2/3). v3.10+: the carousel
+  // runs on mobile too, so this is the scale-toggle point, not a
+  // "skip the carousel" gate.
   var MOBILE_MAX_WIDTH = 768;
+
+  // Detect mobile once at module load. SCALE shrinks the whole tile
+  // layout (BIG_WIDTH, BIG_SPACING, SMALL_WIDTH, etc.) so the tiles
+  // fit the narrow visible region on a 375-wide phone viewport
+  // (~625 SVG units after the 1600-wide viewBox is slice-cropped).
+  // 0.4 = bigs come out at 200×200, smalls at 80×80, spacing 360 —
+  // 1.5–2 bigs visible at load, the rest come in via touch-scroll.
+  var isMobile = window.innerWidth < MOBILE_MAX_WIDTH;
+  var SCALE = isMobile ? 0.4 : 1.0;
 
   // Per-tile phase multipliers. 1.0 = full speed, 2.0 = 2× parallax.
   // Smalls scroll 2× faster than bigs for the CodePen depth effect.
@@ -81,11 +92,11 @@
   // We multiply by a constant to convert to a phase increment.
   var DRAG_SENSITIVITY = 60;
 
-  // ── Layout constants ──────────────────────────────────────────────
-  var BIG_WIDTH = 500;
-  var BIG_HEIGHT = 500;
-  var SMALL_WIDTH = 200;
-  var SMALL_HEIGHT = 200;
+  // ── Layout constants (scaled by SCALE for mobile) ────────────
+  var BIG_WIDTH = 500 * SCALE;
+  var BIG_HEIGHT = 500 * SCALE;
+  var SMALL_WIDTH = 200 * SCALE;
+  var SMALL_HEIGHT = 200 * SCALE;
 
   // Big spacing. The original v3.5+ layout had gaps between bigs
   // (BIG_SPACING = 900) so smalls could fit in the gaps. v3.9 tried
@@ -95,37 +106,46 @@
   // empty band AFTER the last tile, before the loop wrapped. The fix
   // for that is in buildLayout(): X_RANGE is computed from the actual
   // rightmost tile's right edge, not hard-coded.
-  var BIG_SPACING = 900;
+  var BIG_SPACING = 900 * SCALE;
   var X_RANGE = BIG_SPACING * 4; // upper bound; buildLayout() refines it
 
   // Left margin: how far right the first big is from x=0 on load.
   // Buddie's QA on v3.9.2: "add a margin to the first photo" /
   // "the first photo more centered when first loaded or at least
   // not at the start of the page". 200 = a comfortable "breath"
-  // without making big 0 feel off-center.
-  var INITIAL_OFFSET = 200;
+  // without making big 0 feel off-center. On mobile this default
+  // is overridden in buildLayout() — see below.
+  var INITIAL_OFFSET = 200 * SCALE;
 
   // Wrap margin: trailing space AFTER the last big, before the
   // loop wraps. So big 0's right clone doesn't start right where
   // big 2 ends (Buddie's QA: "the last and the first photos always
   // are together"). 200 = a small visible gap at the wrap point.
-  var WRAP_MARGIN = 200;
+  var WRAP_MARGIN = 200 * SCALE;
 
   // Y positions
-  var BIG_Y = 200;
+  var BIG_Y = 200 * SCALE;
   // (Each small spawns at a random y in [SMALL_Y_MIN, SMALL_Y_MAX]
   // defined further down — the old single-anchor SMALL_Y is gone.)
 
   // Gap between smalls and bigs
-  var SMALL_GAP = 10;
+  var SMALL_GAP = 10 * SCALE;
 
   // Y range for smalls. Each small spawns at a random y in this range
   // so they look like a scattered set, not a row. Wide spread on
   // purpose — Buddie's QA: "I want them to spawn different from each
-  // other, no jitter." The range covers the full SVG height minus
-  // margins so smalls can appear above, between, and below the bigs.
-  var SMALL_Y_MIN = 50;
-  var SMALL_Y_MAX = 650;
+  // other, no jitter." SMALL_Y_MAX is floored to BIG_Y + BIG_HEIGHT
+  // + 50 so smalls can appear below the bigs too (not just above or
+  // overlapping). This matters most on mobile where the scaled bigs
+  // sit higher in the SVG.
+  var SMALL_Y_MIN = 50 * SCALE;
+  var SMALL_Y_MAX = Math.max(650 * SCALE, BIG_Y + BIG_HEIGHT + 50);
+
+  // Per-tile horizontal random offset for smalls (slot + offset
+  // distribution). "A little random" per Buddie's QA. Scaled down
+  // on mobile so the ±30px desktop random becomes ±12px on mobile
+  // (proportional to the smaller tile size).
+  var SMALL_X_OFFSET_RANGE = 60 * SCALE;
 
   // Carousel band: outer X% on each side of the hero.
   var BAND_FRACTION = 0.20;
@@ -156,6 +176,26 @@
     });
     var bigCount = bigs.length;
     if (bigCount === 0) return [];
+
+    // On mobile, the visible region inside the 1600-wide viewBox is
+    // only ~625 units wide (the SVG fills a 375-wide phone viewport
+    // with xMidYMid slice, cropping the sides to keep the 9:16-ish
+    // aspect). The visible region is centered at x=800 and runs
+    // roughly 487→1112. To make the tiles land in that window we
+    // re-center INITIAL_OFFSET: tile span sits centered at x=800.
+    //   For 3 bigs at SCALE=0.4: tileSpan = 2*360 + 200 = 920
+    //   INITIAL_OFFSET = 800 - 460 = 340
+    //   tiles at 340 / 700 / 1060 - all three sit inside the
+    //   visible region (big 1 at 700-900 is fully visible; the
+    //   slivers of big 0 and big 2 on the edges come in via
+    //   touch-scroll).
+    // On desktop, the top-level INITIAL_OFFSET (= 200 * SCALE = 200)
+    // is the user-tuned "left margin" from v3.9.3 and stays as-is.
+    if (isMobile) {
+      var tileSpan = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
+      INITIAL_OFFSET = Math.round(800 - tileSpan / 2);
+      WRAP_MARGIN = Math.round(INITIAL_OFFSET * 0.3);
+    }
 
     // Compute X_RANGE = (bigs' span) + WRAP_MARGIN.
     // Two things make the loop look right:
@@ -225,7 +265,7 @@
     var xSlotWidth = (smallsRight - smallsLeft) / smalls.length;
     smalls.forEach(function (tile, i) {
       var xSlot = smallsLeft + (i + 0.5) * xSlotWidth;
-      var xOffset = (Math.random() - 0.5) * 60; // ±30px
+      var xOffset = (Math.random() - 0.5) * SMALL_X_OFFSET_RANGE; // ±30 desktop, ±12 mobile
       var x = Math.max(smallsLeft, Math.min(smallsRight, xSlot + xOffset));
 
       var yOverride = tile.getAttribute('data-y');
@@ -254,19 +294,57 @@
     return 0;
   }
 
+  // Recreate the clip-paths in <defs> with the current (possibly
+  // scaled) BIG/SMALL sizes. The HTML has fixed 500/200 clip-paths
+  // (assumed to match desktop); on mobile SCALE=0.4 so the rects
+  // and rounded corners shrink proportionally.
+  function setupClipPaths(stage) {
+    var defs = stage.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      stage.insertBefore(defs, stage.firstChild);
+    }
+    defs.innerHTML = '';
+    var bigRx = Math.max(2, Math.round(BIG_WIDTH * 0.044));   // 22/500 = 0.044
+    var smallRx = Math.max(2, Math.round(SMALL_WIDTH * 0.08)); // 16/200 = 0.08
+    var SVG_NS = 'http://www.w3.org/2000/svg';
+    var cp1 = document.createElementNS(SVG_NS, 'clipPath');
+    cp1.id = 'hc-cp1';
+    var r1 = document.createElementNS(SVG_NS, 'rect');
+    r1.setAttribute('width', BIG_WIDTH);
+    r1.setAttribute('height', BIG_HEIGHT);
+    r1.setAttribute('rx', bigRx);
+    cp1.appendChild(r1);
+    defs.appendChild(cp1);
+    var cp2 = document.createElementNS(SVG_NS, 'clipPath');
+    cp2.id = 'hc-cp2';
+    var r2 = document.createElementNS(SVG_NS, 'rect');
+    r2.setAttribute('width', SMALL_WIDTH);
+    r2.setAttribute('height', SMALL_HEIGHT);
+    r2.setAttribute('rx', smallRx);
+    cp2.appendChild(r2);
+    defs.appendChild(cp2);
+  }
+
   function init() {
     var hero = document.getElementById('top');
     var stage = document.getElementById('hero-carousel-svg');
     if (!hero || !stage) return;
     if (typeof gsap === 'undefined') return;
 
-    // Mobile skip: the SVG is hidden by CSS, .hero has a static
-    // background image, and the carousel JS has nothing to scrub.
-    if (window.innerWidth < MOBILE_MAX_WIDTH) return;
+    // v3.10+: the carousel runs on mobile too. The previous
+    // `if (window.innerWidth < MOBILE_MAX_WIDTH) return;` short-circuit
+    // is gone — the CSS now shows the SVG in the top 2/3 of the hero
+    // on mobile, and the tile layout is scaled by SCALE in buildLayout
+    // so the visible region on a 375-wide phone shows 1.5–2 bigs.
 
     // Build the layout from the photos in the SVG
     var layout = buildLayout(stage);
     if (!layout.length) return;
+
+    // Recreate clip-paths with the (scaled) tile sizes so the rounded
+    // corners still match.
+    setupClipPaths(stage);
 
     // Set initial sizing + position for each tile (phase = 0).
     gsap.set(stage.querySelectorAll('image'), {
@@ -318,6 +396,22 @@
       hero.style.cursor = 'default';
     }
 
+    // === Mobile area gate (v3.10+) ===
+    // On mobile, .hero is a flex column with the carousel in the
+    // top 2/3 and the text content in the bottom 1/3. The carousel
+    // should only respond to touches in the top 2/3 — the bottom
+    // 1/3 has the CTAs ("View credits", "Rental kit") and we don't
+    // want to steal taps there. On desktop, the gate is always true.
+    var inCarouselArea = true;
+    function updateCarouselArea(clientX, clientY) {
+      if (!isMobile) { inCarouselArea = true; return; }
+      var rect = hero.getBoundingClientRect();
+      // Top 2/3 of the hero. Math is the same on any viewport since
+      // the hero is the reference for both clientY and the area.
+      inCarouselArea = clientY >= rect.top &&
+                        clientY <= rect.top + rect.height * (2 / 3);
+    }
+
     hero.addEventListener('mousemove', function (e) {
       updateBand(e.clientX, e.clientY);
     });
@@ -328,6 +422,7 @@
     // drag would silently no-op.
     hero.addEventListener('pointerdown', function (e) {
       updateBand(e.clientX, e.clientY);
+      updateCarouselArea(e.clientX, e.clientY);
     });
     hero.addEventListener('touchmove', function (e) {
       if (e.touches && e.touches[0]) {
@@ -337,6 +432,7 @@
     hero.addEventListener('touchstart', function (e) {
       if (e.touches && e.touches[0]) {
         updateBand(e.touches[0].clientX, e.touches[0].clientY);
+        updateCarouselArea(e.touches[0].clientX, e.touches[0].clientY);
       }
     }, { passive: true });
     hero.addEventListener('touchend', leaveBand);
@@ -369,6 +465,10 @@
     // mouse wheel turns produce big moves).
     function onWheel(e) {
       if (!inCarouselBand) return;
+      // v3.10+: on mobile, also gate on the carousel area (top 2/3)
+      // so a wheel/touchpad over the content area scrolls the page
+      // instead of the carousel. On desktop this is always true.
+      if (!inCarouselArea) return;
       e.preventDefault();
       var deltaY = readWheelDelta(e);
       if (WHEEL_INVERTED) deltaY = -deltaY;
@@ -396,21 +496,28 @@
         // so it doesn't double-count.
         preventDefault: false,
         onPress: function () {
+          // On mobile, the carousel lives in the top 2/3 of the hero.
+          // If the press started in the bottom 1/3 (the CTA area), the
+          // user is reaching for a button — don't steal the gesture.
+          // On desktop, inCarouselArea stays true.
+          if (!inCarouselArea) return;
           // Capture phase at press time so onDrag has a stable base
           // even if the user starts a drag before any mousemove fires.
           dragStartPhase = phase;
         },
         onDrag: function (self) {
+          if (!inCarouselArea) return;
           // self.deltaX is total horizontal drag distance since start.
           // Drag right (positive) → tiles move right → phase grows.
           phase = dragStartPhase + self.deltaX * DRAG_SENSITIVITY / 1000;
         },
         // onLeft/onRight: discrete gestures (fling past threshold).
-        // Only bump phase if the fling started inside the band —
-        // outside the band, the user is just trying to scroll the
-        // page and we shouldn't move the carousel.
-        onLeft:  function () { if (inCarouselBand) phase -= 50; },
-        onRight: function () { if (inCarouselBand) phase += 50; }
+        // Only bump phase if the fling started inside the band AND
+        // inside the mobile carousel area — outside either, the user
+        // is just trying to scroll the page and we shouldn't move
+        // the carousel.
+        onLeft:  function () { if (inCarouselBand && inCarouselArea) phase -= 50; },
+        onRight: function () { if (inCarouselBand && inCarouselArea) phase += 50; }
       });
     }
 
