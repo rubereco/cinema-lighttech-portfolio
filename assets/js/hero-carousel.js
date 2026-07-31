@@ -1,38 +1,39 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.9).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.9.1).
    ────────────────────────────────────────────────────────────────────────
-   v3.9 fixes (Buddie QA pass on v3.8):
-   1. NO TRAILING GAP. v3.8 hard-coded X_RANGE = 3600 (= 4 ×
-      bigSpacing), but with 3 bigs the last big ends at 2300 and the
-      4th small at 3500 — leaving a 100px ghost slot before the loop
-      wrapped. v3.9 computes X_RANGE from the actual layout:
-      X_RANGE = max(lastBigEnd, lastSmallEnd). For the current photo
-      set that's 3500. The 4th small now abuts the next big's left
-      clone with no gap.
+   v3.9 → v3.9.1 (Buddie QA pass on v3.9):
 
-   2. SMALLS WOBBLE. v3.8 randomized each small's reference Y once
-      at init and then never moved them again — they looked frozen.
-      v3.9 adds a per-frame random Y offset (±3px) in the tick loop
-      so the smalls feel alive while still anchored to their
-      reference point. Bigs are untouched (their motion is x-only).
+   v3.9 misread "move them a little with a random" as per-frame
+   jitter, but Buddie clarified: no constant motion — each small
+   should just SPAWN at a different position from the others. So
+   v3.9.1:
+   • drops the per-frame Y wobble (smalls are fully static now)
+   • widens each small's spawn y to a wide random range
+     (SMALL_Y_MIN..SMALL_Y_MAX, default 50..650) so they look
+     scattered, not aligned
+   • distributes x evenly across the loop with a ±30px offset so
+     they're not on a perfect grid line either
 
-   3. DRAG WORKS ANYWHERE. v3.8 gated drag on inCarouselBand, but
-      inCarouselBand only updated on mousemove — so a user who
-      clicked without first moving the mouse would trigger the
-      Observer with a stale inCarouselBand=false and drag would
-      silently no-op. v3.9:
-      • updates inCarouselBand on pointerdown/touchstart too, so
-        the band is fresh at press time
-      • lets drag work anywhere inside the hero (the band only
-        gates WHEEL, so the page can still scroll when the user
-        wheels in the middle of the hero)
+   Also, Buddie caught that the wrap still had a big gap between
+   the last big and the first: with BIG_SPACING=900 and 3 bigs,
+   big 2 ended at 2300 and big 0's right clone was at 3600 (a
+   1300px gap with smalls scattered in it). That didn't look like
+   a "continuous" carousel. v3.9.1 makes the bigs abut:
+   • BIG_SPACING = BIG_WIDTH = 500, so bigs tile back-to-back
+   • loop = bigCount × BIG_SPACING (= 1500 for 3 bigs), with no
+     trailing slot
+   • big 0's right clone starts exactly where big 2 ends, so the
+     loop reads as a continuous ribbon
+
+   v3.9 fixes that stayed:
+   • Drag works anywhere in the hero (band only gates WHEEL).
+   • inCarouselBand is updated on pointerdown / touchstart too, so
+     drag is fresh at press time.
+   • X_RANGE is computed from the layout, not hard-coded.
 
    What stayed the same (still true from v3.8):
-   • Phase-based scrub: global phase accumulates raw deltaY, rAF
-     lerp interpolates currentPhase → phase, each tile's x is
-     baseX + currentPhase * stepFrac via gsap.set.
-   • Smalls evenly distributed at 1 bigSpacing apart (no adjacent
-     pair cluster).
+   • Phase-based scrub (global phase, lerped to currentPhase, tile
+     x = baseX + currentPhase * stepFrac via gsap.set).
    • Mobile-aware: viewports < 768px skip the carousel entirely.
    • Band-based zones for WHEEL: outer 20% scrubs, middle 60%
      passes wheel to the page.
@@ -72,35 +73,30 @@
   var SMALL_WIDTH = 200;
   var SMALL_HEIGHT = 200;
 
-  // Loop length. 4 × bigSpacing so the 4 smalls can each be 1
-  // bigSpacing apart (avoids the "trailing pair" cluster).
-  var BIG_SPACING = 900;
-  // X_RANGE is computed dynamically inside buildLayout() from the
-  // actual tile layout, so the last tile ends exactly at the loop
-  // boundary — no trailing empty slot. The 3600 default is the upper
-  // bound used by the comments above; buildLayout() may shrink it.
-  var X_RANGE = BIG_SPACING * 4; // 3600 (upper bound; buildLayout() refines it)
+  // Loop length. Bigs abut perfectly: BIG_SPACING = BIG_WIDTH, so
+  // big i+1 starts exactly where big i ends. The loop is exactly
+  // bigCount × BIG_SPACING — no trailing gap, no "phantom" slot
+  // where a missing big would go. (Buddie's QA on v3.9: "the gap
+  // between the last of the big images and the first is not solved".)
+  // X_RANGE is computed inside buildLayout() = last big's right edge.
+  var BIG_SPACING = 500;
+  var X_RANGE = BIG_SPACING * 4; // upper bound; buildLayout() refines it
 
   // Y positions
   var BIG_Y = 200;
-  var SMALL_Y = 350;
-  var SMALL_Y_JITTER = 15; // ±15px variation for visual interest
+  // (Each small spawns at a random y in [SMALL_Y_MIN, SMALL_Y_MAX]
+  // defined further down — the old single-anchor SMALL_Y is gone.)
 
   // Gap between smalls and bigs
   var SMALL_GAP = 10;
 
-  // Per-frame Y jitter range for smalls. The reference Y is set once
-  // at init (so each small has its own anchor), and we add ±half of
-  // this value per frame in tick() to give the smalls a subtle
-  // "alive" wobble. Pure random — no smoothing — because at 60fps a
-  // ±3px random walk reads as gentle motion, not noise.
-  var SMALL_JITTER_RANGE = 6; // ±3px per frame
-
-  // First small's x position. Chosen so the small sits in the gap
-  // between big 0 (0..500) and big 1 (900..1400), centered with the
-  // standard 10px padding on each side. gap = 400, padding =
-  // (400 - 200 - 20) / 2 = 90, so x = 500 + 10 + 90 = 600.
-  var FIRST_SMALL_X = 600;
+  // Y range for smalls. Each small spawns at a random y in this range
+  // so they look like a scattered set, not a row. Wide spread on
+  // purpose — Buddie's QA: "I want them to spawn different from each
+  // other, no jitter." The range covers the full SVG height minus
+  // margins so smalls can appear above, between, and below the bigs.
+  var SMALL_Y_MIN = 50;
+  var SMALL_Y_MAX = 650;
 
   // Carousel band: outer X% on each side of the hero.
   var BAND_FRACTION = 0.20;
@@ -132,18 +128,15 @@
     var bigCount = bigs.length;
     if (bigCount === 0) return [];
 
-    // Compute X_RANGE from the actual layout so the loop ends exactly
-    // at the last tile's right edge — no trailing empty slot. For
-    // 3 bigs + 4 smalls with FIRST_SMALL_X=600, BIG_SPACING=900:
-    //   lastBigEnd   = 2*900 + 500            = 2300
-    //   lastSmallEnd = 600 + 3*900 + 200      = 3500
-    //   X_RANGE      = max(2300, 3500) = 3500
-    // The 4th small now abuts the next big's left clone with no gap.
+    // Compute X_RANGE so the loop ends exactly at the last big's
+    // right edge. Bigs are now continuous (BIG_SPACING = BIG_WIDTH),
+    // so the loop is exactly bigCount × BIG_SPACING. Smalls are
+    // placed within the loop (x in [0, X_RANGE - SMALL_WIDTH]), so
+    // they don't extend X_RANGE.
+    //   For 3 bigs: X_RANGE = 2*500 + 500 = 1500
+    //   Big 0's right clone starts at 1500, abutting big 2's end.
     var lastBigEnd = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
-    var lastSmallEnd = smalls.length > 0
-      ? FIRST_SMALL_X + (smalls.length - 1) * BIG_SPACING + SMALL_WIDTH
-      : 0;
-    X_RANGE = Math.max(lastBigEnd, lastSmallEnd);
+    X_RANGE = lastBigEnd;
 
     // Create left (-X_RANGE) and right (+X_RANGE) clones of every
     // original tile. The clones share the same href (cloneNode(true)
@@ -184,17 +177,23 @@
       pushThree(tile, 'big', x, BIG_Y, BIG_PHASE_FRAC);
     });
 
-    // Smalls: each small sits 1 bigSpacing after the previous, starting
-    // at FIRST_SMALL_X. This guarantees no two smalls are adjacent —
-    // every pair of smalls is separated by bigSpacing (~900px), the
-    // same as the big-to-big spacing. Fixes the "trailing pair" cluster.
+    // Smalls: each at a unique (x, y) so the row reads as a
+    // scattered set, not a grid. X is evenly distributed across the
+    // loop with a small ±30px random offset (avoids landing on a
+    // perfect grid line). Y is a wide random in [SMALL_Y_MIN,
+    // SMALL_Y_MAX] so each small sits at a clearly different vertical
+    // position. No per-frame jitter — positions are fixed at init.
+    // data-y attribute still overrides the random y for fine-tuning.
+    var xSlotWidth = (X_RANGE - SMALL_WIDTH) / smalls.length;
     smalls.forEach(function (tile, i) {
-      var x = FIRST_SMALL_X + i * BIG_SPACING;
-      // Allow per-tile y override via data-y attribute (for fine-tuning)
+      var xSlot = (i + 0.5) * xSlotWidth;
+      var xOffset = (Math.random() - 0.5) * 60; // ±30px
+      var x = Math.max(0, Math.min(X_RANGE - SMALL_WIDTH, xSlot + xOffset));
+
       var yOverride = tile.getAttribute('data-y');
       var y = yOverride !== null
         ? parseFloat(yOverride)
-        : SMALL_Y + (Math.random() - 0.5) * SMALL_Y_JITTER;
+        : SMALL_Y_MIN + Math.random() * (SMALL_Y_MAX - SMALL_Y_MIN);
       pushThree(tile, 'small', x, y, SMALL_PHASE_FRAC);
     });
 
@@ -321,15 +320,7 @@
         // Wrap into the tile's valid range.
         while (displayX > item.offset + X_RANGE) displayX -= X_RANGE;
         while (displayX < item.offset) displayX += X_RANGE;
-        if (item.size === 'small') {
-          // Subtle per-frame Y wobble so the smalls feel "alive"
-          // instead of locked to their reference position. Bigs
-          // stay still — the parallax comes from x only.
-          var jitter = (Math.random() - 0.5) * SMALL_JITTER_RANGE;
-          gsap.set(item.tile, { x: displayX, y: item.y + jitter });
-        } else {
-          gsap.set(item.tile, { x: displayX });
-        }
+        gsap.set(item.tile, { x: displayX });
       });
     }
     gsap.ticker.add(tick);
