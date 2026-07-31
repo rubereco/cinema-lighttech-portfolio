@@ -1,38 +1,43 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.8).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.9).
    ────────────────────────────────────────────────────────────────────────
-   v3.8 fixes (Buddie QA pass):
-   1. SMOOTH SCRUB. The old per-event `gsap.to(..., {duration: 0.2,
-      overwrite: 'auto'})` was the cause of the "not smooth" feel —
-      every wheel tick restarted the tween, so tiles kept chasing a
-      moving target. v3.8 switches to a phase-based scrub:
-      • a single global `phase` accumulates raw `deltaY * SENSITIVITY`
-      • each frame, an rAF lerp interpolates `currentPhase → phase`
-      • each tile's x is `baseX + currentPhase * stepFrac`, set
-        directly with `gsap.set` (no tween, no overwrite)
-      The result: motion is proportional to the wheel (trackpad feels
-      like a trackpad, mouse wheel feels like a mouse wheel) AND
-      smooth (the lerp absorbs the discrete event steps).
+   v3.9 fixes (Buddie QA pass on v3.8):
+   1. NO TRAILING GAP. v3.8 hard-coded X_RANGE = 3600 (= 4 ×
+      bigSpacing), but with 3 bigs the last big ends at 2300 and the
+      4th small at 3500 — leaving a 100px ghost slot before the loop
+      wrapped. v3.9 computes X_RANGE from the actual layout:
+      X_RANGE = max(lastBigEnd, lastSmallEnd). For the current photo
+      set that's 3500. The 4th small now abuts the next big's left
+      clone with no gap.
 
-   2. NO "PAIR" OF SMALLS. The old layout packed the 2 trailing
-      smalls only 210px apart (smalls 200 + gap 10), so they entered
-      the viewport side-by-side looking like a pair. v3.8 distributes
-      all 4 smalls evenly, each 1 bigSpacing (~900px) apart from
-      the next. New loop = 4 × bigSpacing = 3600. Smalls at 600,
-      1500, 2400, 3300 — no two smalls are ever adjacent.
+   2. SMALLS WOBBLE. v3.8 randomized each small's reference Y once
+      at init and then never moved them again — they looked frozen.
+      v3.9 adds a per-frame random Y offset (±3px) in the tick loop
+      so the smalls feel alive while still anchored to their
+      reference point. Bigs are untouched (their motion is x-only).
 
-   3. MOBILE-AWARE. Viewports < 768px skip the carousel entirely
-      (the SVG is hidden by CSS, the .hero gets a static background
-      image). No tiny tiles, no wasted images, no broken wheel.
+   3. DRAG WORKS ANYWHERE. v3.8 gated drag on inCarouselBand, but
+      inCarouselBand only updated on mousemove — so a user who
+      clicked without first moving the mouse would trigger the
+      Observer with a stale inCarouselBand=false and drag would
+      silently no-op. v3.9:
+      • updates inCarouselBand on pointerdown/touchstart too, so
+        the band is fresh at press time
+      • lets drag work anywhere inside the hero (the band only
+        gates WHEEL, so the page can still scroll when the user
+        wheels in the middle of the hero)
 
-   What stayed the same (still true from v3.6/v3.7):
-   • Band-based zones: outer 20% of hero scrubs, middle 60% passes
-     wheel to the page.
+   What stayed the same (still true from v3.8):
+   • Phase-based scrub: global phase accumulates raw deltaY, rAF
+     lerp interpolates currentPhase → phase, each tile's x is
+     baseX + currentPhase * stepFrac via gsap.set.
+   • Smalls evenly distributed at 1 bigSpacing apart (no adjacent
+     pair cluster).
+   • Mobile-aware: viewports < 768px skip the carousel entirely.
+   • Band-based zones for WHEEL: outer 20% scrubs, middle 60%
+     passes wheel to the page.
    • Data-driven layout: `<image data-size="big|small">` in HTML.
    • Seamless wrap: each original tile gets two clones (±X_RANGE).
-     All three copies move in lockstep via the shared `phase`, so
-     when one copy slides off-screen, its sibling slides in from
-     the opposite edge — no visible teleport.
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -70,7 +75,11 @@
   // Loop length. 4 × bigSpacing so the 4 smalls can each be 1
   // bigSpacing apart (avoids the "trailing pair" cluster).
   var BIG_SPACING = 900;
-  var X_RANGE = BIG_SPACING * 4; // 3600
+  // X_RANGE is computed dynamically inside buildLayout() from the
+  // actual tile layout, so the last tile ends exactly at the loop
+  // boundary — no trailing empty slot. The 3600 default is the upper
+  // bound used by the comments above; buildLayout() may shrink it.
+  var X_RANGE = BIG_SPACING * 4; // 3600 (upper bound; buildLayout() refines it)
 
   // Y positions
   var BIG_Y = 200;
@@ -79,6 +88,13 @@
 
   // Gap between smalls and bigs
   var SMALL_GAP = 10;
+
+  // Per-frame Y jitter range for smalls. The reference Y is set once
+  // at init (so each small has its own anchor), and we add ±half of
+  // this value per frame in tick() to give the smalls a subtle
+  // "alive" wobble. Pure random — no smoothing — because at 60fps a
+  // ±3px random walk reads as gentle motion, not noise.
+  var SMALL_JITTER_RANGE = 6; // ±3px per frame
 
   // First small's x position. Chosen so the small sits in the gap
   // between big 0 (0..500) and big 1 (900..1400), centered with the
@@ -115,6 +131,19 @@
     });
     var bigCount = bigs.length;
     if (bigCount === 0) return [];
+
+    // Compute X_RANGE from the actual layout so the loop ends exactly
+    // at the last tile's right edge — no trailing empty slot. For
+    // 3 bigs + 4 smalls with FIRST_SMALL_X=600, BIG_SPACING=900:
+    //   lastBigEnd   = 2*900 + 500            = 2300
+    //   lastSmallEnd = 600 + 3*900 + 200      = 3500
+    //   X_RANGE      = max(2300, 3500) = 3500
+    // The 4th small now abuts the next big's left clone with no gap.
+    var lastBigEnd = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
+    var lastSmallEnd = smalls.length > 0
+      ? FIRST_SMALL_X + (smalls.length - 1) * BIG_SPACING + SMALL_WIDTH
+      : 0;
+    X_RANGE = Math.max(lastBigEnd, lastSmallEnd);
 
     // Create left (-X_RANGE) and right (+X_RANGE) clones of every
     // original tile. The clones share the same href (cloneNode(true)
@@ -256,7 +285,19 @@
       updateBand(e.clientX, e.clientY);
     });
     hero.addEventListener('mouseleave', leaveBand);
+    // Capture the band at pointer/touch PRESS time, not only on
+    // mousemove. Otherwise a user who clicks before moving the mouse
+    // would see inCarouselBand=false (stale initial value) and the
+    // drag would silently no-op.
+    hero.addEventListener('pointerdown', function (e) {
+      updateBand(e.clientX, e.clientY);
+    });
     hero.addEventListener('touchmove', function (e) {
+      if (e.touches && e.touches[0]) {
+        updateBand(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+    hero.addEventListener('touchstart', function (e) {
       if (e.touches && e.touches[0]) {
         updateBand(e.touches[0].clientX, e.touches[0].clientY);
       }
@@ -280,7 +321,15 @@
         // Wrap into the tile's valid range.
         while (displayX > item.offset + X_RANGE) displayX -= X_RANGE;
         while (displayX < item.offset) displayX += X_RANGE;
-        gsap.set(item.tile, { x: displayX });
+        if (item.size === 'small') {
+          // Subtle per-frame Y wobble so the smalls feel "alive"
+          // instead of locked to their reference position. Bigs
+          // stay still — the parallax comes from x only.
+          var jitter = (Math.random() - 0.5) * SMALL_JITTER_RANGE;
+          gsap.set(item.tile, { x: displayX, y: item.y + jitter });
+        } else {
+          gsap.set(item.tile, { x: displayX });
+        }
       });
     }
     gsap.ticker.add(tick);
@@ -304,6 +353,12 @@
       // onDrag / onDragEnd capture total horizontal travel since the
       // gesture started (self.deltaX). We add it to phase so the
       // carousel follows the finger.
+      //
+      // Drag is allowed anywhere inside the hero — the band only
+      // gates WHEEL, so the page can still scroll normally when the
+      // user wheels in the middle of the hero. For drag, the user's
+      // intent is unambiguous: if they're clicking on the hero, they
+      // want to drag the photos.
       var dragStartPhase = 0;
       Observer.create({
         target: hero,
@@ -311,18 +366,20 @@
         // Wheel is already handled above; tell Observer to ignore it
         // so it doesn't double-count.
         preventDefault: false,
-        onDragStart: function () {
-          if (!inCarouselBand) return;
+        onPress: function () {
+          // Capture phase at press time so onDrag has a stable base
+          // even if the user starts a drag before any mousemove fires.
           dragStartPhase = phase;
         },
         onDrag: function (self) {
-          if (!inCarouselBand) return;
           // self.deltaX is total horizontal drag distance since start.
           // Drag right (positive) → tiles move right → phase grows.
           phase = dragStartPhase + self.deltaX * DRAG_SENSITIVITY / 1000;
         },
         // onLeft/onRight: discrete gestures (fling past threshold).
-        // Add a small extra bump so flings keep momentum.
+        // Only bump phase if the fling started inside the band —
+        // outside the band, the user is just trying to scroll the
+        // page and we shouldn't move the carousel.
         onLeft:  function () { if (inCarouselBand) phase -= 50; },
         onRight: function () { if (inCarouselBand) phase += 50; }
       });
