@@ -1,54 +1,37 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.6).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.7).
    ────────────────────────────────────────────────────────────────────────
-   v3.6 fixes the "right movement is broken" bug and the
-   "smalls not following the reference point" feedback. Three fixes:
+   v3.7 polishes the hero carousel per Buddie's notes (issue #18).
+   v3.6's three foundational fixes are unchanged:
+     • RIGHT DIRECTION — no GSAP wrap modifier; newX wraps in JS to
+       [0, X_RANGE]. One event = one scrub (sign of deltaY).
+     • DATA-DRIVEN LAYOUT — `<image data-size="big|small">` in HTML;
+       `buildLayout()` calculates positions from the DOM. `data-y`
+       overrides the random y jitter.
+     • BAND-BASED ZONES — outer 20% of hero scrubs tiles, middle 60%
+       passes the wheel through to the page.
 
-   1. RIGHT DIRECTION (the main bug): the wrap was the culprit. When
-      the user wheels/dragged right, the progress increased past 1.0
-      and the wrap modifier teleported the tile from the right edge
-      to the left. With back.out(5) overshooting and a tight X range,
-      the wrap fired mid-burst and the user saw the tile "jump"
-      while still in view — "wild" motion. Fix:
-        - Smaller step (0.003 / 0.006, was 0.005 / 0.010). Less
-          motion per event, gentler.
-        - Wider X range (2790, was 3200 in v3.4 / 3500 in v3.5). Wrap
-          is rarer.
-        - No cumulative-deltaY. One event = one scrub. The sign of
-          the current event determines the direction.
-        - Wrap is now handled in JS (newX wrapped to [0, X_RANGE])
-          instead of via a GSAP modifier. More predictable, no
-          overshoot surprises.
+   v3.7's three polish fixes:
+   1. DOUBLE SPEED. BIG_STEP_FRAC 0.003 → 0.006; SMALL doubles with
+      it (0.006 → 0.012). Responsive-feeling scrub without re-
+      introducing wrap-too-often (X_RANGE=2790 absorbs the bigger step).
 
-   2. DATA-DRIVEN LAYOUT (maintainable). The photos are now a flat
-      list of `<image href="..." data-size="big|small" />` in the
-      HTML. The system reads the list and calculates the layout
-      (positions, y, step) from the data-size attribute. Adding a
-      new photo is just adding an `<image>` element. No JS edit
-      needed. If a `data-y-jitter` attribute is set, that overrides
-      the random jitter.
-
-   3. ANCHORED PATTERN. Smalls are placed in the gaps between bigs
-      with the "10px from the previous big AND 10px from the next
-      big" reference point. For 3 bigs and 4 smalls, this gives
-      2 smalls per gap (the gap is 430px, fits 2×(200+10)=420 with
-      10px to spare). The math works out:
-        - big spacing = 2790/3 = 930
-        - gap = 930 - 500 = 430
-        - 2 smalls per gap: small 0 at big+510, small 1 at big+720,
-          10px before the next big.
-      Smalls move at 2x the big speed (0.006 vs 0.003) and have
-      a small y jitter (±15px) for visual variety.
+   2. ONE SMALL PER GAP. v3.6 packed 2 smalls into each 430px gap;
+      v3.7 places 1 small centered (10px padding each side) and any
+      extras trail after the last big.
+      - gap = 930 - 500 = 430; padding = (430 - 200 - 20)/2 = 105
+      - centered small: x = prevBig + 500 + 10 + 105 = prevBig + 615
+      - trailing smalls start at lastBig + 500 + 10 = +2370
 
    Layout (for 3 bigs and 4 smalls, X_RANGE=2790)
    ─────────────────────────────────────────────
    big 0     x=0
-   small 0   x=510   (10px after big 0, gap 0-1)
-   small 1   x=720   (10px after small 0, gap 0-1)
+   small 0   x=615   (centered in gap 0-1)
    big 1     x=930
-   small 2   x=1440  (10px after big 1, gap 1-2)
-   small 3   x=1650  (10px after small 2, gap 1-2)
+   small 1   x=1545  (centered in gap 1-2)
    big 2     x=1860
+   small 2   x=2370  (trailing)
+   small 3   x=2580  (trailing)
 
    Scroll behavior (unchanged from v3.3)
    ────────────────────────────────────────
@@ -63,7 +46,7 @@
    Per-tile motion
    ──────────────
    Each scrub event: tile.x changes by ±stepFrac * X_RANGE pixels
-   (stepFrac = 0.003 for bigs, 0.006 for smalls = 2x). After the
+   (stepFrac = 0.006 for bigs, 0.012 for smalls = 2x). After the
    change, tile.x is wrapped to [0, X_RANGE] and the tile is
    animated to the new x with gsap.to (duration 0.2s, ease power2.out).
 
@@ -77,8 +60,11 @@
 
   // Per-tile scrub increments (as fraction of the loop).
   // Smalls move 2x as fast as bigs.
-  var BIG_STEP_FRAC = 0.003;
-  var SMALL_STEP_FRAC = BIG_STEP_FRAC * 2;  // 0.006
+  // v3.7: doubled from 0.003/0.006. The v3.6 right-direction fix
+  // felt sluggish at half speed; X_RANGE=2790 absorbs the bigger
+  // step without re-introducing wrap-too-often.
+  var BIG_STEP_FRAC = 0.006;
+  var SMALL_STEP_FRAC = BIG_STEP_FRAC * 2;  // 0.012
   var SCRUB_DURATION = 0.2;
   var SCRUB_EASE = 'power2.out';
 
@@ -89,9 +75,9 @@
   var SMALL_HEIGHT = 200;
 
   // X range. Wider = less frequent wrap, less visual chaos.
-  // For 3 bigs and 4 smalls (2 per gap) with 10px gaps, the minimum
-  // X range is 2790 (bigs at 0, 930, 1860; gaps of 430 each, fitting
-  // 2 smalls of 200px with 10px on each side).
+  // For 3 bigs and 4 smalls (1 per gap, 2 trailing) with 10px gaps,
+  // X_RANGE = 2790 fits: bigs at 0, 930, 1860 (smalls centered at
+  // 615 and 1545), trailing smalls at 2370 and 2580.
   var X_RANGE = 2790;
 
   // Y positions
@@ -113,9 +99,9 @@
 
   // === Build the layout from the SVG's <image> elements ===
   // Bigs are evenly distributed across the loop.
-  // Smalls are placed in the gaps between bigs, with 10px gap from
-  // each big. Multiple smalls per gap are placed 10px apart from
-  // each other.
+  // Smalls are placed in the gaps between bigs, centered with 10px
+  // padding on each side. Excess smalls trail after the last big,
+  // spaced SMALL_GAP apart.
   function buildLayout(stage) {
     var allTiles = Array.from(stage.querySelectorAll('.hc-row image'));
     if (!allTiles.length) return [];
@@ -135,34 +121,31 @@
     });
 
     // Smalls distributed in the gaps between bigs
-    // For N bigs, there are N-1 gaps. The smalls are placed in these
-    // gaps with 10px gap from each big. Multiple smalls per gap are
-    // placed 10px apart from each other.
+    // For N bigs, there are N-1 gaps. Each gap gets at most 1 small
+    // (centered with SMALL_GAP padding on each side). Any remaining
+    // smalls trail after the last big, spaced SMALL_GAP apart.
     var smallsAssigned = [];
     var smallIndex = 0;
+    // v3.7: 1 small per gap, centered with 10px padding on each side.
+    // With 3 bigs and 4 smalls: 2 smalls fill the 2 gaps, 2 trail.
     for (var g = 0; g < bigCount - 1 && smallIndex < smalls.length; g++) {
       var prevBigX = bigPositions[g];
       var nextBigX = bigPositions[g + 1];
       var gapSize = nextBigX - prevBigX - BIG_WIDTH;
-      // Number of smalls that fit in this gap with 10px gaps
-      // (e.g., gap=430 → 2 smalls: 10+200+10+200+10 = 430)
-      var maxInGap = Math.max(0, Math.floor((gapSize - SMALL_GAP) / (SMALL_WIDTH + SMALL_GAP)));
-      for (var p = 0; p < maxInGap && smallIndex < smalls.length; p++) {
-        var x = prevBigX + BIG_WIDTH + SMALL_GAP + p * (SMALL_WIDTH + SMALL_GAP);
-        smallsAssigned.push({ tile: smalls[smallIndex], x: x });
-        smallIndex++;
-      }
+      // Center 1 small in the gap with 10px padding on each side.
+      // (gap=430 → padding=(430-200-20)/2=105 → x=prevBig+615)
+      var padding = (gapSize - SMALL_WIDTH - 2 * SMALL_GAP) / 2;
+      var x = prevBigX + BIG_WIDTH + SMALL_GAP + padding;
+      smallsAssigned.push({ tile: smalls[smallIndex], x: x });
+      smallIndex++;
     }
-    // Any remaining smalls go after the last big (in the last gap or
-    // at the end of the loop, depending on space).
+    // Remaining smalls trail after the last big, spaced SMALL_GAP apart.
+    // Anchor the trailing run to the last big (not the last gap small),
+    // otherwise trailing smalls overlap the last big.
+    var trailingX = (bigPositions[bigCount - 1] || 0) + BIG_WIDTH + SMALL_GAP;
     while (smallIndex < smalls.length) {
-      var lastSmall = smallsAssigned.length > 0
-        ? smallsAssigned[smallsAssigned.length - 1]
-        : null;
-      var lastX = lastSmall
-        ? lastSmall.x + SMALL_WIDTH + SMALL_GAP
-        : (bigPositions[bigCount - 1] || 0) + BIG_WIDTH + SMALL_GAP;
-      smallsAssigned.push({ tile: smalls[smallIndex], x: lastX });
+      smallsAssigned.push({ tile: smalls[smallIndex], x: trailingX });
+      trailingX += SMALL_WIDTH + SMALL_GAP;
       smallIndex++;
     }
 
