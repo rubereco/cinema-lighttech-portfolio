@@ -7,17 +7,29 @@
 /* ──────────────── Hero ────────────────
    CodePen-style full-bleed SVG carousel.
    ────────────────────────────────────────────────────────────────────────
-   The hero is a single black section with a full-bleed SVG covering it.
+   The hero is a single transparent section with a full-bleed SVG covering it.
    Tiles inside the SVG flow horizontally as the user wheels/drags inside
    the hero (Observer captures those events and scrubs tile timelines).
    Outside the hero, the page scrolls normally.
 
+   The hero background is the body's radial gradient (see reset.css,
+   v3.10.19) — center is #050506 (darker), fading to #0b0b0d at the
+   edges, anchored to the viewport. The hero shows this radial; the
+   next section (.section-posters) is a solid #0b0b0d that matches
+   the edge of the radial, so the hero's margin and the posters
+   section blend seamlessly.
+
    Layered from back to front:
      z:0 .hero-carousel (the SVG stage, full-bleed)
-     z:1 .hero-overlay (dark gradient for text legibility)
-     z:2 .hero-content (text + CTAs, centered)
+     z:1 .hero-content  (text, centered — the radial glassy chip
+                         on .hero-content handles legibility now)
 
    EVF portrait is the 2nd big tile inside the SVG (not a separate layer).
+
+   v3.10.19: removed .hero-overlay (the linear gradient). The "onion"
+   (darker center) is now on the body, not the hero. The .hero-overlay
+   div in index.html is now a no-op (empty div) — left in place to
+   avoid a markup change, but it has no CSS rules and no visible effect.
    ──────────────────────────────────────────────────────────────────────── */
 
 .hero {
@@ -25,7 +37,11 @@
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh; /* dynamic viewport — fixes iOS Safari 100vh bug */
-  background: #000;
+  /* v3.10.19: transparent — body's radial gradient (reset.css) shows
+     through. The center of that radial is #050506 and is anchored to
+     the middle of the viewport, so the hero always shows the darkest
+     part of the onion in the middle of the screen. */
+  background: transparent;
   overflow: hidden;
   isolation: isolate;
   /* Cursor hint that the hero is interactive (wheel scrubs the carousel). */
@@ -65,23 +81,13 @@
   pointer-events: none;
 }
 
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.55) 0%,
-    rgba(0, 0, 0, 0.15) 35%,
-    rgba(0, 0, 0, 0.35) 70%,
-    rgba(0, 0, 0, 0.65) 100%
-  );
-  pointer-events: none;
-}
+/* .hero-overlay removed in v3.10.19.
+   The "onion" (darker center) lives on the body now, not the hero.
+   The empty <div class="hero-overlay"> in index.html is a no-op. */
 
 .hero-content {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -92,28 +98,39 @@
   min-height: 100vh;
   min-height: 100dvh;
   padding: 32px var(--pad-x) 48px;
-  /* Glassy chip behind the text so the moving tiles don't fight legibility. */
+  /* Glassy chip behind the text so the moving tiles don't fight legibility.
+     This is the only darkening layer left in the hero — the body's radial
+     handles the "onion", this handles the text contrast. */
   background: radial-gradient(
     ellipse at center,
-    rgba(0, 0, 0, 0.35) 0%,
-    rgba(0, 0, 0, 0.15) 40%,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.20) 40%,
     rgba(0, 0, 0, 0) 70%
   );
 }
 
 /* ──────────────── Mobile hero (≤767px) ────────────────
-   v3.10.16: restored the 50px .hero margin and added a
-   box-shadow: 0 0 0 50px #0b0b0d. The 50px of empty space
-   was the right amount (per v3.10.13) — the issue was the
-   color of that empty strip (page background, not the hero's
-   dark #0b0b0d). The box-shadow paints the hero's background
-   color into the margin space without affecting layout, so
-   the dark area above (under the nav) and below (above the
-   next section) reads as continuous with the hero. v3.10.15
-   tried removing the margin entirely. v3.10.14 deleted the
-   CTA buttons. v3.10.13 bumped hero margin to 50px. v3.10.12
-   centered the big horizontally. v3.10.10 narrowed the smalls
-   Y range. v3.10.6 made the hero shrink to its content.
+   v3.10.19: hero is transparent. The body's radial gradient
+   (anchored to the viewport) shows through — the 50px margin
+   above and below the hero shows the edge of the radial
+   (fading toward #0b0b0d), which matches .section-posters'
+   solid #0b0b0d background. No box-shadow hack, no own
+   background, no color seam.
+
+   v3.10.18: 50px margin + section owns its #0b0b0d background
+              (rendered as box-shadow extending into margin).
+   v3.10.17: transparent hero, body #0b0b0d shows through
+              (reverted; relied on body being #0b0b0d).
+   v3.10.16: box-shadow: 0 0 0 50px #0b0b0d to color the margin.
+   v3.10.15: removed the 50px margin (reverted in v3.10.16).
+   v3.10.14: deleted the two hero CTA buttons.
+   v3.10.13: hero margin 25→50px, button gap 12→16px.
+   v3.10.12: mobile INITIAL_OFFSET=550 (center big).
+   v3.10.11: DRAG_SENSITIVITY 60→500.
+   v3.10.10: touch-action:pan-y, smalls Y narrowed to 100-400.
+   v3.10.9:  SCALE=1.0 everywhere, drag fix.
+   v3.10.6:  hero shrinks to its content.
+   v3.10.3:  SCALE 0.65→0.67, BIG_Y=0 on mobile.
 
    This block comes AFTER the desktop .hero-content rule above so
    the mobile overrides win on ≤767px viewports. */
@@ -125,30 +142,18 @@
        ends right where the hero-content ends. */
     min-height: 0;
     height: auto;
-    /* v3.10.18: 50px breathing space + the section OWNS its
-       #0b0b0d background. The carousel (the SVG inside) shows
-       this color everywhere it isn't covered by a tile, so the
-       carousel background IS the section background. The body
-       is also #0b0b0d (reset.css), so the 50px margin above
-       and below the hero is the same color as the section —
-       the section + margins read as one continuous surface.
-       (Buddie: "when i say the background of the section im
-       refering also to the margins, so when i enlarge or reduce
-       the margins they inherit the background of that section
-       if the margin is another color it doesn't seem like the
-       section is still going".)
-       This supersedes v3.10.17 (transparent hero relying on
-       body color). Owning the background here is canonical:
-       the section's identity doesn't depend on whatever
-       happens to be behind it. */
+    /* 50px breathing space above and below. With the hero
+       transparent, the margin shows the edge of the body's
+       radial — fading toward #0b0b0d, which is exactly the
+       color of .section-posters just below. */
     margin: 50px 0;
     cursor: default;
-    background-color: #0b0b0d;
+    /* v3.10.19: transparent so the body's radial shows through. */
+    background-color: transparent;
   }
   .hero-content {
-    /* Match the desktop overlay pattern: position relative,
-       fills the hero, text packed at the top so it sits over
-       the big (anchored at y=0 in the SVG since v3.10.3). */
+    /* Text packed at the top (justify-content: flex-start) so it
+       sits over the big (anchored at y=0 in the SVG since v3.10.3). */
     min-height: 0;
     height: auto;
     justify-content: flex-start;
@@ -201,6 +206,11 @@
   padding-right: 0;
   /* containing block so .section-chrome can switch to position:absolute inside */
   position: relative;
+  /* v3.10.19: solid #0b0b0d — matches the edge of the body's radial
+     gradient. The hero's 50px margin shows that same edge color
+     (fading to #0b0b0d at the bottom of the radial), so the margin
+     and this section blend seamlessly with no color seam. */
+  background: #0b0b0d;
 }
 
 .section-posters > .section-head {

@@ -27,7 +27,28 @@ body {
   font-size: 16px;
   line-height: 1.55;
   color: #f4f4f5;
-  background: #0b0b0d;
+  /* v3.10.19: static "onion" background. A centered radial gradient
+     anchored to the viewport (background-attachment: fixed) so the
+     center of the radial sits on the middle of the screen no matter
+     where the user scrolls. The center is #050506 (darker), fading
+     out to #0b0b0d at the edges.
+
+     The .hero is transparent, so it shows this radial — darkest in
+     the middle of the viewport. The .section-posters has a solid
+     #0b0b0d background, which matches the edge of the radial, so
+     the hero's 50px margin and the posters section blend seamlessly.
+
+     background-color is the fallback if the gradient doesn't render
+     (very old browsers, or if background-attachment:fixed is dropped). */
+  background-color: #0b0b0d;
+  background-image: radial-gradient(
+    ellipse at center,
+    #050506 0%,
+    #0b0b0d 100%
+  );
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Smooth scrolling on iOS */
