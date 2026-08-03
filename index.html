@@ -859,6 +859,16 @@
   </head>
 <body>
 
+  <!-- v3.10.23: bg-onion — the "onion" radial that the hero sits on.
+       A real <div> in the markup (not a body::before pseudo-element)
+       because position:fixed + z-index:-1 on a pseudo-element was
+       fragile (overflow-x:hidden on body and z-index quirks in some
+       browsers caused the gradient to scroll with the content). A
+       real fixed div is rock-solid: position:fixed pins it to the
+       viewport no matter what, and z-index:-1 places it behind all
+       body content but in front of the body's solid background. -->
+  <div class="bg-onion" aria-hidden="true"></div>
+
   <!-- ═══════════════════════════════════════════════════════════════════════
 
   <!-- ───────────────────────────── SKIP LINK ───────────────────────────── -->

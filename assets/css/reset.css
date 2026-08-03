@@ -27,58 +27,42 @@ body {
   font-size: 16px;
   line-height: 1.55;
   color: #f4f4f5;
-  /* v3.10.21: static "onion" background. The onion now lives on
-     body::before with position: fixed, NOT on the body's own
-     background with background-attachment: fixed. The fixed
-     background-image approach was unreliable on PC — the
-     gradient scrolled with the content instead of staying
-     anchored to the viewport. A fixed pseudo-element is the
-     rock-solid way to do this: it's tied to the viewport no
-     matter what, and z-index:-1 places it behind all body
-     content but in front of the body's solid fallback color.
-
-     The radial is centered on the viewport, so the center of
-     the onion sits on the middle of the screen no matter where
-     the user scrolls. The center is #050506 (darker), fading
-     out to #141417 at the edges.
-
-     The .hero is transparent, so it shows this radial — darkest
-     in the middle of the viewport. The edge of the radial is
-     #141417, which matches the solid backgrounds of
-     .section-posters, .section-about, and .section-rental. So
-     the hero's 50px margin and those three sections all blend
-     seamlessly.
-
-     The page reads as a zebra: onion (hero) → #141417 (posters)
-     → #141417 (about) → #141417 (rental) → onion (contact).
-     The dark "onion" sections bookend the lighter middle, with
-     no color seams. And the onion itself never moves.
-
-     background-color is the fallback if the pseudo-element
-     doesn't render (very old browsers). */
-  background-color: #141417;
-  /* The radial is on body::before — see below. */
+  /* v3.10.23: body background is the fallback color for very old
+     browsers that don't render the .bg-onion div. The onion itself
+     lives on <div class="bg-onion"> in the markup, not on
+     body::before — pseudo-elements with position:fixed + z-index:-1
+     were fragile (overflow-x:hidden on body, z-index quirks in some
+     browsers, etc.). A real fixed div is rock-solid. The center of
+     the radial is #050506, fading out to #0a0a0c at the edges
+     (darker than the #141417 the other sections use, so the onion
+     has its own identity and doesn't blend into the next band). */
+  background-color: #0a0a0c;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Smooth scrolling on iOS */
   overflow-x: hidden;
 }
 
-body::before {
-  /* The "onion" — a centered radial gradient that stays
-     pinned to the viewport. Center is #050506 (darker),
-     edges fade to #141417 (the lighter band color).
-     z-index: -1 places it behind all body content but in
-     front of the body's solid #141417 background. */
-  content: '';
+/* v3.10.23: the "onion" — a real <div class="bg-onion"> in the
+   markup, not a pseudo-element. position:fixed pins it to the
+   viewport, so the center of the radial stays on the middle of
+   the screen no matter where the user scrolls. z-index:-1 places
+   it behind all body content but in front of the body's solid
+   background. The .hero is transparent, so the hero shows this
+   radial — the darkest part of the page is always in the middle
+   of the viewport. */
+.bg-onion {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: -1;
   pointer-events: none;
   background: radial-gradient(
     ellipse at center,
     #050506 0%,
-    #141417 100%
+    #0a0a0c 100%
   );
 }
 

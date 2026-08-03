@@ -12,12 +12,12 @@
    the hero (Observer captures those events and scrubs tile timelines).
    Outside the hero, the page scrolls normally.
 
-   The hero background is the body's radial gradient (see reset.css,
-   v3.10.20) — center is #050506 (darker), fading to #141417 at the
-   edges, anchored to the viewport. The hero shows this radial; the
-   next section (.section-posters) is a solid #141417 that matches
-   the edge of the radial, so the hero's margin and the posters
-   section blend seamlessly.
+   The hero background is the .bg-onion div (see reset.css, v3.10.23)
+   — a real <div> in the markup, position:fixed, with a centered
+   radial gradient. Center is #050506 (darker), edges fade to
+   #0a0a0c (intentionally darker than the #141417 the other sections
+   use, so the onion has its own identity and reads as a distinct
+   dark band rather than blending into the next section).
 
    Layered from back to front:
      z:0 .hero-carousel (the SVG stage, full-bleed)
@@ -31,7 +31,12 @@
    div in index.html is now a no-op (empty div) — left in place to
    avoid a markup change, but it has no CSS rules and no visible effect.
    v3.10.20: radial edge changed from #0b0b0d to #141417 so it
-   matches the lighter band of the zebra (posters/about/rental).
+              matched the lighter band of the zebra.
+   v3.10.23: onion moved to a real <div class="bg-onion"> in the
+              markup (not a body::before pseudo-element — those
+              were fragile). Radial edge changed from #141417 to
+              #0a0a0c so the onion has its own dark identity and
+              doesn't blend into the next section.
    ──────────────────────────────────────────────────────────────────────── */
 
 .hero {
@@ -209,15 +214,27 @@
   padding-right: 0;
   /* containing block so .section-chrome can switch to position:absolute inside */
   position: relative;
-  /* v3.10.20: solid #141417 — matches the edge of the body's radial
-     gradient. The hero's 50px margin shows that same edge color
-     (fading to #141417 at the bottom of the radial), so the margin
-     and this section blend seamlessly with no color seam. This is
-     the lighter band of the zebra: onion (hero) → #141417 (posters)
-     → #141417 (about, already via .section-alt) → #141417 (rental,
-     already via .section-alt) → onion (contact, transparent, shows
-     body's radial). */
+  /* v3.10.23: solid #141417. This is the "medium" band of the
+     three-shade pattern. The hero is the onion (dark, fixed radial),
+     then the four sections after it are #141417 → #1c1c20 → #0b0b0d
+     → #141417. Three distinct shades so you can actually see the
+     bands changing as you scroll. */
   background: #141417;
+}
+
+/* v3.10.23: per-section background overrides. .section-alt sets all
+   alt sections to var(--c-bg-alt) = #141417, which made the three
+   post-hero sections look identical. These ID-specific overrides give
+   each a distinct shade from the token palette so the page reads as
+   a clear three-shade wave below the hero's onion. */
+#about {
+  /* lighter than #141417 — same family as --c-surface-2 */
+  background: #1c1c20;
+}
+
+#rental {
+  /* darker than #141417 — same as --c-bg */
+  background: #0b0b0d;
 }
 
 .section-posters > .section-head {
