@@ -13,9 +13,9 @@
    Outside the hero, the page scrolls normally.
 
    The hero background is the body's radial gradient (see reset.css,
-   v3.10.19) — center is #050506 (darker), fading to #0b0b0d at the
+   v3.10.20) — center is #050506 (darker), fading to #141417 at the
    edges, anchored to the viewport. The hero shows this radial; the
-   next section (.section-posters) is a solid #0b0b0d that matches
+   next section (.section-posters) is a solid #141417 that matches
    the edge of the radial, so the hero's margin and the posters
    section blend seamlessly.
 
@@ -30,6 +30,8 @@
    (darker center) is now on the body, not the hero. The .hero-overlay
    div in index.html is now a no-op (empty div) — left in place to
    avoid a markup change, but it has no CSS rules and no visible effect.
+   v3.10.20: radial edge changed from #0b0b0d to #141417 so it
+   matches the lighter band of the zebra (posters/about/rental).
    ──────────────────────────────────────────────────────────────────────── */
 
 .hero {
@@ -110,13 +112,14 @@
 }
 
 /* ──────────────── Mobile hero (≤767px) ────────────────
-   v3.10.19: hero is transparent. The body's radial gradient
+   v3.10.20: hero is transparent. The body's radial gradient
    (anchored to the viewport) shows through — the 50px margin
    above and below the hero shows the edge of the radial
-   (fading toward #0b0b0d), which matches .section-posters'
-   solid #0b0b0d background. No box-shadow hack, no own
+   (fading toward #141417), which matches .section-posters'
+   solid #141417 background. No box-shadow hack, no own
    background, no color seam.
 
+   v3.10.19: same idea, radial edge was #0b0b0d.
    v3.10.18: 50px margin + section owns its #0b0b0d background
               (rendered as box-shadow extending into margin).
    v3.10.17: transparent hero, body #0b0b0d shows through
@@ -206,11 +209,15 @@
   padding-right: 0;
   /* containing block so .section-chrome can switch to position:absolute inside */
   position: relative;
-  /* v3.10.19: solid #0b0b0d — matches the edge of the body's radial
+  /* v3.10.20: solid #141417 — matches the edge of the body's radial
      gradient. The hero's 50px margin shows that same edge color
-     (fading to #0b0b0d at the bottom of the radial), so the margin
-     and this section blend seamlessly with no color seam. */
-  background: #0b0b0d;
+     (fading to #141417 at the bottom of the radial), so the margin
+     and this section blend seamlessly with no color seam. This is
+     the lighter band of the zebra: onion (hero) → #141417 (posters)
+     → #141417 (about, already via .section-alt) → #141417 (rental,
+     already via .section-alt) → onion (contact, transparent, shows
+     body's radial). */
+  background: #141417;
 }
 
 .section-posters > .section-head {
