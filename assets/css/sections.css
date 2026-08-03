@@ -111,20 +111,23 @@
        ends right where the hero-content ends. */
     min-height: 0;
     height: auto;
-    /* v3.10.16: margin restored to 50px. The amount of space
-       was right in v3.10.13 — the issue was the COLOR of that
-       empty strip (page background ≠ hero #0b0b0d). The
-       box-shadow below extends the hero's #0b0b0d background
-       into the 50px margin above and below, so the dark area
-       around the hero reads as continuous with the images
-       behind it. (Buddie: "the space thats behind the images
-       i want that to extend like it was the marging. the
-       marging was making space but i wanted the space to be
-       like the images background.") */
+    /* v3.10.17: 50px breathing space, no own background.
+       The body's background is already #0b0b0d (reset.css),
+       so the hero is transparent and shows the body through
+       it. The 50px margin above and below the hero also shows
+       the body color, so the entire vertical run — nav →
+       margin → hero → margin → next section — is one
+       continuous #0b0b0d surface with no visible seams. The
+       carousel background literally is the section
+       background. (Buddie: "make the carousel background be
+       the section background and remove the background of
+       the carousel, i think its the cleanest solution".)
+       Supersedes v3.10.16 box-shadow: the shadow painted the
+       same color as the body, just with extra rendering
+       cost and a visual edge that became visible on
+       scroll-snap and bouncy-scroll. */
     margin: 50px 0;
-    box-shadow: 0 0 0 50px #0b0b0d;
     cursor: default;
-    background-color: #0b0b0d;
   }
   .hero-content {
     /* Match the desktop overlay pattern: position relative,
