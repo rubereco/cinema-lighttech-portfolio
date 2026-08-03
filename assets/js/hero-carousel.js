@@ -74,16 +74,19 @@
   // refresh" look (desktop layout applied to a mobile viewport).
   var MOBILE_MAX_WIDTH = 768;
 
-  // SCALE = 1.0 on every viewport. The tile layout (BIG_WIDTH,
-  // BIG_SPACING, etc.) is the same on desktop and mobile; the
-  // CSS hero height on mobile determines the slice-crop scale
-  // and therefore how big the big appears on screen. Buddie:
-  // "it looks better when i go from desktop to mobile without
-  // refreshing — the images are bigger and they look better."
-  // That look IS SCALE=1.0, so we just keep SCALE=1.0 on
-  // mobile by default.
+  // SCALE: 1.0 on desktop, 1.2 on mobile. v3.10.32: bumped mobile
+  // from 1.0 → 1.2 per Buddie's request — the carousel tiles
+  // (bigs + smalls) read a bit small on a 375–414px phone and
+  // the user wanted them larger. All layout constants below
+  // (BIG_WIDTH, BIG_HEIGHT, SMALL_WIDTH, SMALL_HEIGHT,
+  // BIG_SPACING, INITIAL_OFFSET, WRAP_MARGIN, BIG_Y, SMALL_GAP)
+  // multiply by SCALE, so scaling it up scales the whole
+  // carousel proportionally — tiles get bigger AND the
+  // spacing between them gets bigger, the layout stays the
+  // same shape just at 1.2× on mobile. Desktop stays 1.0.
+  // Buddie: "can we do the images more large on mobile? like 1.2".
   var isMobile = window.innerWidth < MOBILE_MAX_WIDTH;
-  var SCALE = 1.0;
+  var SCALE = isMobile ? 1.2 : 1.0;
 
   // Per-tile phase multipliers. 1.0 = full speed, 2.0 = 2× parallax.
   // Smalls scroll 2× faster than bigs for the CodePen depth effect.
