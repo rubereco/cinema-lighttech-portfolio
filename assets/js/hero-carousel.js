@@ -186,6 +186,30 @@
   // with "natural scrolling" enabled.
   var WHEEL_INVERTED = false;
 
+  // === Momentum (mobile-like inertial scroll) ===
+  // v3.10.33: after a drag or fling, the carousel continues moving
+  // in the drag direction and gradually decelerates, like native
+  // Android/iOS page scrolling. "If i scroll fast they scroll
+  // smoothly and then stop, like when on android you scroll down
+  // a page — the same effect but sideway."
+  //
+  // How it works:
+  //   - During onDrag, we sample (deltaX, time) → compute instant
+  //     velocity (phase units / ms), keep the last N samples.
+  //   - On onDragEnd, average the samples → convert to phase/frame
+  //     → that's the momentum. If a fling (onLeft/onRight) already
+  //     fired, use that velocity instead.
+  //   - In tick(), if velocity > VELOCITY_THRESHOLD, advance
+  //     phase + currentPhase by velocity*deltaRatio, then decay
+  //     velocity by FRICTION^deltaRatio. deltaRatio() makes the
+  //     physics framerate-independent (works at 30/60/120fps).
+  //   - When velocity drops below threshold, momentum stops and
+  //     the normal lerp takes over.
+  var FRICTION = 0.95;            // velocity decay per frame at 60fps
+  var VELOCITY_THRESHOLD = 0.05;  // below this, stop momentum
+  var VELOCITY_SAMPLE_COUNT = 4;   // how many recent samples to average
+  var FLING_VELOCITY = 3;         // phase/frame for onLeft/onRight flings
+
   // === Build the layout from the SVG's <image> elements ===
   // Each entry has:
   //   tile     — the <image> element to position
@@ -418,6 +442,23 @@
     var phase = 0;
     var currentPhase = 0;
 
+    // === Momentum state (v3.10.33) ===
+    //   velocity          — phase units per frame, positive = right.
+    //                       Non-zero = momentum is active.
+    //   velocitySamples   — recent (phase/ms) samples from onDrag,
+    //                       averaged at onDragEnd to get the
+    //                       release velocity. Keeps last N.
+    //   lastDragPhase/Time — used to compute instant velocity
+    //                       between successive onDrag calls.
+    //   flingOccurred     — flag: onLeft/onRight already set the
+    //                       velocity, so onDragEnd should NOT
+    //                       overwrite it with the sample average.
+    var velocity = 0;
+    var velocitySamples = [];
+    var lastDragPhase = 0;
+    var lastDragTime = 0;
+    var flingOccurred = false;
+
     // === Band-based zone detection ===
     var inCarouselBand = false;
     function updateBand(clientX, clientY) {
@@ -458,13 +499,28 @@
     hero.addEventListener('touchcancel', leaveBand);
 
     // === Per-frame update ===
-    // Lerp current toward target, then position every tile by its
-    // baseX + (current * stepFrac). Wrapped into the tile's valid
-    // range [offset, offset+X_RANGE] so the tile cycles through its
-    // loop position. Wrapping displayX (not phase) means the lerp
-    // never goes "the long way" at the boundaries.
+    // Two modes:
+    //   1) Momentum (velocity != 0): advance both phase and
+    //      currentPhase by velocity, then decay velocity by
+    //      FRICTION. Skips the lerp entirely so the tiles
+    //      follow the momentum exactly — no chase lag.
+    //   2) At rest (velocity == 0): normal lerp, currentPhase
+    //      eases toward phase.
+    // gsap.ticker.deltaRatio() scales the physics by frame time
+    // so the same FRICTION / velocity feel right at 30, 60, 120fps.
     function tick() {
-      currentPhase += (phase - currentPhase) * LERP_FACTOR;
+      if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
+        var deltaRatio = gsap.ticker.deltaRatio();
+        phase += velocity * deltaRatio;
+        currentPhase += velocity * deltaRatio;
+        // Decay: velocity *= FRICTION per 60fps frame.
+        // Math.pow(FRICTION, deltaRatio) gives the right decay
+        // for the current frame's elapsed time.
+        velocity *= Math.pow(FRICTION, deltaRatio);
+      } else {
+        velocity = 0;
+        currentPhase += (phase - currentPhase) * LERP_FACTOR;
+      }
       // Snap when very close, to avoid a permanent fractional tween
       if (Math.abs(phase - currentPhase) < 0.05) currentPhase = phase;
 
@@ -519,12 +575,59 @@
         onPress: function () {
           // Capture phase at press time so onDrag has a stable base
           // even if the user starts a drag before any mousemove fires.
+          // v3.10.33: also reset momentum state — any in-flight
+          // velocity from a previous gesture is dropped, and the
+          // sample buffer is cleared for the new gesture.
           dragStartPhase = phase;
+          velocity = 0;
+          velocitySamples = [];
+          flingOccurred = false;
+          lastDragPhase = phase;
+          lastDragTime = performance.now();
         },
         onDrag: function (self) {
           // self.deltaX is total horizontal drag distance since start.
           // Drag right (positive) → tiles move right → phase grows.
-          phase = dragStartPhase + self.deltaX * DRAG_SENSITIVITY / 1000;
+          var now = performance.now();
+          var newPhase = dragStartPhase + self.deltaX * DRAG_SENSITIVITY / 1000;
+          // v3.10.33: sample instant velocity (phase per ms) for
+          // the release-momentum calc in onDragEnd. We track the
+          // last VELOCITY_SAMPLE_COUNT samples and average them
+          // on release — averaging smooths out jitter from
+          // individual pointermove events.
+          var dt = now - lastDragTime;
+          if (dt > 0) {
+            var instantVelocity = (newPhase - lastDragPhase) / dt;
+            velocitySamples.push(instantVelocity);
+            if (velocitySamples.length > VELOCITY_SAMPLE_COUNT) {
+              velocitySamples.shift();
+            }
+          }
+          phase = newPhase;
+          lastDragPhase = newPhase;
+          lastDragTime = now;
+        },
+        // v3.10.33: on release, convert the averaged sample
+        // velocity into a phase/frame momentum value. gsap's
+        // tick() will apply it with FRICTION decay until it
+        // drops below VELOCITY_THRESHOLD, then the normal lerp
+        // takes over. If a fling (onLeft/onRight) already fired,
+        // skip — the fling already set the velocity.
+        onDragEnd: function () {
+          if (flingOccurred) {
+            flingOccurred = false;
+            return;
+          }
+          if (velocitySamples.length > 0) {
+            var sum = 0;
+            for (var i = 0; i < velocitySamples.length; i++) {
+              sum += velocitySamples[i];
+            }
+            var avgVelocityPerMs = sum / velocitySamples.length;
+            // Convert phase/ms → phase/frame (16.67ms at 60fps).
+            // tick() scales by deltaRatio() for variable framerates.
+            velocity = avgVelocityPerMs * 16.67;
+          }
         },
         // onLeft/onRight: discrete gestures (fling past threshold).
         // v3.10.9: drop the inCarouselBand gate — the band is a
@@ -532,8 +635,14 @@
         // wheel-zone split). On mobile the user can swipe from
         // anywhere, and the band check was preventing swipes that
         // started in the middle 60% from advancing the carousel.
-        onLeft:  function () { phase -= 50; },
-        onRight: function () { phase += 50; }
+        // v3.10.33: instead of a discrete phase jump (was ±50),
+        // set a fling velocity — the carousel will smoothly
+        // decelerate from this velocity via FRICTION, giving the
+        // same "scroll and settle" feel as a regular drag release.
+        // flingOccurred flag tells onDragEnd to skip its own
+        // velocity calc so we don't overwrite the fling.
+        onLeft:  function () { velocity = -FLING_VELOCITY; flingOccurred = true; },
+        onRight: function () { velocity =  FLING_VELOCITY; flingOccurred = true; }
       });
     }
 
