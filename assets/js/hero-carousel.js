@@ -205,16 +205,19 @@
   //     physics framerate-independent (works at 30/60/120fps).
   //   - When velocity drops below threshold, momentum stops and
   //     the normal lerp takes over.
-  // v3.10.35: friction back to 0.95 (the user said "the friction
-  // stays at 95"). FLING_VELOCITY stays at 30 (10x the original
-  // 3, which the user liked). Net result: a HARD initial kick
-  // (10x faster at the peak) that glides out over the full
-  // ~1 second before settling — like a heavy flick that
-  // travels a long way.
+  // v3.10.36: PC gets a much smaller momentum. v3.10.35's
+  // FLING_VELOCITY=30 was tuned for mobile (375px swipes), but
+  // on PC a 10-50px mouse drag produces the same velocity
+  // samples — the carousel "goes flying" off a tiny drag and
+  // "the scroll is harsh, not smooth". FLING_VELOCITY stays at
+  // 30 for mobile, but on PC we scale the final velocity by
+  // PC_VELOCITY_SCALE = 0.25 — quarter the push, quarter the
+  // distance, same smooth deceleration. Mobile is unchanged.
   var FRICTION = 0.95;            // velocity decay per frame at 60fps
   var VELOCITY_THRESHOLD = 0.05;  // below this, stop momentum
   var VELOCITY_SAMPLE_COUNT = 4;   // how many recent samples to average
-  var FLING_VELOCITY = 30;        // phase/frame for onLeft/onRight flings
+  var FLING_VELOCITY = 30;        // phase/frame for onLeft/onRight flings (mobile)
+  var PC_VELOCITY_SCALE = 0.25;   // velocity multiplier on PC (quarter the push)
 
   // === Build the layout from the SVG's <image> elements ===
   // Each entry has:
@@ -619,6 +622,9 @@
         // drops below VELOCITY_THRESHOLD, then the normal lerp
         // takes over. If a fling (onLeft/onRight) already fired,
         // skip — the fling already set the velocity.
+        // v3.10.36: scale the final velocity down on PC so a
+        // 10-50px mouse drag doesn't "go flying" — quarter the
+        // push on PC, full push on mobile.
         onDragEnd: function () {
           if (flingOccurred) {
             flingOccurred = false;
@@ -633,6 +639,7 @@
             // Convert phase/ms → phase/frame (16.67ms at 60fps).
             // tick() scales by deltaRatio() for variable framerates.
             velocity = avgVelocityPerMs * 16.67;
+            if (!isMobile) velocity *= PC_VELOCITY_SCALE;
           }
         },
         // onLeft/onRight: discrete gestures (fling past threshold).
@@ -645,10 +652,18 @@
         // set a fling velocity — the carousel will smoothly
         // decelerate from this velocity via FRICTION, giving the
         // same "scroll and settle" feel as a regular drag release.
+        // v3.10.36: quarter the fling on PC (same scale as
+        // onDragEnd) so desktop flings don't blast across the loop.
         // flingOccurred flag tells onDragEnd to skip its own
         // velocity calc so we don't overwrite the fling.
-        onLeft:  function () { velocity = -FLING_VELOCITY; flingOccurred = true; },
-        onRight: function () { velocity =  FLING_VELOCITY; flingOccurred = true; }
+        onLeft:  function () {
+          velocity = isMobile ? -FLING_VELOCITY : -FLING_VELOCITY * PC_VELOCITY_SCALE;
+          flingOccurred = true;
+        },
+        onRight: function () {
+          velocity = isMobile ?  FLING_VELOCITY :  FLING_VELOCITY * PC_VELOCITY_SCALE;
+          flingOccurred = true;
+        }
       });
     }
 
