@@ -80,16 +80,13 @@
 }
 
 /* ──────────────── Mobile hero (≤767px) ────────────────
-   v3.10.6: drop the fixed dvh — the hero shrinks to its content,
-   same way desktop does naturally. No more 100dvh/82dvh
-   black void below the text. The carousel (absolute, fills the
-   hero) carries the big behind the text; the hero ends where
-   the text ends; the next section starts with its own
-   --section-pad-y (56px) as the "little bit of spacing".
-
-   (Buddie: "you can see the image between the hero section and
-   the next section you can fit another carousel entirely, and
-   that not what we want.")
+   v3.10.7: hero still shrinks to its content (v3.10.6), but with
+   10px breathing room on the top and bottom — margin on the hero
+   so it sits 10px below the nav and 10px above the next section,
+   matching padding inside hero-content so the text doesn't
+   touch the carousel edges. (Buddie: "the result i want is the
+   min auto but with a margin at the top and bottom to give a
+   little space like 10px on both sides.")
 
    This block comes AFTER the desktop .hero-content rule above so
    the mobile overrides win on ≤767px viewports. */
@@ -101,6 +98,8 @@
        ends right where the hero-content ends. */
     min-height: 0;
     height: auto;
+    /* 10px gap above (from nav) and below (to the next section). */
+    margin: 10px 0;
     cursor: default;
     background-color: #0b0b0d;
   }
@@ -111,9 +110,9 @@
     min-height: 0;
     height: auto;
     justify-content: flex-start;
-    /* No bottom padding — the gap to the next section is the
-       next section's own --section-pad-y. */
-    padding: 20px var(--pad-x) 0;
+    /* 10px on top and bottom so the text doesn't touch the
+       carousel edges. */
+    padding: 10px var(--pad-x);
   }
 }
 
