@@ -30,6 +30,14 @@
   isolation: isolate;
   /* Cursor hint that the hero is interactive (wheel scrubs the carousel). */
   cursor: ew-resize;
+  /* v3.10.10: tell the browser to only handle vertical panning on
+     touch. The GSAP Observer handles horizontal drag for the
+     carousel. Without this, the browser was trying to interpret the
+     horizontal touch as a horizontal-scroll gesture on the page,
+     causing a jiggling effect on drag (Buddie: "i can see a little
+     of jiggling on the images"). pan-y = browser scrolls the page
+     vertically, JS gets the horizontal touch. */
+  touch-action: pan-y;
 }
 
 .hero-carousel {

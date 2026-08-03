@@ -1,37 +1,31 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.9).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.10).
    ────────────────────────────────────────────────────────────────────────
-   v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9
+   v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    (Buddie: "add the carousel to the mobile version"):
 
    v3.9.3 ran the carousel on desktop only. v3.10 brought it to
    mobile with a 2/3 split layout + a touch gate. v3.10.1 scrapped
    the split and removed the touch gate. v3.10.2 bumped SCALE
    0.4 → 0.65 and centered the bigs vertically. v3.10.3 anchored
-   the big at the top of the SVG on mobile (BIG_Y=0).
+   the big at the top of the SVG on mobile (BIG_Y=0). v3.10.9
+   dropped the mobile-specific SCALE / INITIAL_OFFSET / WRAP_MARGIN
+   overrides (mobile = desktop layout) and fixed the mobile drag
+   (preventDefault:true on the Observer, dropped the band gate
+   on fling gestures).
 
-   v3.10.9: drop the mobile-specific SCALE / INITIAL_OFFSET /
-   WRAP_MARGIN overrides so the mobile carousel uses the same
-   layout as desktop. Buddie's QA: "when i go from desktop to
-   mobile with dev tools and let the web readjust (no refresh),
-   the images are bigger and they look better." That "no refresh"
-   look IS the desktop layout applied to a mobile viewport — the
-   JS doesn't re-run on resize, so SCALE stays at 1.0. Making
-   SCALE=1.0 on mobile by default gives the same result. The
-   only mobile-specific override left is BIG_Y=0 (anchor the big
-   at the top of the SVG) — everything else inherits from
-   desktop.
-
-   Also fixes a drag issue: on mobile the user couldn't drag to
-   see the other tiles. Two causes:
-     (a) Observer had preventDefault:false, so the browser was
-         scrolling the page instead of letting the carousel
-         capture the horizontal drag.
-     (b) The fling gestures (onLeft/onRight) were gated on
-         inCarouselBand (the outer 20% of the hero). Mobile
-         users were swiping in the middle 60% where the band
-         check failed.
-   Both fixed in this version.
+   v3.10.10: two follow-ups from Buddie's QA on the v3.10.9
+   mobile layout:
+     1. Touch drag was jiggling. Root cause: the browser was
+        trying to interpret the horizontal touch as a horizontal-
+        scroll gesture on the page. Fix in CSS: .hero gets
+        touch-action: pan-y so the browser only handles vertical
+        panning (page scroll) and lets JS handle horizontal.
+     2. Smalls were spawning "all over the place on the y
+        aspect" — wide Y range (50–650, 600 units) sprayed them
+        to the top and bottom of the viewBox. Narrowed to a
+        300-unit band (100–400) so they cluster around the big
+        instead of spraying.
 
    What stayed the same from v3.10.3:
    • Mobile layout is the same as desktop — carousel fills the
@@ -134,14 +128,16 @@
   var SMALL_GAP = 10 * SCALE;
 
   // Y range for smalls. Each small spawns at a random y in this range
-  // so they look like a scattered set, not a row. Wide spread on
-  // purpose — Buddie's QA: "I want them to spawn different from each
-  // other, no jitter." SMALL_Y_MAX is floored to BIG_Y + BIG_HEIGHT
-  // + 50 so smalls can appear below the bigs too (not just above or
-  // overlapping). This matters most on mobile where the scaled bigs
-  // sit higher in the SVG.
-  var SMALL_Y_MIN = 50 * SCALE;
-  var SMALL_Y_MAX = Math.max(650 * SCALE, BIG_Y + BIG_HEIGHT + 50);
+  // so they look like a scattered set, not a row. The range was wide
+  // in v3.9.3 ([50, ~750], 700 units) but Buddie found that "they
+  // spawn all over the place on the y aspect" on mobile and asked
+  // to "limit that so they spawn less freely." v3.10.10 narrows the
+  // band to [100, 400] = 300 units — the smalls still have plenty
+  // of vertical variation per tile (300 / 4 smalls = 75 units
+  // average spread) but they cluster around the big instead of
+  // spraying to the top and bottom of the 900-unit viewBox.
+  var SMALL_Y_MIN = 100 * SCALE;
+  var SMALL_Y_MAX = 400 * SCALE;
 
   // Per-tile horizontal random offset for smalls (slot + offset
   // distribution). "A little random" per Buddie's QA. Scaled down
