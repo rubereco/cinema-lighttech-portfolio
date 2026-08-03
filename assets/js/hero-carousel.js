@@ -1,8 +1,9 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.11).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.12).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
-   → v3.10.11 (Buddie: "add the carousel to the mobile version"):
+   → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
+   version"):
 
    v3.9.3 ran the carousel on desktop only. v3.10 brought it to
    mobile with a 2/3 split layout + a touch gate. v3.10.1 scrapped
@@ -14,16 +15,22 @@
    (preventDefault:true on the Observer, dropped the band gate
    on fling gestures). v3.10.10 fixed touch drag jiggling
    (touch-action: pan-y on .hero) and narrowed the smalls Y range
-   to a 300-unit band.
+   to a 300-unit band. v3.10.11 bumped DRAG_SENSITIVITY 60 → 500
+   so a full-width mobile swipe moves the carousel a useful
+   distance (~7.5% of the loop).
 
-   v3.10.11: bump DRAG_SENSITIVITY 60 → 500. The old value was
-   tuned for desktop mouse drags (10–50px), but on mobile a single
-   finger swipe is routinely 100–375px. At 60, a full-width 375px
-   swipe only moved the phase by ~22 units (0.9% of the
-   2500-unit loop) — so the carousel barely budged and Buddie
-   said "its moving but so slow." At 500, the same 375px swipe
-   moves the phase by ~187 units (7.5% of the loop) — enough to
-   bring the next big into view in one swipe.
+   v3.10.12: on mobile, INITIAL_OFFSET=550 instead of the
+   desktop's 200. The 500-unit-wide big now centers at x=800 in
+   the viewBox — the same horizontal axis as the hero text and
+   the CTAs (which are already centered on the hero). Previously
+   the big sat at x=200 (desktop's left-margin composition),
+   offset to the left of the text and buttons, so the three
+   weren't on the same vertical axis. (Buddie: "i think it would
+   be better if the images where centered on the section itself
+   not just to the text, like having in mind the buttons.")
+   Desktop keeps INITIAL_OFFSET=200 (the v3.9.2 left-margin
+   composition stays — different visual on desktop is fine,
+   mobile is what Buddie was looking at when asking for this).
 
    No band rule gates the drag itself. The only inCarouselBand
    checks that survived are:
@@ -35,9 +42,7 @@
        when the mouse is in the band.
    The drag (onDrag), the flings (onLeft/onRight), and the
    Observer's onPress all fire regardless of where on the hero
-   the touch lands. Buddie: "on mobile this is no issue because
-   when can dragg vertically and horizontal we are not attached
-   to a scroll wheel."
+   the touch lands.
 
    What stayed the same from v3.10.3:
    • Mobile layout is the same as desktop — carousel fills the
@@ -202,16 +207,27 @@
     // On desktop, the top-level INITIAL_OFFSET (= 200 * SCALE = 200)
     // and WRAP_MARGIN (= 200 * SCALE = 200) are the user-tuned
     // "left margin" and trailing-gap values from v3.9.3 and they
-    // stay as-is. v3.10.9: mobile no longer overrides them — the
-    // mobile layout uses the same desktop values so the carousel
-    // matches the "no refresh" look (desktop carousel applied to
-    // a mobile viewport, the look Buddie prefers).
+    // stay as-is. WRAP_MARGIN still inherits the desktop value
+    // on mobile (v3.10.9).
+    //
+    // v3.10.12: mobile now overrides INITIAL_OFFSET too, to 550,
+    // so the 500-unit-wide big centers at x=800 in the viewBox
+    // (the visible-region center on a 375-wide phone, which is
+    // also where the hero text and CTAs are centered). The
+    // desktop keeps INITIAL_OFFSET=200 (left-margin composition
+    // from v3.9.2 — Buddie's "add a margin to the first photo"
+    // QA). Buddie: "i think it would be better if the images
+    // where centered on the section itself not just to the text,
+    // like having in mind the buttons."
     if (isMobile) {
-      // Only BIG_Y changes on mobile — anchor the big at the TOP
-      // of the SVG (y=0) so the empty area below it (where the
-      // overlaid text sits) is the only "space" on the hero.
-      // (Buddie: "the space could start perfectly on the highest
-      // point of the images.")
+      // INITIAL_OFFSET: 550 = 800 (viewBox center) - 250 (half of
+      // BIG_WIDTH). Centers the big horizontally on the hero, in
+      // line with the text and the CTAs.
+      INITIAL_OFFSET = 550;
+      // BIG_Y=0: anchor the big at the TOP of the SVG so the
+      // empty area below it (where the overlaid text sits) is
+      // the only "space" on the hero. (Buddie: "the space could
+      // start perfectly on the highest point of the images.")
       BIG_Y = 0;
     }
 
