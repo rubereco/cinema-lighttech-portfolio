@@ -1,31 +1,39 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.2).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.3).
    ────────────────────────────────────────────────────────────────────────
-   v3.9.3 → v3.10 → v3.10.1 → v3.10.2 (Buddie: "add the carousel to
-   the mobile version"):
+   v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 (Buddie: "add the carousel
+   to the mobile version"):
 
    v3.9.3 ran the carousel on desktop only. v3.10 brought it to
    mobile with a 2/3 split layout + a touch gate. v3.10.1 scrapped
    the split (Buddie: "the front text is like splitted of the
    carousel it looks so bad") and removed the touch gate (Buddie:
    "when i dragg it with the mouse it doesn't even move"). v3.10.2
-   addresses two follow-ups from the v3.10.1 mobile layout:
+   bumped SCALE 0.4 → 0.65 and centered the bigs vertically with the
+   text. v3.10.3 addresses two follow-ups from the v3.10.2 layout:
 
-   1. Bigs were still too small. SCALE bumped from 0.4 to 0.65 so
-      bigs are 325×325 on a 375-wide phone — ~78% of the screen
-      width, close to Buddie's "80%" request. With 3 bigs and
-      spacing 585, only the center big is fully visible in the
-      slice-cropped visible region (~416 SVG units wide for a
-      375-wide viewport), but the user can touch-scroll to see
-      the others on either side.
+   1. Bigs were sitting at the vertical CENTER of the hero, leaving
+      a big empty band at the top of the visible region. v3.10.3
+      anchors the bigs to BIG_Y=0 on mobile — the big starts at the
+      very top of the SVG, so the empty area below it (where the
+      text sits) is the only "space" on the hero. (Buddie: "the
+      space could start perfectly on the highest point of the
+      images.")
 
-   2. Bigs weren't vertically centered with the text. The text is
-      centered in the hero (min-height: 100dvh, justify-content:
-      center), but the bigs sat at the top of the SVG (BIG_Y=200
-      on desktop, scaled down on mobile). v3.10.2 adds a mobile
-      override: BIG_Y = 450 − BIG_HEIGHT/2, which centers the bigs
-      vertically at y=450 in the viewBox — the same vertical
-      center as the text in the hero.
+   2. The mobile SCALE was a hand-tuned constant (0.65) that gave
+      ~78% of screen width on a 375-wide phone, but on a 360-wide
+      Android or a 412-wide Pixel the result was noticeably
+      different. v3.10.3 sets SCALE so the big lands at ~80% of the
+      viewport WIDTH on every phone. The math: the SVG fills the
+      hero with xMidYMid slice, so on a 375×812 phone the scale is
+      max(375/1600, 812/900) ≈ 0.902, and the big renders at
+      BIG_WIDTH × 0.902. For 80% of 375 = 300px we need
+      BIG_WIDTH = 300 / 0.902 ≈ 333, so SCALE = 333/500 = 0.666,
+      rounded to 0.67. On 360×780, 390×844, 412×896 etc. the slice
+      scale is still 0.90–0.99, so BIG_WIDTH × scale lands at
+      79–80% of viewport width in every case. Buddie: "i would
+      like to have similar experiences on different devices so i
+      would prefer to do this calculations on percentages."
 
    What stayed the same from v3.10.1:
    • Mobile layout is the same as desktop — carousel fills the
@@ -65,16 +73,20 @@
   // Detect mobile once at module load. SCALE shrinks the whole tile
   // layout (BIG_WIDTH, BIG_SPACING, SMALL_WIDTH, etc.) so the tiles
   // fit the narrow visible region on a phone viewport.
-  // 0.65 = bigs come out at 325×325 ≈ 78% of a 375-wide phone screen
-  // (Buddie: "make the big images take like 80% of the width of
-  // the screen"). The center big is fully visible in the slice-
-  // cropped visible region and is centered both horizontally (at
-  // x=800 in the viewBox) and vertically (at y=450, see the
-  // BIG_Y override in buildLayout) so it sits behind the centered
-  // hero text. The other bigs are off-screen on either side and
-  // come in via touch-scroll.
+  // 0.67 = the big comes out at 335×335 in SVG units, which renders
+  // at 335 × slice-scale screen pixels. On a 375×812 phone the
+  // slice scale is max(375/1600, 812/900) ≈ 0.902, so 335×0.902 ≈
+  // 302px ≈ 80% of viewport width. On 360×780, 390×844, 412×896
+  // the slice scale is in the 0.90–0.99 range, so the same SCALE
+  // lands the big at 79–80% of viewport width on every phone
+  // (Buddie: "similar experiences on different devices… prefer to
+  // do this calculations on percentages"). The center big is
+  // fully visible in the slice-cropped region and sits at the
+  // TOP of the SVG (BIG_Y=0, see buildLayout) so there's no
+  // empty band above it. The other bigs are off-screen on either
+  // side and come in via touch-scroll.
   var isMobile = window.innerWidth < MOBILE_MAX_WIDTH;
-  var SCALE = isMobile ? 0.65 : 1.0;
+  var SCALE = isMobile ? 0.67 : 1.0;
 
   // Per-tile phase multipliers. 1.0 = full speed, 2.0 = 2× parallax.
   // Smalls scroll 2× faster than bigs for the CodePen depth effect.
@@ -199,14 +211,16 @@
       var tileSpan = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
       INITIAL_OFFSET = Math.round(800 - tileSpan / 2);
       WRAP_MARGIN = Math.round(INITIAL_OFFSET * 0.3);
-      // Center the bigs vertically with the hero text. The text is
-      // centered in the hero (min-height: 100dvh, justify-content:
-      // center) and the SVG fills the hero, so the visible y range
-      // is 0–900 in SVG units. The center of that range is y=450,
-      // and the bigs sit at BIG_Y = 450 − BIG_HEIGHT/2 so they're
-      // vertically aligned with the text. (Buddie: "the big images
-      // are not centered with the text" — this fixes the y axis.)
-      BIG_Y = Math.round(450 - BIG_HEIGHT / 2);
+      // Anchor the big at the TOP of the SVG. The previous mobile
+      // override centered the bigs vertically at y=450 (the same
+      // vertical center as the text), but that left a large empty
+      // band at the top of the visible region. Anchoring at y=0
+      // means the big starts at the very top of the hero — the
+      // "highest point of the images" — and the empty area below
+      // the big (where the overlaid text sits) is the only
+      // "space" on the hero. (Buddie: "the space could start
+      // perfectly on the highest point of the images.")
+      BIG_Y = 0;
     }
 
     // Compute X_RANGE = (bigs' span) + WRAP_MARGIN.
