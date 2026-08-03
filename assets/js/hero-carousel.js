@@ -1,56 +1,48 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.3).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.9).
    ────────────────────────────────────────────────────────────────────────
-   v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 (Buddie: "add the carousel
-   to the mobile version"):
+   v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9
+   (Buddie: "add the carousel to the mobile version"):
 
    v3.9.3 ran the carousel on desktop only. v3.10 brought it to
    mobile with a 2/3 split layout + a touch gate. v3.10.1 scrapped
-   the split (Buddie: "the front text is like splitted of the
-   carousel it looks so bad") and removed the touch gate (Buddie:
-   "when i dragg it with the mouse it doesn't even move"). v3.10.2
-   bumped SCALE 0.4 → 0.65 and centered the bigs vertically with the
-   text. v3.10.3 addresses two follow-ups from the v3.10.2 layout:
+   the split and removed the touch gate. v3.10.2 bumped SCALE
+   0.4 → 0.65 and centered the bigs vertically. v3.10.3 anchored
+   the big at the top of the SVG on mobile (BIG_Y=0).
 
-   1. Bigs were sitting at the vertical CENTER of the hero, leaving
-      a big empty band at the top of the visible region. v3.10.3
-      anchors the bigs to BIG_Y=0 on mobile — the big starts at the
-      very top of the SVG, so the empty area below it (where the
-      text sits) is the only "space" on the hero. (Buddie: "the
-      space could start perfectly on the highest point of the
-      images.")
+   v3.10.9: drop the mobile-specific SCALE / INITIAL_OFFSET /
+   WRAP_MARGIN overrides so the mobile carousel uses the same
+   layout as desktop. Buddie's QA: "when i go from desktop to
+   mobile with dev tools and let the web readjust (no refresh),
+   the images are bigger and they look better." That "no refresh"
+   look IS the desktop layout applied to a mobile viewport — the
+   JS doesn't re-run on resize, so SCALE stays at 1.0. Making
+   SCALE=1.0 on mobile by default gives the same result. The
+   only mobile-specific override left is BIG_Y=0 (anchor the big
+   at the top of the SVG) — everything else inherits from
+   desktop.
 
-   2. The mobile SCALE was a hand-tuned constant (0.65) that gave
-      ~78% of screen width on a 375-wide phone, but on a 360-wide
-      Android or a 412-wide Pixel the result was noticeably
-      different. v3.10.3 sets SCALE so the big lands at ~80% of the
-      viewport WIDTH on every phone. The math: the SVG fills the
-      hero with xMidYMid slice, so on a 375×812 phone the scale is
-      max(375/1600, 812/900) ≈ 0.902, and the big renders at
-      BIG_WIDTH × 0.902. For 80% of 375 = 300px we need
-      BIG_WIDTH = 300 / 0.902 ≈ 333, so SCALE = 333/500 = 0.666,
-      rounded to 0.67. On 360×780, 390×844, 412×896 etc. the slice
-      scale is still 0.90–0.99, so BIG_WIDTH × scale lands at
-      79–80% of viewport width in every case. Buddie: "i would
-      like to have similar experiences on different devices so i
-      would prefer to do this calculations on percentages."
+   Also fixes a drag issue: on mobile the user couldn't drag to
+   see the other tiles. Two causes:
+     (a) Observer had preventDefault:false, so the browser was
+         scrolling the page instead of letting the carousel
+         capture the horizontal drag.
+     (b) The fling gestures (onLeft/onRight) were gated on
+         inCarouselBand (the outer 20% of the hero). Mobile
+         users were swiping in the middle 60% where the band
+         check failed.
+   Both fixed in this version.
 
-   What stayed the same from v3.10.1:
+   What stayed the same from v3.10.3:
    • Mobile layout is the same as desktop — carousel fills the
-     full hero, text content is overlaid on top. No flex column.
-   • SCALE shrinks every layout constant (BIG_WIDTH, BIG_SPACING,
-     SMALL_WIDTH, BIG_Y, SMALL_Y_MIN/MAX, INITIAL_OFFSET,
-     WRAP_MARGIN, SMALL_X_OFFSET_RANGE) so the tile layout fits
-     the narrow mobile viewport.
-   • INITIAL_OFFSET is recomputed dynamically on mobile to center
-     the scaled tile span at x=800 in the viewBox. Desktop keeps
-     the v3.9.3 value (200).
-   • setupClipPaths() rebuilds the clip-paths at runtime with the
-     scaled sizes (proportional rx), so mobile tiles still have
-     rounded corners. The HTML keeps the desktop-size clip-paths
-     as a no-JS fallback.
-   • The 'if (window.innerWidth < MOBILE_MAX_WIDTH) return;' skip
-     in init() is gone — the carousel now runs on every viewport.
+     hero, text content is overlaid on top. No flex column.
+   • SCALE is 1.0 on every viewport; the hero shrinks to its
+     content on mobile (CSS), so the carousel's slice scale
+     naturally adapts to the shorter hero height.
+   • setupClipPaths() rebuilds the clip-paths at runtime with
+     the current tile sizes (proportional rx).
+   • The 'if (window.innerWidth < MOBILE_MAX_WIDTH) return;'
+     skip in init() is gone — the carousel runs everywhere.
 
    What stayed the same (still true from v3.8):
    • Phase-based scrub (global phase, lerped to currentPhase).
@@ -64,29 +56,23 @@
   'use strict';
 
   // Mobile breakpoint: below this width the layout switches to a
-  // mobile-optimized version (smaller tile scale, flex column hero,
-  // touch events restricted to the top 2/3). v3.10+: the carousel
-  // runs on mobile too, so this is the scale-toggle point, not a
-  // "skip the carousel" gate.
+  // mobile-optimized version (BIG_Y=0 to anchor the big at the
+  // top of the SVG). v3.10.9: SCALE and the other layout
+  // constants are no longer mobile-specific — they use the
+  // desktop values, so the mobile carousel matches the "no
+  // refresh" look (desktop layout applied to a mobile viewport).
   var MOBILE_MAX_WIDTH = 768;
 
-  // Detect mobile once at module load. SCALE shrinks the whole tile
-  // layout (BIG_WIDTH, BIG_SPACING, SMALL_WIDTH, etc.) so the tiles
-  // fit the narrow visible region on a phone viewport.
-  // 0.67 = the big comes out at 335×335 in SVG units, which renders
-  // at 335 × slice-scale screen pixels. On a 375×812 phone the
-  // slice scale is max(375/1600, 812/900) ≈ 0.902, so 335×0.902 ≈
-  // 302px ≈ 80% of viewport width. On 360×780, 390×844, 412×896
-  // the slice scale is in the 0.90–0.99 range, so the same SCALE
-  // lands the big at 79–80% of viewport width on every phone
-  // (Buddie: "similar experiences on different devices… prefer to
-  // do this calculations on percentages"). The center big is
-  // fully visible in the slice-cropped region and sits at the
-  // TOP of the SVG (BIG_Y=0, see buildLayout) so there's no
-  // empty band above it. The other bigs are off-screen on either
-  // side and come in via touch-scroll.
+  // SCALE = 1.0 on every viewport. The tile layout (BIG_WIDTH,
+  // BIG_SPACING, etc.) is the same on desktop and mobile; the
+  // CSS hero height on mobile determines the slice-crop scale
+  // and therefore how big the big appears on screen. Buddie:
+  // "it looks better when i go from desktop to mobile without
+  // refreshing — the images are bigger and they look better."
+  // That look IS SCALE=1.0, so we just keep SCALE=1.0 on
+  // mobile by default.
   var isMobile = window.innerWidth < MOBILE_MAX_WIDTH;
-  var SCALE = isMobile ? 0.67 : 1.0;
+  var SCALE = 1.0;
 
   // Per-tile phase multipliers. 1.0 = full speed, 2.0 = 2× parallax.
   // Smalls scroll 2× faster than bigs for the CodePen depth effect.
@@ -193,33 +179,19 @@
     var bigCount = bigs.length;
     if (bigCount === 0) return [];
 
-    // On mobile, the visible region inside the 1600-wide viewBox is
-    // only ~625 units wide (the SVG fills a 375-wide phone viewport
-    // with xMidYMid slice, cropping the sides to keep the 9:16-ish
-    // aspect). The visible region is centered at x=800 and runs
-    // roughly 487→1112. To make the tiles land in that window we
-    // re-center INITIAL_OFFSET: tile span sits centered at x=800.
-    //   For 3 bigs at SCALE=0.4: tileSpan = 2*360 + 200 = 920
-    //   INITIAL_OFFSET = 800 - 460 = 340
-    //   tiles at 340 / 700 / 1060 - all three sit inside the
-    //   visible region (big 1 at 700-900 is fully visible; the
-    //   slivers of big 0 and big 2 on the edges come in via
-    //   touch-scroll).
     // On desktop, the top-level INITIAL_OFFSET (= 200 * SCALE = 200)
-    // is the user-tuned "left margin" from v3.9.3 and stays as-is.
+    // and WRAP_MARGIN (= 200 * SCALE = 200) are the user-tuned
+    // "left margin" and trailing-gap values from v3.9.3 and they
+    // stay as-is. v3.10.9: mobile no longer overrides them — the
+    // mobile layout uses the same desktop values so the carousel
+    // matches the "no refresh" look (desktop carousel applied to
+    // a mobile viewport, the look Buddie prefers).
     if (isMobile) {
-      var tileSpan = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
-      INITIAL_OFFSET = Math.round(800 - tileSpan / 2);
-      WRAP_MARGIN = Math.round(INITIAL_OFFSET * 0.3);
-      // Anchor the big at the TOP of the SVG. The previous mobile
-      // override centered the bigs vertically at y=450 (the same
-      // vertical center as the text), but that left a large empty
-      // band at the top of the visible region. Anchoring at y=0
-      // means the big starts at the very top of the hero — the
-      // "highest point of the images" — and the empty area below
-      // the big (where the overlaid text sits) is the only
-      // "space" on the hero. (Buddie: "the space could start
-      // perfectly on the highest point of the images.")
+      // Only BIG_Y changes on mobile — anchor the big at the TOP
+      // of the SVG (y=0) so the empty area below it (where the
+      // overlaid text sits) is the only "space" on the hero.
+      // (Buddie: "the space could start perfectly on the highest
+      // point of the images.")
       BIG_Y = 0;
     }
 
@@ -498,7 +470,13 @@
         type: 'touch,pointer',
         // Wheel is already handled above; tell Observer to ignore it
         // so it doesn't double-count.
-        preventDefault: false,
+        //
+        // preventDefault:true (v3.10.9) is critical on mobile: with
+        // it false, the browser was scrolling the page instead of
+        // letting the carousel capture the horizontal drag, so
+        // mobile users couldn't see the other tiles. (Buddie: "on
+        // mobile i can't scroll to see the other images.")
+        preventDefault: true,
         onPress: function () {
           // Capture phase at press time so onDrag has a stable base
           // even if the user starts a drag before any mousemove fires.
@@ -510,11 +488,13 @@
           phase = dragStartPhase + self.deltaX * DRAG_SENSITIVITY / 1000;
         },
         // onLeft/onRight: discrete gestures (fling past threshold).
-        // Only bump phase if the fling started inside the band —
-        // outside the band, the user is just trying to scroll the
-        // page and we shouldn't move the carousel.
-        onLeft:  function () { if (inCarouselBand) phase -= 50; },
-        onRight: function () { if (inCarouselBand) phase += 50; }
+        // v3.10.9: drop the inCarouselBand gate — the band is a
+        // desktop concept (outer 20% of the hero, used for the
+        // wheel-zone split). On mobile the user can swipe from
+        // anywhere, and the band check was preventing swipes that
+        // started in the middle 60% from advancing the carousel.
+        onLeft:  function () { phase -= 50; },
+        onRight: function () { phase += 50; }
       });
     }
 
