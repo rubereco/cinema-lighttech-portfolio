@@ -27,39 +27,59 @@ body {
   font-size: 16px;
   line-height: 1.55;
   color: #f4f4f5;
-  /* v3.10.20: static "onion" background. A centered radial gradient
-     anchored to the viewport (background-attachment: fixed) so the
-     center of the radial sits on the middle of the screen no matter
-     where the user scrolls. The center is #050506 (darker), fading
+  /* v3.10.21: static "onion" background. The onion now lives on
+     body::before with position: fixed, NOT on the body's own
+     background with background-attachment: fixed. The fixed
+     background-image approach was unreliable on PC — the
+     gradient scrolled with the content instead of staying
+     anchored to the viewport. A fixed pseudo-element is the
+     rock-solid way to do this: it's tied to the viewport no
+     matter what, and z-index:-1 places it behind all body
+     content but in front of the body's solid fallback color.
+
+     The radial is centered on the viewport, so the center of
+     the onion sits on the middle of the screen no matter where
+     the user scrolls. The center is #050506 (darker), fading
      out to #141417 at the edges.
 
-     The .hero is transparent, so it shows this radial — darkest in
-     the middle of the viewport. The edge of the radial is #141417,
-     which matches the solid backgrounds of .section-posters,
-     .section-about, and .section-rental. So the hero's 50px margin
-     and those three sections all blend seamlessly — the only visible
-     color steps are the radial inside the hero (dark center → #141417
-     edge) and the radial inside the .section-cta (same thing).
+     The .hero is transparent, so it shows this radial — darkest
+     in the middle of the viewport. The edge of the radial is
+     #141417, which matches the solid backgrounds of
+     .section-posters, .section-about, and .section-rental. So
+     the hero's 50px margin and those three sections all blend
+     seamlessly.
 
-     The page reads as a zebra: onion (hero) → #141417 (posters) →
-     #141417 (about) → #141417 (rental) → onion (contact). The dark
-     "onion" sections bookend the lighter middle, with no color seams.
+     The page reads as a zebra: onion (hero) → #141417 (posters)
+     → #141417 (about) → #141417 (rental) → onion (contact).
+     The dark "onion" sections bookend the lighter middle, with
+     no color seams. And the onion itself never moves.
 
-     background-color is the fallback if the gradient doesn't render
-     (very old browsers, or if background-attachment:fixed is dropped). */
+     background-color is the fallback if the pseudo-element
+     doesn't render (very old browsers). */
   background-color: #141417;
-  background-image: radial-gradient(
-    ellipse at center,
-    #050506 0%,
-    #141417 100%
-  );
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  /* The radial is on body::before — see below. */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Smooth scrolling on iOS */
   overflow-x: hidden;
+}
+
+body::before {
+  /* The "onion" — a centered radial gradient that stays
+     pinned to the viewport. Center is #050506 (darker),
+     edges fade to #141417 (the lighter band color).
+     z-index: -1 places it behind all body content but in
+     front of the body's solid #141417 background. */
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    #050506 0%,
+    #141417 100%
+  );
 }
 
 img, video {
