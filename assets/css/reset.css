@@ -27,29 +27,34 @@ body {
   font-size: 16px;
   line-height: 1.55;
   color: #f4f4f5;
-  /* v3.10.23: body background is the fallback color for very old
-     browsers that don't render the .bg-onion div. The onion itself
-     lives on <div class="bg-onion"> in the markup, not on
-     body::before — pseudo-elements with position:fixed + z-index:-1
-     were fragile (overflow-x:hidden on body, z-index quirks in some
-     browsers, etc.). A real fixed div is rock-solid. The center of
-     the radial is #050506, fading out to #0a0a0c at the edges
-     (darker than the #141417 the other sections use, so the onion
-     has its own identity and doesn't blend into the next band). */
-  background-color: #0a0a0c;
+  /* v3.10.29: body background is the fallback color for very old
+     browsers that don't render the .bg-onion div. v3.10.29: changed
+     to #141417 so the fallback matches the radial center — if the
+     .bg-onion div doesn't render, the body is the same color as
+     the solid sections, so transparent sections still look right. */
+  background-color: #141417;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Smooth scrolling on iOS */
   overflow-x: hidden;
 }
 
-/* v3.10.28: the "onion" — FLIPPED. Was center=#050506 (darker) →
-   edges=#0a0a0c (lighter), which read as a faint darkening in
-   the middle of the viewport that the user couldn't see. Now
-   center=#0a0a0c (lighter, "clear in the middle") → edges=#050506
-   (darker, "darker on the outside") so the focal point reads as
-   a lighter spot in the middle of a darker surround. Should be
-   visible at a glance; if not, we'll widen the color gap. */
+/* v3.10.29: the "onion" — much wider color gap so it actually
+   reads. Center is now #141417 (matches the solid .section-posters
+   / .section-rental band color, so the center of the onion
+   blends seamlessly with the solid sections above and below),
+   and edges fade to #050506 (the dark that the user has been
+   seeing as the "border" of the onion).
+
+   The contrast is rgb(20,20,23) → rgb(5,5,6) = ~15 units per
+   channel, vs the old #0a0a0c → #050506 which was only ~5
+   units. The dark ring around the lighter center should now
+   be clearly visible.
+
+   The center of the onion matches the solid section color, so
+   scrolling from a solid section into a transparent section is
+   seamless in the middle of the viewport (same color) and the
+   edges darken into the onion ring. */
 .bg-onion {
   position: fixed;
   top: 0;
@@ -60,7 +65,7 @@ body {
   pointer-events: none;
   background: radial-gradient(
     ellipse at center,
-    #0a0a0c 0%,
+    #141417 0%,
     #050506 100%
   );
 }
