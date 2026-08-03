@@ -205,15 +205,13 @@
   //     physics framerate-independent (works at 30/60/120fps).
   //   - When velocity drops below threshold, momentum stops and
   //     the normal lerp takes over.
-  // v3.10.34: 10x faster than v3.10.33. The user loved the feel
-  // but wanted the whole motion (initial push + deceleration)
-  // compressed to ~1/10 the duration. FLING_VELOCITY went 3→30
-  // (10x initial kick) and FRICTION went 0.95→0.5 (the velocity
-  // now halves each frame instead of losing 5%, so the glide
-  // settles in ~10 frames ≈ 0.17s instead of ~60 frames ≈ 1s).
-  // Net feel: a hard, snappy push that snaps to rest fast,
-  // like flicking a heavy card across a table.
-  var FRICTION = 0.5;             // velocity decay per frame at 60fps
+  // v3.10.35: friction back to 0.95 (the user said "the friction
+  // stays at 95"). FLING_VELOCITY stays at 30 (10x the original
+  // 3, which the user liked). Net result: a HARD initial kick
+  // (10x faster at the peak) that glides out over the full
+  // ~1 second before settling — like a heavy flick that
+  // travels a long way.
+  var FRICTION = 0.95;            // velocity decay per frame at 60fps
   var VELOCITY_THRESHOLD = 0.05;  // below this, stop momentum
   var VELOCITY_SAMPLE_COUNT = 4;   // how many recent samples to average
   var FLING_VELOCITY = 30;        // phase/frame for onLeft/onRight flings
