@@ -43,23 +43,6 @@
   pointer-events: none;
 }
 
-/* ──────────────── Mobile hero (≤767px) ────────────────
-   v3.10.1: same layout as desktop — carousel fills the full hero,
-   text content overlaid on top (centered). The 2/3 split layout
-   from v3.10 (carousel top, text bottom) was scrapped because the
-   split felt disjointed. The tile layout is still scaled in JS
-   (SCALE=0.4) so the tiles fit the narrow mobile viewport, but
-   everything else uses the desktop structure. */
-@media (max-width: 767px) {
-  .hero {
-    cursor: default;
-    background-color: #0b0b0d;
-  }
-  .hero-content {
-    padding: 24px var(--pad-x) 32px;
-  }
-}
-
 .hero-overlay {
   position: absolute;
   inset: 0;
@@ -96,17 +79,57 @@
   );
 }
 
-/* On mobile, .hero-content is overlaid on the carousel (same as
-   desktop). The dark vertical gradient gives the headline and CTAs
-   extra legibility against the moving tiles behind them. */
+/* ──────────────── Mobile hero (≤767px) ────────────────
+   v3.10.4: flex column — carousel (square, big anchored at top)
+   stacked above the text content. No more 100dvh empty hero, no
+   more text floating in the middle of a screenful of black.
+   The hero shrinks to just the content height so the next section
+   peeks through at the bottom of the viewport, telling the user
+   there's more below. (Buddie: "let the user see the below
+   section that it adds info to the user so he knows below there
+   are things.")
+
+   This block comes AFTER the desktop .hero-content rule above so
+   the mobile overrides win on ≤767px viewports. */
 @media (max-width: 767px) {
+  .hero {
+    display: flex;
+    flex-direction: column;
+    min-height: auto; /* shrink to content — not 100dvh anymore */
+    height: auto;
+    cursor: default;
+    background-color: #0b0b0d;
+  }
+  .hero-carousel {
+    position: relative; /* not absolute — sits in the flex flow */
+    inset: auto;
+    width: 100%;
+    /* Square so the big (1:1 source images) is the dominant visual.
+       Width = 100% of the hero, height = same as width. On a
+       375-wide phone the carousel is 375×375; the big at the top
+       of the SVG is the headline visual, the text lives below. */
+    aspect-ratio: 1 / 1;
+    height: auto;
+    flex: 0 0 auto;
+  }
+  .hero-overlay {
+    /* Text is in its own stacked section now, not overlaid on the
+       carousel. The dark gradient that gave the text legibility
+       on the moving tiles is no longer needed. */
+    display: none;
+  }
   .hero-content {
-    background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.55) 0%,
-      rgba(0, 0, 0, 0.30) 40%,
-      rgba(0, 0, 0, 0.65) 100%
-    );
+    position: relative; /* not overlaid — sits below the carousel */
+    min-height: auto;
+    width: 100%;
+    flex: 0 0 auto;
+    /* Pack the text at the top of its own row, just under the big. */
+    justify-content: flex-start;
+    padding: 20px var(--pad-x) 28px;
+    /* Drop the radial dark gradient — the hero background
+       (#0b0b0d) is already dark, and the text isn't fighting
+       moving tiles behind it anymore. */
+    background: none;
   }
 }
 
