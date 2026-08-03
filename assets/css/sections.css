@@ -80,42 +80,39 @@
 }
 
 /* ──────────────── Mobile hero (≤767px) ────────────────
-   v3.10.5: keep the desktop-style overlaid layout (carousel
-   absolute behind, text on top — "the images passing behind the
-   text"), but shrink the hero from 100dvh to 82dvh so the next
-   section peeks through at the bottom. Text is packed at the TOP
-   of the hero (justify-content: flex-start) so it sits over the
-   big instead of floating in the middle of the empty hero.
-   (Buddie: "see the images centered with the text at the top of
-   the screen like the images passing behind the text, and the
-   start of the next section there at the same screen because
-   there is space no full empty space. a little bit of spacing
-   between the two section and thats it.")
+   v3.10.6: drop the fixed dvh — the hero shrinks to its content,
+   same way desktop does naturally. No more 100dvh/82dvh
+   black void below the text. The carousel (absolute, fills the
+   hero) carries the big behind the text; the hero ends where
+   the text ends; the next section starts with its own
+   --section-pad-y (56px) as the "little bit of spacing".
+
+   (Buddie: "you can see the image between the hero section and
+   the next section you can fit another carousel entirely, and
+   that not what we want.")
 
    This block comes AFTER the desktop .hero-content rule above so
    the mobile overrides win on ≤767px viewports. */
 @media (max-width: 767px) {
   .hero {
-    /* 82dvh on a 812-tall phone = 666px. The big is anchored at
-       y=0 in the SVG (v3.10.3) and renders at ~73% of viewport
-       width. The bottom ~146px of the viewport is the start of
-       the next section, so the user sees there's more below
-       before they scroll. */
-    min-height: 82dvh;
+    /* No min-height — hero sizes to the content inside it. The
+       carousel (absolute) fills whatever height the hero ends
+       up being, the big anchors at y=0 in the SVG, and the hero
+       ends right where the hero-content ends. */
+    min-height: 0;
+    height: auto;
     cursor: default;
     background-color: #0b0b0d;
   }
   .hero-content {
-    /* Same height as .hero so the overlay fills the shorter
-       mobile hero. Text is packed at the top so it sits over
-       the big (anchored at y=0 in the SVG), not floating in
-       the middle of the screen. */
-    min-height: 82dvh;
+    /* Match the desktop overlay pattern: position relative,
+       fills the hero, text packed at the top so it sits over
+       the big (anchored at y=0 in the SVG since v3.10.3). */
+    min-height: 0;
+    height: auto;
     justify-content: flex-start;
-    /* No bottom padding — the gap between the hero and the
-       next section comes from the next section's own
-       --section-pad-y (56px on mobile), which is the "little
-       bit of spacing" the user asked for. */
+    /* No bottom padding — the gap to the next section is the
+       next section's own --section-pad-y. */
     padding: 20px var(--pad-x) 0;
   }
 }
