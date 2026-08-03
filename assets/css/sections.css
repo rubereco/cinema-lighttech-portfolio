@@ -209,14 +209,15 @@
    The actual pill-chrome (IMDb, next-section) lives in components.css. */
 
 .section-posters {
-  /* v3.10.24: zero out the horizontal padding so the poster wall
-     and section chrome can go edge-to-edge. The section itself
-     is still full-width (from .section base) so the #141417
-     background spans the entire viewport. The .section-head
-     inside has its own padding (max(20px,4vw)) to inset the
-     heading text from the edges. */
-  padding-left: 0;
-  padding-right: 0;
+  /* v3.10.25: let the .section base padding apply (no zero-out).
+     The section background still spans the full viewport (from
+     .section base), but the poster wall and chrome now have
+     proper gutter from the viewport edges — they fill the
+     section's content area, not the raw viewport. On a 1200px
+     screen that gives ~120px gutter on each side; on a 1600px
+     screen ~320px. On mobile the gutter stays at var(--pad-x)
+     (20–28px). The .section-head inside has its own padding
+     (max(20px,4vw)) for the heading text. */
   /* containing block so .section-chrome can switch to position:absolute inside */
   position: relative;
   /* v3.10.23: solid #141417. This is the "medium" band of the
@@ -227,10 +228,10 @@
   background: #141417;
 }
 
-/* v3.10.24: opt these children out of the .section > * container
-   constraint so they can span the full viewport width. The
-   .section-head is left constrained (it has its own padding for
-   the heading text). */
+/* v3.10.25: poster wall and chrome fill the section's content
+   area (not the raw viewport). They opt out of the .section > *
+   container constraint so they can be wider than var(--container),
+   but they still respect the section's horizontal padding. */
 .section-posters > .poster-wall,
 .section-posters > .section-chrome {
   max-width: none;
