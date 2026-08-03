@@ -88,16 +88,14 @@
 }
 
 /* ──────────────── Mobile hero (≤767px) ────────────────
-   v3.10.14: deleted the "View credits" / "Rental kit" buttons
-   from index.html and removed the .hero-cta CSS rules (mobile
-   override + desktop row-direction override). The lede now
-   stands alone as the last line of the hero text.
-   v3.10.13: bumped hero margin 25px → 50px. v3.10.12 centered
-   the big horizontally on the hero. v3.10.10 narrowed the
-   smalls Y range. v3.10.8 gave the hero 25px breathing room.
-   v3.10.6 made the hero shrink to its content. v3.10.5
-   reverted the v3.10.4 flex-column that put the text in a
-   separate band. v3.10.4 (scrapped) was the split layout.
+   v3.10.15: removed the .hero margin. The 50px gap above + below
+   (v3.10.13) was extra dead space the user didn't want — the
+   .hero-content padding (25px top/bottom) is the only breathing
+   room between the hero and the sections around it. v3.10.14
+   deleted the CTA buttons. v3.10.13 bumped hero margin to
+   50px. v3.10.12 centered the big horizontally. v3.10.10
+   narrowed the smalls Y range. v3.10.8 gave the hero 25px
+   breathing room. v3.10.6 made the hero shrink to its content.
 
    This block comes AFTER the desktop .hero-content rule above so
    the mobile overrides win on ≤767px viewports. */
@@ -109,12 +107,14 @@
        ends right where the hero-content ends. */
     min-height: 0;
     height: auto;
-    /* v3.10.13: bumped from 25px → 50px. 25px wasn't enough — the
-       big (anchored at y=0 in the SVG) sat right against the
-       nav. 50px gives the hero a clear "breath" above the big
-       while still letting the hero shrink to its content.
-       (Buddie: "i see the big image touching the navbar.") */
-    margin: 50px 0;
+    /* v3.10.15: margin removed. The 50px gap above + below was
+       extra dead space the user didn't want — the .hero-content
+       padding (25px top/bottom) is the only breathing room
+       between the hero and the sections around it. (Buddie:
+       "there is a space on top and below that i don't like,
+       i don't know if its the padding or the marging, try
+       removing the margin.") */
+    margin: 0;
     cursor: default;
     background-color: #0b0b0d;
   }
@@ -129,8 +129,6 @@
        carousel edges. */
     padding: 25px var(--pad-x);
   }
-  /* v3.10.14: the .hero-cta gap override was removed — the
-     buttons were deleted from index.html. */
 }
 
 .eyebrow {
