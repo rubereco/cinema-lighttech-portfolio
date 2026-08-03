@@ -39,14 +39,16 @@
 
 .section-cta {
   padding-bottom: 80px;
-  /* v3.10.26: #1c1c20 (was #141417) to complete the A→B→A→B
-     zebra:
-       posters  = #141417  (A)
-       about    = #1c1c20  (B)
-       rental   = #141417  (A)
-       contact  = #1c1c20  (B)
-     Two A's, two B's. Clear alternation. */
-  background: #1c1c20;
+  /* v3.10.27: transparent so the body's onion radial shows
+     through. The contact section becomes the fifth band of the
+     zebra — onion, like the hero. The page now reads:
+       hero     → onion (radial)
+       posters  → #141417 (solid)
+       about    → onion (transparent, body radial)
+       rental   → #141417 (solid)
+       contact  → onion (transparent, body radial)
+     Five bands, true onion↔solid alternation. */
+  background: transparent;
 }
 
 .section-head {

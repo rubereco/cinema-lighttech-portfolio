@@ -240,23 +240,22 @@
   width: 100%;
 }
 
-/* v3.10.26: per-section background overrides. Real zebra — the
-   four sections after the hero alternate between two shades so
-   you can see the rhythm at a glance (and two of each so no
-   section looks "lonely"). */
+/* v3.10.27: per-section background overrides. The four sections
+   after the hero now alternate between a solid band and the
+   body's onion radial:
+     posters  = #141417  (solid)
+     about    = transparent (body's onion shows through)
+     rental   = #141417  (solid)
+     contact  = transparent (body's onion shows through)
+   So scrolling down reads: onion (hero) → solid → onion →
+   solid → onion. Five bands, true alternation. The #about and
+   .section-cta overrides below make them see-through, overriding
+   the .section-alt / .section-cta solid backgrounds. */
 #about {
-  /* lighter than #141417 — same family as --c-surface-2 */
-  background: #1c1c20;
+  background: transparent;
 }
 
 #rental {
-  /* v3.10.26: back to #141417 (was #0b0b0d) so it matches
-     #posters. The pattern is now A→B→A→B:
-       posters  = #141417  (A)
-       about    = #1c1c20  (B)
-       rental   = #141417  (A)
-       contact  = #1c1c20  (B) — see layout.css .section-cta
-     Two A's, two B's. Clear zebra. */
   background: #141417;
 }
 
