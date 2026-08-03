@@ -39,22 +39,18 @@ body {
   overflow-x: hidden;
 }
 
-/* v3.10.29: the "onion" — much wider color gap so it actually
-   reads. Center is now #141417 (matches the solid .section-posters
-   / .section-rental band color, so the center of the onion
-   blends seamlessly with the solid sections above and below),
-   and edges fade to #050506 (the dark that the user has been
-   seeing as the "border" of the onion).
+/* v3.10.30: the "onion" — center pushed up to #1c1c20 (the
+   lighter "B" band from the zebra) so the focal point reads as
+   a clearly lighter spot in the middle of a dark surround. Edges
+   stay at #050506. Contrast is now rgb(28,28,32) → rgb(5,5,6) =
+   ~23 units per channel, vs v3.10.29's ~15. Still in the same
+   family of dark colors, but the center is now visibly distinct
+   from both the solid #141417 bands and the dark edges.
 
-   The contrast is rgb(20,20,23) → rgb(5,5,6) = ~15 units per
-   channel, vs the old #0a0a0c → #050506 which was only ~5
-   units. The dark ring around the lighter center should now
-   be clearly visible.
-
-   The center of the onion matches the solid section color, so
-   scrolling from a solid section into a transparent section is
-   seamless in the middle of the viewport (same color) and the
-   edges darken into the onion ring. */
+   The user said "more light don't overdoit" — this is one step
+   up from the solid band (#141417 → #1c1c20), not a jump to
+   anything near white. The focal point should read at a glance
+   without screaming. */
 .bg-onion {
   position: fixed;
   top: 0;
@@ -65,7 +61,7 @@ body {
   pointer-events: none;
   background: radial-gradient(
     ellipse at center,
-    #141417 0%,
+    #1c1c20 0%,
     #050506 100%
   );
 }
