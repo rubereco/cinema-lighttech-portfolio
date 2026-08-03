@@ -1,8 +1,8 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.10).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.11).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
-   (Buddie: "add the carousel to the mobile version"):
+   → v3.10.11 (Buddie: "add the carousel to the mobile version"):
 
    v3.9.3 ran the carousel on desktop only. v3.10 brought it to
    mobile with a 2/3 split layout + a touch gate. v3.10.1 scrapped
@@ -12,20 +12,32 @@
    dropped the mobile-specific SCALE / INITIAL_OFFSET / WRAP_MARGIN
    overrides (mobile = desktop layout) and fixed the mobile drag
    (preventDefault:true on the Observer, dropped the band gate
-   on fling gestures).
+   on fling gestures). v3.10.10 fixed touch drag jiggling
+   (touch-action: pan-y on .hero) and narrowed the smalls Y range
+   to a 300-unit band.
 
-   v3.10.10: two follow-ups from Buddie's QA on the v3.10.9
-   mobile layout:
-     1. Touch drag was jiggling. Root cause: the browser was
-        trying to interpret the horizontal touch as a horizontal-
-        scroll gesture on the page. Fix in CSS: .hero gets
-        touch-action: pan-y so the browser only handles vertical
-        panning (page scroll) and lets JS handle horizontal.
-     2. Smalls were spawning "all over the place on the y
-        aspect" — wide Y range (50–650, 600 units) sprayed them
-        to the top and bottom of the viewBox. Narrowed to a
-        300-unit band (100–400) so they cluster around the big
-        instead of spraying.
+   v3.10.11: bump DRAG_SENSITIVITY 60 → 500. The old value was
+   tuned for desktop mouse drags (10–50px), but on mobile a single
+   finger swipe is routinely 100–375px. At 60, a full-width 375px
+   swipe only moved the phase by ~22 units (0.9% of the
+   2500-unit loop) — so the carousel barely budged and Buddie
+   said "its moving but so slow." At 500, the same 375px swipe
+   moves the phase by ~187 units (7.5% of the loop) — enough to
+   bring the next big into view in one swipe.
+
+   No band rule gates the drag itself. The only inCarouselBand
+   checks that survived are:
+     • onWheel handler (mouse wheel only, never fires on touch) —
+       returns early if the mouse isn't in the outer 20% of the
+       hero. This is the desktop wheel-zone split (outer 20%
+       scrubs, middle 60% scrolls the page).
+     • Cursor hint (desktop only) — changes cursor to ew-resize
+       when the mouse is in the band.
+   The drag (onDrag), the flings (onLeft/onRight), and the
+   Observer's onPress all fire regardless of where on the hero
+   the touch lands. Buddie: "on mobile this is no issue because
+   when can dragg vertically and horizontal we are not attached
+   to a scroll wheel."
 
    What stayed the same from v3.10.3:
    • Mobile layout is the same as desktop — carousel fills the
@@ -84,9 +96,21 @@
   // right on both.
   var WHEEL_SENSITIVITY = 1.0;
 
-  // Drag/touch sensitivity. GSAP Observer's velocityX is in px/ms.
-  // We multiply by a constant to convert to a phase increment.
-  var DRAG_SENSITIVITY = 60;
+  // Drag/touch sensitivity. GSAP Observer's self.deltaX is the total
+  // horizontal drag distance in pixels since the gesture started.
+  // phase = dragStartPhase + deltaX * DRAG_SENSITIVITY / 1000
+  // → so DRAG_SENSITIVITY is "phase units per 1000px of drag".
+  //
+  // v3.10.11: bumped 60 → 500. The old value was tuned for desktop
+  // mouse drags (10–50px), but on mobile a single finger swipe is
+  // routinely 100–375px. At 60/1000, a full-width 375px swipe only
+  // moved the phase by ~22 units (0.9% of the 2500-unit loop) — so
+  // the carousel barely budged and Buddie said "its moving but so
+  // slow." At 500, the same 375px swipe moves the phase by ~187
+  // units (7.5% of the loop) — enough to bring the next big into
+  // view in one swipe. (Desktop drag is still 10–50px so it now
+  // moves 5–25 units per gesture — feels responsive, not jumpy.)
+  var DRAG_SENSITIVITY = 500;
 
   // ── Layout constants (scaled by SCALE for mobile) ────────────
   var BIG_WIDTH = 500 * SCALE;
