@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.12).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.37).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
@@ -218,6 +218,30 @@
   var VELOCITY_SAMPLE_COUNT = 4;   // how many recent samples to average
   var FLING_VELOCITY = 30;        // phase/frame for onLeft/onRight flings (mobile)
   var PC_VELOCITY_SCALE = 0.25;   // velocity multiplier on PC (quarter the push)
+
+  // === Idle auto-scroll (v3.10.37) ===
+  // When the user isn't touching the carousel and there's no
+  // momentum, the carousel slowly drifts to the right on its
+  // own — like a museum display or a portfolio showcase. The
+  // user can grab it at any time (which pauses auto-scroll);
+  // after they release and the momentum settles, auto-scroll
+  // resumes from wherever the carousel is. Wheel scrolling also
+  // pauses auto-scroll for WHEEL_IDLE_DELAY ms so the two
+  // motions don't fight.
+  //
+  // The user said: "i want an animation that makes them move, so
+  // they scroll when the user is not, but if the user scrolls
+  // the animation stops and does what the user wants. after
+  // the user stops the animation will resume where it is and
+  // start scrolling again. i imagine this animation slow".
+  //
+  // AUTO_SCROLL_VELOCITY = 0.3 phase/frame at 60fps = 18
+  // phase/second. One big-tile slot is BIG_SPACING = 900
+  // phase, so a full slot takes ~50 seconds to traverse.
+  // Deliberately slow — it's a background drift, not a demo
+  // reel. Tune up if the user wants it faster.
+  var AUTO_SCROLL_VELOCITY = 0.3;  // phase/frame, slow drift when idle
+  var WHEEL_IDLE_DELAY = 1500;     // ms after last wheel before auto-scroll resumes
 
   // === Build the layout from the SVG's <image> elements ===
   // Each entry has:
@@ -468,6 +492,19 @@
     var lastDragTime = 0;
     var flingOccurred = false;
 
+    // === Auto-scroll state (v3.10.37) ===
+    //   isUserPressing  — true while the user is actively touching
+    //                     or clicking the carousel. Disables
+    //                     auto-scroll so the drag is the only
+    //                     force acting on phase.
+    //   lastWheelTime   — timestamp of the most recent wheel
+    //                     event. Auto-scroll stays paused for
+    //                     WHEEL_IDLE_DELAY ms after each wheel
+    //                     click so the wheel's phase update
+    //                     doesn't get mixed with the auto-drift.
+    var isUserPressing = false;
+    var lastWheelTime = 0;
+
     // === Band-based zone detection ===
     var inCarouselBand = false;
     function updateBand(clientX, clientY) {
@@ -508,17 +545,24 @@
     hero.addEventListener('touchcancel', leaveBand);
 
     // === Per-frame update ===
-    // Two modes:
+    // Three modes (v3.10.37):
     //   1) Momentum (velocity != 0): advance both phase and
     //      currentPhase by velocity, then decay velocity by
     //      FRICTION. Skips the lerp entirely so the tiles
     //      follow the momentum exactly — no chase lag.
-    //   2) At rest (velocity == 0): normal lerp, currentPhase
-    //      eases toward phase.
+    //   2) Auto-scroll (idle, no user input, no recent wheel):
+    //      advance both phase and currentPhase by the constant
+    //      AUTO_SCROLL_VELOCITY. The carousel drifts right at
+    //      a slow, steady pace — like a museum display.
+    //   3) At rest (lerp): currentPhase eases toward phase. Used
+    //      when the user is actively dragging, or within
+    //      WHEEL_IDLE_DELAY ms of a wheel event (so the wheel
+    //      doesn't combine with the auto-drift).
     // gsap.ticker.deltaRatio() scales the physics by frame time
     // so the same FRICTION / velocity feel right at 30, 60, 120fps.
     function tick() {
       if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
+        // Mode 1: momentum.
         var deltaRatio = gsap.ticker.deltaRatio();
         phase += velocity * deltaRatio;
         currentPhase += velocity * deltaRatio;
@@ -528,7 +572,27 @@
         velocity *= Math.pow(FRICTION, deltaRatio);
       } else {
         velocity = 0;
-        currentPhase += (phase - currentPhase) * LERP_FACTOR;
+        // v3.10.37: choose between auto-scroll and lerp.
+        // Auto-scroll runs only when the user is NOT pressing
+        // AND the last wheel event was more than
+        // WHEEL_IDLE_DELAY ms ago. If either condition fails,
+        // fall through to the lerp so the user/wheel's phase
+        // changes settle without the auto-drift piling on top.
+        var now = performance.now();
+        if (!isUserPressing && (now - lastWheelTime) > WHEEL_IDLE_DELAY) {
+          // Mode 2: idle auto-scroll. Both phase and currentPhase
+          // advance by the same delta so they stay in sync — no
+          // lerp needed. deltaRatio() keeps the speed framerate-
+          // independent (0.3 phase/frame at 60fps, scaled by
+          // deltaRatio for other rates).
+          var deltaRatio = gsap.ticker.deltaRatio();
+          phase += AUTO_SCROLL_VELOCITY * deltaRatio;
+          currentPhase += AUTO_SCROLL_VELOCITY * deltaRatio;
+        } else {
+          // Mode 3: lerp toward phase. currentPhase eases into
+          // the latest target the user/wheel set.
+          currentPhase += (phase - currentPhase) * LERP_FACTOR;
+        }
       }
       // Snap when very close, to avoid a permanent fractional tween
       if (Math.abs(phase - currentPhase) < 0.05) currentPhase = phase;
@@ -547,6 +611,11 @@
     // Raw deltaY → phase increment. Proportional to the wheel
     // intensity (trackpad small deltas produce small moves; big
     // mouse wheel turns produce big moves).
+    // v3.10.37: also stamp lastWheelTime so the idle auto-scroll
+    // in tick() stays paused for WHEEL_IDLE_DELAY ms after each
+    // wheel event — without this, the wheel's phase update would
+    // be combined with the auto-drift and the carousel would
+    // appear to scroll faster than the user wheeled it.
     function onWheel(e) {
       if (!inCarouselBand) return;
       e.preventDefault();
@@ -554,6 +623,7 @@
       if (WHEEL_INVERTED) deltaY = -deltaY;
       if (!deltaY) return;
       phase += deltaY * WHEEL_SENSITIVITY;
+      lastWheelTime = performance.now();
     }
     hero.addEventListener('wheel', onWheel, { passive: false });
 
@@ -587,12 +657,16 @@
           // v3.10.33: also reset momentum state — any in-flight
           // velocity from a previous gesture is dropped, and the
           // sample buffer is cleared for the new gesture.
+          // v3.10.37: mark the user as actively pressing so the
+          // idle auto-scroll in tick() backs off — the drag is
+          // the only force acting on phase now.
           dragStartPhase = phase;
           velocity = 0;
           velocitySamples = [];
           flingOccurred = false;
           lastDragPhase = phase;
           lastDragTime = performance.now();
+          isUserPressing = true;
         },
         onDrag: function (self) {
           // self.deltaX is total horizontal drag distance since start.
@@ -625,7 +699,10 @@
         // v3.10.36: scale the final velocity down on PC so a
         // 10-50px mouse drag doesn't "go flying" — quarter the
         // push on PC, full push on mobile.
+        // v3.10.37: also clear isUserPressing so the idle
+        // auto-scroll can resume (after the momentum decays).
         onDragEnd: function () {
+          isUserPressing = false;
           if (flingOccurred) {
             flingOccurred = false;
             return;
@@ -654,13 +731,20 @@
         // same "scroll and settle" feel as a regular drag release.
         // v3.10.36: quarter the fling on PC (same scale as
         // onDragEnd) so desktop flings don't blast across the loop.
+        // v3.10.37: clear isUserPressing here too — a fling is
+        // an exit from the press, and the next onDragEnd will
+        // early-return via the flingOccurred flag, so we MUST
+        // clear isUserPressing in both places or the flag would
+        // stay stuck true after a fling.
         // flingOccurred flag tells onDragEnd to skip its own
         // velocity calc so we don't overwrite the fling.
         onLeft:  function () {
+          isUserPressing = false;
           velocity = isMobile ? -FLING_VELOCITY : -FLING_VELOCITY * PC_VELOCITY_SCALE;
           flingOccurred = true;
         },
         onRight: function () {
+          isUserPressing = false;
           velocity = isMobile ?  FLING_VELOCITY :  FLING_VELOCITY * PC_VELOCITY_SCALE;
           flingOccurred = true;
         }
