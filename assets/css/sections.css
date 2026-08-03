@@ -38,6 +38,20 @@
      of jiggling on the images"). pan-y = browser scrolls the page
      vertically, JS gets the horizontal touch. */
   touch-action: pan-y;
+  /* v3.10.18: scroll-margin-top leaves room for the sticky
+     .site-header (72px tall: 14px pad + 44px nav-toggle + 14px pad)
+     when the browser scrolls to #top. Without this, the top edge of
+     <section id="top"> lands at the very top of the viewport and
+     the sticky nav covers the hero's first ~72px — including the
+     eyebrow / headline / lede text packed at the top of the hero
+     on mobile. Triggers on (a) page refresh while at #top, and
+     (b) clicking the brand link <a class="brand" href="#top">,
+     which is the "Tarek Recolons" link in the header.
+     (Buddie: "the text is still appearing behind the navbar,
+     probably a bad reference of section or something similar,
+     this happens when refreshin or when clicking the name tarek
+     recolons that directs you to #top".) */
+  scroll-margin-top: 80px;
 }
 
 .hero-carousel {
@@ -111,23 +125,25 @@
        ends right where the hero-content ends. */
     min-height: 0;
     height: auto;
-    /* v3.10.17: 50px breathing space, no own background.
-       The body's background is already #0b0b0d (reset.css),
-       so the hero is transparent and shows the body through
-       it. The 50px margin above and below the hero also shows
-       the body color, so the entire vertical run — nav →
-       margin → hero → margin → next section — is one
-       continuous #0b0b0d surface with no visible seams. The
-       carousel background literally is the section
-       background. (Buddie: "make the carousel background be
-       the section background and remove the background of
-       the carousel, i think its the cleanest solution".)
-       Supersedes v3.10.16 box-shadow: the shadow painted the
-       same color as the body, just with extra rendering
-       cost and a visual edge that became visible on
-       scroll-snap and bouncy-scroll. */
+    /* v3.10.18: 50px breathing space + the section OWNS its
+       #0b0b0d background. The carousel (the SVG inside) shows
+       this color everywhere it isn't covered by a tile, so the
+       carousel background IS the section background. The body
+       is also #0b0b0d (reset.css), so the 50px margin above
+       and below the hero is the same color as the section —
+       the section + margins read as one continuous surface.
+       (Buddie: "when i say the background of the section im
+       refering also to the margins, so when i enlarge or reduce
+       the margins they inherit the background of that section
+       if the margin is another color it doesn't seem like the
+       section is still going".)
+       This supersedes v3.10.17 (transparent hero relying on
+       body color). Owning the background here is canonical:
+       the section's identity doesn't depend on whatever
+       happens to be behind it. */
     margin: 50px 0;
     cursor: default;
+    background-color: #0b0b0d;
   }
   .hero-content {
     /* Match the desktop overlay pattern: position relative,
