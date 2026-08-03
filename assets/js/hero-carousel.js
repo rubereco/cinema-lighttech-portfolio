@@ -1,45 +1,48 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.1).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.2).
    ────────────────────────────────────────────────────────────────────────
-   v3.9.3 → v3.10 → v3.10.1 (Buddie: "add the carousel to the
-   mobile version"):
+   v3.9.3 → v3.10 → v3.10.1 → v3.10.2 (Buddie: "add the carousel to
+   the mobile version"):
 
-   v3.9.3 ran the carousel on desktop only — on mobile (≤767px) the
-   CSS hid the SVG and the hero got a static background image
-   (hero-forest.jpg) instead. v3.10 tried a 2/3 split layout
-   (carousel top, text content bottom), but Buddie pushed back:
-   "the front text is like splitted of the carousel it looks so
-   bad". v3.10.1 reverts to the same layout as desktop — carousel
-   fills the full hero, text content is overlaid on top (centered,
-   with the dark gradient for legibility). The split is gone.
+   v3.9.3 ran the carousel on desktop only. v3.10 brought it to
+   mobile with a 2/3 split layout + a touch gate. v3.10.1 scrapped
+   the split (Buddie: "the front text is like splitted of the
+   carousel it looks so bad") and removed the touch gate (Buddie:
+   "when i dragg it with the mouse it doesn't even move"). v3.10.2
+   addresses two follow-ups from the v3.10.1 mobile layout:
 
-   What v3.10 still keeps (the useful parts):
-   • SCALE = 0.4 on mobile. Every layout constant (BIG_WIDTH,
-     BIG_SPACING, SMALL_WIDTH, BIG_Y, SMALL_Y_MIN/MAX,
-     INITIAL_OFFSET, WRAP_MARGIN, SMALL_X_OFFSET_RANGE) is
-     multiplied by SCALE so bigs come out at 200×200, smalls at
-     80×80, spacing 360, etc. Without scaling, the tiles would
-     be off-screen on a 375-wide phone (the slice-cropped visible
-     region in the 1600-wide viewBox is only ~625 SVG units).
+   1. Bigs were still too small. SCALE bumped from 0.4 to 0.65 so
+      bigs are 325×325 on a 375-wide phone — ~78% of the screen
+      width, close to Buddie's "80%" request. With 3 bigs and
+      spacing 585, only the center big is fully visible in the
+      slice-cropped visible region (~416 SVG units wide for a
+      375-wide viewport), but the user can touch-scroll to see
+      the others on either side.
+
+   2. Bigs weren't vertically centered with the text. The text is
+      centered in the hero (min-height: 100dvh, justify-content:
+      center), but the bigs sat at the top of the SVG (BIG_Y=200
+      on desktop, scaled down on mobile). v3.10.2 adds a mobile
+      override: BIG_Y = 450 − BIG_HEIGHT/2, which centers the bigs
+      vertically at y=450 in the viewBox — the same vertical
+      center as the text in the hero.
+
+   What stayed the same from v3.10.1:
+   • Mobile layout is the same as desktop — carousel fills the
+     full hero, text content is overlaid on top. No flex column.
+   • SCALE shrinks every layout constant (BIG_WIDTH, BIG_SPACING,
+     SMALL_WIDTH, BIG_Y, SMALL_Y_MIN/MAX, INITIAL_OFFSET,
+     WRAP_MARGIN, SMALL_X_OFFSET_RANGE) so the tile layout fits
+     the narrow mobile viewport.
    • INITIAL_OFFSET is recomputed dynamically on mobile to center
-     the scaled tile span at x=800. Desktop keeps the v3.9.3 value.
-   • setupClipPaths() recreates the <defs><clipPath> elements at
-     runtime with the SCALED sizes (and proportional rx), so
-     mobile tiles still have rounded corners. The HTML keeps the
-     desktop-size clip-paths as a no-JS fallback.
+     the scaled tile span at x=800 in the viewBox. Desktop keeps
+     the v3.9.3 value (200).
+   • setupClipPaths() rebuilds the clip-paths at runtime with the
+     scaled sizes (proportional rx), so mobile tiles still have
+     rounded corners. The HTML keeps the desktop-size clip-paths
+     as a no-JS fallback.
    • The 'if (window.innerWidth < MOBILE_MAX_WIDTH) return;' skip
-     in init() is removed — the carousel now runs on every viewport.
-
-   What v3.10.1 removes (the parts that broke the UX):
-   • The .hero flex column layout on mobile (carousel top 2/3,
-     content bottom 1/3). The split felt disjointed.
-   • The inCarouselArea touch gate. It was meant to keep the
-     bottom-1/3 CTAs tappable, but since the split is gone the
-     carousel is the full hero and the gate was just blocking
-     drags everywhere on mobile. Buddie: "when i dragg it with
-     the mouse it doesn't even move". Now drags work anywhere in
-     the hero; CTAs still work because taps (no drag) don't fire
-     onDrag, so the click reaches the link.
+     in init() is gone — the carousel now runs on every viewport.
 
    What stayed the same (still true from v3.8):
    • Phase-based scrub (global phase, lerped to currentPhase).
@@ -61,12 +64,17 @@
 
   // Detect mobile once at module load. SCALE shrinks the whole tile
   // layout (BIG_WIDTH, BIG_SPACING, SMALL_WIDTH, etc.) so the tiles
-  // fit the narrow visible region on a 375-wide phone viewport
-  // (~625 SVG units after the 1600-wide viewBox is slice-cropped).
-  // 0.4 = bigs come out at 200×200, smalls at 80×80, spacing 360 —
-  // 1.5–2 bigs visible at load, the rest come in via touch-scroll.
+  // fit the narrow visible region on a phone viewport.
+  // 0.65 = bigs come out at 325×325 ≈ 78% of a 375-wide phone screen
+  // (Buddie: "make the big images take like 80% of the width of
+  // the screen"). The center big is fully visible in the slice-
+  // cropped visible region and is centered both horizontally (at
+  // x=800 in the viewBox) and vertically (at y=450, see the
+  // BIG_Y override in buildLayout) so it sits behind the centered
+  // hero text. The other bigs are off-screen on either side and
+  // come in via touch-scroll.
   var isMobile = window.innerWidth < MOBILE_MAX_WIDTH;
-  var SCALE = isMobile ? 0.4 : 1.0;
+  var SCALE = isMobile ? 0.65 : 1.0;
 
   // Per-tile phase multipliers. 1.0 = full speed, 2.0 = 2× parallax.
   // Smalls scroll 2× faster than bigs for the CodePen depth effect.
@@ -191,6 +199,14 @@
       var tileSpan = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
       INITIAL_OFFSET = Math.round(800 - tileSpan / 2);
       WRAP_MARGIN = Math.round(INITIAL_OFFSET * 0.3);
+      // Center the bigs vertically with the hero text. The text is
+      // centered in the hero (min-height: 100dvh, justify-content:
+      // center) and the SVG fills the hero, so the visible y range
+      // is 0–900 in SVG units. The center of that range is y=450,
+      // and the bigs sit at BIG_Y = 450 − BIG_HEIGHT/2 so they're
+      // vertically aligned with the text. (Buddie: "the big images
+      // are not centered with the text" — this fixes the y axis.)
+      BIG_Y = Math.round(450 - BIG_HEIGHT / 2);
     }
 
     // Compute X_RANGE = (bigs' span) + WRAP_MARGIN.
