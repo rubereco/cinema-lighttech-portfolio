@@ -39,18 +39,18 @@ body {
   overflow-x: hidden;
 }
 
-/* v3.10.30: the "onion" — center pushed up to #1c1c20 (the
-   lighter "B" band from the zebra) so the focal point reads as
-   a clearly lighter spot in the middle of a dark surround. Edges
-   stay at #050506. Contrast is now rgb(28,28,32) → rgb(5,5,6) =
-   ~23 units per channel, vs v3.10.29's ~15. Still in the same
-   family of dark colors, but the center is now visibly distinct
-   from both the solid #141417 bands and the dark edges.
-
-   The user said "more light don't overdoit" — this is one step
-   up from the solid band (#141417 → #1c1c20), not a jump to
-   anything near white. The focal point should read at a glance
-   without screaming. */
+/* v3.10.31: the "onion" — center nudged up to #202024 (one
+   step lighter than v3.10.30's #1c1c20, still in the same
+   family) AND added 4 intermediate color stops so the gradient
+   doesn't band. The 2-stop gradient was getting posterized on
+   dark colors into visible "onion-shape" rings — smooth 2-stop
+   gradients with subtle color differences can show discrete
+   bands on some displays. Adding intermediate stops
+   (#202024 → #18181d → #0f0f13 → #09090b → #070707 → #050506)
+   keeps the same overall feel but makes the transition
+   continuous, no visible rings. Contrast is rgb(32,32,36) →
+   rgb(5,5,6) = ~27 units per channel, a touch more than
+   v3.10.30's ~23. */
 .bg-onion {
   position: fixed;
   top: 0;
@@ -61,7 +61,11 @@ body {
   pointer-events: none;
   background: radial-gradient(
     ellipse at center,
-    #1c1c20 0%,
+    #202024 0%,
+    #18181d 20%,
+    #0f0f13 40%,
+    #09090b 60%,
+    #070707 80%,
     #050506 100%
   );
 }
