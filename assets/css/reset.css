@@ -43,14 +43,13 @@ body {
   overflow-x: hidden;
 }
 
-/* v3.10.23: the "onion" — a real <div class="bg-onion"> in the
-   markup, not a pseudo-element. position:fixed pins it to the
-   viewport, so the center of the radial stays on the middle of
-   the screen no matter where the user scrolls. z-index:-1 places
-   it behind all body content but in front of the body's solid
-   background. The .hero is transparent, so the hero shows this
-   radial — the darkest part of the page is always in the middle
-   of the viewport. */
+/* v3.10.28: the "onion" — FLIPPED. Was center=#050506 (darker) →
+   edges=#0a0a0c (lighter), which read as a faint darkening in
+   the middle of the viewport that the user couldn't see. Now
+   center=#0a0a0c (lighter, "clear in the middle") → edges=#050506
+   (darker, "darker on the outside") so the focal point reads as
+   a lighter spot in the middle of a darker surround. Should be
+   visible at a glance; if not, we'll widen the color gap. */
 .bg-onion {
   position: fixed;
   top: 0;
@@ -61,8 +60,8 @@ body {
   pointer-events: none;
   background: radial-gradient(
     ellipse at center,
-    #050506 0%,
-    #0a0a0c 100%
+    #0a0a0c 0%,
+    #050506 100%
   );
 }
 
