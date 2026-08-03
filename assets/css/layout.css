@@ -3,40 +3,38 @@
    Sections, containers, headers, footers. No component styling here.
    ════════════════════════════════════════════════════════════════════════ */
 
-/* Base .section: content is constrained and centered within the page.
-   On .section-alt we widen the section (background) but keep inner content constrained. */
+/* Base .section: spans the full viewport width (background goes
+   edge-to-edge). Inner content is constrained to var(--container)
+   and centered via the .section > * rule below. The padding-x
+   uses the max(pad-x, half-of-leftover) trick so the gutter is
+   at least var(--pad-x) on small screens and centered on wide
+   screens. */
 .section {
-  padding: var(--section-pad-y) var(--pad-x);
+  padding: var(--section-pad-y) max(var(--pad-x), calc((100% - var(--container)) / 2));
+  max-width: none;
+}
+
+/* Force all direct children of .section to obey container width and center.
+   Same pattern .section-alt used to use. Children that need to be
+   edge-to-edge (e.g. .poster-wall, .section-chrome) opt out below
+   with max-width:none + margin:0. */
+.section > * {
   max-width: var(--container);
   margin-left: auto;
   margin-right: auto;
+  width: 100%;
+  /* Prevent flex/grid from forcing content width to expand the container */
+  min-width: 0;
 }
 
-/* .section-alt: full-width dark band as background.
-   We DON'T use max-width:none + child-constraint pattern because that breaks
-   when direct children are display:flex or display:grid (they ignore parent max-width
-   when their width is determined by content). Instead, we use padding-x for the gutter
-   and rely on direct children to handle their own width. */
+/* .section-alt: full-width dark band as background. Now redundant
+   with the .section width rules above — the section is already
+   full-width and the children are already constrained. .section-alt
+   just adds the background color and the top/bottom borders. */
 .section-alt {
   background: var(--c-bg-alt);
   border-top: 1px solid var(--c-border);
   border-bottom: 1px solid var(--c-border);
-  /* Let the background span full width. */
-  max-width: none;
-  /* Inner content sits inside var(--container) and is centered. */
-  padding-left: max(var(--pad-x), calc((100% - var(--container)) / 2));
-  padding-right: max(var(--pad-x), calc((100% - var(--container)) / 2));
-}
-
-/* Force all direct children of .section-alt to obey container width and center.
-   This overrides any width:100% or content-driven widths they might have. */
-.section-alt > * {
-  max-width: var(--container);
-  margin-left: auto !important;
-  margin-right: auto !important;
-  width: 100%;
-  /* Prevent flex/grid from forcing content width to expand the container */
-  min-width: 0;
 }
 
 .section-cta {

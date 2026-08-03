@@ -209,7 +209,12 @@
    The actual pill-chrome (IMDb, next-section) lives in components.css. */
 
 .section-posters {
-  /* break the standard `.section` padding so posters can go edge-to-edge */
+  /* v3.10.24: zero out the horizontal padding so the poster wall
+     and section chrome can go edge-to-edge. The section itself
+     is still full-width (from .section base) so the #141417
+     background spans the entire viewport. The .section-head
+     inside has its own padding (max(20px,4vw)) to inset the
+     heading text from the edges. */
   padding-left: 0;
   padding-right: 0;
   /* containing block so .section-chrome can switch to position:absolute inside */
@@ -220,6 +225,18 @@
      → #141417. Three distinct shades so you can actually see the
      bands changing as you scroll. */
   background: #141417;
+}
+
+/* v3.10.24: opt these children out of the .section > * container
+   constraint so they can span the full viewport width. The
+   .section-head is left constrained (it has its own padding for
+   the heading text). */
+.section-posters > .poster-wall,
+.section-posters > .section-chrome {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
 }
 
 /* v3.10.23: per-section background overrides. .section-alt sets all
