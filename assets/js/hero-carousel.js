@@ -235,13 +235,15 @@
   // the user stops the animation will resume where it is and
   // start scrolling again. i imagine this animation slow".
   //
-  // AUTO_SCROLL_VELOCITY = 0.3 phase/frame at 60fps = 18
+  // AUTO_SCROLL_VELOCITY = 0.6 phase/frame at 60fps = 36
   // phase/second. One big-tile slot is BIG_SPACING = 900
-  // phase, so a full slot takes ~50 seconds to traverse.
-  // Deliberately slow — it's a background drift, not a demo
-  // reel. Tune up if the user wants it faster.
-  var AUTO_SCROLL_VELOCITY = 0.3;  // phase/frame, slow drift when idle
-  var WHEEL_IDLE_DELAY = 1500;     // ms after last wheel before auto-scroll resumes
+  // phase, so a full slot takes ~25 seconds to traverse.
+  // v3.10.38 (Buddie: "put it to 0.6 the auto scroll") —
+  // doubled from the original 0.3 — the original was
+  // almost imperceptible, the new pace is a clearly visible
+  // drift without feeling like a screensaver.
+  var AUTO_SCROLL_VELOCITY = 0.6;  // phase/frame, slow drift when idle
+  var WHEEL_IDLE_DELAY = 2000;     // ms after last wheel before auto-scroll resumes (v3.10.38: 1500→2000)
 
   // === Build the layout from the SVG's <image> elements ===
   // Each entry has:
