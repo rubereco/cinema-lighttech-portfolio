@@ -240,19 +240,24 @@
   width: 100%;
 }
 
-/* v3.10.23: per-section background overrides. .section-alt sets all
-   alt sections to var(--c-bg-alt) = #141417, which made the three
-   post-hero sections look identical. These ID-specific overrides give
-   each a distinct shade from the token palette so the page reads as
-   a clear three-shade wave below the hero's onion. */
+/* v3.10.26: per-section background overrides. Real zebra — the
+   four sections after the hero alternate between two shades so
+   you can see the rhythm at a glance (and two of each so no
+   section looks "lonely"). */
 #about {
   /* lighter than #141417 — same family as --c-surface-2 */
   background: #1c1c20;
 }
 
 #rental {
-  /* darker than #141417 — same as --c-bg */
-  background: #0b0b0d;
+  /* v3.10.26: back to #141417 (was #0b0b0d) so it matches
+     #posters. The pattern is now A→B→A→B:
+       posters  = #141417  (A)
+       about    = #1c1c20  (B)
+       rental   = #141417  (A)
+       contact  = #1c1c20  (B) — see layout.css .section-cta
+     Two A's, two B's. Clear zebra. */
+  background: #141417;
 }
 
 .section-posters > .section-head {

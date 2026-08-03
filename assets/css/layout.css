@@ -39,14 +39,14 @@
 
 .section-cta {
   padding-bottom: 80px;
-  /* v3.10.22: solid #141417 so the contact section is self-contained
-     instead of being transparent and relying on the body's onion
-     radial. Now every section after the hero owns its own #141417
-     background — the hero is the only "onion" section (it sits on
-     the body's fixed radial), and the rest of the page is a single
-     solid #141417 band. Pattern: onion (hero) → #141417 (everything
-     below). Simpler zebra, easy to test. */
-  background: #141417;
+  /* v3.10.26: #1c1c20 (was #141417) to complete the A→B→A→B
+     zebra:
+       posters  = #141417  (A)
+       about    = #1c1c20  (B)
+       rental   = #141417  (A)
+       contact  = #1c1c20  (B)
+     Two A's, two B's. Clear alternation. */
+  background: #1c1c20;
 }
 
 .section-head {
