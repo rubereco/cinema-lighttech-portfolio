@@ -88,12 +88,14 @@
 }
 
 /* ──────────────── Mobile hero (≤767px) ────────────────
-   v3.10.8: hero still shrinks to its content (v3.10.6), but with
-   25px breathing room on the top and bottom — margin on the hero
-   so it sits 25px below the nav and 25px above the next section,
-   matching padding inside hero-content so the text doesn't
-   touch the carousel edges. (Buddie: "add a little bit more
-   maybe 25px".)
+   v3.10.13: bumped hero margin 25px → 50px (the big was touching
+   the navbar at 25px), and bumped .hero-cta gap 12px → 16px
+   (the rounded pill buttons felt cramped on mobile). v3.10.12
+   centered the big horizontally on the hero. v3.10.10 narrowed
+   the smalls Y range. v3.10.8 gave the hero 25px breathing
+   room. v3.10.6 made the hero shrink to its content. v3.10.5
+   reverted the v3.10.4 flex-column that put the text in a
+   separate band. v3.10.4 (scrapped) was the split layout.
 
    This block comes AFTER the desktop .hero-content rule above so
    the mobile overrides win on ≤767px viewports. */
@@ -105,8 +107,12 @@
        ends right where the hero-content ends. */
     min-height: 0;
     height: auto;
-    /* 25px gap above (from nav) and below (to the next section). */
-    margin: 25px 0;
+    /* v3.10.13: bumped from 25px → 50px. 25px wasn't enough — the
+       big (anchored at y=0 in the SVG) sat right against the
+       nav. 50px gives the hero a clear "breath" above the big
+       while still letting the hero shrink to its content.
+       (Buddie: "i see the big image touching the navbar.") */
+    margin: 50px 0;
     cursor: default;
     background-color: #0b0b0d;
   }
@@ -120,6 +126,16 @@
     /* 25px on top and bottom so the text doesn't touch the
        carousel edges. */
     padding: 25px var(--pad-x);
+  }
+  /* v3.10.13: Bumped button gap 12px → 16px. The 12px gap on
+     mobile felt cramped against the rounded pill shapes —
+     16px gives the tap targets more visual separation. (Buddie:
+     "the 'hitbox' of the buttons is bad because the responsive".)
+     The .btn min-height is already 48px (above the 44px Apple
+     HIG / Material touch target) — the issue was spacing, not
+     the hitbox itself. */
+  .hero-cta {
+    gap: 16px;
   }
 }
 
