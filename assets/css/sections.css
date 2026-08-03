@@ -88,12 +88,14 @@
 }
 
 /* ──────────────── Mobile hero (≤767px) ────────────────
-   v3.10.13: bumped hero margin 25px → 50px (the big was touching
-   the navbar at 25px), and bumped .hero-cta gap 12px → 16px
-   (the rounded pill buttons felt cramped on mobile). v3.10.12
-   centered the big horizontally on the hero. v3.10.10 narrowed
-   the smalls Y range. v3.10.8 gave the hero 25px breathing
-   room. v3.10.6 made the hero shrink to its content. v3.10.5
+   v3.10.14: deleted the "View credits" / "Rental kit" buttons
+   from index.html and removed the .hero-cta CSS rules (mobile
+   override + desktop row-direction override). The lede now
+   stands alone as the last line of the hero text.
+   v3.10.13: bumped hero margin 25px → 50px. v3.10.12 centered
+   the big horizontally on the hero. v3.10.10 narrowed the
+   smalls Y range. v3.10.8 gave the hero 25px breathing room.
+   v3.10.6 made the hero shrink to its content. v3.10.5
    reverted the v3.10.4 flex-column that put the text in a
    separate band. v3.10.4 (scrapped) was the split layout.
 
@@ -127,16 +129,8 @@
        carousel edges. */
     padding: 25px var(--pad-x);
   }
-  /* v3.10.13: Bumped button gap 12px → 16px. The 12px gap on
-     mobile felt cramped against the rounded pill shapes —
-     16px gives the tap targets more visual separation. (Buddie:
-     "the 'hitbox' of the buttons is bad because the responsive".)
-     The .btn min-height is already 48px (above the 44px Apple
-     HIG / Material touch target) — the issue was spacing, not
-     the hitbox itself. */
-  .hero-cta {
-    gap: 16px;
-  }
+  /* v3.10.14: the .hero-cta gap override was removed — the
+     buttons were deleted from index.html. */
 }
 
 .eyebrow {
@@ -166,12 +160,9 @@
   max-width: var(--measure);
 }
 
-.hero-cta {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 8px;
-}
+/* .hero-cta removed in v3.10.14: the "View credits" / "Rental kit"
+   buttons were deleted from index.html. Leave the rule absent
+   so any future markup using this class is styled from scratch. */
 
 /* ──────────────── Work / poster wall ────────────────
    Every film the same size, same aspect (2:3). Mobile-first: 1 column full-width.
@@ -450,10 +441,8 @@
     max-width: 52ch;
   }
 
-  .hero-cta {
-    flex-direction: row;
-    gap: 14px;
-  }
+  /* .hero-cta desktop override removed in v3.10.14 — the buttons
+     were deleted from index.html. */
 
   /* Tablet — 3 columns */
   .poster-wall {
