@@ -776,8 +776,15 @@ html.film-modal-open body {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* v3.13.9: switched from 'cover' to 'contain' so wide SVG
+     wordmarks (Kinolux 250×87.4, Movie-men 139×128) display
+     fully instead of being cropped on the sides. The 64×64
+     photo container has a dark #0b0b0d background, so SVG
+     letterboxing blends in. Square JPG/PNG portraits still
+     fill the box (contain == cover for square content). */
+  object-fit: contain;
   object-position: center;
+  padding: 8px;
 }
 /* v3.12.2: black-bg + grey person-emoji fallback for missing portraits */
 .partner-photo-fallback {
