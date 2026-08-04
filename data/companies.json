@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "version": "1.0",
-    "lastUpdated": "2026-07-27"
+    "version": "1.1",
+    "lastUpdated": "2026-08-04"
   },
   "companies": [
     {
@@ -16,20 +16,6 @@
         "es": "Casa líder de alquiler de equipos en Barcelona. Unidades de distribución de energía, generadores y paquetes completos de iluminación para producciones cinematográficas y publicitarias."
       },
       "url": "https://movie-men.com/",
-      "urlLabel": "Website"
-    },
-    {
-      "id": "mercadona",
-      "name": "Mercadona",
-      "kind": "commercial-partner",
-      "logo": "assets/images/partners/mercadona.jpg",
-      "logoAlt": null,
-      "count": 2,
-      "description": {
-        "en": "Commercial production partner. Lighting and grip for in-store campaigns and serial content.",
-        "es": "Partner de producción comercial. Iluminación y grip para campañas en tienda y contenido serial."
-      },
-      "url": "https://example.com",
       "urlLabel": "Website"
     }
   ]

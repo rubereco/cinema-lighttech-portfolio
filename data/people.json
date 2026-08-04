@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "lastUpdated": "2026-07-27",
-    "version": "1.0"
+    "lastUpdated": "2026-08-04",
+    "version": "1.1"
   },
   "people": [
     {
@@ -53,18 +53,46 @@
       "portrait": null
     },
     {
-      "id": "quim-casanova",
-      "name": "Quim Casanova",
+      "id": "placeholder-electric-1",
+      "name": "Marc Vidal",
       "kind": "collaborator",
-      "relationship": "rental",
-      "portrait": "assets/images/partners/quim-casanova.jpg",
-      "count": 7,
+      "relationship": "electric",
+      "portrait": null,
+      "count": 6,
       "description": {
-        "en": "Independent rental partner for specialty grip and lighting modifiers. Quick turnaround, well-maintained gear.",
-        "es": "Partner independiente de alquiler para grip especializado y modificadores de iluminación. Respuesta rápida, equipo bien mantenido."
+        "en": "PLACEHOLDER — replace with real collaborator data. Reliable electrician with extensive feature-film experience.",
+        "es": "PLACEHOLDER — reemplazar con datos reales del colaborador. Eléctrico fiable con amplia experiencia en largometrajes."
       },
-      "url": "https://example.com",
-      "urlLabel": "Website"
+      "url": null,
+      "urlLabel": null
+    },
+    {
+      "id": "placeholder-electric-2",
+      "name": "Jordi Puig",
+      "kind": "collaborator",
+      "relationship": "electric",
+      "portrait": null,
+      "count": 4,
+      "description": {
+        "en": "PLACEHOLDER — replace with real collaborator data. Lighting technician with a strong grip background.",
+        "es": "PLACEHOLDER — reemplazar con datos reales del colaborador. Técnico de iluminación con sólida base en grip."
+      },
+      "url": null,
+      "urlLabel": null
+    },
+    {
+      "id": "placeholder-electric-3",
+      "name": "Albert Ferrer",
+      "kind": "collaborator",
+      "relationship": "electric",
+      "portrait": null,
+      "count": 3,
+      "description": {
+        "en": "PLACEHOLDER — replace with real collaborator data. Spark / rigging electric, fast setups and clean cable.",
+        "es": "PLACEHOLDER — reemplazar con datos reales del colaborador. Spark / eléctrico de rigging, montajes rápidos y cableado limpio."
+      },
+      "url": null,
+      "urlLabel": null
     }
   ]
 }

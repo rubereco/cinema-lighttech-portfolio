@@ -40,6 +40,11 @@
   /** Category config. Single source of truth for section order, labels, and
    *  card layout. The order here is the order rendered on the page.
    *
+   *  v3.12.0: customer feedback reshaped the categories. Removed the
+   *  rental-partner and commercial-partner/other buckets. Added the
+   *  electricians / lighting technicians bucket ("eléctricos / técnicos
+   *  de luz") for the people Tarek works with on set.
+   *
    *  Each category is a view over the *partners* page composition:
    *    source: "companies" → match companies by `kind` === id
    *    source: "people"   → match people with kind="collaborator" and `relationship` === id
@@ -47,10 +52,9 @@
    *  and companies cleanly separated at the storage layer.
    */
   const CATEGORIES = [
-    { id: "equipment-house",    source: "companies", labelKey: "partners.section.equipment", layout: "card-landscape", defaultOpen: true },
+    { id: "electric",           source: "people",   relationship: "electric", labelKey: "partners.section.electric", layout: "card-default", defaultOpen: true },
+    { id: "equipment-house",    source: "companies", labelKey: "partners.section.equipment", layout: "card-landscape" },
     { id: "dp",                 source: "people",   relationship: "dp",     labelKey: "partners.section.dp",     layout: "card-wide" },
-    { id: "rental",             source: "people",   relationship: "rental", labelKey: "partners.section.rental", layout: "card-square" },
-    { id: "commercial-partner", source: "companies", labelKey: "partners.section.other",   layout: "card-default" },
   ];
 
   // ─── Loaders ──────────────────────────────────────────────────────────
