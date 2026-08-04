@@ -27,20 +27,6 @@
       "portrait": null
     },
     {
-      "id": "joan-pradells",
-      "name": "Joan Pradells",
-      "kind": "collaborator",
-      "relationship": "dp",
-      "portrait": "assets/images/partners/joan-pradells.jpg",
-      "count": 4,
-      "description": {
-        "en": "Cinematographer with a knack for natural light and texture. Repeated collaborations on intimate narrative projects.",
-        "es": "Director de fotografía con ojo para la luz natural y la textura. Colaboraciones repetidas en proyectos narrativos íntimos."
-      },
-      "url": "https://example.com",
-      "urlLabel": "Portfolio"
-    },
-    {
       "id": "juli-carne-martorell",
       "name": "Juli Carné Martorell",
       "kind": "collaborator",
