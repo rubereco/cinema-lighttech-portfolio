@@ -151,46 +151,48 @@
 
 /* ──────────────── In-section chrome container ────────────────
    bottom-left IMDb link + bottom-right "next section" arrow.
-   JS in main.js toggles between `position: fixed`
-   (docked to viewport bottom while reading the section) and `position: absolute`
-   (snapped to section's bottom edge once the user has scrolled past it).
-   The opacity fade is driven by `.is-visible` on the parent section. */
-.section-chrome {
-  /* v3.11.5: BACK TO position: fixed. v3.11.3 removed the JS that
-     set `position: fixed; bottom: 56px` on the chrome (and tried
-     to replace it with a transform-based fall), but forgot that
-     without `position: fixed` the chrome flows with the document
-     and just sits at the bottom of the section. Buddie: "this
-     buttons are supposed to be seen all time when on that section
-     until i scroll down to the next, right now they are only at
-     the bottom of the section the hole time."
 
-     v3.11.6: removed the transform-based fall entirely. The
-     data-docked + transform: translateY(80px) trick was firing
-     on a `rect.bottom <= 10% viewport` trigger, which on typical
-     short sections means the pills slide off-screen BEFORE the
-     user has actually left the section — "they just disappear
-     after i scroll down the section". The IntersectionObserver
-     already fades the opacity smoothly when the section exits the
-     viewport, which is exactly the "smooth transition" the user
-     wanted, no extra transform needed. The pills now stay glued
-     to the viewport bottom for the entire time the section is
-     visible, then fade out cleanly as the section exits. */
-  position: fixed;
+   v3.11.7: REDID with the textbook Sticky Bottom CTA pattern
+   (position: sticky; bottom: <offset>). The element lives as the
+   last child of the <section> and behaves like position: relative
+   (scrolls naturally with the section) UNTIL it would be 56px from
+   the viewport bottom — at that point it sticks there like
+   position: fixed. When the section's bottom edge exits the
+   viewport, the sticky element scrolls away with the section
+   automatically. No JS, no IntersectionObserver, no transform,
+   no measurement. The browser handles the whole show.
+
+   Why this beats position:fixed:
+   - fixed pins to the viewport from the moment the page loads,
+     so you need an IntersectionObserver or scroll listener to
+     hide it when the section isn't on screen → timing bugs,
+     "pills disappear after i scroll down the section", etc.
+   - sticky is bounded by the parent: it can ONLY be visible
+     while the parent section is on screen. It scrolls away
+     naturally with the section's bottom edge. No JS needed.
+
+   Caveat: the parent must NOT have `overflow: hidden|auto|scroll`
+   or sticky is broken. .section has none. */
+
+.section-chrome {
+  position: sticky;
+  bottom: 56px;
+  /* span the full section content width (opt out of the
+     .section > * container constraint). The two pills sit at
+     the left and right edges with their own internal padding. */
   left: 0;
   right: 0;
-  bottom: 56px;
+  margin-left: 0;
+  margin-right: 0;
+  max-width: none;
+  width: 100%;
   padding: 18px max(20px, 4vw);
   display: flex;
   justify-content: space-between;
-  align-items: center;         /* center pills vertically — was flex-end */
-  pointer-events: none;        /* container is a no-op; children opt back in */
-  opacity: 0;
-  transition: opacity 220ms ease-out;
+  align-items: center;
   z-index: 50;
-  will-change: opacity;
+  pointer-events: none;        /* container is a no-op; children opt back in */
 }
-.section-posters.is-visible .section-chrome { opacity: 1; }
 
 /* ──────────────── Inline link with arrow ────────────────
    Used by partner-name links on the partners page. Always orange

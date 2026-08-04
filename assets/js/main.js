@@ -251,60 +251,29 @@ function setupYearStamp() {
 })();
 
 /* ──────────────── Section chrome: sticky-in-section links ──────────────── */
-/* The bottom-left IMDb link + bottom-right "next section" arrow dock to the
-   viewport bottom while the user is reading #work. Once the user scrolls past
-   the section's natural bottom, the chrome "lets go" and snaps to the section's
-   bottom edge — so it never floats over #about's heading.
+/* The bottom-left IMDb link + bottom-right "next section" arrow live inside
+   #work as .section-chrome with `position: sticky; bottom: 56px` (see
+   components.css). Pure CSS — no JS needed:
+   - The pills scroll with the section naturally.
+   - They stick to viewport-bottom-minus-56px as the user scrolls down
+     through the section.
+   - When the section's bottom edge exits the viewport, the sticky element
+     scrolls away with the section automatically.
+   - The pill is bounded by its parent (the section), so it can NEVER float
+     over #about or any other section.
 
-   Pattern (Snapchat / iOS Safari toolbar style):
-   1. Chrome is `position: fixed` at the viewport bottom (always reachable).
-   2. A scroll listener tracks the section's bottom edge in viewport space.
-   3. When the section's bottom is still below the viewport bottom + offset,
-      chrome stays fixed.
-   4. When the section's bottom reaches the chrome's resting position, we
-      switch to `position: absolute` anchored to the section's bottom edge.
-
-   The fade-in/out is still driven by IntersectionObserver (with a tighter
-   rootMargin now: the chrome fades out the moment the section leaves the
-   viewport entirely). */
+   This is the textbook "Sticky Bottom CTA" pattern. Previous iterations
+   (v3.11.0–v3.11.6) used `position: fixed` with IntersectionObserver or
+   transform-based fall-to-floor triggers and kept producing the same
+   "pills disappear mid-scroll" bug because the timing of fade-out vs.
+   dock-release was never right. CSS sticky is bounded by its parent —
+   no timing bugs possible. */
 
 function setupSectionChrome() {
-  const section = document.getElementById("work");
-  if (!section) return;
-
-  // The chrome element lives inside the section (so absolute positioning
-  // resolves to the section). If not present, this page doesn't have the
-  // affordance (e.g. partners.html).
-  const chrome = section.querySelector(".section-chrome");
-  if (!chrome) return;
-
-  // Visibility toggle: chrome is visible whenever ANY part of the section is
-  // in the viewport. Default rootMargin (`0px` on all sides) is correct here.
-  // Previous version used `rootMargin: "0px 0px -100% 0px"` which shrank the
-  // observer root to a zero-height strip at the top of the viewport — the
-  // intersection condition was virtually impossible to satisfy on tall
-  // sections (tablet/desktop), so the chrome never appeared.
-  //
-  // v3.11.6: removed the dock/fall-to-floor transform pattern entirely.
-  // The transform-based slide was firing on a `rect.bottom <= 10% viewport`
-  // trigger which, on typical short sections, slid the pills off-screen
-  // BEFORE the user had actually left the section — "they just disappear
-  // after i scroll down the section". The IntersectionObserver alone
-  // produces the desired behavior: pills are at the viewport bottom
-  // (position: fixed; bottom: 56px — see components.css) the entire time
-  // the section is in view, and the opacity transition handles the
-  // smooth fade-out as the section exits. No JS measurement needed.
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.target === section) {
-          section.classList.toggle("is-visible", entry.isIntersecting);
-        }
-      }
-    },
-    { threshold: 0 }
-  );
-  io.observe(section);
+  // Intentional no-op. Kept as a hook so init() can call it without
+  // conditionals, in case we ever need to add scroll-driven effects
+  // (e.g. active-section highlighting) later.
+  return;
 }
 
 /* ──────────────── Poster wall (work.json × films.json) ──────────────── */
