@@ -312,15 +312,17 @@ function setupSectionChrome() {
   // meet the section as it scrolled out. Buddie: "i want a smooth
   // transition as if they fall to the floor not snapping up."
   //
-  // The fix: keep the chrome at `position: fixed` always. When the
-  // section's bottom drops into the bottom 20% of the viewport, slide
-  // the chrome down past the viewport bottom with a CSS transition on
-  // `transform: translateY()`. Same GPU-accelerated path as the carousel
-  // tiles — the pill falls smoothly off the floor instead of teleporting.
-  // The IntersectionObserver still handles the opacity fade; this just
-  // adds the visual slide.
+  // v3.11.4: the first fix (snapZoneFraction=0.80) was too eager — on
+  // shorter sections the chrome fell off long before the user was
+  // actually done with the section, so the pills disappeared mid-scroll
+  // ("its not on the viewpoint during the scrolling part"). Now the
+  // trigger fires when the section's bottom is in the top 10% of the
+  // viewport (i.e. the section is ~90% scrolled past). The chrome
+  // stays visible for the whole scroll, then falls smoothly off the
+  // floor as the section exits. Same GPU-accelerated translateY path
+  // as the carousel tiles.
   const restingPx = 56;
-  const snapZoneFraction = 0.80;   // section.bottom must drop into the bottom 20% of viewport
+  const snapZoneFraction = 0.10;   // section.bottom must reach the top 10% of viewport
 
   function update() {
     const rect = section.getBoundingClientRect();
@@ -328,11 +330,11 @@ function setupSectionChrome() {
     const snapLine = viewportH * snapZoneFraction;
 
     if (rect.bottom <= snapLine) {
-      // Section is mostly scrolled past — slide the chrome down past
-      // the viewport bottom. The pill falls to the floor (≈80px
-      // below the resting line, well clear of the bottom edge on any
-      // screen size). CSS transition on `transform` makes it smooth;
-      // the IntersectionObserver fades opacity on its own schedule.
+      // Section is mostly scrolled past (its bottom is in the top
+      // 10% of the viewport) — slide the chrome down past the
+      // viewport bottom. The pill falls to the floor ≈80px below
+      // the resting line, well clear of the bottom edge on any
+      // screen size. CSS transition on `transform` makes it smooth.
       chrome.dataset.docked = "true";
     } else {
       // Section still ahead of us or mid-scroll — chrome rides at the
