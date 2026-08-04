@@ -161,30 +161,9 @@ function setupLanguageToggle() {
   });
 }
 
-/* ──────────────── Kit filter (one category at a time) ──────────────── */
-
-function setupKitFilter() {
-  const pills = document.querySelectorAll(".kit-pill");
-  const items = document.querySelectorAll(".kit-item");
-  if (!pills.length || !items.length) return;
-
-  pills.forEach((pill) => {
-    pill.addEventListener("click", () => {
-      const cat = pill.dataset.cat;
-
-      pills.forEach((p) => {
-        const active = p === pill;
-        p.classList.toggle("is-active", active);
-        p.setAttribute("aria-selected", active ? "true" : "false");
-      });
-
-      items.forEach((item) => {
-        const show = cat === "all" || item.dataset.cat === cat;
-        item.style.display = show ? "" : "none";
-      });
-    });
-  });
-}
+/* (v3.13.0: setupKitFilter() and the kit/rental section are gone —
+   the section is now the partners accordion. partners.js handles its
+   own setup.) */
 
 /* ──────────────── Header scroll state ──────────────── */
 /* Toggle .is-scrolled on .site-header once the user has scrolled more
@@ -233,7 +212,6 @@ function setupYearStamp() {
 
   setupMobileNav();
   setupLanguageToggle();
-  setupKitFilter();
   setupYearStamp();
   setupHeaderScroll();
   setupSectionChrome();

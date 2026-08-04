@@ -1,5 +1,11 @@
 /* ════════════════════════════════════════════════════════════════════════
-   partners.js — render the Partners & Credits page from data/people.json + data/companies.json.
+   partners.js — render the #partners section in index.html from
+   data/people.json + data/companies.json.
+
+   v3.13.0: was a standalone partners.html page. The content moved into
+   the main page where the old Kit & Rental section used to be — the
+   partner accordion now lives at <section id="partners"> and is
+   rendered into the empty <div id="partners-content"> stub.
 
    Architecture (incremental, easy to maintain):
    - Categories are defined in CATEGORIES below. Each has:
@@ -131,7 +137,9 @@
     };
   }
 
-  // Inline i18n block — partners.html works even if main.js fails.
+  // Inline i18n block — the #partners section in index.html works
+  // even if main.js fails to load. (v3.13.0: was partners.html,
+  // now embedded in the main page.)
   const i18nBlock = (() => {
     const el = document.getElementById("tarek-i18n");
     if (!el) return null;

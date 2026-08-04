@@ -624,3 +624,212 @@ html.film-modal-open body {
     transform: translate(-50%, -50%);
   }
 }
+/* ════════════════════════════════════════════════════════════════════════
+   Partners section (v3.13.0)
+   ────────────────────────────────────────────────────────────────────────
+   Used by index.html at #partners (replaced the old Kit & Rental
+   section). Layout is data-driven: partners.js renders the accordion
+   from data/people.json + data/companies.json.
+
+   Structure:
+     <section id="partners">
+       <header class="section-head">…</header>
+       <div id="partners-content">
+         <ul class="partners-accordion">
+           <li class="partners-section">
+             <button class="partners-section-toggle">…</button>
+             <div class="partners-section-body">
+               <ul class="partner-list">
+                 <li><article class="partner-card">…</article></li>
+               </ul>
+             </div>
+           </li>
+         </ul>
+       </div>
+     </section>
+
+   Each .partner-card is an IMDb-style list row: a 64px circular avatar
+   on the left, name + description on the right. v3.12.3 moved away
+   from photo-first cards because most portraits are still missing. */
+
+.partners-content {
+  max-width: 64rem;
+  margin: 0 auto;
+}
+.partners-accordion {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--c-border, rgba(255,255,255,0.08));
+}
+
+/* ─── Category section (header + collapsible body) ─────────────── */
+.partners-section {
+  border-bottom: 1px solid var(--c-border, rgba(255,255,255,0.08));
+}
+.partners-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 1.1rem 0.4rem;
+  text-align: left;
+  cursor: pointer;
+  color: var(--c-fg, #f4f4f4);
+  font-family: inherit;
+  transition: color 0.15s;
+}
+.partners-section-toggle:hover,
+.partners-section-toggle:focus-visible {
+  color: var(--c-accent, #E8A33D);
+  outline: none;
+}
+.partners-section-toggle:focus-visible {
+  outline: 2px solid var(--c-accent, #E8A33D);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.partners-section-title {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0;
+  color: inherit;
+}
+.partners-section-meta {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--c-fg-muted, #9b9b9e);
+  text-transform: lowercase;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.partners-section-chevron {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 0.2rem;
+}
+.partners-section-toggle[aria-expanded="true"] .partners-section-chevron {
+  transform: rotate(-135deg);
+}
+.partners-section-body {
+  padding: 0 0.4rem 1.6rem;
+}
+.partners-section-body[hidden] {
+  display: none;
+}
+
+/* ─── Partner cards (IMDb-style list rows) ──────────────────────── */
+.partner-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .partner-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+}
+.partner-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--c-surface, rgba(255,255,255,0.03));
+  border: 1px solid var(--c-border, rgba(255,255,255,0.06));
+  border-radius: 10px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.partner-card:hover,
+.partner-card:focus-within {
+  border-color: var(--c-accent, #E8A33D);
+  transform: translateY(-1px);
+}
+.partner-photo {
+  flex-shrink: 0;
+  align-self: flex-start;
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #0b0b0d;
+}
+.partner-photo img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+/* v3.12.2: black-bg + grey person-emoji fallback for missing portraits */
+.partner-photo-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: #7a7a7e;
+  filter: grayscale(1) brightness(0.85);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+}
+.partner-photo:has(> img) .partner-photo-fallback { display: none; }
+.partner-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.partner-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.8rem;
+}
+.partner-name {
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--c-fg, #f4f4f4);
+  line-height: 1.3;
+}
+a.partner-name:hover,
+a.partner-name:focus {
+  color: var(--c-accent, #E8A33D);
+}
+.partner-link-label {
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-fg-muted, #9b9b9e);
+}
+.partner-desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--c-fg-muted, #c8c8c8);
+  line-height: 1.5;
+}
+.partner-empty {
+  color: var(--c-fg-muted, #9b9b9e);
+  font-style: italic;
+  margin: 0;
+  padding: 0.5rem 0;
+}

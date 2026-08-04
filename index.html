@@ -48,7 +48,6 @@
       "work": "Work",
       "showcase": "Showcase",
       "about": "About",
-      "rental": "Rental",
       "contact": "Contact",
       "partners": "Partners"
     },
@@ -92,22 +91,6 @@
       "statsAvailabilityLabel": "Availability",
       "statsAvailabilityValue": "Global"
     },
-    "rental": {
-      "title": "Kit & Rental",
-      "subtitle": "Lighting and grip available for dry hire or with operator.",
-      "filterAll": "All",
-      "filterLED": "LED",
-      "filterHMI": "HMI & Tungsten",
-      "filterGrip": "Grip",
-      "filterDistro": "Distro",
-      "requestCatalog": "Request full catalog",
-      "catLED": "LED Lighting",
-      "catGrip": "Grip & Stands",
-      "catPower": "Power & Distribution",
-      "descCStands": "Includes arm and knuckle (×10).",
-      "descDistro": "3-phase power distribution box.",
-      "descTextile": "Flags, floppies, and nets set."
-    },
     "contact": {
       "title": "Get in touch",
       "lede": "Available for feature, series, and select commercial work.",
@@ -138,12 +121,11 @@
     },
     "partners": {
       "pageTitle": "Partners & Credits",
-      "intro": "The equipment houses, rental partners, and cinematographers I work with.",
+      "intro": "The electricians, equipment houses, and cinematographers I work with.",
       "section": {
+        "electric": "Electricians / Lighting Technicians",
         "equipment": "Equipment Houses",
-        "rental": "Rental Partners",
-        "dp": "Cinematographers",
-        "other": "Other Partners"
+        "dp": "Cinematographers"
       },
       "empty": "No partners listed yet.",
       "count": {
@@ -172,7 +154,6 @@
       "work": "Trabajo",
       "showcase": "Proyectos",
       "about": "Sobre mí",
-      "rental": "Equipo",
       "contact": "Contacto",
       "partners": "Colaboradores"
     },
@@ -220,22 +201,6 @@
       "statsAvailabilityLabel": "Disponibilidad",
       "statsAvailabilityValue": "Global"
     },
-    "rental": {
-      "title": "Equipo y alquiler",
-      "subtitle": "Iluminación y grip disponibles en alquiler o con operador.",
-      "filterAll": "Todo",
-      "filterLED": "LED",
-      "filterHMI": "HMI y Tungsteno",
-      "filterGrip": "Grip",
-      "filterDistro": "Distribución",
-      "requestCatalog": "Solicitar catálogo completo",
-      "catLED": "Iluminación LED",
-      "catGrip": "Grip y soportes",
-      "catPower": "Energía y distribución",
-      "descCStands": "Incluye brazo y rótula (×10).",
-      "descDistro": "Caja de distribución trifásica.",
-      "descTextile": "Juego de banderas, floppies y redes."
-    },
     "contact": {
       "title": "Contacto",
       "lede": "Disponible para largometrajes, series y producciones comerciales seleccionadas.",
@@ -262,12 +227,11 @@
     },
     "partners": {
       "pageTitle": "Colaboradores y Créditos",
-      "intro": "Las casas de equipos, partners de alquiler y directores de fotografía con los que trabajo.",
+      "intro": "Los eléctricos, casas de equipos y directores de fotografía con los que trabajo.",
       "section": {
+        "electric": "Eléctricos / Técnicos de Luz",
         "equipment": "Casas de Equipos",
-        "rental": "Partners de Alquiler",
-        "dp": "Directores de Fotografía",
-        "other": "Otros Colaboradores"
+        "dp": "Directores de Fotografía"
       },
       "empty": "Aún no hay colaboradores listados.",
       "count": {
@@ -917,8 +881,7 @@
       <a href="#work"         data-i18n="nav.work">Work</a>
       <a href="showcase.html" data-i18n="nav.showcase">Showcase</a>
       <a href="#about"        data-i18n="nav.about">About</a>
-      <a href="partners.html" data-i18n="nav.partners">Partners</a>
-      <a href="#rental"       data-i18n="nav.rental">Rental</a>
+      <a href="#partners"     data-i18n="nav.partners">Partners</a>
       <a href="#contact"      data-i18n="nav.contact">Contact</a>
     </nav>
 
@@ -939,9 +902,8 @@
     <a href="#work"          style="--i: 0.04s" data-i18n="nav.work">Work</a>
     <a href="showcase.html"  style="--i: 0.08s" data-i18n="nav.showcase">Showcase</a>
     <a href="#about"         style="--i: 0.12s" data-i18n="nav.about">About</a>
-    <a href="partners.html"  style="--i: 0.16s" data-i18n="nav.partners">Partners</a>
-    <a href="#rental"        style="--i: 0.20s" data-i18n="nav.rental">Rental</a>
-    <a href="#contact"       style="--i: 0.24s" data-i18n="nav.contact">Contact</a>
+    <a href="#partners"      style="--i: 0.16s" data-i18n="nav.partners">Partners</a>
+    <a href="#contact"       style="--i: 0.20s" data-i18n="nav.contact">Contact</a>
 
   </nav>
 
@@ -1063,59 +1025,23 @@
     </section>
 
     <!-- ════════════════════════════════════════════════════════════════
-         KIT — equipment / skills
+         PARTNERS — collaborators, equipment houses, cinematographers
+         (v3.13.0: replaced the old Kit & Rental section. The kit
+         block is gone; this slot now hosts the partners accordion
+         rendered by assets/js/partners.js from data/people.json +
+         data/companies.json. The previous standalone partners.html
+         page has been deleted.)
          ════════════════════════════════════════════════════════════════ -->
-    <section id="rental" class="section section-alt">
+    <section id="partners" class="section section-alt">
       <header class="section-head">
         <span class="section-index">03</span>
-        <h2 class="section-title" data-i18n="rental.title">Kit &amp; Rental</h2>
-        <p class="section-sub" data-i18n="rental.subtitle">Lighting and grip available for dry hire or with operator.</p>
+        <h2 class="section-title" data-i18n="partners.pageTitle">Partners &amp; Credits</h2>
+        <p class="section-sub" data-i18n="partners.intro">The electricians, equipment houses, and cinematographers I work with.</p>
       </header>
 
-      <div class="kit-filters" role="tablist" aria-label="Kit categories">
-        <button type="button" class="kit-pill is-active" data-cat="all"   role="tab" aria-selected="true"  data-i18n="rental.filterAll">All</button>
-        <button type="button" class="kit-pill"           data-cat="led"    role="tab" aria-selected="false" data-i18n="rental.filterLED">LED</button>
-        <button type="button" class="kit-pill"           data-cat="hmi"    role="tab" aria-selected="false" data-i18n="rental.filterHMI">HMI &amp; Tungsten</button>
-        <button type="button" class="kit-pill"           data-cat="grip"   role="tab" aria-selected="false" data-i18n="rental.filterGrip">Grip</button>
-        <button type="button" class="kit-pill"           data-cat="distro" role="tab" aria-selected="false" data-i18n="rental.filterDistro">Distro</button>
+      <div id="partners-content" class="partners-content" aria-busy="true">
+        <!-- Accordion rendered by assets/js/partners.js on DOMContentLoaded -->
       </div>
-
-      <ul class="kit-grid">
-        <li class="kit-item" data-cat="led">
-          <h3 class="kit-h">Astera Titan Tube Set</h3>
-          <p class="kit-cat" data-i18n="rental.catLED">LED Lighting</p>
-          <p class="kit-desc">8-tube kit with charging case.</p>
-        </li>
-        <li class="kit-item" data-cat="led">
-          <h3 class="kit-h">ARRI SkyPanel S60-C</h3>
-          <p class="kit-cat" data-i18n="rental.catLED">LED Lighting</p>
-          <p class="kit-desc">Full-color controllable LED soft light.</p>
-        </li>
-        <li class="kit-item" data-cat="led">
-          <h3 class="kit-h">Aputure 600d Pro</h3>
-          <p class="kit-cat" data-i18n="rental.catLED">LED Lighting</p>
-          <p class="kit-desc">High-output daylight LED.</p>
-        </li>
-        <li class="kit-item" data-cat="grip">
-          <h3 class="kit-h">C-Stand Kit (American)</h3>
-          <p class="kit-cat" data-i18n="rental.catGrip">Grip &amp; Stands</p>
-          <p class="kit-desc" data-i18n="rental.descCStands">Includes arm and knuckle (×10).</p>
-        </li>
-        <li class="kit-item" data-cat="distro">
-          <h3 class="kit-h">Distro Box 63A</h3>
-          <p class="kit-cat" data-i18n="rental.catPower">Power &amp; Distribution</p>
-          <p class="kit-desc" data-i18n="rental.descDistro">3-phase power distribution box.</p>
-        </li>
-        <li class="kit-item" data-cat="grip">
-          <h3 class="kit-h">Black Textile Kit</h3>
-          <p class="kit-cat" data-i18n="rental.catGrip">Grip &amp; Stands</p>
-          <p class="kit-desc" data-i18n="rental.descTextile">Flags, floppies, and nets set.</p>
-        </li>
-      </ul>
-
-      <p class="section-foot kit-cta">
-        <a class="btn primary" href="#contact" data-i18n="rental.requestCatalog">Request full catalog</a>
-      </p>
     </section>
 
     <!-- ════════════════════════════════════════════════════════════════
@@ -1164,6 +1090,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
   <script src="assets/js/hero-carousel.js" defer></script>
   <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/partners.js" defer></script>
 
   <!-- ════════════════════════════════════════════════════════════════
        FILM DETAIL MODAL (v3.11.0)
