@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.45).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.46).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
@@ -556,6 +556,34 @@
     hero.addEventListener('touchend', leaveBand);
     hero.addEventListener('touchcancel', leaveBand);
 
+    // v3.10.46: native pointerdown listener — the source of truth
+    // for "where did this gesture start." The GSAP Observer's
+    // onPress sometimes doesn't fire for rapid click-release-click
+    // sequences (e.g., clicking again during momentum before the
+    // first gesture fully cleans up), and even when it does fire,
+    // self.deltaX is a global accumulator that carries residual
+    // travel from previous gestures. By capturing e.offsetX in a
+    // raw pointerdown listener and computing the drag as
+    // (self.x - pressOffsetX) in onDrag, we completely sidestep
+    // self.deltaX — every click starts with a clean, zero-based
+    // baseline, so the carousel can never snap back to a previous
+    // gesture's start position. This is what fixes the "snap back
+    // to the first hold" bug Buddie reported.
+    var pressOffsetX = 0;
+    hero.addEventListener('pointerdown', function (e) {
+      pressOffsetX = e.offsetX;
+      // Also use this as the source of truth for dragStartPhase
+      // and momentum reset, in case the Observer's onPress
+      // doesn't fire for this click.
+      dragStartPhase = phase;
+      velocity = 0;
+      velocitySamples = [];
+      flingOccurred = false;
+      lastDragPhase = phase;
+      lastDragTime = performance.now();
+      isUserPressing = true;
+    });
+
     // === Per-frame update ===
     // Three modes (v3.10.37):
     //   1) Momentum (velocity != 0): advance both phase and
@@ -715,20 +743,20 @@
           isUserPressing = true;
         },
         onDrag: function (self) {
-          // self.deltaX is the total horizontal distance moved since
-          // the FIRST gesture started (it doesn't reset to 0 on every
-          // new pointerdown). Drag right (positive) → tiles move right
-          // → phase grows.
-          // v3.10.45: on the first onDrag call after onPress, capture
-          // self.deltaX as the baseline for THIS gesture. Subsequent
-          // onDrag calls use (self.deltaX - dragStartDeltaX) so the
-          // drag distance is relative to the current gesture, not the
-          // first gesture ever. This fixes the "snap back to first
-          // hold" bug when the user clicks again during momentum.
-          if (dragStartDeltaX === null) {
-            dragStartDeltaX = self.deltaX;
-          }
-          var relativeDeltaX = self.deltaX - dragStartDeltaX;
+          // v3.10.46: completely sidestep self.deltaX. It's a global
+          // accumulator that carries residual travel from previous
+          // gestures, which was causing the carousel to snap back to
+          // the first hold's position when the user clicked again
+          // during momentum. Instead, use (self.x - pressOffsetX) —
+          // current pointer position minus the position captured by
+          // the native pointerdown listener at the start of THIS
+          // gesture. Every click starts with a clean zero baseline,
+          // so the drag is always relative to the current press.
+          // self.x is the current pointer x relative to the target
+          // (hero), and pressOffsetX is e.offsetX at pointerdown
+          // time (also relative to the target), so they're in the
+          // same coordinate system.
+          var relativeDeltaX = self.x - pressOffsetX;
           var now = performance.now();
           var newPhase = dragStartPhase + relativeDeltaX * DRAG_SENSITIVITY / 1000;
           // v3.10.33: sample instant velocity (phase per ms) for
