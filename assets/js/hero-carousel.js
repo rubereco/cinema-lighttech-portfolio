@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.47).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.48).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
@@ -651,11 +651,35 @@
       // intent is unambiguous: if they're clicking on the hero, they
       // want to drag the photos.
       var dragStartPhase = 0;
-      // v3.10.47: drag distance is computed as (self.x - self.startX)
-      // in onDrag — both are tracked by the Observer in the hero's
-      // own coordinate system, so each gesture gets a clean zero
-      // baseline. No more self.deltaX accumulator quirks, no more
-      // e.offsetX coordinate-system mismatches.
+      // v3.10.45: self.deltaX is the TOTAL horizontal distance since
+      // the FIRST gesture started (it doesn't reset to 0 on every new
+      // click — the Observer tracks it across pointerdown/pointerup
+      // cycles). So if the user drags, releases during momentum, and
+      // clicks again with the mouse in a different spot, self.deltaX
+      // for the second click includes all the travel from the first
+      // gesture. Without this fix, the carousel would snap to a
+      // position based on (dragStartPhase + first_gesture_total_deltaX)
+      // — which is the "snap back to the first hold" the user saw.
+      // We capture self.deltaX on the first onDrag call after onPress
+      // and compute drag distance relative to THAT (not the first
+      // gesture ever), so each click starts a fresh drag baseline.
+      //
+      // v3.10.48 ROLLBACK: v3.10.46 (self.x - pressOffsetX) and
+      // v3.10.47 (self.x - self.startX) both turned out worse than
+      // v3.10.45. The root cause in both cases is the same: the
+      // GSAP Observer's internal state (self.startX, the deltaX
+      // accumulator, even the onPress callback itself) does NOT
+      // reset cleanly for rapid click-release-click sequences. The
+      // Observer treats the second click as a continuation of the
+      // first gesture, so any value derived from it carries residual
+      // from the first gesture. v3.10.45's per-gesture baseline
+      // (captured on the first onDrag of each gesture) is the most
+      // reliable workaround we have: it sidesteps the cross-gesture
+      // contamination by treating each gesture's first sample as
+      // its own zero. The snap-back is reduced (not eliminated),
+      // but it's the least-bad option we've found. The user said
+      // v3.10.45 was "better" than v3.10.46/47 — restored.
+      var dragStartDeltaX = null;
       Observer.create({
         target: hero,
         type: 'touch,pointer',
@@ -697,11 +721,10 @@
           // captures the current self.deltaX as the new gesture's
           // baseline. Without this, the drag would be relative to
           // the FIRST gesture ever — see the var declaration above.
-          // v3.10.47: dragStartDeltaX is no longer needed — we use
-          // (self.x - self.startX) in onDrag instead, which is
-          // tracked by the Observer in the hero's coordinate
-          // system and resets cleanly on every new gesture.
+          // v3.10.48: ROLLBACK to v3.10.45 (see the v3.10.45 block
+          // above for the full reasoning).
           dragStartPhase = phase;
+          dragStartDeltaX = null;
           velocity = 0;
           velocitySamples = [];
           flingOccurred = false;
@@ -710,16 +733,20 @@
           isUserPressing = true;
         },
         onDrag: function (self) {
-          // v3.10.47: use (self.x - self.startX) — both are in the
-          // Observer's target coordinate system (the hero), tracked
-          // by GSAP itself. This sidesteps the self.deltaX
-          // accumulator issue (v3.10.45) AND the coordinate-mismatch
-          // issue from v3.10.46 (where e.offsetX was relative to
-          // whatever child element the pointer was over, not the
-          // hero). self.startX is the pointer x at the moment the
-          // current gesture started, so each new gesture gets a
-          // clean zero baseline.
-          var relativeDeltaX = self.x - self.startX;
+          // self.deltaX is total horizontal drag distance since start.
+          // Drag right (positive) → tiles move right → phase grows.
+          // v3.10.45: on the first onDrag call after onPress, capture
+          // self.deltaX as the baseline for THIS gesture. Subsequent
+          // onDrag calls use (self.deltaX - dragStartDeltaX) so the
+          // drag distance is relative to the current gesture, not the
+          // first gesture ever. This fixes (mostly) the "snap back to
+          // first hold" bug when the user clicks again during momentum.
+          // v3.10.48: ROLLBACK to v3.10.45 (see the v3.10.45 block
+          // above for why v3.10.46/47 were worse).
+          if (dragStartDeltaX === null) {
+            dragStartDeltaX = self.deltaX;
+          }
+          var relativeDeltaX = self.deltaX - dragStartDeltaX;
           var now = performance.now();
           var newPhase = dragStartPhase + relativeDeltaX * DRAG_SENSITIVITY / 1000;
           // v3.10.33: sample instant velocity (phase per ms) for
