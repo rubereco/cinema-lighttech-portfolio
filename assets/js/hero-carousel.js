@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.41).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.42).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
@@ -494,23 +494,15 @@
     //   flingOccurred     — flag: onLeft/onRight already set the
     //                       velocity, so onDragEnd should NOT
     //                       overwrite it with the sample average.
-    //   lastRenderedDragPhase — (v3.10.40) tracks the last phase
-    //                       we actually rendered to the tiles
-    //                       (as opposed to the last phase onDrag
-    //                       computed, which could be pointer
-    //                       jitter). Used by the dead zone in
-    //                       onDrag to filter sensor noise.
+    // v3.10.42: removed lastRenderedDragPhase (v3.10.40) and
+    // pressTime (v3.10.41) — the dead-zone state. tick()'s
+    // lerp is back to being the primary smoothing mechanism
+    // for the drag, and it doesn't need any of this state.
     var velocity = 0;
     var velocitySamples = [];
     var lastDragPhase = 0;
     var lastDragTime = 0;
     var flingOccurred = false;
-    var lastRenderedDragPhase = 0;
-    // v3.10.41: press timestamp. The time-based dead zone in
-    // onDrag uses this to apply a larger initial filter for
-    // the first 100ms after press (touch-sensor warmup noise
-    // is much louder than steady-state finger wobble).
-    var pressTime = 0;
 
     // === Auto-scroll state (v3.10.37) ===
     //   isUserPressing  — true while the user is actively touching
@@ -680,21 +672,16 @@
           // v3.10.37: mark the user as actively pressing so the
           // idle auto-scroll in tick() backs off — the drag is
           // the only force acting on phase now.
-          // v3.10.40: also seed lastRenderedDragPhase so the
-          // jitter dead zone in onDrag starts with zero gap
-          // (no spurious jumps on the first move).
-          // v3.10.41: also stamp pressTime so the time-based
-          // dead zone in onDrag knows when the gesture started
-          // and can apply the larger INITIAL_DEAD_ZONE for
-          // the first SETTLE_TIME ms.
+          // v3.10.42: removed lastRenderedDragPhase and pressTime
+          // (the dead-zone state from v3.10.40-41) — we no longer
+          // need the dead zone because tick()'s lerp is back to
+          // being the primary smoothing mechanism for the drag.
           dragStartPhase = phase;
-          lastRenderedDragPhase = phase;
           velocity = 0;
           velocitySamples = [];
           flingOccurred = false;
           lastDragPhase = phase;
           lastDragTime = performance.now();
-          pressTime = performance.now();
           isUserPressing = true;
         },
         onDrag: function (self) {
@@ -717,49 +704,35 @@
           }
           lastDragPhase = newPhase;
           lastDragTime = now;
-          // v3.10.41: time-based dead zone. The v3.10.40 static
-          // 1.5-phase dead zone wasn't enough for FAST drags
-          // (Buddie: "the stutter is happening when i drag
-          // faster, if i drag slow it doesn't happen, but when
-          // i drag faster it's worse"). On a fast drag, the
-          // first few onDrag calls have noisy deltaX values —
-          // touch sensor warmup, finger landing impact — that
-          // can easily exceed 1.5 phase units. The static dead
-          // zone lets them through, and the carousel stutters
-          // right-left at the start of every fast drag.
+          // v3.10.42: REVERTED v3.10.39's `currentPhase = newPhase`
+          // change. v3.10.39 was an attempt to eliminate lerp
+          // lag by making tiles follow the finger exactly. But
+          // bypassing the lerp also bypassed its NOISE-FILTERING
+          // role — the lerp was smoothing out the noisy self.deltaX
+          // values that the OS/touch-sensor produces on every
+          // pointermove. Without the lerp, the noise showed up as
+          // phase stutter on every drag, and it got WORSE on fast
+          // drags (Buddie: "the stutter is happening when i drag
+          // faster, if i drag slow it doesn't happen, but when i
+          // drag faster it's worse").
           //
-          // Fix: the dead zone is LARGE (5 phase units = 10px)
-          // for the first SETTLE_TIME (100ms) after press,
-          // then drops to the small STEADY value (1.0 = 2px).
-          // This filters the noisy startup phase without
-          // affecting steady-state dragging — after 100ms the
-          // user has settled into a consistent direction and
-          // the per-frame movement is intentional.
+          // v3.10.40 (static 1.5-phase dead zone) and v3.10.41
+          // (time-based 5→1 dead zone) tried to filter the noise
+          // at the source, but noise spikes on fast drags can
+          // exceed any reasonable threshold. The lerp is the
+          // right tool for this — it smooths whatever noise
+          // survives the threshold, and its smoothing scales
+          // automatically with the noise magnitude.
           //
-          // Same caveat as v3.10.40: we always update
-          // velocitySamples (even inside the dead zone) so the
-          // release-momentum average still reflects the actual
-          // gesture.
-          var elapsedSincePress = now - pressTime;
-          var currentDeadZone = elapsedSincePress < 100
-            ? 5.0  // INITIAL_DEAD_ZONE: first 100ms after press
-            : 1.0; // STEADY_DEAD_ZONE: after the gesture settles
-          if (Math.abs(newPhase - lastRenderedDragPhase) < currentDeadZone) return;
+          // v3.10.38 was the last version that used the lerp for
+          // drag smoothing, and Buddie confirmed it was the clean
+          // state. v3.10.42 restores that behavior, keeping the
+          // v3.10.39 wheel fix (WHEEL_SENSITIVITY 0.3).
+          //
+          // The trade-off: ~1-3 frame visible lag on fast drags
+          // (the lerp catching up), in exchange for stutter-free
+          // motion. v3.10.38's lag was acceptable to Buddie.
           phase = newPhase;
-          // v3.10.39: also set currentPhase = newPhase. The old
-          // behavior only set phase, then tick()'s lerp would
-          // chase currentPhase toward phase. With LERP_FACTOR=0.18
-          // at 60fps, the catch-up is ~3 frames for a fast drag
-          // — the tiles visibly lag behind the finger by 1-3
-          // frames, and on release the gap would persist as the
-          // momentum moved the tiles from the lagging position
-          // (the "not smooth" interactive feel). Now the tiles
-          // follow the finger exactly, and at release there's
-          // zero gap for the momentum to inherit — momentum
-          // continues from the exact finger position, not from
-          // a lagging copy of it.
-          currentPhase = newPhase;
-          lastRenderedDragPhase = newPhase;
         },
         // v3.10.33: on release, convert the averaged sample
         // velocity into a phase/frame momentum value. gsap's
