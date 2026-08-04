@@ -45,6 +45,10 @@
    *  electricians / lighting technicians bucket ("eléctricos / técnicos
    *  de luz") for the people Tarek works with on set.
    *
+   *  v3.12.3: removed the per-category `layout` property. The card is
+   *  now a uniform IMDb-style list row (64px circular avatar + text),
+   *  so per-category aspect ratios are no longer needed.
+   *
    *  Each category is a view over the *partners* page composition:
    *    source: "companies" → match companies by `kind` === id
    *    source: "people"   → match people with kind="collaborator" and `relationship` === id
@@ -52,9 +56,9 @@
    *  and companies cleanly separated at the storage layer.
    */
   const CATEGORIES = [
-    { id: "electric",           source: "people",   relationship: "electric", labelKey: "partners.section.electric", layout: "card-default", defaultOpen: true },
-    { id: "equipment-house",    source: "companies", labelKey: "partners.section.equipment", layout: "card-landscape" },
-    { id: "dp",                 source: "people",   relationship: "dp",     labelKey: "partners.section.dp",     layout: "card-wide" },
+    { id: "electric",           source: "people",   relationship: "electric", labelKey: "partners.section.electric", defaultOpen: true },
+    { id: "equipment-house",    source: "companies", labelKey: "partners.section.equipment" },
+    { id: "dp",                 source: "people",   relationship: "dp",     labelKey: "partners.section.dp" },
   ];
 
   // ─── Loaders ──────────────────────────────────────────────────────────
@@ -208,10 +212,10 @@
   // ─── Card renderer ────────────────────────────────────────────────────
 
   /**
-   * Renders a single partner card using the layout class from the category
-   * config. The layout only affects the photo's aspect ratio and grid span;
-   * the card content (image, name, count, description, link) is identical.
-   * That way, "format per category" is purely a CSS concern.
+   * Renders a single partner card. v3.12.3: the card is now a uniform
+   * IMDb-style list row — a 64px circular avatar on the left and the
+   * name + description on the right. The previous per-category photo
+   * aspect ratios (card-landscape, card-wide, etc.) are gone.
    *
    * v3.12.2: portrait fallback. The fallback element (black bg + grey
    * person emoji) is ALWAYS rendered inside .partner-photo. CSS hides
@@ -242,7 +246,7 @@
       : "";
 
     return `
-      <article class="partner-card ${category.layout}" data-type="${escapeAttr(dataType)}">
+      <article class="partner-card" data-type="${escapeAttr(dataType)}">
         <div class="partner-photo">
           ${imgHtml}
           <div class="partner-photo-fallback" aria-hidden="true">👤</div>
