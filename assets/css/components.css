@@ -761,7 +761,12 @@ html.film-modal-open body {
   position: relative;
   width: 64px;
   height: 64px;
-  border-radius: 50%;
+  /* v3.13.6: rounded square (was 50% circle). The Movie-men
+     SVG wordmark + camera mark gets clipped on the edges of
+     a 64px circle, and the squircle look reads more like a
+     thumbnail card than a profile pic — which fits the
+     IMDb-style "name + small visual identifier" layout. */
+  border-radius: 10px;
   overflow: hidden;
   background: #0b0b0d;
 }
