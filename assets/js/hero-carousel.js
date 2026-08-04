@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.42).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.43).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
@@ -676,7 +676,23 @@
           // (the dead-zone state from v3.10.40-41) — we no longer
           // need the dead zone because tick()'s lerp is back to
           // being the primary smoothing mechanism for the drag.
+          // v3.10.43: SNAP currentPhase = phase on press. Without
+          // this, the GSAP Observer can fire onDrag immediately
+          // after onPress with a tiny self.deltaX (mouse wobble,
+          // touch landing impact) — even 1-2px of click-wobble
+          // updates phase but not currentPhase, creating a small
+          // gap. Then the lerp in tick() animates currentPhase
+          // toward phase over a few frames, which the user
+          // perceives as "an animation that stops the moving
+          // carousel, going forward or backward a little" (the
+          // direction depends on the click-wobble direction).
+          // Snapping eliminates the gap so the tiles are
+          // exactly at the press position with no lerp chase.
+          // The lerp is still active during the drag (catches
+          // up currentPhase to phase from onDrag), so drag
+          // smoothness is unchanged.
           dragStartPhase = phase;
+          currentPhase = phase;
           velocity = 0;
           velocitySamples = [];
           flingOccurred = false;
