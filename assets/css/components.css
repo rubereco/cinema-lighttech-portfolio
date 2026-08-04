@@ -165,10 +165,17 @@
      until i scroll down to the next, right now they are only at
      the bottom of the section the hole time."
 
-     So: position: fixed puts the chrome at the viewport bottom,
-     visible all the time the user is in the section. The JS only
-     toggles a `data-docked` attribute; the CSS handles the visual
-     slide via transform. Layout (position) never changes. */
+     v3.11.6: removed the transform-based fall entirely. The
+     data-docked + transform: translateY(80px) trick was firing
+     on a `rect.bottom <= 10% viewport` trigger, which on typical
+     short sections means the pills slide off-screen BEFORE the
+     user has actually left the section — "they just disappear
+     after i scroll down the section". The IntersectionObserver
+     already fades the opacity smoothly when the section exits the
+     viewport, which is exactly the "smooth transition" the user
+     wanted, no extra transform needed. The pills now stay glued
+     to the viewport bottom for the entire time the section is
+     visible, then fade out cleanly as the section exits. */
   position: fixed;
   left: 0;
   right: 0;
@@ -179,23 +186,9 @@
   align-items: center;         /* center pills vertically — was flex-end */
   pointer-events: none;        /* container is a no-op; children opt back in */
   opacity: 0;
-  /* The transform handles the fall-to-floor on scroll past. See
-     `.section-chrome[data-docked="true"]` below. Same expo-out
-     cubic-bezier the buttons use for buttery settle. */
-  transform: translateY(0);
-  transition: opacity 220ms ease-out, transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 220ms ease-out;
   z-index: 50;
-  will-change: transform, opacity;
-}
-
-/* v3.11.3: when the section scrolls past, the JS flips
-   data-docked="true" on the chrome. The pill slides 80px down
-   past the viewport bottom — clear of the resting line (56px)
-   so the glow can bleed off-screen smoothly. Reversible: when
-   the user scrolls back up, the pill slides back into place
-   with the same ease. */
-.section-chrome[data-docked="true"] {
-  transform: translateY(80px);
+  will-change: opacity;
 }
 .section-posters.is-visible .section-chrome { opacity: 1; }
 

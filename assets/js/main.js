@@ -285,10 +285,15 @@ function setupSectionChrome() {
   // intersection condition was virtually impossible to satisfy on tall
   // sections (tablet/desktop), so the chrome never appeared.
   //
-  // We do NOT need to fade when the section leaves the viewport: the
-  // dock-then-snap pattern below moves the chrome to `position: absolute;
-  // bottom: 0` once the section's bottom reaches the resting line, and the
-  // chrome scrolls out of view with the section naturally.
+  // v3.11.6: removed the dock/fall-to-floor transform pattern entirely.
+  // The transform-based slide was firing on a `rect.bottom <= 10% viewport`
+  // trigger which, on typical short sections, slid the pills off-screen
+  // BEFORE the user had actually left the section — "they just disappear
+  // after i scroll down the section". The IntersectionObserver alone
+  // produces the desired behavior: pills are at the viewport bottom
+  // (position: fixed; bottom: 56px — see components.css) the entire time
+  // the section is in view, and the opacity transition handles the
+  // smooth fade-out as the section exits. No JS measurement needed.
   const io = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -300,83 +305,6 @@ function setupSectionChrome() {
     { threshold: 0 }
   );
   io.observe(section);
-
-  // ── dock-to-bottom / fall-to-floor ──
-  //
-  // v3.11.3: the chrome used to teleport from `position: fixed` (riding
-  // the viewport bottom) to `position: absolute; bottom: 0` (anchored to
-  // the section's bottom edge) once the section's bottom crossed the
-  // bottom 20% of the viewport. CSS can't transition between `position`
-  // values, so the pill snapped instantly — and the new position was
-  // above the viewport bottom, so it looked like the pill jumped UP to
-  // meet the section as it scrolled out. Buddie: "i want a smooth
-  // transition as if they fall to the floor not snapping up."
-  //
-  // v3.11.4: the first fix (snapZoneFraction=0.80) was too eager — on
-  // shorter sections the chrome fell off long before the user was
-  // actually done with the section, so the pills disappeared mid-scroll
-  // ("its not on the viewpoint during the scrolling part"). Now the
-  // trigger fires when the section's bottom is in the top 10% of the
-  // viewport (i.e. the section is ~90% scrolled past). The chrome
-  // stays visible for the whole scroll, then falls smoothly off the
-  // floor as the section exits. Same GPU-accelerated translateY path
-  // as the carousel tiles.
-  const restingPx = 56;
-  const snapZoneFraction = 0.10;   // section.bottom must reach the top 10% of viewport
-
-  function update() {
-    const rect = section.getBoundingClientRect();
-    const viewportH = window.innerHeight;
-    const snapLine = viewportH * snapZoneFraction;
-
-    if (rect.bottom <= snapLine) {
-      // Section is mostly scrolled past (its bottom is in the top
-      // 10% of the viewport) — slide the chrome down past the
-      // viewport bottom. The pill falls to the floor ≈80px below
-      // the resting line, well clear of the bottom edge on any
-      // screen size. CSS transition on `transform` makes it smooth.
-      chrome.dataset.docked = "true";
-    } else {
-      // Section still ahead of us or mid-scroll — chrome rides at the
-      // viewport bottom. Setting `docked` to anything but "true" removes
-      // the slide, and the CSS transition brings it back into view.
-      chrome.dataset.docked = "false";
-    }
-  }
-
-  let ticking = false;
-  function onScroll() {
-    if (ticking) return;
-    ticking = true;
-    // Double-rAF: ensure layout has reflowed before measuring. When DevTools
-    // switches device emulation modes, `resize` can fire before the layout
-    // has settled, so `getBoundingClientRect()` may return stale geometry
-    // on the first frame. The second rAF defers to a frame after the
-    // browser has had a chance to apply the new layout.
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      update();
-      ticking = false;
-    }));
-  }
-
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onScroll, { passive: true });
-  // Chrome DevTools device emulation can change the viewport without firing
-  // `resize` reliably (or fires it before the layout has reflowed), so hook
-  // every other viewport-change signal we can. visualViewport fires for
-  // pinch-zoom and on-screen keyboard; orientationchange fires on rotation;
-  // the matchMedia listeners fire when the viewport crosses one of our CSS
-  // breakpoints (where the section height changes discontinuously).
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener("resize", onScroll);
-  }
-  window.addEventListener("orientationchange", onScroll);
-  for (const bp of [560, 720, 900, 1024]) {
-    const mql = window.matchMedia(`(min-width: ${bp}px)`);
-    if (mql.addEventListener) mql.addEventListener("change", onScroll);
-    else mql.addListener(onScroll);   // Safari < 14
-  }
-  update();
 }
 
 /* ──────────────── Poster wall (work.json × films.json) ──────────────── */
