@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.39).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.40).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
@@ -494,11 +494,18 @@
     //   flingOccurred     — flag: onLeft/onRight already set the
     //                       velocity, so onDragEnd should NOT
     //                       overwrite it with the sample average.
+    //   lastRenderedDragPhase — (v3.10.40) tracks the last phase
+    //                       we actually rendered to the tiles
+    //                       (as opposed to the last phase onDrag
+    //                       computed, which could be pointer
+    //                       jitter). Used by the dead zone in
+    //                       onDrag to filter sensor noise.
     var velocity = 0;
     var velocitySamples = [];
     var lastDragPhase = 0;
     var lastDragTime = 0;
     var flingOccurred = false;
+    var lastRenderedDragPhase = 0;
 
     // === Auto-scroll state (v3.10.37) ===
     //   isUserPressing  — true while the user is actively touching
@@ -668,7 +675,11 @@
           // v3.10.37: mark the user as actively pressing so the
           // idle auto-scroll in tick() backs off — the drag is
           // the only force acting on phase now.
+          // v3.10.40: also seed lastRenderedDragPhase so the
+          // jitter dead zone in onDrag starts with zero gap
+          // (no spurious jumps on the first move).
           dragStartPhase = phase;
+          lastRenderedDragPhase = phase;
           velocity = 0;
           velocitySamples = [];
           flingOccurred = false;
@@ -694,6 +705,27 @@
               velocitySamples.shift();
             }
           }
+          lastDragPhase = newPhase;
+          lastDragTime = now;
+          // v3.10.40: jitter dead zone. Touch screens and even
+          // mice wobble ±1-3px while "holding still" — without
+          // a dead zone, each wobble fires onDrag with a small
+          // deltaX that updates phase, and the carousel stutters
+          // left-right at the start of every press (Buddie:
+          // "when i hold my finger or mouse some animation
+          // triggers and seems like its stuttering like right
+          // left fast for a moment and then it draggs"). The
+          // threshold is 1.5 phase units = 3px at
+          // DRAG_SENSITIVITY=500 — large enough to absorb
+          // sensor noise, small enough that an intentional
+          // 3px+ move passes through immediately.
+          //
+          // We always update velocitySamples (even inside the
+          // dead zone) so the release-momentum average still
+          // reflects the actual gesture — jitter samples are
+          // near 0 anyway, so averaging them in doesn't bias
+          // the result. Only the VISUAL position is filtered.
+          if (Math.abs(newPhase - lastRenderedDragPhase) < 1.5) return;
           phase = newPhase;
           // v3.10.39: also set currentPhase = newPhase. The old
           // behavior only set phase, then tick()'s lerp would
@@ -708,8 +740,7 @@
           // continues from the exact finger position, not from
           // a lagging copy of it.
           currentPhase = newPhase;
-          lastDragPhase = newPhase;
-          lastDragTime = now;
+          lastRenderedDragPhase = newPhase;
         },
         // v3.10.33: on release, convert the averaged sample
         // velocity into a phase/frame momentum value. gsap's
