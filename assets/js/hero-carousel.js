@@ -1,6 +1,21 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.52).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.53).
    ────────────────────────────────────────────────────────────────────────
+   v3.10.53: PC SMALLS centering — the smalls' Y range was still
+   off-center on PC after v3.10.52. Big was centered (y=100-800,
+   midpoint 450) but small tops [140, 560] at SCALE=1.4 gave small
+   centers in [280, 700] with midpoint 490 — 40px below the
+   viewBox center. Fix: re-derive the formula so small CENTERS
+   are centered on the viewBox at any SCALE:
+     SMALL_Y_MIN = 450 - 250 * SCALE
+     SMALL_Y_MAX = 450 +  50 * SCALE
+     SCALE=1.0 → tops [200, 500], centers [300, 600], mid 450 ✓
+     SCALE=1.4 → tops [100, 520], centers [240, 660], mid 450 ✓
+   Mobile override ([0, 420] tops → centers [140, 560] → mid 350)
+   still wins on mobile — smalls orbit the big there, not the
+   viewBox. Buddie: "in pc i don't feel its centered on the
+   section the big and small images."
+
    v3.10.52: POSITION FIXES — two related centering issues from
    the v3.10.51 SCALE bump.
 
@@ -270,16 +285,25 @@
   var SMALL_GAP = 10 * SCALE;
 
   // Y range for smalls. Each small spawns at a random y in this range
-  // so they look like a scattered set, not a row. The range was wide
-  // in v3.9.3 ([50, ~750], 700 units) but Buddie found that "they
-  // spawn all over the place on the y aspect" on mobile and asked
-  // to "limit that so they spawn less freely." v3.10.10 narrows the
-  // band to [100, 400] = 300 units — the smalls still have plenty
-  // of vertical variation per tile (300 / 4 smalls = 75 units
-  // average spread) but they cluster around the big instead of
-  // spraying to the top and bottom of the 900-unit viewBox.
-  var SMALL_Y_MIN = 100 * SCALE;
-  var SMALL_Y_MAX = 400 * SCALE;
+  // so they look like a scattered set, not a row. v3.10.10 narrowed
+  // the band to [100, 400] (tops) at SCALE=1.0, but those values put
+  // the small CENTERS in [240, 540] with midpoint y=390 — 60px above
+  // the viewBox center (y=450). v3.10.52 re-derives the formula so
+  // the small centers are centered on the viewBox at any SCALE:
+  //   range width (tops)         = 300 * SCALE
+  //   small half-height          = 100 * SCALE
+  //   tops midpoint              = 450 (viewBox center)
+  //   → SMALL_Y_MIN = 450 - 150*SCALE - 100*SCALE = 450 - 250*SCALE
+  //   → SMALL_Y_MAX = 450 + 150*SCALE - 100*SCALE = 450 +  50*SCALE
+  //   SCALE=1.0 → tops [200, 500], centers [300, 600], mid 450 ✓
+  //   SCALE=1.4 → tops [100, 520], centers [240, 660], mid 450 ✓
+  // Buddie: "in pc i don't feel its centered on the section the big
+  // and small images." Mobile overrides these to [0, 420] so the
+  // smalls center on the big (y=350) instead of the viewBox (y=450)
+  // — on mobile the big anchors at the top (BIG_Y=0) and the smalls
+  // orbit it, not the section.
+  var SMALL_Y_MIN = 450 - 250 * SCALE;
+  var SMALL_Y_MAX = 450 +  50 * SCALE;
 
   // Per-tile horizontal random offset for smalls (slot + offset
   // distribution). "A little random" per Buddie's QA. Scaled down
