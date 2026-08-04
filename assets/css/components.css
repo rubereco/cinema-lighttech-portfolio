@@ -156,22 +156,32 @@
    (snapped to section's bottom edge once the user has scrolled past it).
    The opacity fade is driven by `.is-visible` on the parent section. */
 .section-chrome {
+  /* v3.11.5: BACK TO position: fixed. v3.11.3 removed the JS that
+     set `position: fixed; bottom: 56px` on the chrome (and tried
+     to replace it with a transform-based fall), but forgot that
+     without `position: fixed` the chrome flows with the document
+     and just sits at the bottom of the section. Buddie: "this
+     buttons are supposed to be seen all time when on that section
+     until i scroll down to the next, right now they are only at
+     the bottom of the section the hole time."
+
+     So: position: fixed puts the chrome at the viewport bottom,
+     visible all the time the user is in the section. The JS only
+     toggles a `data-docked` attribute; the CSS handles the visual
+     slide via transform. Layout (position) never changes. */
+  position: fixed;
   left: 0;
   right: 0;
+  bottom: 56px;
   padding: 18px max(20px, 4vw);
   display: flex;
   justify-content: space-between;
   align-items: center;         /* center pills vertically — was flex-end */
   pointer-events: none;        /* container is a no-op; children opt back in */
   opacity: 0;
-  /* v3.11.3: added `transform` to the transition list. The JS in
-     main.js (setupSectionChrome) toggles a `data-docked` attribute
-     on this element when the section's bottom crosses the bottom
-     20% of the viewport. The `transform: translateY(0)` →
-     `transform: translateY(80px)` below makes the pill smoothly
-     fall to the floor instead of teleporting between position
-     values (which CSS can't animate). Same expo-out cubic-bezier
-     the buttons use for buttery settle. */
+  /* The transform handles the fall-to-floor on scroll past. See
+     `.section-chrome[data-docked="true"]` below. Same expo-out
+     cubic-bezier the buttons use for buttery settle. */
   transform: translateY(0);
   transition: opacity 220ms ease-out, transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 50;
