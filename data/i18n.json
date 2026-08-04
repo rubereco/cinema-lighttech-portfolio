@@ -118,6 +118,19 @@
         "partner_one": "partner",
         "partner_other": "partners"
       }
+    },
+    "film": {
+      "closeAria": "Close film details",
+      "backToWork": "← All projects",
+      "yourRole": "Role on set",
+      "productionCompany": "Production Company",
+      "director": "Director",
+      "dop": "Director of Photography",
+      "dopAbbr": "(DP / DoP)",
+      "gaffer": "Gaffer",
+      "electrics": "Sparks",
+      "electricsSubtitle": "Electrics / Lighting Technicians",
+      "noCredits": "—"
     }
   },
   "es": {
@@ -229,6 +242,19 @@
         "partner_one": "colaborador",
         "partner_other": "colaboradores"
       }
+    },
+    "film": {
+      "closeAria": "Cerrar detalles de la película",
+      "backToWork": "← Todos los proyectos",
+      "yourRole": "Rol en rodaje",
+      "productionCompany": "Productora",
+      "director": "Director",
+      "dop": "Director de Fotografía",
+      "dopAbbr": "(DF)",
+      "gaffer": "Gaffer",
+      "electrics": "Eléctricos",
+      "electricsSubtitle": "Técnicos de Iluminación / Sparks",
+      "noCredits": "—"
     }
   }
 }

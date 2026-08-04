@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════════
-   main.js — theme toggle, mobile nav, language toggle, kit filter.
-   One file, no build, no dependencies.
+   main.js — theme toggle, mobile nav, language toggle, kit filter,
+   film detail modal. One file, no build, no dependencies.
    ════════════════════════════════════════════════════════════════════════ */
 
 /* ──────────────── i18n: load + apply translations ──────────────── */
@@ -242,6 +242,10 @@ function setupYearStamp() {
   POSTER_WALL.render();
   POSTER_WALL.setupClick();
 
+  // Film detail modal — loads films.json + people.json, listens for
+  // tarek:film-open events from the poster wall, handles deep links.
+  FILM_MODAL.init();
+
   // Signal sibling scripts that i18n is ready (showcase.js listens for this).
   window.dispatchEvent(new CustomEvent("tarek:i18n-ready", { detail: { lang } }));
 })();
@@ -479,6 +483,245 @@ const POSTER_WALL = (() => {
     render: () => { loadData().then(renderFromState); },
     setupClick
   };
+})();
+
+/* ──────────────── Film detail modal (v3.11.0) ──────────────── */
+/* Opens when a poster tile fires `tarek:film-open { filmId }`
+   (see POSTER_WALL above). Pulls the film row from films.json
+   and resolves the people ids (director / dop / gaffer /
+   electrics) against people.json. The production field is
+   already company names, not ids, so it renders as-is. Crew
+   rows with no data are hidden. The modal sets a `#film-<id>`
+   hash on open and clears it on close so deep links work and
+   the browser back button closes the modal. Closes on X click,
+   ESC, backdrop click, or the "← All projects" back link. */
+
+const FILM_MODAL = (() => {
+  // ─── Inline-first data loader (file:// compatibility) ────────────────
+  const BLOCKS = [
+    { src: "data/films.json",  inline: "tarek-films"  },
+    { src: "data/people.json", inline: "tarek-people" }
+  ];
+
+  function readInline(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    try { return JSON.parse(el.textContent); }
+    catch (err) { console.warn(`[film-modal] inline #${id} parse failed:`, err); return null; }
+  }
+
+  async function loadBlock(block) {
+    const inline = readInline(block.inline);
+    if (inline) return inline;
+    try {
+      const res = await fetch(block.src, { cache: "no-store" });
+      return await res.json();
+    } catch (err) {
+      console.warn(`[film-modal] failed to load ${block.src}:`, err);
+      return null;
+    }
+  }
+
+  let filmsById = null;
+  let peopleById = null;
+  let modal = null;
+
+  async function loadData() {
+    const [films, people] = await Promise.all(BLOCKS.map(loadBlock));
+    if (!films || !people) return false;
+    filmsById = {};
+    for (const f of (films.films || [])) filmsById[f.id] = f;
+    peopleById = {};
+    for (const p of (people.people || [])) peopleById[p.id] = p;
+    return true;
+  }
+
+  // ─── Rendering helpers ────────────────────────────────────────────────
+  function escapeText(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function personNames(ids) {
+    if (!ids || !ids.length) return null;
+    return ids.map((id) => {
+      const person = peopleById[id];
+      return person ? person.name : id;
+    });
+  }
+
+  function renderList(arr) {
+    if (!arr || !arr.length) {
+      // Empty: render a single muted dash. The row's hidden-state
+      // is set in renderCrewRows() so the whole dt/dd pair disappears
+      // when there's nothing to show.
+      return `<span class="film-modal__no-credits">—</span>`;
+    }
+    return arr.map((name) => `<span class="film-modal__chip">${escapeText(name)}</span>`).join("");
+  }
+
+  // ─── Open / close ────────────────────────────────────────────────────
+  function open(filmId) {
+    const film = filmsById && filmsById[filmId];
+    if (!film) {
+      console.warn(`[film-modal] no film with id "${filmId}"`);
+      return;
+    }
+    if (!modal) return;
+
+    // Title + meta
+    const titleEl = document.getElementById("film-modal-title");
+    titleEl.textContent = film.title || "Untitled";
+
+    const yearEl = document.getElementById("film-modal-year");
+    yearEl.textContent = film.year ? String(film.year) : "";
+    yearEl.hidden = !film.year;
+
+    const typeEl = document.getElementById("film-modal-type");
+    typeEl.textContent = film.type || "";
+    typeEl.hidden = !film.type;
+
+    // "Role on set" — Tarek's own credit on this film
+    const roleRow = document.getElementById("film-modal-role-row");
+    if (film.role) {
+      document.getElementById("film-modal-role").textContent = film.role;
+      roleRow.hidden = false;
+    } else {
+      roleRow.hidden = true;
+    }
+
+    // Poster
+    const poster = document.getElementById("film-modal-poster");
+    if (film.poster) {
+      poster.src = film.poster;
+      poster.alt = film.title ? `${film.title} poster` : "Film poster";
+      poster.hidden = false;
+    } else {
+      poster.removeAttribute("src");
+      poster.alt = "";
+      poster.hidden = true;
+    }
+
+    // Crew rows
+    const credits = film.credits || {};
+    document.getElementById("film-modal-production").innerHTML = renderList(credits.production);
+    document.getElementById("film-modal-director").innerHTML  = renderList(personNames(credits.director));
+    document.getElementById("film-modal-dop").innerHTML       = renderList(personNames(credits.dop));
+    document.getElementById("film-modal-gaffer").innerHTML    = renderList(personNames(credits.gaffer));
+    document.getElementById("film-modal-electrics").innerHTML = renderList(personNames(credits.electrics));
+
+    // Hide whole dt/dd pairs that have no data, so we don't show
+    // empty "Director: —" lines for films where that field is empty.
+    modal.querySelectorAll("[data-film-field]").forEach((row) => {
+      const dd = row.querySelector("dd");
+      const isEmpty = !dd.textContent.trim() || dd.querySelector(".film-modal__no-credits");
+      row.hidden = !!isEmpty;
+    });
+
+    // Show
+    modal.classList.add("film-modal--open");
+    modal.setAttribute("aria-hidden", "false");
+    document.documentElement.classList.add("film-modal-open");
+
+    // Focus the close button so ESC and Tab work from the keyboard.
+    const closeBtn = modal.querySelector(".film-modal__close");
+    if (closeBtn) closeBtn.focus({ preventScroll: true });
+
+    // Push the hash for deep linking. Use pushState so browser back
+    // closes the modal instead of leaving the page.
+    if (window.location.hash !== `#film-${filmId}`) {
+      window.history.pushState({ filmModal: filmId }, "", `#film-${filmId}`);
+    }
+  }
+
+  function close() {
+    if (!modal || !modal.classList.contains("film-modal--open")) return;
+    modal.classList.remove("film-modal--open");
+    modal.setAttribute("aria-hidden", "true");
+    document.documentElement.classList.remove("film-modal-open");
+
+    // Pop the hash. If the user landed on a deep link, replaceState
+    // (don't push) so back goes to the previous page, not "open then
+    // close the modal". Otherwise, push a null state so back closes
+    // the modal gracefully.
+    if (window.location.hash.startsWith("#film-")) {
+      // Did the user land here with this hash already? If so, the
+      // history entry is the page-load one — replace it. Otherwise
+      // we pushed it on open, so go back one to undo.
+      // Simpler heuristic: if history.state has filmModal, we
+      // pushed it; otherwise it was the page-load entry.
+      if (window.history.state && window.history.state.filmModal) {
+        window.history.back();
+      } else {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+    }
+  }
+
+  // ─── Listeners ───────────────────────────────────────────────────────
+  function setupListeners() {
+    modal = document.getElementById("film-modal");
+    if (!modal) {
+      console.warn("[film-modal] #film-modal not found in DOM");
+      return;
+    }
+
+    // Close on backdrop / close button / "← All projects" link
+    modal.addEventListener("click", (ev) => {
+      const closer = ev.target.closest("[data-film-modal-close]");
+      if (closer) {
+        ev.preventDefault();
+        close();
+      }
+    });
+
+    // ESC closes
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape" && modal.classList.contains("film-modal--open")) {
+        ev.preventDefault();
+        close();
+      }
+    });
+
+    // tarek:film-open from POSTER_WALL (or anywhere else)
+    window.addEventListener("tarek:film-open", (ev) => {
+      if (ev.detail && ev.detail.filmId) open(ev.detail.filmId);
+    });
+
+    // Browser back/forward: open/close based on the hash
+    window.addEventListener("popstate", () => {
+      const hash = window.location.hash;
+      if (hash.startsWith("#film-") && filmsById) {
+        const filmId = hash.slice("#film-".length);
+        if (filmsById[filmId]) open(filmId);
+        else close();
+      } else {
+        close();
+      }
+    });
+  }
+
+  // ─── Boot ────────────────────────────────────────────────────────────
+  async function init() {
+    setupListeners();
+    const ok = await loadData();
+    if (!ok) return;
+
+    // If the page was loaded with a deep link, open the modal.
+    const hash = window.location.hash;
+    if (hash.startsWith("#film-")) {
+      const filmId = hash.slice("#film-".length);
+      if (filmsById[filmId]) {
+        // pushState a marker so close() knows this was the page-load
+        // entry, not one we pushed.
+        window.history.replaceState({ filmModal: filmId, deepLink: true }, "", hash);
+        open(filmId);
+      }
+    }
+  }
+
+  return { init, open, close };
 })();
 
 /* ──────────────── Scroll indicator ──────────────── */

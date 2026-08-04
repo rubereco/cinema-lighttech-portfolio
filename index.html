@@ -152,6 +152,19 @@
         "partner_one": "partner",
         "partner_other": "partners"
       }
+    },
+    "film": {
+      "closeAria": "Close film details",
+      "backToWork": "← All projects",
+      "yourRole": "Role on set",
+      "productionCompany": "Production Company",
+      "director": "Director",
+      "dop": "Director of Photography",
+      "dopAbbr": "(DP / DoP)",
+      "gaffer": "Gaffer",
+      "electrics": "Sparks",
+      "electricsSubtitle": "Electrics / Lighting Technicians",
+      "noCredits": "—"
     }
   },
   "es": {
@@ -263,6 +276,19 @@
         "partner_one": "colaborador",
         "partner_other": "colaboradores"
       }
+    },
+    "film": {
+      "closeAria": "Cerrar detalles de la película",
+      "backToWork": "← Todos los proyectos",
+      "yourRole": "Rol en rodaje",
+      "productionCompany": "Productora",
+      "director": "Director",
+      "dop": "Director de Fotografía",
+      "dopAbbr": "(DF)",
+      "gaffer": "Gaffer",
+      "electrics": "Eléctricos",
+      "electricsSubtitle": "Técnicos de Iluminación / Sparks",
+      "noCredits": "—"
     }
   }
 }
@@ -1138,5 +1164,80 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
   <script src="assets/js/hero-carousel.js" defer></script>
   <script src="assets/js/main.js" defer></script>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       FILM DETAIL MODAL (v3.11.0)
+       Opens when a poster tile fires `tarek:film-open { filmId }`
+       (see POSTER_WALL in main.js). Shows the film's poster,
+       title, year, type, Tarek's role on set, and the full crew
+       list (production company, director, DP/DoP, gaffer, sparks).
+       The crew roles use the most common industry slang in each
+       language (DP / DoP in EN, DF in ES; Sparks in EN, Eléctricos
+       in ES) with the formal term as the primary label so it's
+       readable for non-industry visitors too. Closes on X click,
+       ESC, backdrop click, or browser back. URL hash
+       `#film-<id>` is set on open and cleared on close for deep
+       linking.
+       ════════════════════════════════════════════════════════════════ -->
+  <div id="film-modal" class="film-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="film-modal-title">
+    <div class="film-modal__backdrop" data-film-modal-close tabindex="-1"></div>
+    <article class="film-modal__content" role="document">
+      <button class="film-modal__close" data-film-modal-close type="button" data-i18n-attr="aria-label:film.closeAria" aria-label="Close film details">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <div class="film-modal__poster">
+        <img id="film-modal-poster" src="" alt="" />
+      </div>
+
+      <div class="film-modal__info">
+        <header class="film-modal__header">
+          <h2 id="film-modal-title" class="film-modal__title"></h2>
+          <p class="film-modal__meta">
+            <span id="film-modal-year" class="film-modal__year"></span>
+            <span id="film-modal-type" class="film-modal__type"></span>
+          </p>
+        </header>
+
+        <p class="film-modal__role" id="film-modal-role-row" hidden>
+          <span class="film-modal__role-label" data-i18n="film.yourRole">Role on set</span>
+          <strong id="film-modal-role"></strong>
+        </p>
+
+        <dl class="film-modal__crew">
+          <div class="film-modal__crew-row" data-film-field="production">
+            <dt data-i18n="film.productionCompany">Production Company</dt>
+            <dd id="film-modal-production"></dd>
+          </div>
+          <div class="film-modal__crew-row" data-film-field="director">
+            <dt data-i18n="film.director">Director</dt>
+            <dd id="film-modal-director"></dd>
+          </div>
+          <div class="film-modal__crew-row" data-film-field="dop">
+            <dt>
+              <span data-i18n="film.dop">Director of Photography</span>
+              <span class="film-modal__crew-abbr" data-i18n="film.dopAbbr">(DP / DoP)</span>
+            </dt>
+            <dd id="film-modal-dop"></dd>
+          </div>
+          <div class="film-modal__crew-row" data-film-field="gaffer">
+            <dt data-i18n="film.gaffer">Gaffer</dt>
+            <dd id="film-modal-gaffer"></dd>
+          </div>
+          <div class="film-modal__crew-row" data-film-field="electrics">
+            <dt>
+              <span data-i18n="film.electrics">Sparks</span>
+              <span class="film-modal__crew-subtitle" data-i18n="film.electricsSubtitle">Electrics / Lighting Technicians</span>
+            </dt>
+            <dd id="film-modal-electrics"></dd>
+          </div>
+        </dl>
+
+        <a class="film-modal__back" href="#work" data-film-modal-close data-i18n="film.backToWork">← All projects</a>
+      </div>
+    </article>
+  </div>
 </body>
 </html>

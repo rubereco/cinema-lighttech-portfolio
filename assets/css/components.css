@@ -177,3 +177,368 @@
     transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   FILM DETAIL MODAL (v3.11.0)
+   Opens when a poster tile fires `tarek:film-open { filmId }`. Shows the
+   film poster, title, year, type, Tarek's role on set, and the full
+   crew list (production, director, DP/DoP, gaffer, sparks). Closes on
+   X click, ESC, backdrop click, "← All projects" back link, or browser
+   back. The `#film-modal` is hidden by default; `.film-modal--open`
+   on the root flips it to a fixed full-viewport overlay.
+
+   Structure:
+     .film-modal                  (root, fixed, hidden by default)
+       .film-modal__backdrop      (click-to-close, aria-hidden)
+       .film-modal__content       (the actual card)
+         .film-modal__close       (X button, top-right)
+         .film-modal__poster      (left/top)
+         .film-modal__info        (right/bottom)
+           .film-modal__header    (title + year + type)
+           .film-modal__role      ("Role on set: Gaffer")
+           .film-modal__crew      (dl with dt/dd pairs)
+           .film-modal__back      ("← All projects" link)
+   ════════════════════════════════════════════════════════════════════════ */
+
+.film-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  /* When open, fade the root in. The backdrop and content handle their
+     own animations for a staggered reveal. */
+}
+
+.film-modal[aria-hidden="false"],
+.film-modal--open {
+  display: block;
+}
+
+.film-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 8, 10, 0.85);
+  /* Match the sticky-nav glassy feel: blur the page behind the modal
+     so the user still feels the context (hero, posters) is right
+     there. Backdrop-filter needs a fallback for browsers that
+     don't support it — the dark overlay is the fallback. */
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.film-modal--open .film-modal__backdrop {
+  opacity: 1;
+}
+
+.film-modal__content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -48%) scale(0.96);
+  width: min(960px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  background: var(--c-bg-alt);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.film-modal--open .film-modal__content {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Lock body scroll while modal is open (set by JS on <html>) */
+html.film-modal-open,
+html.film-modal-open body {
+  overflow: hidden;
+  /* Prevent layout shift from the scrollbar disappearing */
+  padding-right: var(--film-modal-scrollbar, 0px);
+}
+
+/* Close button — top-right, circular, glassy */
+.film-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--c-border);
+  border-radius: 50%;
+  color: var(--c-fg);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.film-modal__close:hover,
+.film-modal__close:focus-visible {
+  background: rgba(0, 0, 0, 0.75);
+  border-color: var(--c-border-strong);
+  outline: none;
+}
+
+.film-modal__close svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Poster — on mobile sits at the top of the card, on desktop floats
+   to the left of the info. The aspect-ratio keeps it 2:3 (matching
+   the poster wall ratio) without needing the image to be loaded. */
+.film-modal__poster {
+  flex: 0 0 auto;
+  background: var(--c-surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.film-modal__poster img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 50vh;
+  max-height: 50dvh;
+  object-fit: cover;
+}
+
+/* Info — the right side on desktop, bottom on mobile. The card is
+   column on mobile, row on desktop. The info panel scrolls if
+   the content overflows. */
+.film-modal__info {
+  flex: 1 1 auto;
+  padding: 24px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  /* Subtle inner top border on mobile (where poster is above) */
+  border-top: 1px solid var(--c-border);
+}
+
+.film-modal__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.film-modal__title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  color: var(--c-fg);
+  margin: 0;
+  /* Slight optical balance for display type at large sizes */
+  text-wrap: balance;
+}
+
+.film-modal__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 14px;
+  color: var(--c-fg-muted);
+  margin: 0;
+}
+
+.film-modal__meta > span:not(:empty)::before {
+  /* Separator dot between year and type — only render if both
+     elements are non-empty. The `hidden` attribute (set by JS)
+     hides the element when its text is empty, so :empty and
+     [hidden] both suppress the separator. */
+}
+
+.film-modal__meta > span:not([hidden]) + span:not([hidden])::before {
+  content: "·";
+  margin-right: 12px;
+  color: var(--c-fg-muted);
+  opacity: 0.6;
+}
+
+.film-modal__role {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  margin: 0;
+  padding: 10px 14px;
+  background: var(--c-accent-soft);
+  border: 1px solid rgba(232, 163, 61, 0.3);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--c-fg-dim);
+}
+
+.film-modal__role-label {
+  color: var(--c-fg-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.film-modal__role strong {
+  color: var(--c-accent);
+  font-weight: 600;
+}
+
+/* Crew list — definition list. Each row is a dt (role) + dd (people).
+   Stacked on mobile (role on top, people below). Side-by-side on
+   desktop (role on left, people on right). */
+.film-modal__crew {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+
+.film-modal__crew-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--c-border);
+}
+
+.film-modal__crew-row:last-child {
+  border-bottom: none;
+}
+
+.film-modal__crew-row dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-fg-muted);
+  font-weight: 500;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.film-modal__crew-abbr,
+.film-modal__crew-subtitle {
+  color: var(--c-fg-muted);
+  opacity: 0.6;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: none;
+}
+
+.film-modal__crew-row dd {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--c-fg);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.film-modal__chip {
+  display: inline-block;
+  padding: 3px 10px;
+  background: var(--c-card-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--c-fg);
+  /* Prevent very long company names from overflowing the chip */
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.film-modal__no-credits {
+  color: var(--c-fg-muted);
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Back link — sits at the bottom of the info panel */
+.film-modal__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding: 10px 0 0;
+  color: var(--c-fg-dim);
+  font-size: 14px;
+  text-decoration: none;
+  border-top: 1px solid var(--c-border);
+  transition: color 0.2s ease;
+}
+
+.film-modal__back:hover,
+.film-modal__back:focus-visible {
+  color: var(--c-accent);
+  outline: none;
+}
+
+/* Desktop: side-by-side poster + info */
+@media (min-width: 720px) {
+  .film-modal__content {
+    flex-direction: row;
+    max-height: min(640px, calc(100vh - 64px));
+    max-height: min(640px, calc(100dvh - 64px));
+  }
+
+  .film-modal__poster {
+    flex: 0 0 38%;
+    border-right: 1px solid var(--c-border);
+  }
+
+  .film-modal__poster img {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+  }
+
+  .film-modal__info {
+    border-top: none;
+    padding: 28px 32px 24px;
+    flex: 1 1 62%;
+  }
+
+  .film-modal__crew-row {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 16px;
+    padding: 12px 0;
+  }
+
+  .film-modal__crew-row dt {
+    flex: 0 0 180px;
+  }
+
+  .film-modal__crew-row dd {
+    flex: 1 1 auto;
+  }
+}
+
+/* Reduced motion — no transforms, instant show/hide */
+@media (prefers-reduced-motion: reduce) {
+  .film-modal__backdrop,
+  .film-modal__content {
+    transition: none;
+  }
+  .film-modal--open .film-modal__content {
+    transform: translate(-50%, -50%);
+  }
+}
