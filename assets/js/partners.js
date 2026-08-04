@@ -142,6 +142,11 @@
           origin: "person",
         })),
       ],
+      // v3.13.12: also return the raw companies so the logo carousel
+      // can filter by kind:"equipment-house" without going through
+      // the merged list (the merged list flattens 'kind' for people
+      // to 'collaborator', so we'd lose the discriminator).
+      companies,
     };
   }
 

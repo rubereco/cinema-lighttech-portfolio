@@ -874,14 +874,17 @@
         <p class="section-sub" data-i18n="partners.intro">The electricians, equipment houses, and cinematographers I work with.</p>
       </header>
 
+      <!-- Equipment houses logo strip (rendered by assets/js/partners.js).
+           Auto-cycling marquee, pauses on hover, fades at edges.
+           The 3 logos are duplicated in JS for an infinite loop.
+           v3.13.12: placed ABOVE the accordion — equipment houses are
+           the most prominent partner category, so they lead the
+           section. -->
+      <div id="partners-logos" class="partners-logos" aria-busy="true" aria-label="Equipment houses"></div>
+
       <div id="partners-content" class="partners-content" aria-busy="true">
         <!-- Accordion rendered by assets/js/partners.js on DOMContentLoaded -->
       </div>
-
-      <!-- Equipment houses logo strip (rendered by assets/js/partners.js).
-           Auto-cycling marquee, pauses on hover, fades at edges.
-           The 3 logos are duplicated in JS for an infinite loop. -->
-      <div id="partners-logos" class="partners-logos" aria-busy="true" aria-label="Equipment houses"></div>
     </section>
 
     <!-- ════════════════════════════════════════════════════════════════

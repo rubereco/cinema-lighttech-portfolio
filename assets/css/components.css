@@ -865,7 +865,8 @@ a.partner-name:focus {
    - On mobile: 2-3 logos visible (2×120 + 1×40 = 280px →
      fits any phone width comfortably) */
 .partners-logos {
-  margin-top: 3rem;
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
   padding: 1.5rem 0;
   text-align: center;
 }
