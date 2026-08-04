@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.43).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.44).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
@@ -676,23 +676,19 @@
           // (the dead-zone state from v3.10.40-41) — we no longer
           // need the dead zone because tick()'s lerp is back to
           // being the primary smoothing mechanism for the drag.
-          // v3.10.43: SNAP currentPhase = phase on press. Without
-          // this, the GSAP Observer can fire onDrag immediately
-          // after onPress with a tiny self.deltaX (mouse wobble,
-          // touch landing impact) — even 1-2px of click-wobble
-          // updates phase but not currentPhase, creating a small
-          // gap. Then the lerp in tick() animates currentPhase
-          // toward phase over a few frames, which the user
-          // perceives as "an animation that stops the moving
-          // carousel, going forward or backward a little" (the
-          // direction depends on the click-wobble direction).
-          // Snapping eliminates the gap so the tiles are
-          // exactly at the press position with no lerp chase.
-          // The lerp is still active during the drag (catches
-          // up currentPhase to phase from onDrag), so drag
-          // smoothness is unchanged.
+          // v3.10.43: tried snapping currentPhase = phase to
+          // eliminate the lerp catch-up animation on press.
+          // v3.10.44: REMOVED the snap. The snap itself was
+          // sometimes visible as a small jump when phase and
+          // currentPhase were out of sync (e.g., right after a
+          // drag or wheel, while the lerp was still catching up).
+          // The lerp is a smoother mechanism — it animates the
+          // gap over 1-3 frames (~16-50ms), which is barely
+          // perceptible and matches the "Android scroll" feel
+          // (smooth deceleration, no hard stops). The user
+          // said the snap was "sometimes" visible; the lerp
+          // is always smooth.
           dragStartPhase = phase;
-          currentPhase = phase;
           velocity = 0;
           velocitySamples = [];
           flingOccurred = false;
