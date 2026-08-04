@@ -72,14 +72,36 @@
   box-shadow:
     0 0 12px rgba(255, 255, 255, 0.12),
     0 0 28px rgba(255, 255, 255, 0.06);
-  transition: color 180ms ease, transform 180ms ease, background 180ms ease,
-              box-shadow 180ms ease, filter 180ms ease;
+  /* v3.11.2: smoother motion. Was 180ms ease across the board with
+     no actual transform value on hover (so the transform transition
+     never fired). Now: longer 300ms duration, custom cubic-bezier
+     easing for a buttery feel, and a real transform value
+     (scale + lift) on hover/focus so the pill actually moves.
+     Active state adds a tiny scale-down for click feedback. */
+  transition:
+    color 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, box-shadow;
 }
 .section-link:hover,
 .section-link:focus-visible {
   color: var(--c-accent);
   background: color-mix(in srgb, var(--c-surface) 92%, transparent);
   filter: brightness(1.08);
+  /* Real transform now — the v3.10 era transition declared
+     `transform 180ms ease` but no rule ever set a transform, so
+     the timing function was dead code. Now the pill lifts and
+     grows slightly on hover, matching the carousel's buttery
+     feel. */
+  transform: translateY(-1px) scale(1.04);
+}
+.section-link:active {
+  /* Click feedback — settle back down so the user feels the press */
+  transform: translateY(0) scale(0.98);
+  transition-duration: 120ms;
 }
 
 /* IMDb pill — orange glow to match its orange text. Same borderless
@@ -94,8 +116,13 @@
 .section-link.link-arrow:hover,
 .section-link.link-arrow:focus-visible {
   box-shadow:
-    0 0 16px rgba(232, 163, 61, 0.40),
-    0 0 36px rgba(232, 163, 61, 0.18);
+    /* v3.11.2: stronger, more spread-out glow on hover so the
+       orange bleed reads as "this thing is reacting to me"
+       rather than a static decoration. The 40px spread + 18%
+       alpha gives it a soft lantern feel. */
+    0 0 18px rgba(232, 163, 61, 0.45),
+    0 0 40px rgba(232, 163, 61, 0.18),
+    0 0 64px rgba(232, 163, 61, 0.08);
 }
 
 /* Next-arrow icon container (inside the next-section pill) */
