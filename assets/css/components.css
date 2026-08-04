@@ -164,9 +164,28 @@
   align-items: center;         /* center pills vertically — was flex-end */
   pointer-events: none;        /* container is a no-op; children opt back in */
   opacity: 0;
-  transition: opacity 220ms ease-out;
+  /* v3.11.3: added `transform` to the transition list. The JS in
+     main.js (setupSectionChrome) toggles a `data-docked` attribute
+     on this element when the section's bottom crosses the bottom
+     20% of the viewport. The `transform: translateY(0)` →
+     `transform: translateY(80px)` below makes the pill smoothly
+     fall to the floor instead of teleporting between position
+     values (which CSS can't animate). Same expo-out cubic-bezier
+     the buttons use for buttery settle. */
+  transform: translateY(0);
+  transition: opacity 220ms ease-out, transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 50;
-  will-change: transform, position;
+  will-change: transform, opacity;
+}
+
+/* v3.11.3: when the section scrolls past, the JS flips
+   data-docked="true" on the chrome. The pill slides 80px down
+   past the viewport bottom — clear of the resting line (56px)
+   so the glow can bleed off-screen smoothly. Reversible: when
+   the user scrolls back up, the pill slides back into place
+   with the same ease. */
+.section-chrome[data-docked="true"] {
+  transform: translateY(80px);
 }
 .section-posters.is-visible .section-chrome { opacity: 1; }
 

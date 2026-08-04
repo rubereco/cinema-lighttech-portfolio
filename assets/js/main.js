@@ -301,23 +301,24 @@ function setupSectionChrome() {
   );
   io.observe(section);
 
-  // ── dock-to-bottom / snap-to-section-bottom ──
+  // ── dock-to-bottom / fall-to-floor ──
   //
-  // The chrome "rides" the section: it stays fixed at the viewport bottom
-  // (so it's reachable) while the user is scrolling through #work, then
-  // snaps to the section's natural bottom edge (`position: absolute`) once
-  // the section has scrolled mostly past.
+  // v3.11.3: the chrome used to teleport from `position: fixed` (riding
+  // the viewport bottom) to `position: absolute; bottom: 0` (anchored to
+  // the section's bottom edge) once the section's bottom crossed the
+  // bottom 20% of the viewport. CSS can't transition between `position`
+  // values, so the pill snapped instantly — and the new position was
+  // above the viewport bottom, so it looked like the pill jumped UP to
+  // meet the section as it scrolled out. Buddie: "i want a smooth
+  // transition as if they fall to the floor not snapping up."
   //
-  // The trick: snap when the section's bottom has entered the BOTTOM 20%
-  // of the viewport, NOT when it crosses `viewport - restingPx`.
-  //
-  // Why: on tall sections (tablet portrait, mobile), the section can be
-  // 1.5–7x taller than the viewport. Using `viewport - restingPx` as the
-  // snap line would only fire in the literal last few pixels of scroll —
-  // users would never see the snap effect, the chrome would feel static.
-  // Using a percentage-based line (bottom 20% of viewport) gives the user
-  // a visible window where they can see the chrome anchored to the section
-  // as it scrolls out.
+  // The fix: keep the chrome at `position: fixed` always. When the
+  // section's bottom drops into the bottom 20% of the viewport, slide
+  // the chrome down past the viewport bottom with a CSS transition on
+  // `transform: translateY()`. Same GPU-accelerated path as the carousel
+  // tiles — the pill falls smoothly off the floor instead of teleporting.
+  // The IntersectionObserver still handles the opacity fade; this just
+  // adds the visual slide.
   const restingPx = 56;
   const snapZoneFraction = 0.80;   // section.bottom must drop into the bottom 20% of viewport
 
@@ -327,18 +328,17 @@ function setupSectionChrome() {
     const snapLine = viewportH * snapZoneFraction;
 
     if (rect.bottom <= snapLine) {
-      // Section is mostly scrolled past — chrome snaps to section's bottom edge
-      // and rides out of view naturally with the section.
-      chrome.style.position = "absolute";
-      chrome.style.bottom = "0";
-      chrome.style.left = "0";
-      chrome.style.right = "0";
+      // Section is mostly scrolled past — slide the chrome down past
+      // the viewport bottom. The pill falls to the floor (≈80px
+      // below the resting line, well clear of the bottom edge on any
+      // screen size). CSS transition on `transform` makes it smooth;
+      // the IntersectionObserver fades opacity on its own schedule.
+      chrome.dataset.docked = "true";
     } else {
-      // Section still ahead of us or mid-scroll — chrome docks to viewport bottom.
-      chrome.style.position = "fixed";
-      chrome.style.bottom = restingPx + "px";
-      chrome.style.left = "0";
-      chrome.style.right = "0";
+      // Section still ahead of us or mid-scroll — chrome rides at the
+      // viewport bottom. Setting `docked` to anything but "true" removes
+      // the slide, and the CSS transition brings it back into view.
+      chrome.dataset.docked = "false";
     }
   }
 
