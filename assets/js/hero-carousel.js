@@ -1,6 +1,19 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.49).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.50).
    ────────────────────────────────────────────────────────────────────────
+   v3.10.50: PRESS-DECAY — when the user presses (or taps) during
+   release momentum, the carousel no longer snaps to the press
+   position. Instead the RAF keeps running with a slower friction
+   (PRESS_DECAY_FRICTION = 0.97 vs the normal FRICTION = 0.95),
+   so the carousel coasts to a "future position" — the place it
+   would have reached if the user hadn't pressed. The drag, if it
+   happens, picks up from wherever the carousel is at that moment
+   (re-anchored in onPointerMove). If the user just taps (no drag),
+   the coast continues until the momentum naturally decays and
+   the carousel stops at the future position. This gives a much
+   more pronounced "simulated positions" feel — the carousel
+   visibly settles over ~2s instead of stopping immediately.
+
    v3.10.49: SCRATCHED the GSAP Observer for drag/touch — replaced
    with native Pointer Events (pointerdown / pointermove / pointerup /
    pointercancel) plus a requestAnimationFrame loop for the release
@@ -263,6 +276,12 @@
   // PC_VELOCITY_SCALE = 0.25 — quarter the push, quarter the
   // distance, same smooth deceleration. Mobile is unchanged.
   var FRICTION = 0.95;            // velocity decay per frame at 60fps
+  var PRESS_DECAY_FRICTION = 0.97; // v3.10.50: slower decay during press-decay,
+                                    // so the coast to a "future position" is
+                                    // more pronounced (≈2s coast at typical
+                                    // release velocities vs ≈1s with FRICTION).
+                                    // Closer to 1 = slower decay = more positions
+                                    // simulated before the carousel stops.
   var VELOCITY_THRESHOLD = 0.05;  // below this, stop momentum
   var VELOCITY_SAMPLE_COUNT = 4;   // how many recent samples to average
   var PC_VELOCITY_SCALE = 0.25;   // velocity multiplier on PC (quarter the push)
@@ -573,6 +592,15 @@
     var momentumVelocity = 0;
     var momentumRAF = null;
     var isMomentumActive = false;
+    // v3.10.50: true while a press during momentum is "coasting"
+    // the carousel to its natural stop position. During this phase
+    // momentumLoop uses PRESS_DECAY_FRICTION (slower decay) instead
+    // of FRICTION, so the coast is more pronounced — the carousel
+    // stops at a "future position" (where the momentum would have
+    // carried it) rather than at the abrupt-stop position. Cleared
+    // on pointermove (user starts dragging) or when velocity drops
+    // below threshold.
+    var inPressDecay = false;
 
     // === Auto-scroll state (v3.10.37, unchanged) ===
     //   isUserPressing  — kept for clarity; equivalent to isDragging
@@ -699,12 +727,19 @@
       if (Math.abs(momentumVelocity) <= VELOCITY_THRESHOLD) {
         isMomentumActive = false;
         momentumVelocity = 0;
+        inPressDecay = false;
         return;
       }
       var deltaRatio = gsap.ticker.deltaRatio();
       phase += momentumVelocity * deltaRatio;
       currentPhase += momentumVelocity * deltaRatio;
-      momentumVelocity *= Math.pow(FRICTION, deltaRatio);
+      // v3.10.50: use PRESS_DECAY_FRICTION (slower decay) when
+      // the user pressed during momentum and the carousel is
+      // coasting to a "future position". Otherwise use the
+      // normal FRICTION (post-release glide from a drag).
+      // Closer to 1 = slower decay = more positions simulated.
+      var currentFriction = inPressDecay ? PRESS_DECAY_FRICTION : FRICTION;
+      momentumVelocity *= Math.pow(currentFriction, deltaRatio);
       momentumRAF = requestAnimationFrame(momentumLoop);
     }
 
@@ -763,18 +798,33 @@
     //   see the other tiles. We do it in the listener now.
 
     function onPointerDown(e) {
-      // Cancel any in-flight release momentum. This is the
-      // critical line that fixes the snap-back: when the user
-      // clicks again during momentum, the previous RAF loop is
-      // explicitly cancelled, the velocity is zeroed, and the
-      // drag starts from the current phase. No leaked state
-      // from the previous gesture.
+      // v3.10.50: Press-during-momentum now COASTS to a "future
+      // position" instead of snapping to the press position.
+      // If there's in-flight release momentum, we DON'T cancel
+      // the RAF — we let it keep running, but flag it as
+      // "press decay" so momentumLoop uses PRESS_DECAY_FRICTION
+      // (slower decay) for a more pronounced coast. The drag
+      // will pick up from wherever the carousel is at that
+      // moment. If the user never drags (just taps), the coast
+      // continues until the momentum naturally decays, and the
+      // carousel stops at the "future position" — the place
+      // it would have reached if the user hadn't pressed.
+      //
+      // The snap-back fix from v3.10.49 is still intact for the
+      // case where the user actually DRAGS: pointermove cancels
+      // the press decay (see below) and zeroes the velocity, so
+      // the drag starts clean. The flag distinguishes "tap during
+      // momentum" (let it coast) from "drag during momentum"
+      // (cancel and take over).
       if (momentumRAF !== null) {
-        cancelAnimationFrame(momentumRAF);
-        momentumRAF = null;
+        inPressDecay = true;
+        // DON'T cancel momentumRAF, DON'T zero momentumVelocity.
+        // The RAF is still updating phase + currentPhase each
+        // frame, and momentumLoop will check inPressDecay to
+        // apply the slower friction.
+      } else {
+        inPressDecay = false;
       }
-      isMomentumActive = false;
-      momentumVelocity = 0;
 
       // Capture press position in the hero's LOCAL coordinate
       // system. This is the fix for the v3.10.46 coordinate-
@@ -815,6 +865,33 @@
       // the element, not just drags — gating on isDragging
       // prevents accidental phase updates from a stray hover.
       if (!isDragging) return;
+
+      // v3.10.50: If we were in press decay (tap during
+      // momentum), the user is now actually dragging — cancel
+      // the press decay, zero the velocity, and re-anchor the
+      // drag to the CURRENT position so the math is clean.
+      // Without this re-anchor, the drag would be relative to
+      // the press position while the phase has been moving
+      // forward from the coast, which would feel laggy/wrong.
+      if (inPressDecay) {
+        if (momentumRAF !== null) {
+          cancelAnimationFrame(momentumRAF);
+          momentumRAF = null;
+        }
+        isMomentumActive = false;
+        momentumVelocity = 0;
+        inPressDecay = false;
+        // Re-anchor: the drag starts from the current phase
+        // and the current pointer position, so the delta
+        // (currentX - pressX) is zero at this moment and
+        // grows from here as the user drags.
+        var pressRect = hero.getBoundingClientRect();
+        pressX = e.clientX - pressRect.left;
+        dragStartPhase = phase;
+        lastDragPhase = phase;
+        lastDragTime = performance.now();
+        velocitySamples = [];
+      }
 
       // Same coordinate frame as the press (see onPointerDown).
       var rect = hero.getBoundingClientRect();
@@ -864,6 +941,16 @@
       // Release the pointer capture so the browser can do its
       // normal thing again.
       try { hero.releasePointerCapture(e.pointerId); } catch (err) {}
+
+      // v3.10.50: If we're in press decay, the user just
+      // tapped (no drag happened) — the RAF is still running
+      // and will continue coasting to the "future position".
+      // Do NOT compute a release velocity (velocitySamples is
+      // empty since the user didn't move) and do NOT start a
+      // new RAF. Just bail and let the existing coast play out.
+      if (inPressDecay) {
+        return;
+      }
 
       // Compute release velocity from samples. If the user
       // didn't move enough to produce samples, no momentum
