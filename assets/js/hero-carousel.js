@@ -1,6 +1,19 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.50).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.51).
    ────────────────────────────────────────────────────────────────────────
+   v3.10.51: SCALE bumped to 1.4 on BOTH mobile and PC. Buddie:
+   "i don't want to rescalate but i want the images bigger so make
+   them bigger" — was mobile=1.2, PC=1.0; both now 1.4 (the "new
+   1.0"). Since they end up equal, the ternary is gone — SCALE is
+   just 1.4 unconditionally. All layout constants (BIG_WIDTH,
+   BIG_HEIGHT, SMALL_WIDTH, SMALL_HEIGHT, BIG_SPACING,
+   INITIAL_OFFSET, WRAP_MARGIN, BIG_Y, SMALL_GAP, SMALL_Y_MIN/MAX,
+   SMALL_X_OFFSET_RANGE) multiply by SCALE, so the whole carousel
+   scales proportionally. Net effect: bigs 500→700px, smalls
+   200→280px, spacing 900→1260px, etc. Mobile/desktop split on
+   SCALE removed; other mobile-vs-PC splits (velocity scaling,
+   touch-action, wheel-sensitivity) are unchanged.
+
    v3.10.50: PRESS-DECAY — when the user presses (or taps) during
    release momentum, the carousel no longer snaps to the press
    position. Instead the RAF keeps running with a slower friction
@@ -130,19 +143,22 @@
   // refresh" look (desktop layout applied to a mobile viewport).
   var MOBILE_MAX_WIDTH = 768;
 
-  // SCALE: 1.0 on desktop, 1.2 on mobile. v3.10.32: bumped mobile
-  // from 1.0 → 1.2 per Buddie's request — the carousel tiles
-  // (bigs + smalls) read a bit small on a 375–414px phone and
-  // the user wanted them larger. All layout constants below
-  // (BIG_WIDTH, BIG_HEIGHT, SMALL_WIDTH, SMALL_HEIGHT,
+  // SCALE: 1.4 on BOTH mobile and PC. v3.10.51: Buddie asked for
+  // the images bigger across the board — "the new 1.0". Mobile
+  // was 1.2, PC was 1.0; both bumped to 1.4. Since they end up
+  // the same, the mobile/desktop split is gone for SCALE (the
+  // other mobile-vs-PC splits — isMobile velocity scaling,
+  // touch-action, wheel-sensitivity — are all unchanged and
+  // still in their respective branches). All layout constants
+  // below (BIG_WIDTH, BIG_HEIGHT, SMALL_WIDTH, SMALL_HEIGHT,
   // BIG_SPACING, INITIAL_OFFSET, WRAP_MARGIN, BIG_Y, SMALL_GAP)
-  // multiply by SCALE, so scaling it up scales the whole
-  // carousel proportionally — tiles get bigger AND the
-  // spacing between them gets bigger, the layout stays the
-  // same shape just at 1.2× on mobile. Desktop stays 1.0.
-  // Buddie: "can we do the images more large on mobile? like 1.2".
+  // multiply by SCALE, so the whole carousel scales
+  // proportionally — tiles AND spacing grow together, the
+  // layout stays the same shape just at 1.4×.
+  // Buddie: "i don't want to rescalate but i want the images
+  // bigger so make them bigger".
   var isMobile = window.innerWidth < MOBILE_MAX_WIDTH;
-  var SCALE = isMobile ? 1.2 : 1.0;
+  var SCALE = 1.4;
 
   // Per-tile phase multipliers. 1.0 = full speed, 2.0 = 2× parallax.
   // Smalls scroll 2× faster than bigs for the CodePen depth effect.
