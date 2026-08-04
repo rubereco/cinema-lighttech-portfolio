@@ -55,6 +55,12 @@
    *  now a uniform IMDb-style list row (64px circular avatar + text),
    *  so per-category aspect ratios are no longer needed.
    *
+   *  v3.13.2: reordered per client — the electricians / sparks bucket
+   *  now sits at the bottom of the list (was first). Equipment Houses
+   *  lead, then Cinematographers, then Electricians. The "sparks"
+   *  category still has defaultOpen:true so it ships expanded on
+   *  first visit.
+   *
    *  Each category is a view over the *partners* page composition:
    *    source: "companies" → match companies by `kind` === id
    *    source: "people"   → match people with kind="collaborator" and `relationship` === id
@@ -62,9 +68,9 @@
    *  and companies cleanly separated at the storage layer.
    */
   const CATEGORIES = [
-    { id: "electric",           source: "people",   relationship: "electric", labelKey: "partners.section.electric", defaultOpen: true },
     { id: "equipment-house",    source: "companies", labelKey: "partners.section.equipment" },
     { id: "dp",                 source: "people",   relationship: "dp",     labelKey: "partners.section.dp" },
+    { id: "electric",           source: "people",   relationship: "electric", labelKey: "partners.section.electric", defaultOpen: true },
   ];
 
   // ─── Loaders ──────────────────────────────────────────────────────────
