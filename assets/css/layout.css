@@ -91,7 +91,7 @@
   text-align: left;
 }
 
-/* Site footer (also lives in showcase.css as a scoped override — see comments there). */
+/* Site footer */
 .site-footer {
   padding: 32px var(--pad-x);
   text-align: center;

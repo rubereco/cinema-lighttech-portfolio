@@ -17,17 +17,13 @@ Static portfolio site. No build step, no framework, no tracking, no cookies.
 
 | Page | What it shows |
 |---|---|
-| `index.html` | Single-page bio + work credits + kit + contact |
-| `showcase.html` | Visual projects gallery (folder grid → per-project photos) |
-| `partners.html` | Partners & Credits (equipment houses, DPs, rental partners) |
+| `index.html` | Single-page bio + work credits + partners + contact |
 
 ## File map
 
 ```
 cinema-lighttech-portfolio/
 ├── index.html                  ← THE page. All sections. Single file.
-├── showcase.html               ← Visual projects gallery (folder grid + per-project)
-├── partners.html               ← Partners & Credits (equipment houses, DPs, rental)
 ├── codebase_index.json         ← AI navigation map (read first in AI sessions)
 ├── data/
 │   ├── i18n.json               ← EN + ES UI strings (~80 keys)
@@ -35,28 +31,22 @@ cinema-lighttech-portfolio/
 │   ├── people.json             ← people entries (id, name, kind, portrait …)
 │   ├── films.json              ← canonical film records (id, title, year, role, type, credits)
 │   ├── work.json               ← ordered list of `{filmId}` rows for the index work table
-│   ├── showcase.json           ← rich project presentations (cover, summary, photos) keyed by filmId
 │   ├── kit.json                ← equipment items for the rental section
 │   └── companies.json          ← partner companies (equipment houses, commercial partners)
 │
-│  (no partners.json — the “Partners & Credits” page composes people + companies)
+│  (no partners.json — the “Partners” section composes people + companies)
 ├── assets/
 │   ├── css/
 │   │   ├── base.css            ← mobile-first layout + components
-│   │   ├── showcase.css        ← showcase page styles (grid, cards, lightbox)
 │   │   ├── tungsten.css        ← default theme (cinematic warm)
 │   │   └── anamorphic.css      ← alt theme (cool anamorphic look)
 │   ├── js/
 │   │   ├── main.js             ← i18n + theme + nav + kit filter
-│   │   ├── showcase.js         ← showcase render + lazy load + lightbox + hash routing
 │   │   └── partners.js         ← partners render (typed, language-aware)
 │   ├── images/                 ← hero photo + og-image
-│   └── projects/               ← ONE folder per project (cover + photos)
+│   └── projects/               ← ONE folder per project (poster + photos)
 │       ├── saw-2026/
-│       │   ├── cover.svg       ← folder cover (replace with cover.jpg when ready)
-│       │   ├── photo-01-bts.svg
-│       │   ├── photo-02-bts.svg
-│       │   └── ...
+│       │   └── poster.jpg
 │       └── els-mals-noms-2025/
 │           └── ...
 └── scripts/
@@ -80,7 +70,6 @@ referenced by stable IDs (e.g. `credits.director: ["marc-ortiz-prades"]` walks t
 | Add a new partner company | `data/companies.json` → append a `{id, name, kind, logo, ...}` entry |
 | Add a new film (canonical record: title, year, role, type, credits) | `data/films.json` → append a `{id, title, year, role, type, credits}` entry |
 | Show a film in the work-table view | `data/work.json` → append `{filmId: "<film.id>"}` |
-| Show a film in the showcase | `data/showcase.json` → append a project keyed by `filmId` |
 | Add a new partner-page section (e.g. "Sponsors") | `assets/js/partners.js` → `CATEGORIES` + i18n key |
 | Add a translation key | `data/i18n.json` (both `en` and `es`) + `data-i18n="key"` in HTML |
 | Switch default theme | `index.html` → `<link id="theme-css" ...>` |
@@ -109,7 +98,7 @@ ones relevant to his work:
    wants to list. Tarek himself is already there (`tarek-recolons`).
 4. **Photos** — Tarek sends BTS photos on Telegram → owner drops them in
    `assets/projects/<slug>/photo-NN-kind.{svg,jpg,webp}` and references them in
-   `data/showcase.json`.
+   the project folder.
 
 The other files (`site.json`, `kit.json`, `companies.json`, `i18n.json`)
 change rarely; the owner edits them on demand.
@@ -162,42 +151,26 @@ change rarely; the owner edits them on demand.
   ]
 }
 
-// data/showcase.json
-{
-  "_meta": { "version": "1.0", "lastUpdated": "2026-07-27" },
-  "projects": [
-    {
-      "filmId":        "els-mals-noms-2025",
-      "status":        "released",     // in-production | released
-      "cover":         "assets/projects/els-mals-noms-2025/cover.jpg",
-      "fallbackCover": "assets/projects/els-mals-noms-2025/cover.jpg",
-      "accent":        "#C77B3A",
-      "summary": { "en": "…", "es": "…" },
-      "photos": [ { "src": "assets/projects/els-mals-noms-2025/photo-01-bts.svg" } ]
-    }
-  ]
-}
-
 // data/site.json      { brand, contact{email, imdbId, imdbUrl, instagram, instagramUrl}, stats{yearsExperience, featureFilms, availability} }
 // data/kit.json       { items: [{ name, category }] }                       // category: led | hmi | grip | distro
 // data/companies.json { companies: [{ id, name, kind, logo, logoAlt?, count, description{en,es}, url, urlLabel }] }
 // data/i18n.json      { _meta, en: { … }, es: { … } }
 
-// data/people.json (collaborator entries, used on the partners page):
+// data/people.json (collaborator entries, used in the Partners section):
 //   {
-//     "id": "joan-pradells",
-//     "name": "Joan Pradells",
+//     "id": "juli-carne-martorell",
+//     "name": "Juli Carné Martorell",
 //     "kind": "collaborator",          // subject | director | dop | gaffer | electric | collaborator
-//     "relationship": "dp",            // for kind:collaborator only; dp | rental | sponsor | …
-//                                       // drives which section on the partners page they fall into
-//     "portrait": "assets/images/partners/joan-pradells.jpg",
-//     "count": 4,
+//     "relationship": "dp",            // for kind:collaborator only; dp | electric | …
+//                                       // drives which section on the Partners page they fall into
+//     "portrait": "assets/images/partners/juli-carne-martorell.jpg",
+//     "count": 0,
 //     "description": { "en": "…", "es": "…" },
 //     "url": "https://example.com",
 //     "urlLabel": "Portfolio"
 //   }
 
-// The "Partners & Credits" page (partners.html) is a *view*: it composes
+// The "Partners" section on the index page is a *view*: it composes
 // companies + collaborator-people into one page. partners.js owns the
 // section config; data ownership lives in the two entity files.
 ```
@@ -207,10 +180,9 @@ change rarely; the owner edits them on demand.
 1. If the film has a new director or DP, add them to `data/people.json` first.
 2. Add the film record to `data/films.json` (id = kebab-cased `title-year`).
 3. Add `{filmId: "<that id>"}` to `data/work.json` in the position you want.
-4. (Optional, for showcase) Add a project entry to `data/showcase.json`.
-5. Run `node scripts/inline-content.mjs` to re-inline the JSON into the HTML
+4. Run `node scripts/inline-content.mjs` to re-inline the JSON into the HTML
    files (only needed if you're previewing via `file://`; live deploys auto-fetch).
-6. Commit + push. Live in ~30s.
+5. Commit + push. Live in ~30s.
 
 ## Adding a new translated string
 
@@ -236,25 +208,7 @@ change rarely; the owner edits them on demand.
 
 Header has a small `⇄` button cycling between **Tungsten** (warm gold) and **Anamorphic** (cool cyan). Saved to `localStorage`.
 
-To set a build-time default, change the `href` of the `<link id="theme-css">` element in `index.html` (or `showcase.html`).
-
-## Showcase page
-
-`showcase.html` is a visual projects gallery — a separate page from `index.html` so the work-credit table stays scannable for SEO/crawlers/agencies.
-
-- **Folder grid** (`showcase.html`): one card per project, cover image dominant, year stripe, title, role, status badge ("In production" amber / "Released" subtle).
-- **Per-project view** (`showcase.html#<slug>`): hero cover, title block, photo grid with tabs (All / BTS / Stills / Process), click any photo to open the lightbox. Keyboard nav (←/→/Esc).
-- **Hash routing** means `showcase.html#saw-2026` is a shareable link to that project — useful for "send me the Saw BTS shots" emails.
-
-### Image loading strategy (progressive)
-
-The site is photo-heavy on the showcase page. To keep it fast:
-
-1. **IntersectionObserver** — `<img>` tags only get a real `src` once they're within 200px of the viewport. Off-screen images cost nothing.
-2. **Responsive `srcset`** — for real `.jpg/.webp` photos, the JS automatically generates `srcset` with 400/800/1200 widths so phones don't download desktop-sized files. Naming convention: drop in `photo-01-bts-400.jpg`, `-800.jpg`, `-1200.jpg` next to `photo-01-bts.jpg`.
-3. **`loading="lazy"` + `decoding="async"`** as fallbacks.
-4. **Opacity fade-in** on load to avoid layout pop-in.
-5. **LQIP / blur-up** — the CSS has the hook (`background: var(--c-surface-2)` placeholder); for real blur-up, set `data-lqip` on each photo with a tiny base64 thumbnail and the JS will set it as `background-image` while the real image loads.
+To set a build-time default, change the `href` of the `<link id="theme-css">` element in `index.html`.
 
 ## Deploy
 
@@ -267,7 +221,7 @@ To rollback: Cloudflare dashboard → Pages → `cinema-lighttech-portfolio` →
 ```bash
 cd cinema-lighttech-portfolio
 python3 -m http.server 8000
-# Open http://localhost:8000/showcase.html in any browser
+# Open http://localhost:8000 in any browser
 ```
 
 No build step, no `npm install`. Just a static file server.
@@ -280,7 +234,6 @@ No build step, no `npm install`. Just a static file server.
 - Confirm or trim the 11 credits to 6–8 for the public cut
 - Showreel: Vimeo/YouTube embed vs self-hosted (R2) — depends on trailer licensing
 - Pick the real domain (`tarekrecolons.com` vs other)
-- Decide which 3–6 projects get initial showcase folders
 
 ## What this site does NOT do (deliberate)
 

@@ -15,7 +15,7 @@
   --c-bg:           #0b0b0d;    /* near-black, slight warm */
   --c-bg-alt:       #141417;    /* warm-tinted dark (alt sections) */
   --c-surface:      #0b0b0d;    /* surface / card backgrounds */
-  --c-surface-2:    #1c1c20;    /* slightly lighter surface — used by showcase skeletons & photo tiles */
+  --c-surface-2:    #1c1c20;    /* slightly lighter surface — used by photo tiles & section accents */
   --c-card-bg:      rgba(255, 255, 255, 0.03);
   --c-fg:           #f4f4f5;    /* primary foreground */
   --c-fg-dim:       rgba(255, 255, 255, 0.7);

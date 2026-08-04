@@ -108,7 +108,7 @@ const I18N = (() => {
   return { load, apply, detectLanguage, t };
 })();
 
-// Expose for sibling scripts (e.g. showcase.js) so they can read translations
+// Expose for sibling scripts (e.g. partners.js) so they can read translations
 // and the active language without re-loading i18n.json. Single source of truth.
 window.TarekI18N = I18N;
 
@@ -154,7 +154,7 @@ function setupLanguageToggle() {
       const lang = btn.getAttribute("data-lang");
       try { localStorage.setItem("tarek.lang", lang); } catch {}
       I18N.apply(lang);
-      // Notify sibling scripts (showcase.js, partners.js) that the active
+      // Notify sibling scripts (partners.js) that the active
       // language changed so they can re-render dynamic content.
       window.dispatchEvent(new CustomEvent("tarek:i18n-change", { detail: { lang } }));
     });
@@ -224,7 +224,7 @@ function setupYearStamp() {
   // tarek:film-open events from the poster wall, handles deep links.
   FILM_MODAL.init();
 
-  // Signal sibling scripts that i18n is ready (showcase.js listens for this).
+  // Signal sibling scripts that i18n is ready (partners.js listens for this).
   window.dispatchEvent(new CustomEvent("tarek:i18n-ready", { detail: { lang } }));
 })();
 
@@ -329,7 +329,7 @@ const POSTER_WALL = (() => {
   function setupClick() {
     const ul = document.getElementById("poster-wall");
     if (!ul) return;
-    // Click delegation (matches the showcase pattern)
+    // Click delegation on the poster wall.
     ul.addEventListener("click", (ev) => {
       const link = ev.target.closest("a.poster-link");
       if (!link) return;

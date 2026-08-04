@@ -12,15 +12,9 @@
   "en": {
     "nav": {
       "work": "Work",
-      "showcase": "Showcase",
       "about": "About",
       "contact": "Contact",
       "partners": "Partners"
-    },
-    "showcase": {
-      "title": "Showcase",
-      "subtitle": "Selected projects · visual stories from set",
-      "backToFolders": "← All projects"
     },
     "brand": "Tarek Recolons",
     "hero": {
@@ -118,15 +112,9 @@
   "es": {
     "nav": {
       "work": "Trabajo",
-      "showcase": "Proyectos",
       "about": "Sobre mí",
       "contact": "Contacto",
       "partners": "Colaboradores"
-    },
-    "showcase": {
-      "title": "Proyectos",
-      "subtitle": "Proyectos seleccionados · historias visuales del rodaje",
-      "backToFolders": "← Todos los proyectos"
     },
     "footer": {
       "tagline": "Hecho con cuidado · sin rastreo, sin cookies.",
