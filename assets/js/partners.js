@@ -181,16 +181,6 @@
     return text;
   }
 
-  /** Count is rendered with a localized singular/plural word. The number
-   *  is the only numeric field, so we just attach a small statistics label. */
-  function countFor(partner, lang) {
-    if (typeof partner.count !== "number" || partner.count <= 0) return null;
-    const word = partner.count === 1
-      ? (t("partners.count.one", lang) || "collaboration")
-      : (t("partners.count.other", lang) || "collaborations");
-    return `${partner.count} ${word}`;
-  }
-
   /** Display name. Falls back to name if no surname field (enterprises). */
   function nameFor(partner) {
     return partner.name || "";
@@ -224,12 +214,17 @@
    *   1) portrait is null/empty in the data — we don't render <img> at all
    *   2) the image URL 404s — the onerror handler removes the <img>,
    *      which makes :has(> img) false, and CSS shows the fallback.
+   *
+   * v3.12.4: per-card "X collaborations" badge removed per client
+   * feedback. The card now shows just name + description + link.
+   * The `count` field in the data is still kept (harmless, in case
+   * the client wants to bring the badge back later), it just isn't
+   * rendered here.
    */
   function partnerCardHtml(partner, category) {
     const lang = getActiveLang();
     const name = nameFor(partner);
     const desc = descriptionFor(partner, lang);
-    const count = countFor(partner, lang);
     const image = partner.image || "";
     const alt = partner.imageAlt || partner.name || "";
     const hasImage = image.trim() !== "";
@@ -254,7 +249,6 @@
         <div class="partner-body">
           <header class="partner-card-head">
             ${linkFor(partner)}
-            ${count ? `<span class="partner-count">${escapeText(count)}</span>` : ""}
           </header>
           ${desc ? `<p class="partner-desc">${escapeText(desc)}</p>` : ""}
         </div>
