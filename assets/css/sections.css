@@ -215,9 +215,18 @@
      proper gutter from the viewport edges — they fill the
      section's content area, not the raw viewport. On a 1200px
      screen that gives ~120px gutter on each side; on a 1600px
-     screen ~320px. On mobile the gutter stays at var(--pad-x)
-     (20–28px). The .section-head inside has its own padding
-     (max(20px,4vw)) for the heading text. */
+     screen ~320px.
+     v3.11.1: on mobile the section is FULL-BLEED again — zero
+     horizontal padding so the poster wall reaches the screen
+     edges. The poster-aspect (2:3) is already designed to fill
+     the viewport vertically on a phone, so edge-to-edge feels
+     like the cinema poster you'd see on a wall, not a card
+     sitting inside a gutter. Buddie: "on mobile you changed
+     the style of the movies. the style i want the previous
+     one where they fill all the screen." Desktop/tablet keep
+     the guttered layout (v3.10.25). */
+  padding-left: 0;
+  padding-right: 0;
   /* containing block so .section-chrome can switch to position:absolute inside */
   position: relative;
   /* v3.10.23: solid #141417. This is the "medium" band of the
@@ -263,6 +272,19 @@
   /* keep the header inside normal section padding; only the wall goes full-bleed */
   padding-left: max(20px, 4vw);
   padding-right: max(20px, 4vw);
+}
+
+/* v3.11.1: on tablet+ restore the guttered layout from v3.10.25.
+   Mobile (<560px) stays full-bleed per Buddie's "fill all the
+   screen" feedback — the poster wall reaches the screen edges.
+   Tablet (560–899) and desktop (900+) get the normal
+   max(--pad-x, (100% - --container)/2) gutter so the wall sits
+   inside the content area, not the raw viewport. */
+@media (min-width: 560px) {
+  .section-posters {
+    padding-left: max(var(--pad-x), calc((100% - var(--container)) / 2));
+    padding-right: max(var(--pad-x), calc((100% - var(--container)) / 2));
+  }
 }
 
 .poster-wall {
