@@ -1,6 +1,26 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.51).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.52).
    ────────────────────────────────────────────────────────────────────────
+   v3.10.52: POSITION FIXES — two related centering issues from
+   the v3.10.51 SCALE bump.
+
+   1) PC big was too low at SCALE=1.4. The old formula
+      BIG_Y = 200 * SCALE = 280 put the 700-tall big at y=280
+      to y=980, clipping 80px off the bottom of the viewBox.
+      Fix: BIG_Y = 450 - 250 * SCALE, which centers the big
+      vertically in the 900-tall viewBox at any SCALE
+      (SCALE=1.0 → BIG_Y=200, SCALE=1.4 → BIG_Y=100). Mobile
+      still overrides to BIG_Y=0 (big anchors at the top so the
+      text sits in the empty space below).
+
+   2) Mobile smalls were not centered on the big. At SCALE=1.4
+      the big is y=0-700 (center y=350) but the default small
+      tops [140, 560] gave small CENTERS in [280, 700] — clustered
+      in the lower half. Fix: mobile override drops SMALL_Y_MIN/MAX
+      to [0, 420] so small centers land in [140, 560], symmetric
+      around 350. PC keeps the default (Buddie: "i think the small
+      ones are good on pc").
+
    v3.10.51: SCALE bumped to 1.4 on BOTH mobile and PC. Buddie:
    "i don't want to rescalate but i want the images bigger so make
    them bigger" — was mobile=1.2, PC=1.0; both now 1.4 (the "new
@@ -230,7 +250,19 @@
   var WRAP_MARGIN = 200 * SCALE;
 
   // Y positions
-  var BIG_Y = 200 * SCALE;
+  // v3.10.52: BIG_Y now centers the big vertically in the
+  // 900-unit viewBox at any SCALE. Formula: (viewBoxH - BIG_HEIGHT)/2
+  // = (900 - 500*SCALE)/2 = 450 - 250*SCALE.
+  //   SCALE=1.0  → BIG_Y=200, big 500px tall, centered (200-700)
+  //   SCALE=1.4  → BIG_Y=100, big 700px tall, centered (100-800)
+  // Was: BIG_Y = 200 * SCALE, which centered the big at SCALE=1.0
+  // (200 = (900-500)/2) but pushed it down at SCALE=1.4 (280,
+  // extending to 980, bottom 80px clipped by the viewBox). Buddie:
+  // "on pc the big ones are low its like we have space at the top
+  // but the bottom of the image is going inside the next section."
+  // The mobile BIG_Y=0 override below still wins on mobile — the
+  // big anchors at the top of the SVG on mobile regardless.
+  var BIG_Y = 450 - 250 * SCALE;
   // (Each small spawns at a random y in [SMALL_Y_MIN, SMALL_Y_MAX]
   // defined further down — the old single-anchor SMALL_Y is gone.)
 
@@ -374,6 +406,19 @@
       // the only "space" on the hero. (Buddie: "the space could
       // start perfectly on the highest point of the images.")
       BIG_Y = 0;
+      // v3.10.52: re-center the smalls' Y range around the big.
+      // Big on mobile: y=0 to 700 (BIG_Y=0, BIG_HEIGHT=700 at
+      // SCALE=1.4), center at y=350. The default SMALL_Y_MIN/MAX
+      // (= [140, 560] at SCALE=1.4) gives small CENTERS in
+      // [280, 700], which is not centered on 350 — the smalls
+      // cluster in the lower half of the big. Override to tops
+      // [0, 420] so centers land in [140, 560], symmetric around
+      // 350. Buddie: "the small ones don't spawn centered to the
+      // big ones ... the max and min point is not centered."
+      // PC keeps the default [140, 560] tops (Buddie: "i think
+      // the small ones are good on pc").
+      SMALL_Y_MIN = 0;
+      SMALL_Y_MAX = 420;
     }
 
     // Compute X_RANGE = (bigs' span) + WRAP_MARGIN.
