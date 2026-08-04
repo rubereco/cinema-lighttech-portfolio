@@ -181,7 +181,24 @@
      naturally with the section's bottom edge. No JS needed.
 
    Caveat: the parent must NOT have `overflow: hidden|auto|scroll`
-   or sticky is broken. .section has none. */
+   or sticky is broken. .section has none.
+
+   v3.11.10: the work section's --section-pad-y (96px desktop /
+   56px mobile) was creating a big dark gap below the buttons
+   before the next section. The buttons were floating at the top
+   of that gap, looking like they didn't belong to anything.
+   Buddie: "i would want the buttons to be centered between
+   sections. ... i don't like that much gap between the buttons
+   and the next section."
+
+   The fix: pull the chrome DOWN by the section's bottom padding
+   using a negative margin-bottom. The chrome now sits flush at
+   the section's bottom edge — visually centered in the
+   transition between sections, with the next section's own top
+   padding providing the only spacing below. The section's own
+   padding is untouched (so the visual balance of the section
+   is preserved), but the chrome is pulled into the padding
+   area to close the gap. */
 
 .section-chrome {
   position: sticky;
@@ -201,6 +218,11 @@
   align-items: center;
   z-index: 50;
   pointer-events: none;        /* container is a no-op; children opt back in */
+  /* v3.11.10: pull chrome down into the section's bottom padding
+     so the buttons sit flush at the boundary with the next section
+     (no big dark gap below). The padding variable scales with
+     breakpoint (56/72/96px) so this stays in sync. */
+  margin-bottom: calc(-1 * var(--section-pad-y, 56px));
 }
 
 /* ──────────────── Inline link with arrow ────────────────
