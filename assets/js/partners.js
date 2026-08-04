@@ -212,6 +212,14 @@
    * config. The layout only affects the photo's aspect ratio and grid span;
    * the card content (image, name, count, description, link) is identical.
    * That way, "format per category" is purely a CSS concern.
+   *
+   * v3.12.2: portrait fallback. The fallback element (black bg + grey
+   * person emoji) is ALWAYS rendered inside .partner-photo. CSS hides
+   * it via :has(> img) when a valid <img> is present. Two paths reveal
+   * the fallback:
+   *   1) portrait is null/empty in the data — we don't render <img> at all
+   *   2) the image URL 404s — the onerror handler removes the <img>,
+   *      which makes :has(> img) false, and CSS shows the fallback.
    */
   function partnerCardHtml(partner, category) {
     const lang = getActiveLang();
@@ -220,17 +228,24 @@
     const count = countFor(partner, lang);
     const image = partner.image || "";
     const alt = partner.imageAlt || partner.name || "";
+    const hasImage = image.trim() !== "";
 
     const dataType = partner.origin === "person"
       ? partner.relationship || partner.kind
       : partner.kind;
 
+    const imgHtml = hasImage
+      ? `<img alt="${escapeAttr(alt)}"
+              loading="lazy" decoding="async"
+              src="${escapeAttr(image)}"
+              onerror="this.remove()">`
+      : "";
+
     return `
       <article class="partner-card ${category.layout}" data-type="${escapeAttr(dataType)}">
         <div class="partner-photo">
-          <img alt="${escapeAttr(alt)}"
-               loading="lazy" decoding="async"
-               src="${escapeAttr(image)}">
+          ${imgHtml}
+          <div class="partner-photo-fallback" aria-hidden="true">👤</div>
         </div>
         <div class="partner-body">
           <header class="partner-card-head">

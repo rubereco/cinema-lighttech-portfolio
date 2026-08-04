@@ -397,16 +397,40 @@
       transform: translateY(-1px);
     }
     .partner-photo {
-      background: var(--c-bg-2, rgba(255,255,255,0.04));
+      position: relative;
+      background: #0b0b0d;        /* black fallback shows through if img is transparent */
       overflow: hidden;
     }
     .partner-photo img {
+      position: relative;
+      z-index: 1;
       display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
       object-position: center;
     }
+    /* v3.12.2: black-bg + grey person-emoji fallback when no portrait
+       is provided (or the image file 404s). Hidden via :has() when a
+       valid <img> is present; revealed when portrait is null OR the
+       img's onerror handler removes the broken element. */
+    .partner-photo-fallback {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(2.4rem, 14cqi, 4.5rem);
+      line-height: 1;
+      color: #7a7a7e;
+      filter: grayscale(1) brightness(0.85);
+      opacity: 0.55;
+      pointer-events: none;
+      user-select: none;
+    }
+    .partner-card { container-type: inline-size; }
+    .partner-photo:has(> img) .partner-photo-fallback { display: none; }
     .partner-body {
       padding: 0.85rem 1rem 1rem;
     }
