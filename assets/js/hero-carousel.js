@@ -1,6 +1,15 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.54).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.55).
    ────────────────────────────────────────────────────────────────────────
+   v3.10.55: Mobile big lowered 30px. v3.10.52 set BIG_Y=0 on
+   mobile (big anchored flush at the top of the SVG), but Buddie
+   said "now on mobile are a touch high" — the top-anchored big
+   sat right against the 72px sticky nav with no breathing room.
+   Mobile override now BIG_Y=30: big spans y=30 to y=730, center
+   y=380, with 30px of headroom at the top (visible above the
+   text overlay) and 170px below for the hero text. PC untouched
+   (still lifted 50px above geometric center per v3.10.54).
+
    v3.10.54: BIG_Y lifted 50px above geometric center. v3.10.52
    centered the big at y=450 (viewBox center) but Buddie said
    "i think the big ones are a little low still" — the hero text
@@ -442,19 +451,26 @@
       // BIG_WIDTH). Centers the big horizontally on the hero, in
       // line with the text and the CTAs.
       INITIAL_OFFSET = 550;
-      // BIG_Y=0: anchor the big at the TOP of the SVG so the
-      // empty area below it (where the overlaid text sits) is
-      // the only "space" on the hero. (Buddie: "the space could
-      // start perfectly on the highest point of the images.")
-      BIG_Y = 0;
+      // v3.10.55: BIG_Y = 30 on mobile. Was 0 (big anchored flush
+      // at the top of the SVG), but Buddie: "now on mobile are a
+      // touch high" — the top-anchored big sat right against the
+      // 72px sticky nav with no breathing room. 30px of headroom
+      // (matching the PC lift's 50px-of-headroom feel, just a
+      // touch less since the text overlay sits in the empty space
+      // below the big on mobile). Big now spans y=30 to y=730,
+      // center y=380, leaving 30px above and 170px below for the
+      // hero text.
+      BIG_Y = 30;
       // v3.10.52: re-center the smalls' Y range around the big.
-      // Big on mobile: y=0 to 700 (BIG_Y=0, BIG_HEIGHT=700 at
-      // SCALE=1.4), center at y=350. The default SMALL_Y_MIN/MAX
+      // Big on mobile: y=30 to 730 (BIG_Y=30, BIG_HEIGHT=700 at
+      // SCALE=1.4), center at y=380. The default SMALL_Y_MIN/MAX
       // (= [140, 560] at SCALE=1.4) gives small CENTERS in
-      // [280, 700], which is not centered on 350 — the smalls
-      // cluster in the lower half of the big. Override to tops
-      // [0, 420] so centers land in [140, 560], symmetric around
-      // 350. Buddie: "the small ones don't spawn centered to the
+      // [280, 700], which is not centered on 380. Override to
+      // tops [0, 420] so centers land in [140, 560], midpoint
+      // 350 — sits 30px above the new big center (380), which
+      // is fine because the smalls cluster in the visual-weight
+      // portion of the big (just below the text overlay).
+      // Buddie: "the small ones don't spawn centered to the
       // big ones ... the max and min point is not centered."
       // PC keeps the default [140, 560] tops (Buddie: "i think
       // the small ones are good on pc").
