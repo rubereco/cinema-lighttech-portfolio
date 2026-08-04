@@ -1,6 +1,18 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.53).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.54).
    ────────────────────────────────────────────────────────────────────────
+   v3.10.54: BIG_Y lifted 50px above geometric center. v3.10.52
+   centered the big at y=450 (viewBox center) but Buddie said
+   "i think the big ones are a little low still" — the hero text
+   sits at the top of the hero and the big's optical center at
+   y=450 made the composition feel bottom-heavy. New formula:
+     BIG_Y = 400 - 250 * SCALE
+     SCALE=1.0 → BIG_Y=150, big 500px, lifted (150-650, mid 400)
+     SCALE=1.4 → BIG_Y= 50, big 700px, lifted ( 50-750, mid 400)
+   At SCALE=1.4 the top 10-12px of the big now sit behind the
+   72px sticky nav (which has backdrop-filter blur, so the big
+   shows through softly). Mobile BIG_Y=0 override still wins.
+
    v3.10.53: PC SMALLS centering — the smalls' Y range was still
    off-center on PC after v3.10.52. Big was centered (y=100-800,
    midpoint 450) but small tops [140, 560] at SCALE=1.4 gave small
@@ -265,19 +277,24 @@
   var WRAP_MARGIN = 200 * SCALE;
 
   // Y positions
-  // v3.10.52: BIG_Y now centers the big vertically in the
-  // 900-unit viewBox at any SCALE. Formula: (viewBoxH - BIG_HEIGHT)/2
-  // = (900 - 500*SCALE)/2 = 450 - 250*SCALE.
-  //   SCALE=1.0  → BIG_Y=200, big 500px tall, centered (200-700)
-  //   SCALE=1.4  → BIG_Y=100, big 700px tall, centered (100-800)
-  // Was: BIG_Y = 200 * SCALE, which centered the big at SCALE=1.0
-  // (200 = (900-500)/2) but pushed it down at SCALE=1.4 (280,
-  // extending to 980, bottom 80px clipped by the viewBox). Buddie:
-  // "on pc the big ones are low its like we have space at the top
-  // but the bottom of the image is going inside the next section."
-  // The mobile BIG_Y=0 override below still wins on mobile — the
-  // big anchors at the top of the SVG on mobile regardless.
-  var BIG_Y = 450 - 250 * SCALE;
+  // v3.10.52: BIG_Y centers the big vertically in the 900-unit
+  // viewBox at any SCALE. v3.10.54 lifts it 50px above geometric
+  // center because the hero text (eyebrow/headline/lede) sits at
+  // the top of the hero and the big's optical center sitting at
+  // y=450 made the whole composition feel bottom-heavy — Buddie:
+  // "i think the big ones are a little low still."
+  // Formula: (viewBoxH - BIG_HEIGHT)/2 - 50
+  //        = 450 - 250*SCALE - 50
+  //        = 400 - 250*SCALE
+  //   SCALE=1.0  → BIG_Y=150, big 500px, lifted (150-650, mid 400)
+  //   SCALE=1.4  → BIG_Y= 50, big 700px, lifted ( 50-750, mid 400)
+  // The SCALE=1.4 big now starts at viewBox y=50, which on a
+  // 1920x1080 viewport (1.2× SVG scale) maps to hero y=60 — 12px
+  // into the 72px sticky-nav area. The sticky nav has a
+  // backdrop-filter blur, so the top sliver of the big shows
+  // through softly rather than being hard-clipped. Mobile
+  // BIG_Y=0 override still wins on mobile.
+  var BIG_Y = 400 - 250 * SCALE;
   // (Each small spawns at a random y in [SMALL_Y_MIN, SMALL_Y_MAX]
   // defined further down — the old single-anchor SMALL_Y is gone.)
 
