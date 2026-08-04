@@ -114,11 +114,11 @@
       "lamp": "Lamp Operator"
     },
     "partners": {
-      "pageTitle": "Partners & Credits",
-      "intro": "The electricians, equipment houses, and cinematographers I work with.",
+      "pageTitle": "Who I Work With",
+      "intro": "The cinematographers, lighting technicians, and equipment houses I work with.",
+      "logosLabel": "Equipment houses",
       "section": {
         "electric": "Electricians / Lighting Technicians",
-        "equipment": "Equipment Houses",
         "dp": "Cinematographers"
       },
       "empty": "No partners listed yet.",
@@ -214,11 +214,11 @@
       "lamp": "Operador de lámpara"
     },
     "partners": {
-      "pageTitle": "Colaboradores y Créditos",
-      "intro": "Los eléctricos, casas de equipos y directores de fotografía con los que trabajo.",
+      "pageTitle": "Con quien trabajo",
+      "intro": "Los directores de fotografía, técnicos de iluminación y casas de equipos con los que trabajo.",
+      "logosLabel": "Casas de equipos",
       "section": {
         "electric": "Eléctricos / Técnicos de Luz",
-        "equipment": "Casas de Equipos",
         "dp": "Directores de Fotografía"
       },
       "empty": "Aún no hay colaboradores listados.",
@@ -870,13 +870,18 @@
     <section id="partners" class="section section-alt">
       <header class="section-head">
         <span class="section-index">03</span>
-        <h2 class="section-title" data-i18n="partners.pageTitle">Partners &amp; Credits</h2>
+        <h2 class="section-title" data-i18n="partners.pageTitle">Who I Work With</h2>
         <p class="section-sub" data-i18n="partners.intro">The electricians, equipment houses, and cinematographers I work with.</p>
       </header>
 
       <div id="partners-content" class="partners-content" aria-busy="true">
         <!-- Accordion rendered by assets/js/partners.js on DOMContentLoaded -->
       </div>
+
+      <!-- Equipment houses logo strip (rendered by assets/js/partners.js).
+           Auto-cycling marquee, pauses on hover, fades at edges.
+           The 3 logos are duplicated in JS for an infinite loop. -->
+      <div id="partners-logos" class="partners-logos" aria-busy="true" aria-label="Equipment houses"></div>
     </section>
 
     <!-- ════════════════════════════════════════════════════════════════

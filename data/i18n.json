@@ -80,11 +80,11 @@
       "lamp": "Lamp Operator"
     },
     "partners": {
-      "pageTitle": "Partners & Credits",
-      "intro": "The electricians, equipment houses, and cinematographers I work with.",
+      "pageTitle": "Who I Work With",
+      "intro": "The cinematographers, lighting technicians, and equipment houses I work with.",
+      "logosLabel": "Equipment houses",
       "section": {
         "electric": "Electricians / Lighting Technicians",
-        "equipment": "Equipment Houses",
         "dp": "Cinematographers"
       },
       "empty": "No partners listed yet.",
@@ -180,11 +180,11 @@
       "lamp": "Operador de lámpara"
     },
     "partners": {
-      "pageTitle": "Colaboradores y Créditos",
-      "intro": "Los eléctricos, casas de equipos y directores de fotografía con los que trabajo.",
+      "pageTitle": "Con quien trabajo",
+      "intro": "Los directores de fotografía, técnicos de iluminación y casas de equipos con los que trabajo.",
+      "logosLabel": "Casas de equipos",
       "section": {
         "electric": "Eléctricos / Técnicos de Luz",
-        "equipment": "Casas de Equipos",
         "dp": "Directores de Fotografía"
       },
       "empty": "Aún no hay colaboradores listados.",

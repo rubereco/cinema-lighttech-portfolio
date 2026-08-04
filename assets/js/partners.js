@@ -68,7 +68,9 @@
    *  and companies cleanly separated at the storage layer.
    */
   const CATEGORIES = [
-    { id: "equipment-house",    source: "companies", labelKey: "partners.section.equipment" },
+    // v3.13.11: equipment-house removed from the accordion — equipment
+    // houses now live in a separate logo carousel below the accordion
+    // (see renderLogosCarousel()).
     { id: "dp",                 source: "people",   relationship: "dp",     labelKey: "partners.section.dp" },
     { id: "electric",           source: "people",   relationship: "electric", labelKey: "partners.section.electric", defaultOpen: true },
   ];
@@ -310,6 +312,45 @@
 
   // ─── Render entry point ───────────────────────────────────────────────
 
+  /** Build the equipment-houses logo carousel.
+   *  - Reads companies of kind: "equipment-house" from content.companies
+   *  - Renders a label + a duplicated track of logos (for infinite marquee)
+   *  - Each logo links out to the company's URL, with a grayscale → color hover
+   *  - Returns "" if no equipment-house companies exist (silently no-op) */
+  function renderLogosCarousel(content) {
+    const target = document.getElementById("partners-logos");
+    if (!target) return;
+    const lang = getActiveLang();
+    const companies = (content.companies || []).filter(c => c.kind === "equipment-house");
+    if (companies.length === 0) {
+      target.innerHTML = "";
+      target.setAttribute("aria-busy", "false");
+      return;
+    }
+    const label = t("partners.logosLabel", lang);
+    const itemHtml = (c, isClone) => `
+      <a class="partners-logos__item${isClone ? " is-clone" : ""}" 
+         href="${escapeAttr(c.url || "#")}" 
+         target="_blank" rel="noopener" 
+         aria-label="${escapeAttr(c.name)}" 
+         ${isClone ? 'aria-hidden="true"' : ''}>
+        <img src="${escapeAttr(c.logo || "")}" alt="${escapeAttr(c.logoAlt || c.name || "")}" loading="lazy" />
+      </a>
+    `;
+    const originals = companies.map(c => itemHtml(c, false)).join("");
+    const clones    = companies.map(c => itemHtml(c, true )).join("");
+    target.innerHTML = `
+      <p class="partners-logos__label">${escapeText(label)}</p>
+      <div class="partners-logos__viewport">
+        <div class="partners-logos__track">
+          ${originals}
+          ${clones}
+        </div>
+      </div>
+    `;
+    target.setAttribute("aria-busy", "false");
+  }
+
   function render(content) {
     const target = document.getElementById("partners-content");
     if (!target) return;
@@ -351,7 +392,11 @@
   async function boot() {
     currentContent = await loadContent();
     render(currentContent);
-    window.addEventListener("tarek:i18n-change", () => render(currentContent));
+    renderLogosCarousel(currentContent);
+    window.addEventListener("tarek:i18n-change", () => {
+      render(currentContent);
+      renderLogosCarousel(currentContent);
+    });
   }
 
   function startWhenReady() {
