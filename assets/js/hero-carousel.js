@@ -1,6 +1,22 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.55).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.56).
    ────────────────────────────────────────────────────────────────────────
+   v3.10.56: Z-ORDER FIX — tiles now appended to the DOM in
+   y-sorted order so the SVG render order matches the visual
+   stacking. The previous code did `bigs.concat(smalls).forEach`
+   for the clone-creation loop, which meant all big clones got
+   appended first, then all small clones — so every small was
+   always on top of every big regardless of their actual y
+   position. During the wrap transition this caused a z-switching
+   bug: a small that entered from the left (behind a big) would
+   suddenly pop to the front as it scrolled into view, because
+   the small's clone was always rendered after the big's clone.
+   Fix: pre-compute y for every tile, sort by y (higher first =
+   behind, lower last = on top; same y → bigs after smalls), then
+   iterate the sorted list when creating/append the clones.
+   Buddie: "if they spawn below they stay below and if they
+   spawn on top they stay on top don't be swithching like that."
+
    v3.10.55: Mobile big lowered 30px. v3.10.52 set BIG_Y=0 on
    mobile (big anchored flush at the top of the SVG), but Buddie
    said "now on mobile are a touch high" — the top-anchored big
@@ -495,14 +511,66 @@
     var bigsSpan = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
     X_RANGE = bigsSpan + WRAP_MARGIN;
 
+    // v3.10.56: Z-ORDER FIX — pre-compute the y for every tile
+    // and sort by y before creating the clones. In SVG, later DOM
+    // elements render on top, so the append order determines the
+    // visual stacking. The previous code did
+    // `bigs.concat(smalls).forEach(...)` for the clone creation,
+    // which meant all big clones got appended first, then all
+    // small clones — so every small was always on top of every
+    // big regardless of their actual y position. During the wrap
+    // transition this caused a z-switching bug: a small that
+    // entered from the left (behind a big) would suddenly pop to
+    // the front as it scrolled into view, because the small's
+    // clone was always rendered after the big's clone.
+    //
+    // Fix: sort the tiles so higher-y (visually lower) get
+    // appended first (behind) and lower-y (visually higher) get
+    // appended last (on top). Within the same y, bigs go after
+    // smalls (bigs on top of smalls at the same y, preserving
+    // the existing visual hierarchy for co-located tiles).
+    // Buddie: "if they spawn below they stay below and if they
+    // spawn on top they stay on top don't be swithching like
+    // that."
+    var tileY = new Map();
+    bigs.forEach(function (tile) { tileY.set(tile, BIG_Y); });
+    // Pre-compute the y for each small so the sort can see it.
+    // We use the same `data-y` override / random-in-range logic
+    // as the smalls.forEach loop below, just hoisted earlier so
+    // the sort has the values. The x and xOffset are still
+    // computed in the forEach loop below (they don't affect
+    // z-order, only horizontal position).
+    smalls.forEach(function (tile) {
+      var yOverride = tile.getAttribute('data-y');
+      var y = yOverride !== null
+        ? parseFloat(yOverride)
+        : SMALL_Y_MIN + Math.random() * (SMALL_Y_MAX - SMALL_Y_MIN);
+      tileY.set(tile, y);
+    });
+
+    // Sort: higher y first (behind), lower y last (on top).
+    // Same y: bigs after smalls (bigs render on top).
+    var allTilesForZ = bigs.concat(smalls);
+    allTilesForZ.sort(function (a, b) {
+      var yA = tileY.get(a);
+      var yB = tileY.get(b);
+      if (yA !== yB) return yB - yA;
+      var aIsBig = bigs.indexOf(a) !== -1;
+      var bIsBig = bigs.indexOf(b) !== -1;
+      if (aIsBig && !bIsBig) return 1;
+      if (!aIsBig && bIsBig) return -1;
+      return 0;
+    });
+
     // Create left (-X_RANGE) and right (+X_RANGE) clones of every
     // original tile. The clones share the same href (cloneNode(true)
     // preserves attributes including href), so when one copy slides
     // off-screen, the replacement copy is the same photo — no visible
-    // teleport.
+    // teleport. v3.10.56: iterates in y-sorted order so the DOM
+    // append order matches the visual z-stacking (see comment above).
     var leftClone = new WeakMap();
     var rightClone = new WeakMap();
-    bigs.concat(smalls).forEach(function (tile) {
+    allTilesForZ.forEach(function (tile) {
       var lc = tile.cloneNode(true);
       lc.setAttribute('data-clone', 'left');
       tile.parentNode.appendChild(lc);
@@ -531,15 +599,15 @@
     // INITIAL_OFFSET=200: big 0 at 200, big 1 at 1100, big 2 at 2000.
     bigs.forEach(function (tile, i) {
       var x = INITIAL_OFFSET + i * BIG_SPACING;
-      pushThree(tile, 'big', x, BIG_Y, BIG_PHASE_FRAC);
+      pushThree(tile, 'big', x, tileY.get(tile), BIG_PHASE_FRAC);
     });
 
     // Smalls: each at a unique (x, y) in the CONTENT area (not in
     // the left/right padding). X is evenly distributed across the
     // content area with a small ±30px random offset (avoids landing
-    // on a perfect grid line). Y is a wide random in [SMALL_Y_MIN,
-    // SMALL_Y_MAX] so each small sits at a clearly different vertical
-    // position. No per-frame jitter — positions are fixed at init.
+    // on a perfect grid line). Y was pre-computed in tileY above
+    // (for the z-order sort); we just look it up here. No per-frame
+    // jitter — positions are fixed at init.
     // data-y attribute still overrides the random y for fine-tuning.
     var smallsLeft = INITIAL_OFFSET;
     var smallsRight = X_RANGE - WRAP_MARGIN - SMALL_WIDTH;
@@ -549,11 +617,7 @@
       var xOffset = (Math.random() - 0.5) * SMALL_X_OFFSET_RANGE; // ±30 desktop, ±12 mobile
       var x = Math.max(smallsLeft, Math.min(smallsRight, xSlot + xOffset));
 
-      var yOverride = tile.getAttribute('data-y');
-      var y = yOverride !== null
-        ? parseFloat(yOverride)
-        : SMALL_Y_MIN + Math.random() * (SMALL_Y_MAX - SMALL_Y_MIN);
-      pushThree(tile, 'small', x, y, SMALL_PHASE_FRAC);
+      pushThree(tile, 'small', x, tileY.get(tile), SMALL_PHASE_FRAC);
     });
 
     return layout;
