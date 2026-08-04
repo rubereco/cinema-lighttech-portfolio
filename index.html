@@ -966,7 +966,7 @@
       </svg>
 
       <!-- Dark overlay: keeps the centered text legible against moving tiles.
-           pointer-events: none so it never blocks Observer or clicks. -->
+           pointer-events: none so it never blocks the drag or clicks. -->
       <div class="hero-overlay" aria-hidden="true"></div>
 
       <!-- Text content — centered on top of the carousel. -->
@@ -1130,11 +1130,12 @@
   </footer>
 
   <!-- One small JS file: theme toggle + language toggle + mobile nav. ~80 lines. -->
-  <!-- GSAP from CDN — used by hero-carousel.js for the Observer-driven tile scrub.
-       Observer plugin is a separate file; both are required for the carousel.
+  <!-- GSAP from CDN — used by hero-carousel.js for the per-frame tile
+       wrap math, idle auto-scroll, and lerp smoothing. v3.10.49+
+       uses native Pointer Events for the drag (no Observer plugin
+       needed), so only gsap.min.js is required.
        No npm install per project convention (static site, no build step). -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Observer.min.js" defer></script>
   <script src="assets/js/hero-carousel.js" defer></script>
   <script src="assets/js/main.js" defer></script>
 </body>
