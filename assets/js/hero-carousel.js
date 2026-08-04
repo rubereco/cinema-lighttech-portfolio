@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.37).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.39).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
@@ -99,10 +99,16 @@
 
   // Wheel sensitivity. deltaY values vary wildly (trackpad ~2-10,
   // mouse wheel ~100-300), so we multiply by a tuned constant.
-  // With this value: trackpad tick (deltaY ~5) advances phase ~5px,
-  // mouse wheel click (deltaY ~120) advances phase ~120px. Feels
-  // right on both.
-  var WHEEL_SENSITIVITY = 1.0;
+  // v3.10.39: dropped 1.0 → 0.3. The old 1.0 made each mouse-wheel
+  // click add ~100-300 phase units to phase, then the lerp had
+  // to chase currentPhase toward that for 10+ frames — the
+  // carousel visibly lagged behind the wheel, felt "harsh" and
+  // "steppy". At 0.3, a mouse-wheel click adds ~30-90 phase
+  // units (the lerp still chases, but the catch-up is much
+  // shorter — feels like a smooth scroll, not a jump-and-glide).
+  // A trackpad tick (deltaY ~5) now advances phase ~1.5 units,
+  // which the lerp covers in ~2 frames — imperceptible lag.
+  var WHEEL_SENSITIVITY = 0.3;
 
   // Drag/touch sensitivity. GSAP Observer's self.deltaX is the total
   // horizontal drag distance in pixels since the gesture started.
@@ -689,6 +695,19 @@
             }
           }
           phase = newPhase;
+          // v3.10.39: also set currentPhase = newPhase. The old
+          // behavior only set phase, then tick()'s lerp would
+          // chase currentPhase toward phase. With LERP_FACTOR=0.18
+          // at 60fps, the catch-up is ~3 frames for a fast drag
+          // — the tiles visibly lag behind the finger by 1-3
+          // frames, and on release the gap would persist as the
+          // momentum moved the tiles from the lagging position
+          // (the "not smooth" interactive feel). Now the tiles
+          // follow the finger exactly, and at release there's
+          // zero gap for the momentum to inherit — momentum
+          // continues from the exact finger position, not from
+          // a lagging copy of it.
+          currentPhase = newPhase;
           lastDragPhase = newPhase;
           lastDragTime = now;
         },
