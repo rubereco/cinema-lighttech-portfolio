@@ -1,6 +1,22 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.57).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.58).
    ────────────────────────────────────────────────────────────────────────
+   v3.10.58: Z-ORDER FIX v3 — reorder ALL tiles (originals +
+   clones) in the DOM, not just the clones. v3.10.57 only sorted
+   the clones in the append order, so the original tiles stayed
+   at the bottom of the z-stack in their original HTML order —
+   meaning an original tile at a y above a clone of a different
+   tile still rendered BEHIND that clone. Buddie screenshotted
+   the exact bug: a hanging-lantern small that was visible while
+   the big was entering from the left vanished when the big
+   fully appeared, because the original lantern tile was lower
+   in DOM order than a different small's clone. Fix: build a
+   sorted list of every <image> (originals + left + right
+   clones) in the same bigs-first/smalls-last order with each
+   group sorted by top y, then re-append them all to the parent
+   in that order. appendChild on an existing node moves it to
+   the end (no duplication), so this is a pure reorder.
+
    v3.10.57: Z-ORDER FIX v2 — group by size, sort by y within
    each group, append bigs first then smalls. v3.10.56 sorted
    ALL tiles together by top y, which put some smalls behind
@@ -582,6 +598,40 @@
       rc.setAttribute('data-clone', 'right');
       tile.parentNode.appendChild(rc);
       rightClone.set(tile, rc);
+    });
+
+    // v3.10.58: Z-ORDER FIX v3 — reorder ALL tiles (originals +
+    // clones) in the DOM, not just the clones. v3.10.57 only sorted
+    // the clones in the append order, so the original tiles stayed
+    // at the bottom of the z-stack in their original HTML order.
+    // That meant an original tile at a y above a clone of a
+    // different tile would still render BEHIND that clone — the
+    // exact "pops from behind" bug Buddie screenshotted (the
+    // hanging-lantern small disappeared when the big fully
+    // appeared because the original lantern tile was below a
+    // different small's clone in DOM order).
+    //
+    // Fix: build a sorted list of EVERY <image> (originals +
+    // left + right clones) in the same bigs-first/smalls-last
+    // order, with each group sorted by top y (higher y = behind,
+    // lower y = on top). Then re-append them all to the parent in
+    // that order. appendChild on an existing node moves it to the
+    // end (doesn't duplicate), so this just reorders without
+    // creating new nodes.
+    var allElementsForZ = [];
+    bigsSorted.forEach(function (tile) {
+      allElementsForZ.push(tile);
+      allElementsForZ.push(leftClone.get(tile));
+      allElementsForZ.push(rightClone.get(tile));
+    });
+    smallsSorted.forEach(function (tile) {
+      allElementsForZ.push(tile);
+      allElementsForZ.push(leftClone.get(tile));
+      allElementsForZ.push(rightClone.get(tile));
+    });
+    var reappendParent = bigs[0].parentNode;
+    allElementsForZ.forEach(function (elem) {
+      reappendParent.appendChild(elem);
     });
 
     // Helper: push three entries for one tile (left clone, original,
