@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.40).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.41).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
@@ -506,6 +506,11 @@
     var lastDragTime = 0;
     var flingOccurred = false;
     var lastRenderedDragPhase = 0;
+    // v3.10.41: press timestamp. The time-based dead zone in
+    // onDrag uses this to apply a larger initial filter for
+    // the first 100ms after press (touch-sensor warmup noise
+    // is much louder than steady-state finger wobble).
+    var pressTime = 0;
 
     // === Auto-scroll state (v3.10.37) ===
     //   isUserPressing  — true while the user is actively touching
@@ -678,6 +683,10 @@
           // v3.10.40: also seed lastRenderedDragPhase so the
           // jitter dead zone in onDrag starts with zero gap
           // (no spurious jumps on the first move).
+          // v3.10.41: also stamp pressTime so the time-based
+          // dead zone in onDrag knows when the gesture started
+          // and can apply the larger INITIAL_DEAD_ZONE for
+          // the first SETTLE_TIME ms.
           dragStartPhase = phase;
           lastRenderedDragPhase = phase;
           velocity = 0;
@@ -685,6 +694,7 @@
           flingOccurred = false;
           lastDragPhase = phase;
           lastDragTime = performance.now();
+          pressTime = performance.now();
           isUserPressing = true;
         },
         onDrag: function (self) {
@@ -707,25 +717,34 @@
           }
           lastDragPhase = newPhase;
           lastDragTime = now;
-          // v3.10.40: jitter dead zone. Touch screens and even
-          // mice wobble ±1-3px while "holding still" — without
-          // a dead zone, each wobble fires onDrag with a small
-          // deltaX that updates phase, and the carousel stutters
-          // left-right at the start of every press (Buddie:
-          // "when i hold my finger or mouse some animation
-          // triggers and seems like its stuttering like right
-          // left fast for a moment and then it draggs"). The
-          // threshold is 1.5 phase units = 3px at
-          // DRAG_SENSITIVITY=500 — large enough to absorb
-          // sensor noise, small enough that an intentional
-          // 3px+ move passes through immediately.
+          // v3.10.41: time-based dead zone. The v3.10.40 static
+          // 1.5-phase dead zone wasn't enough for FAST drags
+          // (Buddie: "the stutter is happening when i drag
+          // faster, if i drag slow it doesn't happen, but when
+          // i drag faster it's worse"). On a fast drag, the
+          // first few onDrag calls have noisy deltaX values —
+          // touch sensor warmup, finger landing impact — that
+          // can easily exceed 1.5 phase units. The static dead
+          // zone lets them through, and the carousel stutters
+          // right-left at the start of every fast drag.
           //
-          // We always update velocitySamples (even inside the
-          // dead zone) so the release-momentum average still
-          // reflects the actual gesture — jitter samples are
-          // near 0 anyway, so averaging them in doesn't bias
-          // the result. Only the VISUAL position is filtered.
-          if (Math.abs(newPhase - lastRenderedDragPhase) < 1.5) return;
+          // Fix: the dead zone is LARGE (5 phase units = 10px)
+          // for the first SETTLE_TIME (100ms) after press,
+          // then drops to the small STEADY value (1.0 = 2px).
+          // This filters the noisy startup phase without
+          // affecting steady-state dragging — after 100ms the
+          // user has settled into a consistent direction and
+          // the per-frame movement is intentional.
+          //
+          // Same caveat as v3.10.40: we always update
+          // velocitySamples (even inside the dead zone) so the
+          // release-momentum average still reflects the actual
+          // gesture.
+          var elapsedSincePress = now - pressTime;
+          var currentDeadZone = elapsedSincePress < 100
+            ? 5.0  // INITIAL_DEAD_ZONE: first 100ms after press
+            : 1.0; // STEADY_DEAD_ZONE: after the gesture settles
+          if (Math.abs(newPhase - lastRenderedDragPhase) < currentDeadZone) return;
           phase = newPhase;
           // v3.10.39: also set currentPhase = newPhase. The old
           // behavior only set phase, then tick()'s lerp would
