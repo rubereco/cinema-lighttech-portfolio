@@ -1,6 +1,20 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.56).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.57).
    ────────────────────────────────────────────────────────────────────────
+   v3.10.57: Z-ORDER FIX v2 — group by size, sort by y within
+   each group, append bigs first then smalls. v3.10.56 sorted
+   ALL tiles together by top y, which put some smalls behind
+   the big whenever the small's top y was higher than the
+   big's top y — and a small whose body sat on the big (top
+   above the big's top, body inside the big's vertical range)
+   would pop behind when the big fully appeared. Buddie:
+   "when there are two smalls on a big image and then the big
+   image fully appear one of the small pops from behind of the
+   image." Now: sort each group by top y (higher first = behind,
+   lower last = on top), then bigs first then smalls. Smalls
+   always sit on top of bigs; within smalls, higher y is behind
+   (z-switching fix preserved within the group).
+
    v3.10.56: Z-ORDER FIX — tiles now appended to the DOM in
    y-sorted order so the SVG render order matches the visual
    stacking. The previous code did `bigs.concat(smalls).forEach`
@@ -511,35 +525,26 @@
     var bigsSpan = (bigCount - 1) * BIG_SPACING + BIG_WIDTH;
     X_RANGE = bigsSpan + WRAP_MARGIN;
 
-    // v3.10.56: Z-ORDER FIX — pre-compute the y for every tile
-    // and sort by y before creating the clones. In SVG, later DOM
-    // elements render on top, so the append order determines the
-    // visual stacking. The previous code did
-    // `bigs.concat(smalls).forEach(...)` for the clone creation,
-    // which meant all big clones got appended first, then all
-    // small clones — so every small was always on top of every
-    // big regardless of their actual y position. During the wrap
-    // transition this caused a z-switching bug: a small that
-    // entered from the left (behind a big) would suddenly pop to
-    // the front as it scrolled into view, because the small's
-    // clone was always rendered after the big's clone.
+    // v3.10.57: Z-ORDER FIX v2 — group by size, sort by y within
+    // each group, append bigs first then smalls. v3.10.56 sorted
+    // ALL tiles together by top y, which put some smalls behind
+    // the big whenever the small's top y was higher than the
+    // big's top y. That made a small whose body sat on the big
+    // (top above the big's top, body inside the big's vertical
+    // range) get hidden when the big fully appeared — Buddie:
+    // "when there are two smalls on a big image and then the big
+    // image fully appear one of the small pops from behind of the
+    // image." The intent: a small that is "on" a big should
+    // always sit in front of that big.
     //
-    // Fix: sort the tiles so higher-y (visually lower) get
-    // appended first (behind) and lower-y (visually higher) get
-    // appended last (on top). Within the same y, bigs go after
-    // smalls (bigs on top of smalls at the same y, preserving
-    // the existing visual hierarchy for co-located tiles).
-    // Buddie: "if they spawn below they stay below and if they
-    // spawn on top they stay on top don't be swithching like
-    // that."
+    // Fix: sort bigs by y among themselves, sort smalls by y among
+    // themselves, then append bigs first (behind) and smalls last
+    // (on top). Within each group, higher y = behind, lower y =
+    // on top, so the z-switching fix from v3.10.56 is preserved
+    // within each group (the cross-group rule is just "smalls on
+    // top of bigs", which is what the visual stacking wants).
     var tileY = new Map();
     bigs.forEach(function (tile) { tileY.set(tile, BIG_Y); });
-    // Pre-compute the y for each small so the sort can see it.
-    // We use the same `data-y` override / random-in-range logic
-    // as the smalls.forEach loop below, just hoisted earlier so
-    // the sort has the values. The x and xOffset are still
-    // computed in the forEach loop below (they don't affect
-    // z-order, only horizontal position).
     smalls.forEach(function (tile) {
       var yOverride = tile.getAttribute('data-y');
       var y = yOverride !== null
@@ -548,19 +553,16 @@
       tileY.set(tile, y);
     });
 
-    // Sort: higher y first (behind), lower y last (on top).
-    // Same y: bigs after smalls (bigs render on top).
-    var allTilesForZ = bigs.concat(smalls);
-    allTilesForZ.sort(function (a, b) {
-      var yA = tileY.get(a);
-      var yB = tileY.get(b);
-      if (yA !== yB) return yB - yA;
-      var aIsBig = bigs.indexOf(a) !== -1;
-      var bIsBig = bigs.indexOf(b) !== -1;
-      if (aIsBig && !bIsBig) return 1;
-      if (!aIsBig && bIsBig) return -1;
-      return 0;
-    });
+    // Sort each group by top y: higher y first (behind), lower y
+    // last (on top). All bigs share BIG_Y so this is effectively
+    // a no-op for them; smalls get the real y-spread sort.
+    function byYDesc(a, b) {
+      return tileY.get(b) - tileY.get(a);
+    }
+    var bigsSorted = bigs.slice().sort(byYDesc);
+    var smallsSorted = smalls.slice().sort(byYDesc);
+    // bigs appended first (behind), then smalls (on top).
+    var allTilesForZ = bigsSorted.concat(smallsSorted);
 
     // Create left (-X_RANGE) and right (+X_RANGE) clones of every
     // original tile. The clones share the same href (cloneNode(true)
