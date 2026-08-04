@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   hero-carousel.js — CodePen-style carousel for the hero (v3.10.44).
+   hero-carousel.js — CodePen-style carousel for the hero (v3.10.45).
    ────────────────────────────────────────────────────────────────────────
    v3.9.3 → v3.10 → v3.10.1 → v3.10.2 → v3.10.3 → v3.10.9 → v3.10.10
    → v3.10.11 → v3.10.12 (Buddie: "add the carousel to the mobile
@@ -651,6 +651,19 @@
       // intent is unambiguous: if they're clicking on the hero, they
       // want to drag the photos.
       var dragStartPhase = 0;
+      // v3.10.45: self.deltaX is the TOTAL horizontal distance since
+      // the FIRST gesture started (it doesn't reset to 0 on every new
+      // click — the Observer tracks it across pointerdown/pointerup
+      // cycles). So if the user drags, releases during momentum, and
+      // clicks again with the mouse in a different spot, self.deltaX
+      // for the second click includes all the travel from the first
+      // gesture. Without this fix, the carousel would snap to a
+      // position based on (dragStartPhase + first_gesture_total_deltaX)
+      // — which is the "snap back to the first hold" the user saw.
+      // We capture self.deltaX on the first onDrag call after onPress
+      // and compute drag distance relative to THAT (not the first
+      // gesture ever), so each click starts a fresh drag baseline.
+      var dragStartDeltaX = null;
       Observer.create({
         target: hero,
         type: 'touch,pointer',
@@ -688,7 +701,12 @@
           // (smooth deceleration, no hard stops). The user
           // said the snap was "sometimes" visible; the lerp
           // is always smooth.
+          // v3.10.45: reset dragStartDeltaX to null so onDrag
+          // captures the current self.deltaX as the new gesture's
+          // baseline. Without this, the drag would be relative to
+          // the FIRST gesture ever — see the var declaration above.
           dragStartPhase = phase;
+          dragStartDeltaX = null;
           velocity = 0;
           velocitySamples = [];
           flingOccurred = false;
@@ -697,10 +715,22 @@
           isUserPressing = true;
         },
         onDrag: function (self) {
-          // self.deltaX is total horizontal drag distance since start.
-          // Drag right (positive) → tiles move right → phase grows.
+          // self.deltaX is the total horizontal distance moved since
+          // the FIRST gesture started (it doesn't reset to 0 on every
+          // new pointerdown). Drag right (positive) → tiles move right
+          // → phase grows.
+          // v3.10.45: on the first onDrag call after onPress, capture
+          // self.deltaX as the baseline for THIS gesture. Subsequent
+          // onDrag calls use (self.deltaX - dragStartDeltaX) so the
+          // drag distance is relative to the current gesture, not the
+          // first gesture ever. This fixes the "snap back to first
+          // hold" bug when the user clicks again during momentum.
+          if (dragStartDeltaX === null) {
+            dragStartDeltaX = self.deltaX;
+          }
+          var relativeDeltaX = self.deltaX - dragStartDeltaX;
           var now = performance.now();
-          var newPhase = dragStartPhase + self.deltaX * DRAG_SENSITIVITY / 1000;
+          var newPhase = dragStartPhase + relativeDeltaX * DRAG_SENSITIVITY / 1000;
           // v3.10.33: sample instant velocity (phase per ms) for
           // the release-momentum calc in onDragEnd. We track the
           // last VELOCITY_SAMPLE_COUNT samples and average them
