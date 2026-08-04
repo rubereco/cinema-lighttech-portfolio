@@ -67,11 +67,14 @@
   -webkit-backdrop-filter: blur(8px);
   /* Buddie: "ugly static border" — replace with a soft white glow that
      reads as light leaking out from behind the pill. Borderless so the
-     glow is the only edge cue. */
+     glow is the only edge cue.
+     v3.11.8: compressed to 75% of the previous spread (12→9, 28→21)
+     and the alpha bumped slightly so the smaller glow still feels
+     present rather than washed out. "More dense, less spread." */
   border: none;
   box-shadow:
-    0 0 12px rgba(255, 255, 255, 0.12),
-    0 0 28px rgba(255, 255, 255, 0.06);
+    0 0 9px rgba(255, 255, 255, 0.16),
+    0 0 21px rgba(255, 255, 255, 0.10);
   /* v3.11.2: smoother motion. Was 180ms ease across the board with
      no actual transform value on hover (so the transform transition
      never fired). Now: longer 300ms duration, custom cubic-bezier
@@ -105,24 +108,28 @@
 }
 
 /* IMDb pill — orange glow to match its orange text. Same borderless
-   treatment as the next-arrow pill but the glow hue is the accent. */
+   treatment as the next-arrow pill but the glow hue is the accent.
+   v3.11.8: same 75% compression as the base white glow — 12→9, 28→21.
+   Alpha nudged up so the smaller spread still feels dense. */
 .section-link.link-arrow {
   border-bottom: none;
   padding-bottom: 0;
   box-shadow:
-    0 0 12px rgba(232, 163, 61, 0.22),
-    0 0 28px rgba(232, 163, 61, 0.10);
+    0 0 9px rgba(232, 163, 61, 0.28),
+    0 0 21px rgba(232, 163, 61, 0.16);
 }
 .section-link.link-arrow:hover,
 .section-link.link-arrow:focus-visible {
   box-shadow:
-    /* v3.11.2: stronger, more spread-out glow on hover so the
-       orange bleed reads as "this thing is reacting to me"
-       rather than a static decoration. The 40px spread + 18%
-       alpha gives it a soft lantern feel. */
-    0 0 18px rgba(232, 163, 61, 0.45),
-    0 0 40px rgba(232, 163, 61, 0.18),
-    0 0 64px rgba(232, 163, 61, 0.08);
+    /* v3.11.2: stronger glow on hover so the orange bleed reads as
+       "this thing is reacting to me" rather than a static decoration.
+       v3.11.8: compressed to 75% of the previous spread (18→14,
+       40→30, 64→48) so the glow stays tight and dense instead of
+       washing out into the background. Alpha bumped a touch to
+       keep the perceived brightness. */
+    0 0 14px rgba(232, 163, 61, 0.50),
+    0 0 30px rgba(232, 163, 61, 0.24),
+    0 0 48px rgba(232, 163, 61, 0.12);
 }
 
 /* Next-arrow icon container (inside the next-section pill) */
