@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Content Manager · Tarek Recolons</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b0b0d'/%3E%3Ctext x='50' y='68' font-family='sans-serif' font-size='60' font-weight='700' fill='%23E8A33D' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E" />
+  <style>
+    /* v3.14.0: minimal loading screen. The Decap CMS UI takes over once it loads.
+       The dark theme matches the portfolio so it feels like one product. */
+    body {
+      margin: 0;
+      background: #0b0b0d;
+      color: #e8e8e8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .boot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      color: #7a7a7e;
+    }
+  </style>
+</head>
+<body>
+  <!-- Decap CMS is loaded from a pinned version on jsDelivr. The version
+       is intentionally pinned (not @^3) so a breaking change upstream
+       doesn't silently break the admin panel. Bump on purpose only. -->
+  <script src="https://cdn.jsdelivr.net/npm/decap-cms@3.7.4/dist/decap-cms.js"></script>
+  <noscript>
+    <div class="boot">This admin requires JavaScript. Please enable it.</div>
+  </noscript>
+  <div class="boot" id="boot-fallback">Loading content manager…</div>
+  <script>
+    // Remove the loading message once Decap has rendered its UI.
+    document.addEventListener("DOMContentLoaded", () => {
+      const check = setInterval(() => {
+        if (document.querySelector(".nc-app-header") || document.querySelector("[class*='App']")) {
+          const el = document.getElementById("boot-fallback");
+          if (el) el.remove();
+          clearInterval(check);
+        }
+      }, 200);
+      // Failsafe: remove the loading text after 10s either way so it
+      // doesn't linger over the Decap UI.
+      setTimeout(() => {
+        const el = document.getElementById("boot-fallback");
+        if (el) el.remove();
+        clearInterval(check);
+      }, 10000);
+    });
+  </script>
+</body>
+</html>

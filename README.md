@@ -49,6 +49,13 @@ cinema-lighttech-portfolio/
 │       │   └── poster.jpg
 │       └── els-mals-noms-2025/
 │           └── ...
+├── admin/                      ← Decap CMS admin panel (Phase 1)
+│   ├── index.html              ← Decap CMS loader (visits /admin)
+│   ├── config.yml              ← editable content schemas
+│   └── SETUP.md                ← one-time setup guide
+├── cloudflare-worker/          ← OAuth proxy for /admin (separate deploy)
+│   ├── oauth-proxy.js          ← Worker code
+│   └── wrangler.toml           ← deploy config
 └── scripts/
     ├── inline-content.mjs      ← inlines each data/*.json into its own <script> block per page
     └── generate-placeholders.mjs   ← regenerates SVG placeholders (idempotent)
@@ -61,11 +68,16 @@ referenced by stable IDs (e.g. `credits.director: ["marc-ortiz-prades"]` walks t
 
 ## Editing content
 
-| Change | Where |
+You have two options:
+
+**A) Admin panel (recommended for non-developers)** — go to `tarekrecolons.com/admin`, log in with GitHub, edit visually. Changes commit to the repo and the site rebuilds automatically. See `admin/SETUP.md` for the one-time setup.
+
+**B) Direct file edit** — for small changes, edit the JSON files in `data/` directly. The data files are the source of truth; the admin panel just provides a UI on top of them.
+
+| Change | Where (file edit) |
 |---|---|
 | Bio / UI strings (EN + ES) | `data/i18n.json` |
 | Site-wide config (contact email, stats, brand) | `data/site.json` |
-| Update kit item | `data/kit.json` |
 | Add a new person (director, DP, gaffer, collaborator) | `data/people.json` → append a `{id, name, kind, portrait?}` entry |
 | Add a new partner company | `data/companies.json` → append a `{id, name, kind, logo, ...}` entry |
 | Add a new film (canonical record: title, year, role, type, credits) | `data/films.json` → append a `{id, title, year, role, type, credits}` entry |
@@ -239,8 +251,13 @@ No build step, no `npm install`. Just a static file server.
 
 - No analytics, no cookies, no third-party requests beyond Google Fonts.
 - No JavaScript framework, no Tailwind, no build step. Raw, fast, modifiable.
-- No CMS. Content lives in `data/content.json` + `index.html` — change it in any text editor.
 - No "AI chatbot" or generated copy.
 - No drag-and-drop file upload UI (deliberately — adds complexity without enough value at 2-3 updates/year).
+
+## Content management (CMS)
+
+A Decap CMS admin panel is available at `/admin` (Phase 1, see `docs/issues/08-git-based-cms.md`). Tarek (or any GitHub collaborator on this repo) can log in via GitHub OAuth and edit films, work order, people, companies, site config, and translations from a web UI. Changes commit directly to this repo → Cloudflare Pages rebuilds → site updates in ~30-60s. No database.
+
+The OAuth handshake is brokered by a Cloudflare Worker (see `cloudflare-worker/oauth-proxy.js`). Setup steps in `admin/SETUP.md`.
 
 If any of those become hard requirements later, that's a separate decision.
