@@ -15,7 +15,7 @@ After the first setup, day-to-day usage is just "go to `/admin`, log in, edit".
 
 If Tarek doesn't have one yet:
 1. Go to https://github.com/signup
-2. Pick a username (e.g. `tarekrecolons`)
+2. Pick a username (e.g. `tarekrecolons` or whatever Tarek wants)
 3. Use a real email — GitHub sends important security alerts there
 4. Free tier is enough
 
@@ -36,10 +36,10 @@ Tarek accepts the email invitation. Now Tarek's GitHub account has push access t
 1. Go to https://github.com/settings/developers
 2. Click "New OAuth App"
 3. Fill in:
-   - **Application name:** `Tarek Recolons Admin`
-   - **Homepage URL:** `https://tarekrecolons.com`
-   - **Application description:** `Content management for tarekrecolons.com`
-   - **Authorization callback URL:** `https://oauth.tarekrecolons.com/callback` (or your worker URL + `/callback`)
+   - **Application name:** `Recalone Admin`
+   - **Homepage URL:** `https://recalone.com`
+   - **Application description:** `Content management for recalone.com`
+   - **Authorization callback URL:** `https://oauth.recalone.com/callback` (must match your worker's URL + `/callback` exactly — see step 4)
 4. Click "Register application"
 5. On the next page, click "Generate a new client secret"
 6. **Copy the Client ID and the Client Secret** — you'll need them in Step 4
@@ -71,7 +71,7 @@ Option B: With the Cloudflare dashboard (no CLI)
 6. Go to Settings → Variables → add:
    - `GITHUB_CLIENT_ID` (text, encrypted)
    - `GITHUB_CLIENT_SECRET` (text, encrypted)
-7. Go back to the worker → Triggers → add a custom domain (e.g. `oauth.tarekrecolons.com`)
+7. Go back to the worker → Triggers → add a custom domain (e.g. `oauth.recalone.com`). The custom domain must match what you put in the GitHub OAuth callback URL exactly.
 
 Either way, you end up with a worker URL.
 
@@ -84,7 +84,7 @@ backend:
   name: github
   repo: rubereco/cinema-lighttech-portfolio
   branch: wip/portfolio-r1
-  base_url: https://oauth.tarekrecolons.com   # ← your worker URL
+  base_url: https://oauth.recalone.com   # ← your worker URL
   auth_endpoint: auth
   open_authoring: false
   squash_merges: true
@@ -94,7 +94,7 @@ Commit and push this change.
 
 ## Step 6: Test the login
 
-1. Go to `https://tarekrecolons.com/admin`
+1. Go to `https://recalone.com/admin`
 2. You should see the Decap CMS login page
 3. Click "Login with GitHub"
 4. A popup opens with GitHub's authorization screen
@@ -115,7 +115,7 @@ In the Decap editor:
 3. Click "Publish" (or "Save" depending on workflow)
 4. Decap shows "Committing…", then "Site is deploying…"
 5. Wait 30-60 seconds
-6. Refresh `tarekrecolons.com` — the change should be live
+6. Refresh `recalone.com` — the change should be live
 7. Revert the change so the site stays clean
 
 If this works, you're done with setup. The whole flow takes ~15-20 minutes once the GitHub account + OAuth app exist.

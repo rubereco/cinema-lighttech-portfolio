@@ -2,7 +2,7 @@
 
 Static portfolio site. No build step, no framework, no tracking, no cookies.
 
-**Live:** https://tarekrecolons.pages.dev
+**Live:** https://recalone.com
 **Repo:** https://github.com/rubereco/cinema-lighttech-portfolio
 
 ## Stack
@@ -70,7 +70,7 @@ referenced by stable IDs (e.g. `credits.director: ["marc-ortiz-prades"]` walks t
 
 You have two options:
 
-**A) Admin panel (recommended for non-developers)** — go to `tarekrecolons.com/admin`, log in with GitHub, edit visually. Changes commit to the repo and the site rebuilds automatically. See `admin/SETUP.md` for the one-time setup.
+**A) Admin panel (recommended for non-developers)** — go to `recalone.com/admin`, log in with GitHub, edit visually. Changes commit to the repo and the site rebuilds automatically. See `admin/SETUP.md` for the one-time setup.
 
 **B) Direct file edit** — for small changes, edit the JSON files in `data/` directly. The data files are the source of truth; the admin panel just provides a UI on top of them.
 
@@ -245,7 +245,7 @@ No build step, no `npm install`. Just a static file server.
 - Confirm bio voice (1st vs 3rd person; longer version?)
 - Confirm or trim the 11 credits to 6–8 for the public cut
 - Showreel: Vimeo/YouTube embed vs self-hosted (R2) — depends on trailer licensing
-- Pick the real domain (`tarekrecolons.com` vs other)
+- ~~Pick the real domain (`tarekrecolons.com` vs other)~~ — resolved 2026-08-05: domain is `recalone.com`
 
 ## What this site does NOT do (deliberate)
 

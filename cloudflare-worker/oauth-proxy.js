@@ -31,11 +31,11 @@
  *   2. Set the secrets:
  *        wrangler secret put GITHUB_CLIENT_ID
  *        wrangler secret put GITHUB_CLIENT_SECRET
- *   3. Add a custom domain (e.g. oauth.tarekrecolons.com) or use the
+ *   3. Add a custom domain (e.g. oauth.recalone.com) or use the
  *      default *.workers.dev URL
  *   4. Update admin/config.yml `base_url` to match
  *   5. In the GitHub OAuth app settings, set the callback URL to
- *      https://oauth.tarekrecolons.com/callback
+ *      https://oauth.recalone.com/callback
  *
  * That's it. No database, no state to manage. The token lives in the
  * user's browser session, expires when they close the tab.

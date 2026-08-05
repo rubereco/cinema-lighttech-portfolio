@@ -27,16 +27,16 @@ backend:
   repo: rubereco/cinema-lighttech-portfolio
   branch: wip/portfolio-r1
   # base_url is the Cloudflare Worker URL. After deploying the
-  # oauth-proxy worker, set this to https://oauth.YOUR-DOMAIN.workers.dev
-  # (or a custom domain if you've added one).
-  base_url: https://oauth.tarekrecolons.com
+  # oauth-proxy worker, set this to the worker's URL (e.g. the
+  # *.workers.dev default or a custom domain like oauth.recalone.com).
+  base_url: https://oauth.recalone.com
   auth_endpoint: auth
   open_authoring: false
   squash_merges: true
 
 # Site URL — used by Decap for "Preview" buttons.
-site_url: https://tarekrecolons.com
-display_url: https://tarekrecolons.com
+site_url: https://recalone.com
+display_url: https://recalone.com
 logo_url: /assets/images/og-image.svg
 
 # Where uploaded media files go. All Decap uploads land here.

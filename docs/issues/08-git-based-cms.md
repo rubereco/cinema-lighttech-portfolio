@@ -39,7 +39,7 @@
 - Single auth via GitHub (private, only Tarek has access)
 - Self-hosted admin interface runs as a static page on Cloudflare Pages
 
-**Trade-off:** Tarek needs a GitHub account + 5 minutes of setup. After that, he edits through a web UI at `tarekrecolons.com/admin` and changes ship automatically.
+**Trade-off:** Tarek needs a GitHub account + 5 minutes of setup. After that, he edits through a web UI at `recalone.com/admin` and changes ship automatically.
 
 ## Tasks
 
@@ -62,7 +62,7 @@
   - (b) Pushed to Cloudflare R2 (see issue "Cloudflare R2") for high-res originals
   - **Phase 1 default:** (a) repo. Add a pre-upload "resize to 2000px max" reminder in the CMS UI.
 - [ ] **Set up `admin/` folder** with `index.html` + `config.yml`
-- [ ] **Configure GitHub OAuth app** for the portfolio domain (callback URL: `https://tarekrecolons.com/admin/callback`)
+- [ ] **Configure GitHub OAuth app** for the portfolio domain (callback URL: `https://oauth.recalone.com/callback`)
 - [ ] **Deploy OAuth proxy** as a Cloudflare Worker (Decap needs an OAuth handshake broker since Cloudflare Pages is purely static — cannot run server code itself). The worker exchanges GitHub's auth code for an access token. Free, ~50 lines of code, deployable in 5 min.
 - [ ] **Document the editor workflow** for Tarek (how to log in, how to add a project, how to upload a photo, what fields are required)
 - [ ] **Test end-to-end:** Tarek adds a new work credit via the CMS → repo commit → Cloudflare rebuild → live site updated within 60s
@@ -91,7 +91,7 @@ Keep the Option A flow running in parallel for 2 weeks while Tarek learns the CM
 Next steps (in order):
 1. User confirms: do they have a GitHub account? (yes / no / "have one but never used it")
 2. If no, set up GitHub account (~5 min, free at github.com)
-3. Create GitHub OAuth app (callback: `https://tarekrecolons.com/admin/callback`)
+3. Create GitHub OAuth app (callback: `https://oauth.recalone.com/callback`)
 4. Deploy Cloudflare Worker as the OAuth proxy (Decap's auth handshake broker)
 5. Add `admin/index.html` (Decap loader) + `admin/config.yml` (content schemas)
 6. First live test: log in → add a film → verify it goes live within 60s
