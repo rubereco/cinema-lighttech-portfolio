@@ -56,7 +56,7 @@ export default {
           // /health response. Use it to verify the deployed
           // Worker has the latest code (especially after
           // redeploying to pick up the postMessage fix).
-          version: "3.14.6",
+          version: "3.14.9",
           endpoints: ["/auth", "/callback"],
         }),
         {
@@ -76,28 +76,98 @@ export default {
         );
       }
 
-      // Decap passes these query params through (site_id, scope, state).
-      // We just pass them along to GitHub (mainly `state` for CSRF).
+      // v3.14.9: Decap's auth flow has TWO stages, not one. The
+      // popup must first send a handshake message ("authorizing:github")
+      // to the opener, wait for the echo, and ONLY THEN redirect
+      // to GitHub. The opener uses the handshake to swap its
+      // message listener (from "waiting for handshake" to
+      // "waiting for the real auth response"). My previous
+      // /auth endpoint skipped straight to the GitHub redirect,
+      // so Decap's first listener never fired and the second
+      // listener was never installed — meaning the actual auth
+      // response (sent from /callback) hit the wrong listener
+      // and got silently dropped.
+      //
+      // Flow now:
+      //   1. Popup loads /auth?provider=github&site_id=...&state=...
+      //   2. Page JS sends postMessage("authorizing:github") to opener
+      //   3. Decap receives, swaps its listener to authorizeCallback
+      //   4. Decap postMessages("authorizing:github") BACK to popup
+      //   5. Popup receives the echo, redirects window.location to
+      //      GitHub's authorize URL with client_id, redirect_uri,
+      //      scope, state
+      //   6. User authorizes on GitHub → GitHub redirects to
+      //      /callback?code=...&state=...
+      //   7. /callback exchanges code for token, postMessages
+      //      "authorization:github:success:{json}" to opener
+      //   8. Decap's authorizeCallback fires, completes login
       const params = url.searchParams;
+      const provider = params.get("provider") || "github";
       const state = params.get("state") || crypto.randomUUID();
+      const scope = params.get("scope") || "repo,user";
 
-      const authParams = new URLSearchParams({
-        client_id: env.GITHUB_CLIENT_ID,
-        // Callback URL — must match exactly what's registered in the
-        // GitHub OAuth app settings.
-        redirect_uri: `${url.origin}/callback`,
-        // repo scope = read + write to the user's repos (needed for commits)
-        scope: "repo,user",
-        state: state,
-        // Don't show the "this app is not verified" warning screen
-        // since this is a personal-use OAuth app.
-        allow_signup: "false",
+      const handshakeHtml = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Authenticating…</title>
+  <style>
+    body {
+      background: #0b0b0d;
+      color: #e8e8e8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .msg { text-align: center; font-size: 14px; color: #7a7a7e; }
+  </style>
+</head>
+<body>
+  <div class="msg">Authenticating with GitHub…</div>
+  <script>
+    (function () {
+      var provider = ${JSON.stringify(provider)};
+      var state    = ${JSON.stringify(state)};
+      var scope    = ${JSON.stringify(scope)};
+      var clientId = ${JSON.stringify(env.GITHUB_CLIENT_ID)};
+      var origin   = window.location.origin;
+
+      // Step 1: tell the opener "I'm here, ready to do the OAuth
+      // dance". The opener will swap its message listener to
+      // accept the eventual auth response.
+      window.opener.postMessage("authorizing:" + provider, origin);
+
+      // Step 2: wait for the opener to confirm it has swapped
+      // its listener. The opener echoes "authorizing:github"
+      // back to us once it's ready.
+      window.addEventListener("message", function (event) {
+        if (event.origin !== origin) return;          // security
+        if (event.data !== "authorizing:" + provider) return;
+        // Step 3: redirect to GitHub's authorize endpoint. The
+        // user will see the GitHub auth screen, authorize, and
+        // GitHub will redirect back to /callback on us.
+        var authParams = new URLSearchParams({
+          client_id: clientId,
+          redirect_uri: origin + "/callback",
+          scope: scope,
+          state: state,
+          allow_signup: "false",
+        });
+        window.location.href =
+          "https://github.com/login/oauth/authorize?" + authParams.toString();
       });
+    })();
+  </script>
+</body>
+</html>`;
 
-      return Response.redirect(
-        `https://github.com/login/oauth/authorize?${authParams.toString()}`,
-        302
-      );
+      return new Response(handshakeHtml, {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
     }
 
     // ─── /callback: exchange code for token ──────────────────────────
