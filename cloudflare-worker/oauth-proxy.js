@@ -56,7 +56,7 @@ export default {
           // /health response. Use it to verify the deployed
           // Worker has the latest code (especially after
           // redeploying to pick up the postMessage fix).
-          version: "3.14.9",
+          version: "3.14.10",
           endpoints: ["/auth", "/callback"],
         }),
         {
@@ -138,7 +138,17 @@ export default {
       // Step 1: tell the opener "I'm here, ready to do the OAuth
       // dance". The opener will swap its message listener to
       // accept the eventual auth response.
-      window.opener.postMessage("authorizing:" + provider, origin);
+      //
+      // v3.14.10: targetOrigin was 'origin' (= oauth.recalone.com)
+      // but the opener is at recalone.com — DIFFERENT origins,
+      // so the message was silently dropped. Same bug as
+      // v3.14.6 but in reverse. Use '*' since this message is
+      // going to the window that opened us (window.opener),
+      // which is the same tab that initiated the OAuth flow.
+      // Decap's handshakeCallback validates the message format
+      // (it checks r.data === "authorizing:" + provider) on
+      // receipt, so the wildcard targetOrigin is safe.
+      window.opener.postMessage("authorizing:" + provider, "*");
 
       // Step 2: wait for the opener to confirm it has swapped
       // its listener. The opener echoes "authorizing:github"
