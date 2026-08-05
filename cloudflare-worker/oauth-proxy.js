@@ -163,6 +163,14 @@ export default {
       // We use its exact expected format. window.close() shuts the popup.
       // The window.opener is the original /admin tab.
       //
+      // v3.14.6: targetOrigin was window.location.origin (i.e.
+      // https://oauth.recalone.com), but the opener is at
+      // https://recalone.com — DIFFERENT origins, so postMessage
+      // was being silently dropped. Switched to "*" since the
+      // message is going to window.opener (which Decap controls
+      // and validates) and there's no risk of leaking the token
+      // to a 3rd party.
+      //
       // Sanitization: we pass the token through a <script> context, so
       // we JSON-encode it (turns any " or </script> into safe escape
       // sequences). GitHub tokens are alphanumeric + underscore so
@@ -201,9 +209,14 @@ export default {
       // Decap listens on window.opener for an authorization:github:success
       // message with { token, provider } in the data payload.
       const data = JSON.stringify({ token: token, provider: "github" });
+      // v3.14.6: targetOrigin "*" instead of window.location.origin.
+      // The worker is at oauth.recalone.com but the opener (admin page)
+      // is at recalone.com — different origins. Using "*" since window.opener
+      // is the same browser tab that initiated the OAuth flow, and Decap
+      // validates the message format on receipt.
       window.opener.postMessage(
         "authorization:github:success:" + data,
-        window.location.origin
+        "*"
       );
       // Brief delay so the user sees the success message before close.
       setTimeout(function () { window.close(); }, 800);
