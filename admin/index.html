@@ -71,6 +71,57 @@
       border-radius: 3px;
       color: #E8A33D;
     }
+    /* v3.14.8: debug panel — temporary, helps diagnose the
+       OAuth postMessage flow. REMOVE before final commit. */
+    .debug {
+      position: fixed;
+      bottom: 12px;
+      right: 12px;
+      max-width: 420px;
+      max-height: 60vh;
+      overflow-y: auto;
+      background: rgba(12, 12, 14, 0.95);
+      border: 1px solid #3a1f1f;
+      border-left: 3px solid #E8A33D;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #c8c8c8;
+      z-index: 9999;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+    .debug__title {
+      color: #E8A33D;
+      font-weight: 600;
+      margin: 0 0 0.5rem 0;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+    }
+    .debug__close {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: #7a7a7e;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+    }
+    .debug__close:hover { color: #e8e8e8; }
+    .debug__row {
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .debug__row:last-child { border-bottom: none; }
+    .debug__time { color: #6a6a6e; }
+    .debug__ok  { color: #4ade80; }
+    .debug__err { color: #f87171; }
+    .debug__info { color: #c8c8c8; }
+    .debug__raw  { color: #9b9b9e; word-break: break-all; }
   </style>
 </head>
 <body>
@@ -84,6 +135,13 @@
   <div class="boot" id="boot">
     <p class="boot__title">Loading content manager…</p>
     <p class="boot__progress" id="boot-status">Loading Decap CMS from jsDelivr</p>
+  </div>
+
+  <!-- v3.14.8: temporary debug panel — REMOVE before final commit -->
+  <div class="debug" id="debug" style="display:none">
+    <button class="debug__close" type="button" id="debug-close" aria-label="Close">×</button>
+    <p class="debug__title">DEBUG PANEL (v3.14.8 — temporary)</p>
+    <div id="debug-log"></div>
   </div>
 
   <script>
@@ -125,6 +183,87 @@
         .replace(/"/g, "&quot;");
     }
 
+    // ─── v3.14.8: Debug panel — temporary ──────────────────────────
+    // Capture every interesting event so we can see exactly what
+    // happens during the OAuth flow. REMOVE this whole block
+    // (debug panel markup + this script + the .debug CSS) before
+    // final commit to production.
+    (function setupDebug() {
+      // Show panel unless ?nodebug is in the URL
+      var url = new URL(window.location.href);
+      if (url.searchParams.get("nodebug") === null) {
+        var panel = document.getElementById("debug");
+        if (panel) panel.style.display = "block";
+        var closeBtn = document.getElementById("debug-close");
+        if (closeBtn) {
+          closeBtn.addEventListener("click", function () {
+            panel.style.display = "none";
+          });
+        }
+      }
+
+      // Expose a global log function
+      window.__debugLog = function (label, type, data) {
+        var log = document.getElementById("debug-log");
+        if (!log) return;
+        var now = new Date();
+        var time = now.toTimeString().slice(0, 8);
+        var row = document.createElement("div");
+        row.className = "debug__row";
+        var timeSpan = '<span class="debug__time">[' + time + ']</span> ';
+        var labelSpan = '<span class="debug__' + type + '">' + escapeHtml(label) + '</span>';
+        var dataSpan = "";
+        if (data !== undefined) {
+          try {
+            var dataStr = typeof data === "string" ? data : JSON.stringify(data);
+            if (dataStr.length > 200) dataStr = dataStr.slice(0, 200) + "…";
+            dataSpan = '<div class="debug__raw">' + escapeHtml(dataStr) + "</div>";
+          } catch (e) {
+            dataSpan = '<div class="debug__raw">[unserializable]</div>';
+          }
+        }
+        row.innerHTML = timeSpan + labelSpan + dataSpan;
+        log.insertBefore(row, log.firstChild);
+        // Keep the log to the last 50 entries
+        while (log.children.length > 50) {
+          log.removeChild(log.lastChild);
+        }
+      };
+
+      // Capture all window.message events (this is the key one —
+      // if the postMessage from the Worker arrives, we'll see it here)
+      window.addEventListener("message", function (event) {
+        var origin = event.origin;
+        var data = event.data;
+        var type = (typeof data === "string" && data.indexOf("authorization:") === 0)
+          ? "ok"
+          : "info";
+        window.__debugLog("window.message received", type, {
+          origin: origin,
+          dataType: typeof data,
+          data: data
+        });
+      });
+
+      // Capture URL changes (Decap navigates to /#/ after auth)
+      var lastUrl = location.href;
+      setInterval(function () {
+        if (location.href !== lastUrl) {
+          window.__debugLog("URL changed", "info", {
+            from: lastUrl,
+            to: location.href
+          });
+          lastUrl = location.href;
+        }
+      }, 200);
+
+      // Initial state
+      window.__debugLog("Page loaded", "info", {
+        href: location.href,
+        search: location.search
+      });
+    })();
+
     // Try loading Decap from jsDelivr first.
     function loadDecap(url) {
       return new Promise(function (resolve, reject) {
@@ -157,9 +296,11 @@
         try {
           setStatus("Loading Decap CMS (try " + (i + 1) + "/" + sources.length + ")…");
           await loadDecap(sources[i]);
+          if (window.__debugLog) window.__debugLog("Script loaded: " + sources[i], "ok");
           setStatus("Decap loaded, initializing editor…");
           break;
         } catch (err) {
+          if (window.__debugLog) window.__debugLog("CDN failed: " + sources[i], "err", err.message);
           if (i === sources.length - 1) {
             showError(
               "Could not load Decap CMS",
@@ -176,6 +317,7 @@
       var tries = 0;
       function waitForCMS() {
         if (window.CMS) {
+          if (window.__debugLog) window.__debugLog("CMS global detected", "ok");
           setStatus("Editor ready");
           // v3.14.4: stop trying to detect Decap's specific DOM
           // selectors (they change between Decap versions and we
@@ -187,11 +329,13 @@
           setTimeout(function () {
             var boot = document.getElementById("boot");
             if (boot) boot.remove();
+            if (window.__debugLog) window.__debugLog("Boot screen removed", "info");
           }, 1500);
           // Failsafe: if Decap hasn't rendered after 20s, show a
           // diagnostic error instead of leaving the user on a blank page.
           setTimeout(function () {
             if (document.getElementById("boot")) {
+              if (window.__debugLog) window.__debugLog("20s failsafe fired", "err");
               showError(
                 "Decap loaded but the editor never appeared",
                 "This usually means config.yml has an error. " +
@@ -205,6 +349,7 @@
           tries++;
           setTimeout(waitForCMS, 100);
         } else {
+          if (window.__debugLog) window.__debugLog("CMS global never appeared", "err");
           showError(
             "Decap loaded but CMS global is missing",
             "The script loaded but the global `CMS` object never appeared. " +
