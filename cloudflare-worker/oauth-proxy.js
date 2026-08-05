@@ -56,7 +56,7 @@ export default {
           // /health response. Use it to verify the deployed
           // Worker has the latest code (especially after
           // redeploying to pick up the postMessage fix).
-          version: "3.14.10",
+          version: "3.14.11",
           endpoints: ["/auth", "/callback"],
         }),
         {
@@ -153,8 +153,20 @@ export default {
       // Step 2: wait for the opener to confirm it has swapped
       // its listener. The opener echoes "authorizing:github"
       // back to us once it's ready.
+      //
+      // v3.14.11: removed the event.origin check. The opener
+      // (Decap admin page) is at a DIFFERENT origin than us
+      // (e.g. recalone.com vs oauth.recalone.com, or in the
+      // user's case a Cloudflare Pages preview URL like
+      // bbf866f6.tarekrecolons.pages.dev). When the echo
+      // arrives, event.origin is the opener's origin, which
+      // doesn't equal OUR origin (oauth.recalone.com) — so
+      // the listener bailed and the popup never redirected.
+      // The echo isn't a security token (it's just a cue to
+      // start the OAuth flow); Decap already validated the
+      // handshake chain on its end before sending it. Safe
+      // to drop the check.
       window.addEventListener("message", function (event) {
-        if (event.origin !== origin) return;          // security
         if (event.data !== "authorizing:" + provider) return;
         // Step 3: redirect to GitHub's authorize endpoint. The
         // user will see the GitHub auth screen, authorize, and
