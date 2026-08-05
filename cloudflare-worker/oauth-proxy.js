@@ -52,6 +52,11 @@ export default {
         JSON.stringify({
           ok: true,
           service: "decap-oauth-proxy",
+          // v3.14.6 added: this version string appears in the
+          // /health response. Use it to verify the deployed
+          // Worker has the latest code (especially after
+          // redeploying to pick up the postMessage fix).
+          version: "3.14.6",
           endpoints: ["/auth", "/callback"],
         }),
         {
