@@ -4,11 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Content Manager · Tarek Recolons</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b0b0d'/%3E%3Ctext x='50' y='68' font-family='sans-serif' font-size='60' font-weight='700' fill='%23E8A33D' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E" />
+  <title>Content Manager · Recalone</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b0b0d'/%3E%3Ctext x='50' y='68' font-family='sans-serif' font-size='60' font-weight='700' fill='%23E8A33D' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E" />
   <style>
-    /* v3.14.0: minimal loading screen. The Decap CMS UI takes over once it loads.
-       The dark theme matches the portfolio so it feels like one product. */
     body {
       margin: 0;
       background: #0b0b0d;
@@ -20,39 +18,199 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      font-size: 14px;
-      letter-spacing: 0.04em;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 2rem;
+    }
+    .boot__title {
+      font-size: 1.1rem;
       color: #7a7a7e;
+      letter-spacing: 0.04em;
+    }
+    .boot__progress {
+      font-size: 0.85rem;
+      color: #4a4a4e;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    }
+    .boot__error {
+      max-width: 720px;
+      padding: 1.5rem;
+      background: #1c1c20;
+      border: 1px solid #3a1f1f;
+      border-left: 3px solid #f87171;
+      border-radius: 8px;
+      color: #e8e8e8;
+    }
+    .boot__error h2 {
+      color: #f87171;
+      font-size: 1rem;
+      margin: 0 0 0.5rem 0;
+    }
+    .boot__error pre {
+      background: #0b0b0d;
+      padding: 0.75rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #c8c8c8;
+      white-space: pre-wrap;
+    }
+    .boot__hint {
+      font-size: 0.8rem;
+      color: #7a7a7e;
+      line-height: 1.5;
+      max-width: 720px;
+    }
+    .boot__hint code {
+      background: #1c1c20;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      color: #E8A33D;
     }
   </style>
 </head>
 <body>
-  <!-- Decap CMS is loaded from a pinned version on jsDelivr. The version
-       is intentionally pinned (not @^3) so a breaking change upstream
-       doesn't silently break the admin panel. Bump on purpose only. -->
-  <script src="https://cdn.jsdelivr.net/npm/decap-cms@3.7.4/dist/decap-cms.js"></script>
-  <noscript>
-    <div class="boot">This admin requires JavaScript. Please enable it.</div>
-  </noscript>
-  <div class="boot" id="boot-fallback">Loading content manager…</div>
+  <!--
+    Decap CMS admin panel. Loads the editor from a CDN, then auto-detects
+    config.yml in this same directory and renders the editor UI.
+
+    CDN order: jsDelivr first, unpkg as fallback. If both fail, we show
+    a clear error message instead of a silent dark page.
+  -->
+  <div class="boot" id="boot">
+    <p class="boot__title">Loading content manager…</p>
+    <p class="boot__progress" id="boot-status">Loading Decap CMS from jsDelivr</p>
+  </div>
+
   <script>
-    // Remove the loading message once Decap has rendered its UI.
-    document.addEventListener("DOMContentLoaded", () => {
-      const check = setInterval(() => {
-        if (document.querySelector(".nc-app-header") || document.querySelector("[class*='App']")) {
-          const el = document.getElementById("boot-fallback");
-          if (el) el.remove();
-          clearInterval(check);
-        }
-      }, 200);
-      // Failsafe: remove the loading text after 10s either way so it
-      // doesn't linger over the Decap UI.
-      setTimeout(() => {
-        const el = document.getElementById("boot-fallback");
-        if (el) el.remove();
-        clearInterval(check);
-      }, 10000);
+    // Show the loading state immediately, then track Decap's progress.
+    window.addEventListener("error", function (event) {
+      showError(
+        "Page script error",
+        (event.error && event.error.stack) || event.message || "Unknown error"
+      );
     });
+
+    function setStatus(text) {
+      var el = document.getElementById("boot-status");
+      if (el) el.textContent = text;
+    }
+
+    function showError(title, details) {
+      var boot = document.getElementById("boot");
+      if (!boot) return;
+      boot.innerHTML =
+        '<div class="boot__error">' +
+          '<h2>' + title + '</h2>' +
+          '<pre>' + escapeHtml(String(details)) + '</pre>' +
+        '</div>' +
+        '<p class="boot__hint">' +
+          'Common causes: <br>' +
+          '• Invalid <code>config.yml</code> (check browser console for parse errors) <br>' +
+          '• CDN blocked (try a different network) <br>' +
+          '• <code>base_url</code> in config.yml doesn\'t match the deployed Worker URL <br>' +
+          'Open the browser DevTools (F12) → Console tab for the full error.' +
+        '</p>';
+    }
+
+    function escapeHtml(s) {
+      return s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    // Try loading Decap from jsDelivr first.
+    function loadDecap(url) {
+      return new Promise(function (resolve, reject) {
+        var script = document.createElement("script");
+        script.src = url;
+        script.async = false;
+        script.onload = function () { resolve(url); };
+        script.onerror = function () { reject(new Error("Failed to load: " + url)); };
+        document.head.appendChild(script);
+      });
+    }
+
+    (async function () {
+      // Make sure unhandled errors hit our error UI.
+      window.addEventListener("unhandledrejection", function (event) {
+        showError("Unhandled error", (event.reason && event.reason.stack) || event.reason);
+      });
+
+      var version = "3.7.4";
+      var sources = [
+        "https://cdn.jsdelivr.net/npm/decap-cms@" + version + "/dist/decap-cms.js",
+        "https://unpkg.com/decap-cms@" + version + "/dist/decap-cms.js",
+      ];
+
+      for (var i = 0; i < sources.length; i++) {
+        try {
+          setStatus("Loading Decap CMS (try " + (i + 1) + "/" + sources.length + ")…");
+          await loadDecap(sources[i]);
+          setStatus("Decap loaded, initializing editor…");
+          break;
+        } catch (err) {
+          if (i === sources.length - 1) {
+            showError(
+              "Could not load Decap CMS",
+              "Tried both CDNs and both failed:\n" +
+                sources.join("\n") +
+                "\n\nCheck your network connection, or open the browser DevTools (F12) → Network tab to see what was blocked."
+            );
+            return;
+          }
+        }
+      }
+
+      // Wait a tick for Decap to register its CMS global.
+      var tries = 0;
+      function waitForCMS() {
+        if (window.CMS) {
+          setStatus("Editor ready");
+          // Decap auto-detects config.yml in this directory. If config
+          // is valid, the editor will render on its own. If not, the
+          // Decap UI will show its own error message.
+          // We remove our boot screen once Decap's UI is visible.
+          var renderCheck = setInterval(function () {
+            if (document.querySelector(".nc-app-header") ||
+                document.querySelector("[class*='App-']") ||
+                document.querySelector("[class*='app-']") ||
+                document.querySelector("[data-testid='cms-app']")) {
+              var boot = document.getElementById("boot");
+              if (boot) boot.remove();
+              clearInterval(renderCheck);
+            }
+          }, 200);
+          // Failsafe: if Decap hasn't rendered after 20s, show a
+          // diagnostic error instead of leaving the user on a blank page.
+          setTimeout(function () {
+            if (document.getElementById("boot")) {
+              showError(
+                "Decap loaded but the editor never appeared",
+                "This usually means config.yml has an error. " +
+                "Open the browser DevTools (F12) → Console tab and look for " +
+                "a yellow or red error message — it'll point at the broken " +
+                "field in config.yml."
+              );
+            }
+            clearInterval(renderCheck);
+          }, 20000);
+        } else if (tries < 50) {
+          tries++;
+          setTimeout(waitForCMS, 100);
+        } else {
+          showError(
+            "Decap loaded but CMS global is missing",
+            "The script loaded but the global `CMS` object never appeared. " +
+            "This is unusual — try a hard refresh (Ctrl+Shift+R or Cmd+Shift+R)."
+          );
+        }
+      }
+      waitForCMS();
+    })();
   </script>
 </body>
 </html>

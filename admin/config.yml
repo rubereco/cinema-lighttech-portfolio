@@ -45,8 +45,10 @@ logo_url: /assets/images/og-image.svg
 media_folder: "assets/images/uploads"
 public_folder: "/assets/images/uploads"
 
-# Default branch for preview / view links.
-publish_mode: editorial_workflow
+# publish_mode intentionally omitted — defaults to "simple" (save = direct
+# commit). editorial_workflow adds a draft/review/publish flow that needs
+# extra GitHub config (PR templates, branch protection) — we can layer
+# it on later if Tarek wants reviews before publishing.
 
 # ─── Collections ──────────────────────────────────────────────────────
 
@@ -222,25 +224,18 @@ collections:
           - { name: "availability",    label: "Availability",         widget: "string", hint: "e.g. 'Spain + worldwide'" }
 
   # 6) Translations — raw JSON editor for Phase 1. Phase 2 will
-  #    promote this to structured fields per key. The "code" widget
-  #    shows a JSON editor with syntax validation.
+  #    promote this to structured fields per key. The "object" widget
+  #    with no subfields shows a JSON editor for the field's value
+  #    (we use this for en/es since they're nested objects, not strings).
+  #    The _meta field is intentionally NOT in the schema — Decap
+  #    preserves it as an unknown field, so the file keeps its metadata.
   - name: "i18n"
     label: "Translations (raw JSON)"
     label_singular: "Translation file"
-    description: "EN + ES UI strings. Edit as raw JSON. Be careful with commas and quotes — invalid JSON will break the site."
+    description: "EN + ES UI strings. Edit each language as a raw JSON object. Be careful with commas and quotes — invalid JSON will break the site."
     file: "data/i18n.json"
     format: "json"
     delete: false
     fields:
-      - name: "_meta"
-        label: "_meta (don't touch)"
-        widget: "object"
-        collapsed: true
-        required: false
-        fields:
-          - { name: "version",     label: "Version",     widget: "string", required: false }
-          - { name: "lastUpdated", label: "Last updated", widget: "string", required: false }
-      - { name: "en", label: "English (en)", widget: "code", default_language: "json", output_language: "json" }
-      - { name: "es", label: "Spanish (es)", widget: "code", default_language: "json", output_language: "json" }
-      - { name: "en", label: "English (en)", widget: "code", default_language: "json", output_language: "json" }
-      - { name: "es", label: "Spanish (es)", widget: "code", default_language: "json", output_language: "json" }
+      - { name: "en", label: "English (en)", widget: "object" }
+      - { name: "es", label: "Spanish (es)", widget: "object" }
