@@ -7,11 +7,14 @@
   <title>Content Manager · Recalone</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b0b0d'/%3E%3Ctext x='50' y='68' font-family='sans-serif' font-size='60' font-weight='700' fill='%23E8A33D' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E" />
   <style>
-    body {
-      margin: 0;
-      background: #0b0b0d;
-      color: #e8e8e8;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    /* v3.14.4: !important on body bg so Decap's CSS can't
+       flip us to its light theme. The boot screen stays
+       dark no matter what Decap does to <body>. */
+    html, body {
+      background: #0b0b0d !important;
+      color: #e8e8e8 !important;
+      margin: 0 !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }
     .boot {
       display: flex;
@@ -174,20 +177,17 @@
       function waitForCMS() {
         if (window.CMS) {
           setStatus("Editor ready");
-          // Decap auto-detects config.yml in this directory. If config
-          // is valid, the editor will render on its own. If not, the
-          // Decap UI will show its own error message.
-          // We remove our boot screen once Decap's UI is visible.
-          var renderCheck = setInterval(function () {
-            if (document.querySelector(".nc-app-header") ||
-                document.querySelector("[class*='App-']") ||
-                document.querySelector("[class*='app-']") ||
-                document.querySelector("[data-testid='cms-app']")) {
-              var boot = document.getElementById("boot");
-              if (boot) boot.remove();
-              clearInterval(renderCheck);
-            }
-          }, 200);
+          // v3.14.4: stop trying to detect Decap's specific DOM
+          // selectors (they change between Decap versions and we
+          // were leaving the boot screen stuck on top of an
+          // already-rendered Decap UI). Instead: just wait a
+          // moment for Decap to mount, then remove the boot.
+          // If Decap failed to render, the 20s failsafe below
+          // will catch it.
+          setTimeout(function () {
+            var boot = document.getElementById("boot");
+            if (boot) boot.remove();
+          }, 1500);
           // Failsafe: if Decap hasn't rendered after 20s, show a
           // diagnostic error instead of leaving the user on a blank page.
           setTimeout(function () {
@@ -200,7 +200,6 @@
                 "field in config.yml."
               );
             }
-            clearInterval(renderCheck);
           }, 20000);
         } else if (tries < 50) {
           tries++;
