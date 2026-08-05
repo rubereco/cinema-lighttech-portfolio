@@ -21,6 +21,13 @@
 #   to the partner/posters subfolders — Tarek or rubereco moves the
 #   file after upload if needed. Phase 2 (deferred) will use
 #   collection-specific media folders.
+#
+# v3.14.5: switched from the legacy `file:` (singular) pattern to
+# the modern `files:` (plural) pattern. Decap 3.15.1's JSON schema
+# validator rejects `file:` — each collection must have either
+# `files:` (a list of file definitions) or `folder:` (a folder
+# of files). For our case (one file per collection), each entry
+# in `files:` is a single-item list with one file definition.
 
 backend:
   name: github
@@ -59,38 +66,57 @@ collections:
     label: "Films"
     label_singular: "Film"
     description: "Canonical film records (title, year, role, type, credits)."
-    file: "data/films.json"
-    format: "json"
-    delete: false   # never delete a film from the CMS (would orphan Work rows)
-    fields:
-      - name: "films"
+    files:
+      - name: "films-data"
         label: "Films"
-        widget: "list"
-        summary: "{{fields.title}} ({{fields.year}}) — {{fields.role}}"
+        file: "data/films.json"
+        format: "json"
         fields:
-          - { name: "id",    label: "ID (kebab-case-title-year)", widget: "string", hint: "e.g. els-mals-noms-2025" }
-          - { name: "title", label: "Title",   widget: "string" }
-          - { name: "year",  label: "Year",    widget: "number", value_type: "int", min: 1950, max: 2100 }
-          - { name: "role",  label: "Tarek's role on this film", widget: "string", hint: "e.g. Gaffer, Best Boy Electric, Electric" }
-          - name: "type"
-            label: "Type"
-            widget: "select"
-            options:
-              - { label: "Feature (Largometraje)", value: "Largometraje" }
-              - { label: "TV Series (Serie TV)",    value: "Serie TV" }
-              - { label: "Short (Cortometraje)",    value: "Cortometraje" }
-              - { label: "Commercial",              value: "Comercial" }
-              - { label: "Other",                   value: "Otro" }
-          - name: "credits"
-            label: "Credits"
-            widget: "object"
-            collapsed: true
+          - name: "films"
+            label: "Films"
+            widget: "list"
+            summary: "{{fields.title}} ({{fields.year}}) — {{fields.role}}"
             fields:
-              - { name: "production", label: "Production companies", widget: "list", field: { name: "name", label: "Company", widget: "string" }, required: false }
-              - { name: "director",   label: "Director (people.json id)",   widget: "list", field: { name: "id", label: "Person ID", widget: "string" }, hint: "e.g. marc-ortiz-prades" }
-              - { name: "dop",        label: "Cinematographer (id)", widget: "list", field: { name: "id", label: "Person ID", widget: "string" } }
-              - { name: "gaffer",     label: "Gaffer (id)",         widget: "list", field: { name: "id", label: "Person ID", widget: "string" } }
-              - { name: "electrics",  label: "Electrics (ids)",     widget: "list", field: { name: "id", label: "Person ID", widget: "string" } }
+              - { name: "id",    label: "ID (kebab-case-title-year)", widget: "string", hint: "e.g. els-mals-noms-2025" }
+              - { name: "title", label: "Title",   widget: "string" }
+              - { name: "year",  label: "Year",    widget: "number", value_type: "int", min: 1950, max: 2100 }
+              - { name: "role",  label: "Tarek's role on this film", widget: "string", hint: "e.g. Gaffer, Best Boy Electric, Electric" }
+              - name: "type"
+                label: "Type"
+                widget: "select"
+                options:
+                  - { label: "Feature (Largometraje)", value: "Largometraje" }
+                  - { label: "TV Series (Serie TV)",    value: "Serie TV" }
+                  - { label: "Short (Cortometraje)",    value: "Cortometraje" }
+                  - { label: "Commercial",              value: "Comercial" }
+                  - { label: "Other",                   value: "Otro" }
+              - name: "credits"
+                label: "Credits"
+                widget: "object"
+                collapsed: true
+                fields:
+                  - name: "production"
+                    label: "Production companies"
+                    widget: "list"
+                    field: { name: "name", label: "Company", widget: "string" }
+                    required: false
+                  - name: "director"
+                    label: "Director (people.json id)"
+                    widget: "list"
+                    field: { name: "id", label: "Person ID", widget: "string" }
+                    hint: "e.g. marc-ortiz-prades"
+                  - name: "dop"
+                    label: "Cinematographer (id)"
+                    widget: "list"
+                    field: { name: "id", label: "Person ID", widget: "string" }
+                  - name: "gaffer"
+                    label: "Gaffer (id)"
+                    widget: "list"
+                    field: { name: "id", label: "Person ID", widget: "string" }
+                  - name: "electrics"
+                    label: "Electrics (ids)"
+                    widget: "list"
+                    field: { name: "id", label: "Person ID", widget: "string" }
 
   # 2) Work — the ordered list of films shown on the homepage. Each
   #    row references a film by id. Reorder via drag-and-drop in the UI.
@@ -98,16 +124,18 @@ collections:
     label: "Work order"
     label_singular: "Work row"
     description: "Ordered list of films shown in the homepage credits table."
-    file: "data/work.json"
-    format: "json"
-    delete: false
-    fields:
-      - name: "rows"
-        label: "Films in display order"
-        widget: "list"
-        summary: "→ {{fields.filmId}}"
+    files:
+      - name: "work-data"
+        label: "Work rows"
+        file: "data/work.json"
+        format: "json"
         fields:
-          - { name: "filmId", label: "Film ID (must match an id in Films)", widget: "string", hint: "e.g. els-mals-noms-2025" }
+          - name: "rows"
+            label: "Films in display order"
+            widget: "list"
+            summary: "→ {{fields.filmId}}"
+            fields:
+              - { name: "filmId", label: "Film ID (must match an id in Films)", widget: "string", hint: "e.g. els-mals-noms-2025" }
 
   # 3) People — all people entries. Some are film credits (kind: director,
   #    dop, gaffer, electric), some are partners (kind: collaborator
@@ -118,44 +146,46 @@ collections:
     label: "People"
     label_singular: "Person"
     description: "Directors, DPs, gaffers, electrics, and partner collaborators."
-    file: "data/people.json"
-    format: "json"
-    delete: false
-    fields:
-      - name: "people"
+    files:
+      - name: "people-data"
         label: "People"
-        widget: "list"
-        summary: "{{fields.name}} ({{fields.kind}}{{fields.relationship ? ' / ' + fields.relationship : ''}})"
+        file: "data/people.json"
+        format: "json"
         fields:
-          - { name: "id",   label: "ID (kebab-case)",  widget: "string", hint: "e.g. juli-carne-martorell" }
-          - { name: "name", label: "Name",              widget: "string" }
-          - name: "kind"
-            label: "Kind"
-            widget: "select"
-            options:
-              - { label: "Subject (Tarek himself)",     value: "subject" }
-              - { label: "Director (film credit)",      value: "director" }
-              - { label: "DP / DoP (film credit)",      value: "dop" }
-              - { label: "Gaffer (film credit)",        value: "gaffer" }
-              - { label: "Electric (film credit)",      value: "electric" }
-              - { label: "Collaborator (partners page)", value: "collaborator" }
-          - { name: "relationship", label: "Relationship (collaborators only)", widget: "select", required: false, options: ["dp", "electric"], hint: "Only set for kind: collaborator" }
-          - { name: "portrait",  label: "Portrait path", widget: "string", required: false, hint: "e.g. assets/images/partners/juli-carne-martorell.jpg" }
-          - { name: "count",     label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
-          - { name: "imdb",      label: "IMDb id",     widget: "string", required: false }
-          - { name: "imdbUrl",   label: "IMDb URL",    widget: "string", required: false }
-          - { name: "instagram", label: "Instagram handle", widget: "string", required: false }
-          - { name: "instagramUrl", label: "Instagram URL", widget: "string", required: false }
-          - name: "description"
-            label: "Description"
-            widget: "object"
-            collapsed: true
-            required: false
+          - name: "people"
+            label: "People"
+            widget: "list"
+            summary: "{{fields.name}} ({{fields.kind}}{{fields.relationship ? ' / ' + fields.relationship : ''}})"
             fields:
-              - { name: "en", label: "English", widget: "text", required: false }
-              - { name: "es", label: "Spanish", widget: "text", required: false }
-          - { name: "url",      label: "Website URL",     widget: "string", required: false }
-          - { name: "urlLabel", label: "URL label",       widget: "string", required: false, hint: "e.g. 'Portfolio', 'Website'" }
+              - { name: "id",   label: "ID (kebab-case)",  widget: "string", hint: "e.g. juli-carne-martorell" }
+              - { name: "name", label: "Name",              widget: "string" }
+              - name: "kind"
+                label: "Kind"
+                widget: "select"
+                options:
+                  - { label: "Subject (Tarek himself)",     value: "subject" }
+                  - { label: "Director (film credit)",      value: "director" }
+                  - { label: "DP / DoP (film credit)",      value: "dop" }
+                  - { label: "Gaffer (film credit)",        value: "gaffer" }
+                  - { label: "Electric (film credit)",      value: "electric" }
+                  - { label: "Collaborator (partners page)", value: "collaborator" }
+              - { name: "relationship", label: "Relationship (collaborators only)", widget: "select", required: false, options: ["dp", "electric"], hint: "Only set for kind: collaborator" }
+              - { name: "portrait",  label: "Portrait path", widget: "string", required: false, hint: "e.g. assets/images/partners/juli-carne-martorell.jpg" }
+              - { name: "count",     label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
+              - { name: "imdb",      label: "IMDb id",     widget: "string", required: false }
+              - { name: "imdbUrl",   label: "IMDb URL",    widget: "string", required: false }
+              - { name: "instagram", label: "Instagram handle", widget: "string", required: false }
+              - { name: "instagramUrl", label: "Instagram URL", widget: "string", required: false }
+              - name: "description"
+                label: "Description"
+                widget: "object"
+                collapsed: true
+                required: false
+                fields:
+                  - { name: "en", label: "English", widget: "text", required: false }
+                  - { name: "es", label: "Spanish", widget: "text", required: false }
+              - { name: "url",      label: "Website URL",     widget: "string", required: false }
+              - { name: "urlLabel", label: "URL label",       widget: "string", required: false, hint: "e.g. 'Portfolio', 'Website'" }
 
   # 4) Companies — partner businesses (equipment houses, post houses,
   #    any other non-individual partner).
@@ -163,79 +193,86 @@ collections:
     label: "Companies"
     label_singular: "Company"
     description: "Equipment houses, post houses, and other partner businesses."
-    file: "data/companies.json"
-    format: "json"
-    delete: false
-    fields:
-      - name: "companies"
+    files:
+      - name: "companies-data"
         label: "Companies"
-        widget: "list"
-        summary: "{{fields.name}} ({{fields.kind}})"
+        file: "data/companies.json"
+        format: "json"
         fields:
-          - { name: "id",   label: "ID (kebab-case)", widget: "string", hint: "e.g. movie-men" }
-          - { name: "name", label: "Name",             widget: "string" }
-          - name: "kind"
-            label: "Kind"
-            widget: "select"
-            options:
-              - { label: "Equipment house", value: "equipment-house" }
-              - { label: "Post-production", value: "post-house" }
-              - { label: "Sound studio",    value: "sound-studio" }
-              - { label: "Other partner",   value: "other" }
-          - { name: "logo",    label: "Logo path",   widget: "string", hint: "e.g. assets/images/partners/movie-men.svg" }
-          - { name: "logoAlt", label: "Logo alt text", widget: "string", required: false }
-          - { name: "count",   label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
-          - name: "description"
-            label: "Description"
-            widget: "object"
-            collapsed: true
-            required: false
+          - name: "companies"
+            label: "Companies"
+            widget: "list"
+            summary: "{{fields.name}} ({{fields.kind}})"
             fields:
-              - { name: "en", label: "English", widget: "text", required: false }
-              - { name: "es", label: "Spanish", widget: "text", required: false }
-          - { name: "url",      label: "Website URL", widget: "string", required: false }
-          - { name: "urlLabel", label: "URL label",   widget: "string", required: false }
+              - { name: "id",   label: "ID (kebab-case)", widget: "string", hint: "e.g. movie-men" }
+              - { name: "name", label: "Name",             widget: "string" }
+              - name: "kind"
+                label: "Kind"
+                widget: "select"
+                options:
+                  - { label: "Equipment house", value: "equipment-house" }
+                  - { label: "Post-production", value: "post-house" }
+                  - { label: "Sound studio",    value: "sound-studio" }
+                  - { label: "Other partner",   value: "other" }
+              - { name: "logo",    label: "Logo path",   widget: "string", hint: "e.g. assets/images/partners/movie-men.svg" }
+              - { name: "logoAlt", label: "Logo alt text", widget: "string", required: false }
+              - { name: "count",   label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
+              - name: "description"
+                label: "Description"
+                widget: "object"
+                collapsed: true
+                required: false
+                fields:
+                  - { name: "en", label: "English", widget: "text", required: false }
+                  - { name: "es", label: "Spanish", widget: "text", required: false }
+              - { name: "url",      label: "Website URL", widget: "string", required: false }
+              - { name: "urlLabel", label: "URL label",   widget: "string", required: false }
 
   # 5) Site config — single object. Brand name, contact, stats.
   - name: "site"
     label: "Site config"
     label_singular: "Site"
     description: "Brand name, contact info, stats shown on the homepage."
-    file: "data/site.json"
-    format: "json"
-    delete: false
-    fields:
-      - { name: "brand", label: "Brand name", widget: "string" }
-      - name: "contact"
-        label: "Contact"
-        widget: "object"
+    files:
+      - name: "site-data"
+        label: "Site"
+        file: "data/site.json"
+        format: "json"
         fields:
-          - { name: "email",       label: "Email",         widget: "string" }
-          - { name: "imdbId",      label: "IMDb id",       widget: "string", required: false }
-          - { name: "imdbUrl",     label: "IMDb URL",      widget: "string", required: false }
-          - { name: "instagram",   label: "Instagram handle", widget: "string", required: false }
-          - { name: "instagramUrl", label: "Instagram URL",   widget: "string", required: false }
-      - name: "stats"
-        label: "Stats (shown on the About section)"
-        widget: "object"
-        fields:
-          - { name: "yearsExperience", label: "Years of experience", widget: "number", value_type: "int" }
-          - { name: "featureFilms",    label: "Feature films",        widget: "number", value_type: "int" }
-          - { name: "availability",    label: "Availability",         widget: "string", hint: "e.g. 'Spain + worldwide'" }
+          - { name: "brand", label: "Brand name", widget: "string" }
+          - name: "contact"
+            label: "Contact"
+            widget: "object"
+            fields:
+              - { name: "email",       label: "Email",         widget: "string" }
+              - { name: "imdbId",      label: "IMDb id",       widget: "string", required: false }
+              - { name: "imdbUrl",     label: "IMDb URL",      widget: "string", required: false }
+              - { name: "instagram",   label: "Instagram handle", widget: "string", required: false }
+              - { name: "instagramUrl", label: "Instagram URL",   widget: "string", required: false }
+          - name: "stats"
+            label: "Stats (shown on the About section)"
+            widget: "object"
+            fields:
+              - { name: "yearsExperience", label: "Years of experience", widget: "number", value_type: "int" }
+              - { name: "featureFilms",    label: "Feature films",        widget: "number", value_type: "int" }
+              - { name: "availability",    label: "Availability",         widget: "string", hint: "e.g. 'Spain + worldwide'" }
 
-  # 6) Translations — raw JSON editor for Phase 1. Phase 2 will
-  #    promote this to structured fields per key. The "object" widget
-  #    with no subfields shows a JSON editor for the field's value
-  #    (we use this for en/es since they're nested objects, not strings).
-  #    The _meta field is intentionally NOT in the schema — Decap
-  #    preserves it as an unknown field, so the file keeps its metadata.
-  - name: "i18n"
-    label: "Translations (raw JSON)"
-    label_singular: "Translation file"
-    description: "EN + ES UI strings. Edit each language as a raw JSON object. Be careful with commas and quotes — invalid JSON will break the site."
-    file: "data/i18n.json"
-    format: "json"
-    delete: false
-    fields:
-      - { name: "en", label: "English (en)", widget: "object" }
-      - { name: "es", label: "Spanish (es)", widget: "object" }
+  # 6) Translations — DEFERRED for Phase 1. The data file is too
+  #    deeply nested to expose via the `object` widget without
+  #    defining every leaf string. The `code` widget only works on
+  #    string values, but en/es are objects, so it errors out.
+  #    For now, edit data/i18n.json directly via git. Phase 2
+  #    will add a structured editor with a full schema for nav,
+  #    hero, work, about, partners, footer, etc.
+  #
+  # When ready to re-enable, replace this block with:
+  #   - name: "i18n"
+  #     label: "Translations"
+  #     files:
+  #       - name: "i18n-data"
+  #         label: "Translations"
+  #         file: "data/i18n.json"
+  #         format: "json"
+  #         fields:
+  #           - { name: "en", label: "English", widget: "object", fields: [ /* full nav, hero, work... schema */ ] }
+  #           - { name: "es", label: "Spanish", widget: "object", fields: [ /* same */ ] }
