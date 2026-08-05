@@ -140,7 +140,11 @@
         showError("Unhandled error", (event.reason && event.reason.stack) || event.reason);
       });
 
-      var version = "3.7.4";
+      // v3.14.3: 3.7.4 was never published (Decap jumped 3.7.2 → 3.8.0
+      // on npm). Bumped to 3.15.1 (latest stable as of 2026-08-05).
+      // Version is pinned (not @latest) so a future breaking change
+      // upstream can't silently break the admin.
+      var version = "3.15.1";
       var sources = [
         "https://cdn.jsdelivr.net/npm/decap-cms@" + version + "/dist/decap-cms.js",
         "https://unpkg.com/decap-cms@" + version + "/dist/decap-cms.js",
