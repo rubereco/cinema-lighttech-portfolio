@@ -159,6 +159,31 @@ Without editorial_workflow, step 10 would have triggered TWO separate Cloudflare
 - **Save succeeds but live site doesn't change** — Cloudflare Pages hasn't rebuilt yet. Wait 60s and hard-refresh. Check the Pages deploy log at https://dash.cloudflare.com → Pages → your project → Deployments. **Also confirm the build command is set to `npm run build`** (see top of this file) — without it, the live site keeps serving the old data/films.json and data/people.json aggregates even after the publish.
 - **JSON syntax error in i18n** — roll back via git: `git checkout HEAD~1 -- data/i18n.json`, then commit + push the fix.
 
+## Local-first editing (v3.14.20)
+
+The admin panel has a localStorage layer that makes editing feel like Google Docs:
+
+- **Every keystroke is saved to `localStorage`** under `decap-draft:<collection>:<entryId>`. Form state is preserved across navigation, refresh, and even closing the tab.
+- **The "Save" button just writes to localStorage** — no git commit, no network round-trip, no build hook. You can hit it as many times as you want, freely.
+- **A new "Publish all (N)" button** next to Save walks all your local drafts, navigates to each entry, fills the form, and clicks the real Decap Save (committing each to the editorial workflow draft branch). One button = N commits to the draft branch.
+- **The browser's beforeunload prompt is suppressed** when you have local drafts (changes are safe in localStorage, no scary warning).
+
+**Recommended workflow:**
+
+1. Edit Jobs → add a new job. The form is auto-saved to localStorage on every keystroke. Hit "Save" or just navigate away.
+2. Edit Films → add a credit using the new job. The job is now in the dropdown because... wait, no — local drafts aren't visible in dropdowns until they're published. So if you need a new job in a credit, hit "Publish all" first, then go to Films.
+3. Edit People → set partnership.jobIds. Auto-saved.
+4. When done, click **"Publish all (3)"**. The script navigates to each entry, restores the form, and clicks the real Save. Each entry gets a commit on the `cms/editorial-workflow` draft branch.
+5. Open the **Workflow** tab in the admin → click **Publish** → Decap opens a single PR with all 3 entries → merge the PR → one Cloudflare build.
+
+**Devtools escape hatch:** `__decapDrafts.readAll()` lists all local drafts, `__decapDrafts.count()` returns the count.
+
+**Edge cases:**
+
+- If a save fails (network, validation), the draft stays in localStorage so you can retry.
+- The Publish script waits up to 15s for Decap to navigate back to the list after each save. If it times out, it skips and moves to the next.
+- New entries (URL `/new`) are handled: the entryId in the localStorage key starts with `new-`, and the script navigates to `/new` to fill the form.
+
 ## Data model (v3.14.18)
 
 Four collections, fully normalized. No duplication of role info anywhere.

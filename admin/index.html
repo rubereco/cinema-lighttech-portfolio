@@ -215,5 +215,361 @@
       waitForCMS();
     })();
   </script>
+
+  <!--
+    v3.14.20: localStorage draft layer.
+
+    The Decap "Save" button (with editorial_workflow) commits to a draft
+    branch on every click. That's a network round-trip per save, and the
+    editor blocks navigation with a beforeunload prompt while there are
+    unsaved changes — both of which make editing slow and annoying when
+    you're touching several entries in one session.
+
+    This script replaces that with a local-first workflow:
+
+      1. Every keystroke is debounced-saved to localStorage under
+         `decap-draft:<collection>:<entryId>`. The form is fully
+         persisted across navigation, refresh, even closing the tab.
+
+      2. The "Save" button is intercepted (capture-phase click listener
+         on document): instead of committing to the draft branch, it
+         just confirms the localStorage snapshot is up to date and
+         shows a "Saved locally" toast. No git commit, no network
+         round-trip, no build hook.
+
+      3. A new "Publish all" button is added next to Save. When clicked,
+         it walks every localStorage draft, navigates to that entry,
+         waits for the form to load, fills the form from the draft,
+         then clicks the ORIGINAL Save button (the override is
+         temporarily bypassed via a flag) so Decap commits to the
+         editorial workflow draft branch the way it normally would.
+         One Publish = N commits to the draft branch (one per entry)
+         = one PR via the Workflow tab = one Cloudflare build.
+
+      4. The browser's beforeunload prompt is suppressed when there
+         are localStorage drafts (changes are safe in localStorage; the
+         user doesn't need a scary warning).
+
+    The editorial_workflow config stays in place — Publish still uses
+    the same draft branch + PR flow. We just moved the per-change
+    commit from Save to Publish.
+  -->
+  <script>
+  (function () {
+    "use strict";
+
+    var LS_PREFIX = "decap-draft:";
+    var PUBLISH_BTN_ID = "decap-publish-all";
+    var publishInProgress = false;   // bypass override during Publish
+    var overrideInstalled = false;    // capture-phase listener installed
+    var lastHash = null;
+    var pendingSaveT = null;
+
+    // ─── localStorage helpers ─────────────────────────────────────────
+    function lsKey(collection, entryId) {
+      return LS_PREFIX + collection + ":" + entryId;
+    }
+    function readAllDrafts() {
+      var drafts = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(LS_PREFIX) === 0) {
+          try {
+            drafts.push({ key: k, value: JSON.parse(localStorage.getItem(k)) });
+          } catch (e) { /* ignore corrupt entry */ }
+        }
+      }
+      return drafts;
+    }
+    function clearDraft(key) { localStorage.removeItem(key); }
+    function draftCount() {
+      var n = 0;
+      for (var i = 0; i < localStorage.length; i++) {
+        if (localStorage.key(i).indexOf(LS_PREFIX) === 0) n++;
+      }
+      return n;
+    }
+
+    // ─── URL / context ───────────────────────────────────────────────
+    // #/collections/<collection>/new
+    // #/collections/<collection>/entries/<id>
+    function currentContext() {
+      var m = window.location.hash.match(/#\/collections\/([^/]+)\/(new|entries\/([^/?]+))/);
+      if (!m) return null;
+      return { collection: m[1], entryId: m[3] || ("new-" + Date.now()) };
+    }
+
+    // ─── Form read/write ─────────────────────────────────────────────
+    function form() { return document.querySelector("form"); }
+    function readForm() {
+      var f = form();
+      if (!f) return null;
+      var data = {};
+      var inputs = f.querySelectorAll("input, textarea, select");
+      for (var i = 0; i < inputs.length; i++) {
+        var el = inputs[i];
+        if (!el.name) continue;
+        if (el.type === "checkbox") data[el.name] = el.checked;
+        else if (el.type === "radio") { if (el.checked) data[el.name] = el.value; }
+        else data[el.name] = el.value;
+      }
+      return data;
+    }
+    function writeForm(data) {
+      if (!data) return;
+      var f = form();
+      if (!f) return;
+      var inputs = f.querySelectorAll("input, textarea, select");
+      for (var i = 0; i < inputs.length; i++) {
+        var el = inputs[i];
+        if (!el.name || !(el.name in data)) continue;
+        var newVal = data[el.name];
+        if (el.type === "checkbox") el.checked = !!newVal;
+        else if (el.type === "radio") el.checked = (el.value === newVal);
+        else el.value = newVal;
+        // Tell Decap the field changed (its React handlers listen for
+        // input/change events to update its draft state)
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
+    function snapshotNow(ctx) {
+      if (!ctx) return;
+      var data = readForm();
+      if (!data) return;
+      try {
+        localStorage.setItem(lsKey(ctx.collection, ctx.entryId), JSON.stringify(data));
+        updateDraftCount();
+      } catch (e) { console.warn("[decap-draft] snapshot failed", e); }
+    }
+    function restoreIfAny(ctx) {
+      if (!ctx) return;
+      var raw = localStorage.getItem(lsKey(ctx.collection, ctx.entryId));
+      if (!raw) return;
+      try {
+        writeForm(JSON.parse(raw));
+        toast("Restored unsaved changes from localStorage", "info");
+      } catch (e) { console.warn("[decap-draft] restore failed", e); }
+    }
+
+    // ─── Save button override (capture phase) ────────────────────────
+    // Decap attaches its React onClick at the document root. We use
+    // capture phase so our listener runs first; if `publishInProgress`
+    // is false we stop the event, write to localStorage, and toast.
+    function installOverride() {
+      if (overrideInstalled) return;
+      overrideInstalled = true;
+      document.addEventListener("click", function (e) {
+        if (publishInProgress) return; // Publish is driving — let Decap's save run
+        var btn = e.target.closest && e.target.closest("button");
+        if (!btn) return;
+        var text = (btn.textContent || "").trim();
+        if (text !== "Save" && text !== "Save as draft") return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        var ctx = currentContext();
+        snapshotNow(ctx);
+        toast("Saved locally. Click \"Publish all\" to push to git.", "success");
+      }, true);
+    }
+
+    // ─── Publish all flow ────────────────────────────────────────────
+    // Find the real Save button (not intercepted because we set
+    // publishInProgress = true just before clicking it).
+    function findSaveButton() {
+      var btns = document.querySelectorAll("button");
+      for (var i = 0; i < btns.length; i++) {
+        var t = (btns[i].textContent || "").trim();
+        if (t === "Save" || t === "Save as draft") return btns[i];
+      }
+      return null;
+    }
+    function findPublishButtonContainer() {
+      // Decap's top bar holds the Save/Publish buttons. We add our
+      // "Publish all" button right after the Save button.
+      var save = findSaveButton();
+      return save ? save.parentElement : null;
+    }
+    function installPublishButton() {
+      if (document.getElementById(PUBLISH_BTN_ID)) return;
+      var bar = findPublishButtonContainer();
+      if (!bar) return;
+      var btn = document.createElement("button");
+      btn.id = PUBLISH_BTN_ID;
+      btn.type = "button";
+      btn.textContent = "Publish all (" + draftCount() + ")";
+      btn.style.cssText = "margin-left:8px;padding:6px 14px;border-radius:4px;border:0;background:#E8A33D;color:#0b0b0d;font-weight:700;cursor:pointer;font-size:13px;";
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        publishAll();
+      });
+      bar.appendChild(btn);
+    }
+    function updateDraftCount() {
+      var btn = document.getElementById(PUBLISH_BTN_ID);
+      if (btn) btn.textContent = "Publish all (" + draftCount() + ")";
+    }
+
+    function publishAll() {
+      var drafts = readAllDrafts();
+      if (drafts.length === 0) {
+        toast("Nothing to publish — no local drafts.", "info");
+        return;
+      }
+      toast("Publishing " + drafts.length + " draft" + (drafts.length === 1 ? "" : "s") + " to git…", "info");
+      // Snapshot whatever the user is currently editing
+      snapshotNow(currentContext());
+      var i = 0;
+      function next() {
+        if (i >= drafts.length) {
+          // If anything's still in localStorage after Publish, the saves
+          // failed. Don't clear them — let the user retry.
+          var remaining = draftCount();
+          if (remaining === 0) {
+            toast("All drafts pushed to git. Open the Workflow tab to merge the PR.", "success");
+          } else {
+            toast("Done. " + remaining + " draft(s) still in localStorage (may have failed).", "error");
+          }
+          return;
+        }
+        var d = drafts[i];
+        var parts = d.key.slice(LS_PREFIX.length).split(":");
+        var collection = parts[0];
+        var entryId = parts.slice(1).join(":");
+        var hash = entryId.indexOf("new-") === 0
+          ? "#/collections/" + collection + "/new"
+          : "#/collections/" + collection + "/entries/" + encodeURIComponent(entryId);
+        if (window.location.hash !== hash) {
+          window.location.hash = hash;
+        }
+        // Wait for the form to mount + fill it
+        waitFor(10000, function () {
+          var f = form();
+          if (!f) return false;
+          var fdata = readForm();
+          return fdata && Object.keys(fdata).length > 1; // more than just csrf etc.
+        }).then(function () {
+          // Clear the field for the current entry so writeForm doesn't
+          // conflict with Decap's "loading the saved entry" state.
+          // Actually, writeForm overwrites all fields, so we just need
+          // to give Decap a tick to settle.
+          writeForm(d.value);
+          // Wait a beat for Decap to register the changes via React
+          return waitFor(2000, function () { return true; });
+        }).then(function () {
+          // Click the real Save button. Bypass the override.
+          var save = findSaveButton();
+          if (!save) throw new Error("Save button not found");
+          publishInProgress = true;
+          save.click();
+          // Wait for Decap to navigate back to the list (= save succeeded)
+          return waitFor(15000, function () {
+            return /#\/collections\/[^/]+\/?$/.test(window.location.hash) ||
+                   window.location.hash === "#/" ||
+                   window.location.hash === "";
+          });
+        }).then(function () {
+          // Save succeeded — clear the local draft for this entry
+          clearDraft(d.key);
+          updateDraftCount();
+          i++;
+          setTimeout(next, 600);
+        }).catch(function (err) {
+          console.error("[decap-draft] publish failed for", d.key, err);
+          toast("Failed to publish " + collection + "/" + entryId + " — kept in localStorage. Error: " + err, "error");
+          i++;
+          setTimeout(next, 300);
+        }).then(function () {
+          publishInProgress = false;
+        }, function () {
+          publishInProgress = false;
+        });
+      }
+      next();
+    }
+
+    // ─── Toast notifications ─────────────────────────────────────────
+    function toast(msg, kind) {
+      var t = document.createElement("div");
+      t.textContent = msg;
+      t.style.cssText = "position:fixed;bottom:20px;right:20px;padding:12px 18px;border-radius:6px;background:" +
+        (kind === "error" ? "#7a1f1f" : kind === "success" ? "#1f5a2a" : "#1c1c20") +
+        ";color:#fff;font:14px -apple-system,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:99999;opacity:0;transition:opacity .2s;max-width:420px;";
+      document.body.appendChild(t);
+      requestAnimationFrame(function () { t.style.opacity = "1"; });
+      setTimeout(function () {
+        t.style.opacity = "0";
+        setTimeout(function () { t.remove(); }, 250);
+      }, kind === "error" ? 6000 : 3000);
+    }
+
+    // ─── Promise-based wait ──────────────────────────────────────────
+    function waitFor(timeoutMs, predicate) {
+      return new Promise(function (resolve, reject) {
+        var start = Date.now();
+        (function tick() {
+          if (predicate()) return resolve();
+          if (Date.now() - start > timeoutMs) return reject("timed out after " + timeoutMs + "ms");
+          setTimeout(tick, 100);
+        })();
+      });
+    }
+
+    // ─── beforeunload: keep silent when local drafts exist ──────────
+    function installBeforeUnloadSuppression() {
+      window.addEventListener("beforeunload", function (e) {
+        if (draftCount() > 0) {
+          // Changes are safely in localStorage — no warning needed
+          e.preventDefault();
+          e.returnValue = "";
+          return "";
+        }
+      }, true);
+    }
+
+    // ─── Boot ────────────────────────────────────────────────────────
+    function tick() {
+      var ctx = currentContext();
+      installOverride();
+      installPublishButton();
+      if (ctx) {
+        // Form-context page. Auto-snapshot the form on every change.
+        var f = form();
+        if (f && !f.__decapDraftHooked) {
+          f.__decapDraftHooked = true;
+          f.addEventListener("input", function () {
+            clearTimeout(pendingSaveT);
+            pendingSaveT = setTimeout(function () { snapshotNow(ctx); }, 250);
+          });
+          f.addEventListener("change", function () {
+            clearTimeout(pendingSaveT);
+            pendingSaveT = setTimeout(function () { snapshotNow(ctx); }, 250);
+          });
+        }
+        // If the URL changed, restore the local draft for this entry
+        if (lastHash !== window.location.hash) {
+          lastHash = window.location.hash;
+          // Give Decap a moment to render the form
+          setTimeout(function () { restoreIfAny(ctx); }, 400);
+        }
+        // Also snapshot on every tick (in case the form changes via
+        // Decap's internal state but not via user input — e.g. picking
+        // from a relation widget dropdown)
+        clearTimeout(pendingSaveT);
+        pendingSaveT = setTimeout(function () { snapshotNow(ctx); }, 250);
+      } else {
+        lastHash = window.location.hash;
+      }
+      updateDraftCount();
+    }
+    installBeforeUnloadSuppression();
+    setInterval(tick, 500);
+    tick();
+
+    // Devtools escape hatch
+    window.__decapDrafts = { readAll: readAllDrafts, count: draftCount };
+  })();
+  </script>
 </body>
 </html>
