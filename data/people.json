@@ -29,7 +29,7 @@
     {
       "id": "juli-carne-martorell",
       "name": "Juli Carné Martorell",
-      "kind": "collaborator",
+      "kind": "dop",
       "relationship": "dp",
       "portrait": "assets/images/partners/juli-carne-martorell.jpg",
       "count": 0,
@@ -43,7 +43,7 @@
     {
       "id": "nils-dalmases",
       "name": "Nils Dalmases",
-      "kind": "collaborator",
+      "kind": "dop",
       "relationship": "dp",
       "portrait": "assets/images/partners/nils-dalmases.jpg",
       "count": 0,
@@ -69,7 +69,7 @@
     {
       "id": "placeholder-electric-1",
       "name": "Marc Vidal",
-      "kind": "collaborator",
+      "kind": "electric",
       "relationship": "electric",
       "portrait": null,
       "count": 6,
@@ -83,7 +83,7 @@
     {
       "id": "placeholder-electric-2",
       "name": "Jordi Puig",
-      "kind": "collaborator",
+      "kind": "electric",
       "relationship": "electric",
       "portrait": null,
       "count": 4,
@@ -97,7 +97,7 @@
     {
       "id": "placeholder-electric-3",
       "name": "Albert Ferrer",
-      "kind": "collaborator",
+      "kind": "electric",
       "relationship": "electric",
       "portrait": null,
       "count": 3,

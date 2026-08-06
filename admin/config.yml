@@ -218,7 +218,7 @@ collections:
               - { name: "id",   label: "ID (kebab-case)",  widget: "string", hint: "e.g. juli-carne-martorell" }
               - { name: "name", label: "Name",              widget: "string" }
               - name: "kind"
-                label: "Kind"
+                label: "Kind (film credit role)"
                 widget: "select"
                 options:
                   - { label: "Subject (Tarek himself)",     value: "subject" }
@@ -226,8 +226,8 @@ collections:
                   - { label: "DP / DoP (film credit)",      value: "dop" }
                   - { label: "Gaffer (film credit)",        value: "gaffer" }
                   - { label: "Electric (film credit)",      value: "electric" }
-                  - { label: "Collaborator (partners page)", value: "collaborator" }
-              - { name: "relationship", label: "Relationship (collaborators only)", widget: "select", required: false, options: ["dp", "electric"], hint: "Only set for kind: collaborator" }
+                hint: "v3.14.15: 'collaborator' removed. A person can be BOTH a film credit (kind) AND a partner (relationship) — e.g. an electric with relationship: 'electric' shows up on the partners page AND can be selected as the electric on a film."
+              - { name: "relationship", label: "Partner page section (optional)", widget: "select", required: false, options: ["dp", "electric"], hint: "v3.14.15: set this to put the person on the partners page in that section (dp = Cinematographers, electric = Electricians). Leave empty to keep them only as a film credit. Independent of kind — an electric with relationship: 'electric' works as both." }
               - { name: "portrait",  label: "Portrait path", widget: "string", required: false, hint: "e.g. assets/images/partners/juli-carne-martorell.jpg" }
               - { name: "count",     label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
               - { name: "imdb",      label: "IMDb id",     widget: "string", required: false }

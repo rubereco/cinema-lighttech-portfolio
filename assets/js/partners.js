@@ -11,8 +11,8 @@
    - Categories are defined in CATEGORIES below. Each has:
        source        — "companies" (match by `kind`) or "people" (match by `relationship`)
        id            — discriminator against the source; for source:companies this
-                       is matched against company.kind; for source:people the match
-                       requires kind==="collaborator" + relationship===id.
+                       is matched against company.kind; for source:people this
+                       is matched against person.relationship.
        labelKey      — i18n key for the section header
        layout        — CSS class that defines the card's image aspect ratio
                        ("landscape", "wide", "square", "default")
@@ -22,9 +22,14 @@
        3. Add a CSS rule for the layout class (or reuse an existing one)
    - To remove a category: just delete its CATEGORIES entry. Partners with
      that kind/relationship will silently not render.
-   - The data layer is two entities: people (data/people.json, kind: collaborator)
-     and companies (data/companies.json). The composePartners() function
-     merges them into a uniform partners[] list, filtered per category by source.
+   - The data layer is two entities: people (data/people.json) and
+     companies (data/companies.json). People have TWO orthogonal fields:
+       kind          — film credit role (subject, director, dop, gaffer, electric)
+       relationship  — partner page section (dp, electric); if set, the
+                       person also shows up on the partners page.
+     This lets a person be BOTH a film credit AND a partner without
+     conflict. The composePartners() function merges them into a
+     uniform partners[] list, filtered per category by source.
    - The renderer is fully data-driven. No per-category JS code.
 
    Loads inline-first (file:// compatibility) with fetch() fallback.
@@ -63,9 +68,11 @@
    *
    *  Each category is a view over the *partners* page composition:
    *    source: "companies" → match companies by `kind` === id
-   *    source: "people"   → match people with kind="collaborator" and `relationship` === id
-   *  The two source kinds keep people (with their kind: collaborator distinction)
-   *  and companies cleanly separated at the storage layer.
+   *    source: "people"   → match people by `relationship` === id (kind is the
+   *                         separate film-credit role and is not consulted here)
+   *  The two source kinds keep people and companies cleanly separated at
+   *  the storage layer. v3.14.15: people no longer need kind="collaborator"
+   *  to appear on the partners page — they just need a relationship set.
    */
   const CATEGORIES = [
     // v3.13.11: equipment-house removed from the accordion — equipment
@@ -108,11 +115,18 @@
   }
 
   /** Merge people + companies into a single shape the renderer understands.
-   *  People with `kind: "collaborator"` and companies of any `kind` are the
-   *  only entries that show up here. Film-credit people (subject, director,
-   *  dop, gaffer, electrics) are not part of the partners page. */
+   *  v3.14.15: the "appears on partners page" decision is now driven by
+   *  `relationship` (dp | electric) — NOT by `kind`. This way a person
+   *  can be BOTH a film credit (kind: director, dop, gaffer, electric)
+   *  AND a partner (relationship: dp or electric) without conflict.
+   *  Example: an electric who's a regular collaborator has
+   *  kind: "electric" + relationship: "electric" — they show up in
+   *  the partners page (via the relationship) AND can be selected as
+   *  the electric on a film (via the kind). */
   function composePartners(peopleData, companiesData) {
-    const collaborators = (peopleData?.people ?? []).filter((p) => p.kind === "collaborator");
+    const collaborators = (peopleData?.people ?? []).filter(
+      (p) => p.relationship === "dp" || p.relationship === "electric"
+    );
     const companies = companiesData?.companies ?? [];
     return {
       partners: [
@@ -131,8 +145,8 @@
         ...collaborators.map((p) => ({
           id: p.id,
           name: p.name,
-          kind: p.kind,                       // "collaborator"
-          relationship: p.relationship,       // "dp" | "rental"
+          kind: p.kind,                       // film-credit kind (director, dop, gaffer, electric…)
+          relationship: p.relationship,       // "dp" | "electric" — drives which partners section
           image: p.portrait ?? null,
           imageAlt: null,
           count: p.count ?? 0,
@@ -144,8 +158,11 @@
       ],
       // v3.13.12: also return the raw companies so the logo carousel
       // can filter by kind:"equipment-house" without going through
-      // the merged list (the merged list flattens 'kind' for people
-      // to 'collaborator', so we'd lose the discriminator).
+      // the merged list (the merged list keeps the raw `kind` field
+      // so the company type is preserved).
+      // v3.14.15: people no longer carry kind="collaborator" — they
+      // keep their real film-credit kind (director, dop, etc.) and
+      // get categorized on the partners page via `relationship`.
       companies,
     };
   }
@@ -364,9 +381,11 @@
     const html = CATEGORIES.map((category) => {
       // Filter by source first (companies / people), then by kind or relationship
       // depending on the source. Two-step keeps page-config declarative.
+      // v3.14.15: people are matched on `relationship` only — `kind` is
+      // the film-credit role and is no longer restricted to "collaborator".
       const items = partners.filter((p) => {
         if (category.source === "companies") return p.kind === category.id;
-        if (category.source === "people")     return p.kind === "collaborator" && p.relationship === category.id;
+        if (category.source === "people")     return p.relationship === category.id;
         return false;
       });
       return sectionHtml(category, items, lang);
