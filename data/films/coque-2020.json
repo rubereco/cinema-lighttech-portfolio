@@ -8,14 +8,16 @@
     "production": [
       "Somos Acme SL"
     ],
-    "director": [],
-    "dop": [],
-    "gaffer": [
+    "people": [
       {
-        "id": "tarek-recolons"
+        "personId": "tarek-recolons",
+        "role": "Gaffer",
+        "description": {
+          "en": "",
+          "es": ""
+        }
       }
-    ],
-    "electrics": []
+    ]
   },
   "poster": "assets/projects/coque-2020/poster.jpg"
 }

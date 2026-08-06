@@ -8,14 +8,16 @@
     "production": [
       "Oberon Media"
     ],
-    "director": [],
-    "dop": [],
-    "gaffer": [
+    "people": [
       {
-        "id": "tarek-recolons"
+        "personId": "tarek-recolons",
+        "role": "Gaffer",
+        "description": {
+          "en": "",
+          "es": ""
+        }
       }
-    ],
-    "electrics": []
+    ]
   },
   "poster": "assets/projects/un-altre-home-2025/poster.jpg"
 }

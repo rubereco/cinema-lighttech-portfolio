@@ -8,14 +8,16 @@
     "production": [
       "Potenza Producciones"
     ],
-    "director": [],
-    "dop": [],
-    "gaffer": [
+    "people": [
       {
-        "id": "tarek-recolons"
+        "personId": "tarek-recolons",
+        "role": "Gaffer",
+        "description": {
+          "en": "",
+          "es": ""
+        }
       }
-    ],
-    "electrics": []
+    ]
   },
   "poster": "assets/projects/lo-que-queda-de-ti-2025/poster.jpg"
 }

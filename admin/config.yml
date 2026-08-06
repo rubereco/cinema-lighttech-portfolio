@@ -104,66 +104,47 @@ collections:
           - { label: "Short (Cortometraje)",    value: "Cortometraje" }
           - { label: "Commercial",              value: "Comercial" }
           - { label: "Other",                   value: "Otro" }
-      - name: "credits"
-        label: "Credits"
-        widget: "object"
-        collapsed: true
+      - name: "people"
+        label: "People on this film"
+        widget: "list"
+        # v3.14.17: replaced the four role-grouped fields
+        # (director / dop / gaffer / electrics) with a single
+        # flat list. Each entry is {personId, role, department,
+        # description.i18n} — a person can show up multiple
+        # times if they did multiple roles (e.g. Director + DP),
+        # the role is free-text so "Best Boy Electric" / "Sparks"
+        # / "1st AC" all work, and the description supports
+        # per-credit i18n for the film detail page.
+        summary: "{{fields.role}} — {{fields.personId}}"
         fields:
-          - name: "production"
-            label: "Production companies"
-            widget: "list"
-            field: { name: "name", label: "Company", widget: "string" }
+          - name: "personId"
+            label: "Person"
+            widget: "relation"
+            collection: "people"
+            searchFields: ["name"]
+            valueField: "id"
+            displayFields: ["name", "kind"]
+          - { name: "role", label: "Role on this film", widget: "string", hint: "Free-text — e.g. Director, DoP, Gaffer, Best Boy Electric, Sparks, 1st AC" }
+          - name: "department"
+            label: "Department (for grouping on the public page)"
+            widget: "select"
             required: false
-            hint: "Free-text for now — production companies aren't in the companies collection (only equipment houses are). Once you add production entries to a collection, this can become a relation widget too."
-          - name: "director"
-            label: "Director"
-            widget: "list"
-            # v3.14.14: relation widget. Each list item is
-            # a {id: "..."} object — required by Decap's
-            # list widget. v3.14.16: people collection is now
-            # folder-based, so the relation widget's index
-            # actually loads.
-            field:
-              name: "id"
-              label: "Director"
-              widget: "relation"
-              collection: "people"
-              searchFields: ["name"]
-              valueField: "id"
-              displayFields: ["name", "kind"]
-          - name: "dop"
-            label: "Cinematographer"
-            widget: "list"
-            field:
-              name: "id"
-              label: "Cinematographer"
-              widget: "relation"
-              collection: "people"
-              searchFields: ["name"]
-              valueField: "id"
-              displayFields: ["name", "kind"]
-          - name: "gaffer"
-            label: "Gaffer"
-            widget: "list"
-            field:
-              name: "id"
-              label: "Gaffer"
-              widget: "relation"
-              collection: "people"
-              searchFields: ["name"]
-              valueField: "id"
-              displayFields: ["name", "kind"]
-          - name: "electrics"
-            label: "Electrics"
-            widget: "list"
-            field:
-              name: "id"
-              label: "Electric"
-              widget: "relation"
-              collection: "people"
-              searchFields: ["name"]
-              valueField: "id"
-              displayFields: ["name", "kind"]
+            options:
+              - { label: "Direction",          value: "direction" }
+              - { label: "Cinematography",     value: "cinematography" }
+              - { label: "Lighting",           value: "lighting" }
+              - { label: "Sound",              value: "sound" }
+              - { label: "Production",         value: "production" }
+              - { label: "Other",              value: "other" }
+            hint: "Used to group credits under section headers on the film detail page. Optional — leave blank to skip grouping."
+          - name: "description"
+            label: "Description (per credit, optional)"
+            widget: "object"
+            collapsed: true
+            required: false
+            fields:
+              - { name: "en", label: "English", widget: "text", required: false }
+              - { name: "es", label: "Spanish", widget: "text", required: false }
 
   # 2) Work — the ordered list of films shown on the homepage. Each
   #    row references a film by id. Reorder via drag-and-drop in the UI.
@@ -214,18 +195,40 @@ collections:
       - { name: "id",   label: "ID (kebab-case)",  widget: "string", hint: "e.g. juli-carne-martorell" }
       - { name: "name", label: "Name",              widget: "string" }
       - name: "kind"
-        label: "Kind (film credit role)"
+        label: "Primary role"
         widget: "select"
         options:
           - { label: "Subject (Tarek himself)",     value: "subject" }
-          - { label: "Director (film credit)",      value: "director" }
-          - { label: "DP / DoP (film credit)",      value: "dop" }
-          - { label: "Gaffer (film credit)",        value: "gaffer" }
-          - { label: "Electric (film credit)",      value: "electric" }
-        hint: "v3.14.15: 'collaborator' removed. A person can be BOTH a film credit (kind) AND a partner (relationship) — e.g. an electric with relationship: 'electric' shows up on the partners page AND can be selected as the electric on a film."
+          - { label: "Director",                    value: "director" }
+          - { label: "DP / DoP",                    value: "dop" }
+          - { label: "Gaffer",                      value: "gaffer" }
+          - { label: "Electric",                    value: "electric" }
+        hint: "v3.14.17: 'kind' is now just a primary-role tag (for the relation dropdown and quick identification). The actual roles this person has played are in 'Works' below — a person can be both director and dop, or sparks-then-gaffer, etc. Free to leave as the most common role or pick 'subject' for non-crew folks."
       - { name: "relationship", label: "Partner page section (optional)", widget: "select", required: false, options: ["dp", "electric"], hint: "v3.14.15: set this to put the person on the partners page in that section (dp = Cinematographers, electric = Electricians). Leave empty to keep them only as a film credit. Independent of kind — an electric with relationship: 'electric' works as both." }
+      - name: "works"
+        label: "Works / collaborations"
+        widget: "list"
+        required: false
+        summary: "{{fields.role}} — {{fields.project}} ({{fields.year}})"
+        # v3.14.17: the person's portfolio. Each entry is one
+        # collaboration (a film, a project, anything). Role is free-
+        # text — Tarek can put "Director of Photography", "DoP",
+        # "Gaffer", "Best Boy Electric", "Sparks", whatever.
+        # Description is per-work i18n so Tarek can add details
+        # about specific collaborations in EN + ES.
+        fields:
+          - { name: "role",     label: "Role",         widget: "string", hint: "e.g. Director of Photography, Gaffer, Best Boy Electric, Sparks" }
+          - { name: "year",     label: "Year",         widget: "number", value_type: "int", required: false, hint: "When this collaboration happened" }
+          - { name: "project",  label: "Project",      widget: "string", required: false, hint: "e.g. Els Mals Noms, or a non-film project" }
+          - name: "description"
+            label: "Description (per work, optional)"
+            widget: "object"
+            collapsed: true
+            required: false
+            fields:
+              - { name: "en", label: "English", widget: "text", required: false }
+              - { name: "es", label: "Spanish", widget: "text", required: false }
       - { name: "portrait",  label: "Portrait path", widget: "string", required: false, hint: "e.g. assets/images/partners/juli-carne-martorell.jpg" }
-      - { name: "count",     label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
       - { name: "imdb",      label: "IMDb id",     widget: "string", required: false }
       - { name: "imdbUrl",   label: "IMDb URL",    widget: "string", required: false }
       - { name: "instagram", label: "Instagram handle", widget: "string", required: false }

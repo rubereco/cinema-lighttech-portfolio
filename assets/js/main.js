@@ -428,6 +428,32 @@ const FILM_MODAL = (() => {
     });
   }
 
+  // v3.14.17: with credits now a flat list of {personId, role,
+  // description.i18n}, we group by role pattern and map to the
+  // 4 crew rows (director / dop / gaffer / electrics) that the
+  // modal still has. The role is free-text on the credit, so
+  // we use regex patterns to bucket it. People with roles that
+  // don't match any pattern (e.g. "Sound Mixer", "1st AC")
+  // simply don't render in the modal — they'd need a UI row
+  // added for them.
+  const ROLE_TO_ROW = [
+    { row: "director",  pattern: /^\s*director\s*$/i },
+    { row: "dop",       pattern: /director of photo|cinemat|^\s*d[\sop]*p?\s*$/i },
+    { row: "gaffer",    pattern: /gaffer/i },
+    { row: "electrics", pattern: /electric|spark|best boy/i },
+  ];
+  function groupCrewByRow(people) {
+    const out = { director: [], dop: [], gaffer: [], electrics: [] };
+    for (const credit of people || []) {
+      const role = credit.role || "";
+      const name = peopleById[credit.personId]?.name || credit.personId;
+      for (const { row, pattern } of ROLE_TO_ROW) {
+        if (pattern.test(role)) { out[row].push(name); break; }
+      }
+    }
+    return out;
+  }
+
   function renderList(arr) {
     if (!arr || !arr.length) {
       // Empty: render a single muted dash. The row's hidden-state
@@ -481,12 +507,16 @@ const FILM_MODAL = (() => {
     }
 
     // Crew rows
+    // v3.14.17: credits.people is a flat list of {personId, role,
+    // description.i18n}. Group by role pattern, then render into
+    // the 4 fixed rows (director / dop / gaffer / electrics).
     const credits = film.credits || {};
+    const grouped = groupCrewByRow(credits.people);
     document.getElementById("film-modal-production").innerHTML = renderList(credits.production);
-    document.getElementById("film-modal-director").innerHTML  = renderList(personNames(credits.director));
-    document.getElementById("film-modal-dop").innerHTML       = renderList(personNames(credits.dop));
-    document.getElementById("film-modal-gaffer").innerHTML    = renderList(personNames(credits.gaffer));
-    document.getElementById("film-modal-electrics").innerHTML = renderList(personNames(credits.electrics));
+    document.getElementById("film-modal-director").innerHTML  = renderList(grouped.director);
+    document.getElementById("film-modal-dop").innerHTML       = renderList(grouped.dop);
+    document.getElementById("film-modal-gaffer").innerHTML    = renderList(grouped.gaffer);
+    document.getElementById("film-modal-electrics").innerHTML = renderList(grouped.electrics);
 
     // Hide whole dt/dd pairs that have no data, so we don't show
     // empty "Director: —" lines for films where that field is empty.

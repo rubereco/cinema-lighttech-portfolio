@@ -9,18 +9,24 @@
       "Lamalanga Produccions Audiovisuals",
       "Admirable Films"
     ],
-    "director": [
+    "people": [
       {
-        "id": "marc-ortiz-prades"
-      }
-    ],
-    "dop": [],
-    "gaffer": [
+        "personId": "marc-ortiz-prades",
+        "role": "Director",
+        "description": {
+          "en": "",
+          "es": ""
+        }
+      },
       {
-        "id": "tarek-recolons"
+        "personId": "tarek-recolons",
+        "role": "Gaffer",
+        "description": {
+          "en": "",
+          "es": ""
+        }
       }
-    ],
-    "electrics": []
+    ]
   },
   "poster": "assets/projects/els-mals-noms-2025/poster.jpg"
 }

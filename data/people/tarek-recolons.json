@@ -6,5 +6,70 @@
   "imdb": "nm5007366",
   "imdbUrl": "https://www.imdb.com/name/nm5007366/",
   "instagram": "tarekreco",
-  "instagramUrl": "https://www.instagram.com/tarekreco/"
+  "instagramUrl": "https://www.instagram.com/tarekreco/",
+  "works": [
+    {
+      "role": "Gaffer",
+      "year": 2026,
+      "project": "Saw",
+      "description": {
+        "en": "",
+        "es": ""
+      }
+    },
+    {
+      "role": "Gaffer",
+      "year": 2025,
+      "project": "Els Mals Noms",
+      "description": {
+        "en": "",
+        "es": ""
+      }
+    },
+    {
+      "role": "Gaffer",
+      "year": 2025,
+      "project": "Lo que queda de ti",
+      "description": {
+        "en": "",
+        "es": ""
+      }
+    },
+    {
+      "role": "Gaffer",
+      "year": 2025,
+      "project": "Un altre home",
+      "description": {
+        "en": "",
+        "es": ""
+      }
+    },
+    {
+      "role": "Gaffer",
+      "year": 2023,
+      "project": "Calladita",
+      "description": {
+        "en": "",
+        "es": ""
+      }
+    },
+    {
+      "role": "Gaffer",
+      "year": 2020,
+      "project": "Coque",
+      "description": {
+        "en": "",
+        "es": ""
+      }
+    },
+    {
+      "role": "Gaffer",
+      "year": 2019,
+      "project": "Boca Norte",
+      "description": {
+        "en": "",
+        "es": ""
+      }
+    }
+  ]
 }

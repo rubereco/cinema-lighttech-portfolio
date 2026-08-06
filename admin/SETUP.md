@@ -156,11 +156,36 @@ Without editorial_workflow, step 10 would have triggered TWO separate Cloudflare
 
 - **Can't log in** — check the Cloudflare Worker logs (`wrangler tail`) and the browser console. 99% of "can't log in" bugs are either wrong OAuth credentials in the Worker env, or the callback URL mismatch.
 - **Save fails with 403/404** — your GitHub account isn't a collaborator on the repo. Add yourself in Step 2.
-- **Save succeeds but live site doesn't change** — Cloudflare Pages hasn't rebuilt yet. Wait 60s and hard-refresh. Check the Pages deploy log at https://dash.cloudflare.com → Pages → your project → Deployments.
+- **Save succeeds but live site doesn't change** — Cloudflare Pages hasn't rebuilt yet. Wait 60s and hard-refresh. Check the Pages deploy log at https://dash.cloudflare.com → Pages → your project → Deployments. **Also confirm the build command is set to `npm run build`** (see top of this file) — without it, the live site keeps serving the old data/films.json and data/people.json aggregates even after the publish.
 - **JSON syntax error in i18n** — roll back via git: `git checkout HEAD~1 -- data/i18n.json`, then commit + push the fix.
+
+## Data model (v3.14.17)
+
+Three collections work together for credits and people:
+
+1. **People** (`data/people/<id>.json`):
+   - `kind`: primary role tag (subject / director / dop / gaffer / electric) — used for the relation dropdown and quick identification
+   - `relationship`: optional (dp / electric) — drives the partners page category
+   - `works`: list of `{role, year, project, description.i18n}` — the person's portfolio. A director who's also a dop has both. A gaffer who started as sparks has both, with different years.
+   - Plus bio fields (portrait, description.i18n, imdb, instagram, url, urlLabel)
+
+2. **Films** (`data/films/<id>.json`):
+   - `people`: flat list of `{personId, role, department, description.i18n}` — every credit on this film
+   - `production`: free-text list of production companies (separate from the credits.people list)
+   - No more role-grouped fields (director / dop / gaffer / electrics). One person can be on a film multiple times if they did multiple roles.
+
+3. **Work order** (`data/work.json`):
+   - Unchanged. Ordered list of `{filmId}` rows. Drives the homepage poster wall.
+
+Adding a credit on a film: open the film → Credits → "+ Add person" → pick from the People dropdown → set role (free-text: "Director", "DoP", "Gaffer", "Best Boy Electric", "Sparks", "1st AC", whatever) → optionally set department + i18n description.
+
+Adding a work to a person: open the person → Works → "+ Add work" → role / year / project / optional i18n description.
+
+These two are independent — a credit on a film does NOT auto-add a work to the person, and vice versa. That gives you full control: a recurring collaborator with no specific film credit yet can be on the partners page with no works; a one-off film credit can be added without polluting the person's works.
 
 ## For future work (Phase 2, not now)
 
 - **Cloudflare Access** — move auth entirely to Cloudflare Zero Trust so the `/admin` URL returns 404 to non-team-members. More setup, more secure.
 - **Cloudflare R2** — large photo uploads bypass the repo, land in a bucket. Good for >100 MB of photos total.
 - **Structured i18n fields** — promote `data/i18n.json` from raw JSON editor to per-key widgets. Useful if Tarek is editing translations often.
+- **Film detail per-credit descriptions** — the new `description.i18n` on each film credit is currently collected but not rendered on the public site. Would need a small UI change to show "Marc Ortiz Prades — Director — 'A character study set in Barcelona...'" on the film detail page.

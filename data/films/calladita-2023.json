@@ -6,18 +6,24 @@
   "role": "Gaffer",
   "credits": {
     "production": [],
-    "director": [
+    "people": [
       {
-        "id": "miguel-faus"
-      }
-    ],
-    "dop": [],
-    "gaffer": [
+        "personId": "miguel-faus",
+        "role": "Director",
+        "description": {
+          "en": "",
+          "es": ""
+        }
+      },
       {
-        "id": "tarek-recolons"
+        "personId": "tarek-recolons",
+        "role": "Gaffer",
+        "description": {
+          "en": "",
+          "es": ""
+        }
       }
-    ],
-    "electrics": []
+    ]
   },
   "poster": "assets/projects/calladita-2023/poster.jpg"
 }

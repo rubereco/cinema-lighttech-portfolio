@@ -62,7 +62,7 @@ const films = readDir("data/films").sort((a, b) => {
   if ((b.year ?? 0) !== (a.year ?? 0)) return (b.year ?? 0) - (a.year ?? 0);
   return (a.id ?? "").localeCompare(b.id ?? "");
 });
-writeAggregate("data/films.json", "films", films, { version: "1.1" });
+writeAggregate("data/films.json", "films", films, { version: "1.2" });
 
 // ─── People: sort by kind order, then by id ────────────────────────
 const KIND_ORDER = { subject: 0, director: 1, dop: 2, gaffer: 3, electric: 4 };
@@ -72,6 +72,6 @@ const people = readDir("data/people").sort((a, b) => {
   if (ka !== kb) return ka - kb;
   return (a.id ?? "").localeCompare(b.id ?? "");
 });
-writeAggregate("data/people.json", "people", people, { version: "1.3" });
+writeAggregate("data/people.json", "people", people, { version: "1.4" });
 
 console.log("build complete.");

@@ -10,14 +10,16 @@
       "A Contracorriente Films",
       "Green Films"
     ],
-    "director": [
+    "people": [
       {
-        "id": "isabel-coixet"
+        "personId": "isabel-coixet",
+        "role": "Director",
+        "description": {
+          "en": "",
+          "es": ""
+        }
       }
-    ],
-    "dop": [],
-    "gaffer": [],
-    "electrics": []
+    ]
   },
   "poster": "assets/projects/the-bookshop-2017/poster.jpg"
 }

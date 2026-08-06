@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.1",
+    "version": "1.2",
     "lastUpdated": "2026-08-06"
   },
   "films": [
@@ -12,14 +12,16 @@
       "role": "Gaffer",
       "credits": {
         "production": [],
-        "director": [],
-        "dop": [],
-        "gaffer": [
+        "people": [
           {
-            "id": "tarek-recolons"
+            "personId": "tarek-recolons",
+            "role": "Gaffer",
+            "description": {
+              "en": "",
+              "es": ""
+            }
           }
-        ],
-        "electrics": []
+        ]
       }
     },
     {
@@ -33,18 +35,24 @@
           "Lamalanga Produccions Audiovisuals",
           "Admirable Films"
         ],
-        "director": [
+        "people": [
           {
-            "id": "marc-ortiz-prades"
-          }
-        ],
-        "dop": [],
-        "gaffer": [
+            "personId": "marc-ortiz-prades",
+            "role": "Director",
+            "description": {
+              "en": "",
+              "es": ""
+            }
+          },
           {
-            "id": "tarek-recolons"
+            "personId": "tarek-recolons",
+            "role": "Gaffer",
+            "description": {
+              "en": "",
+              "es": ""
+            }
           }
-        ],
-        "electrics": []
+        ]
       },
       "poster": "assets/projects/els-mals-noms-2025/poster.jpg"
     },
@@ -58,14 +66,16 @@
         "production": [
           "Potenza Producciones"
         ],
-        "director": [],
-        "dop": [],
-        "gaffer": [
+        "people": [
           {
-            "id": "tarek-recolons"
+            "personId": "tarek-recolons",
+            "role": "Gaffer",
+            "description": {
+              "en": "",
+              "es": ""
+            }
           }
-        ],
-        "electrics": []
+        ]
       },
       "poster": "assets/projects/lo-que-queda-de-ti-2025/poster.jpg"
     },
@@ -81,10 +91,7 @@
           "Lastor Media",
           "Vilaüt Films"
         ],
-        "director": [],
-        "dop": [],
-        "gaffer": [],
-        "electrics": []
+        "people": []
       },
       "poster": "assets/projects/parenostre-2025/poster.jpg"
     },
@@ -98,14 +105,16 @@
         "production": [
           "Oberon Media"
         ],
-        "director": [],
-        "dop": [],
-        "gaffer": [
+        "people": [
           {
-            "id": "tarek-recolons"
+            "personId": "tarek-recolons",
+            "role": "Gaffer",
+            "description": {
+              "en": "",
+              "es": ""
+            }
           }
-        ],
-        "electrics": []
+        ]
       },
       "poster": "assets/projects/un-altre-home-2025/poster.jpg"
     },
@@ -117,18 +126,24 @@
       "role": "Gaffer",
       "credits": {
         "production": [],
-        "director": [
+        "people": [
           {
-            "id": "miguel-faus"
-          }
-        ],
-        "dop": [],
-        "gaffer": [
+            "personId": "miguel-faus",
+            "role": "Director",
+            "description": {
+              "en": "",
+              "es": ""
+            }
+          },
           {
-            "id": "tarek-recolons"
+            "personId": "tarek-recolons",
+            "role": "Gaffer",
+            "description": {
+              "en": "",
+              "es": ""
+            }
           }
-        ],
-        "electrics": []
+        ]
       },
       "poster": "assets/projects/calladita-2023/poster.jpg"
     },
@@ -142,7 +157,7 @@
         "production": [
           null
         ],
-        "director": []
+        "people": []
       }
     },
     {
@@ -153,14 +168,16 @@
       "role": "Grip",
       "credits": {
         "production": [],
-        "director": [
+        "people": [
           {
-            "id": "alejandro-rojas"
+            "personId": "alejandro-rojas",
+            "role": "Director",
+            "description": {
+              "en": "",
+              "es": ""
+            }
           }
-        ],
-        "dop": [],
-        "gaffer": [],
-        "electrics": []
+        ]
       },
       "poster": "assets/projects/upon-entry-2022/poster.jpg"
     },
@@ -172,10 +189,7 @@
       "role": "Electrician / 2nd Gaffer",
       "credits": {
         "production": [],
-        "director": [],
-        "dop": [],
-        "gaffer": [],
-        "electrics": []
+        "people": []
       },
       "poster": "assets/projects/lultima-nit-del-karaoke-2021/poster.jpg"
     },
@@ -189,14 +203,16 @@
         "production": [
           "Somos Acme SL"
         ],
-        "director": [],
-        "dop": [],
-        "gaffer": [
+        "people": [
           {
-            "id": "tarek-recolons"
+            "personId": "tarek-recolons",
+            "role": "Gaffer",
+            "description": {
+              "en": "",
+              "es": ""
+            }
           }
-        ],
-        "electrics": []
+        ]
       },
       "poster": "assets/projects/coque-2020/poster.jpg"
     },
@@ -211,14 +227,16 @@
           "Playz",
           "RTVE"
         ],
-        "director": [],
-        "dop": [],
-        "gaffer": [
+        "people": [
           {
-            "id": "tarek-recolons"
+            "personId": "tarek-recolons",
+            "role": "Gaffer",
+            "description": {
+              "en": "",
+              "es": ""
+            }
           }
-        ],
-        "electrics": []
+        ]
       },
       "poster": "assets/projects/boca-norte-2019/poster.jpg"
     },
@@ -234,14 +252,16 @@
           "A Contracorriente Films",
           "Green Films"
         ],
-        "director": [
+        "people": [
           {
-            "id": "isabel-coixet"
+            "personId": "isabel-coixet",
+            "role": "Director",
+            "description": {
+              "en": "",
+              "es": ""
+            }
           }
-        ],
-        "dop": [],
-        "gaffer": [],
-        "electrics": []
+        ]
       },
       "poster": "assets/projects/the-bookshop-2017/poster.jpg"
     }

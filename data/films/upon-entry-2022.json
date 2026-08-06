@@ -6,14 +6,16 @@
   "role": "Grip",
   "credits": {
     "production": [],
-    "director": [
+    "people": [
       {
-        "id": "alejandro-rojas"
+        "personId": "alejandro-rojas",
+        "role": "Director",
+        "description": {
+          "en": "",
+          "es": ""
+        }
       }
-    ],
-    "dop": [],
-    "gaffer": [],
-    "electrics": []
+    ]
   },
   "poster": "assets/projects/upon-entry-2022/poster.jpg"
 }

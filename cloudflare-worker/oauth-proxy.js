@@ -56,7 +56,7 @@ export default {
           // /health response. Use it to verify the deployed
           // Worker has the latest code (especially after
           // redeploying to pick up the postMessage fix).
-          version: "3.14.15",
+          version: "3.14.17",
           endpoints: ["/auth", "/callback"],
         }),
         {

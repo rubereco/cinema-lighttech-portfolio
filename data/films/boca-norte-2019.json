@@ -9,14 +9,16 @@
       "Playz",
       "RTVE"
     ],
-    "director": [],
-    "dop": [],
-    "gaffer": [
+    "people": [
       {
-        "id": "tarek-recolons"
+        "personId": "tarek-recolons",
+        "role": "Gaffer",
+        "description": {
+          "en": "",
+          "es": ""
+        }
       }
-    ],
-    "electrics": []
+    ]
   },
   "poster": "assets/projects/boca-norte-2019/poster.jpg"
 }
