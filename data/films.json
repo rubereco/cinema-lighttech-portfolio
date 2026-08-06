@@ -8,7 +8,7 @@
       "id": "saw-2026",
       "title": "Saw",
       "year": 2026,
-      "type": null,
+      "type": "Largometraje",
       "role": "Gaffer",
       "credits": {
         "production": [],
@@ -209,6 +209,19 @@
         "electrics": []
       },
       "poster": "assets/projects/the-bookshop-2017/poster.jpg"
+    },
+    {
+      "id": "el-cuco-2023",
+      "title": "El Cuco",
+      "year": 2023,
+      "role": "Gaffer",
+      "type": "Largometraje",
+      "credits": {
+        "production": [
+          null
+        ],
+        "director": []
+      }
     }
   ]
 }
