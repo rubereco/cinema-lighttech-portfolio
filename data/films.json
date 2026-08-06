@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "lastUpdated": "2026-07-27",
-    "version": "1.0"
+    "version": "1.1",
+    "lastUpdated": "2026-08-06"
   },
   "films": [
     {
@@ -133,6 +133,19 @@
       "poster": "assets/projects/calladita-2023/poster.jpg"
     },
     {
+      "id": "el-cuco-2023",
+      "title": "El Cuco",
+      "year": 2023,
+      "role": "Gaffer",
+      "type": "Largometraje",
+      "credits": {
+        "production": [
+          null
+        ],
+        "director": []
+      }
+    },
+    {
       "id": "upon-entry-2022",
       "title": "Upon Entry",
       "year": 2022,
@@ -231,19 +244,6 @@
         "electrics": []
       },
       "poster": "assets/projects/the-bookshop-2017/poster.jpg"
-    },
-    {
-      "id": "el-cuco-2023",
-      "title": "El Cuco",
-      "year": 2023,
-      "role": "Gaffer",
-      "type": "Largometraje",
-      "credits": {
-        "production": [
-          null
-        ],
-        "director": []
-      }
     }
   ]
 }

@@ -1,0 +1,21 @@
+{
+  "id": "lo-que-queda-de-ti-2025",
+  "title": "Lo que queda de ti",
+  "year": 2025,
+  "type": "Largometraje",
+  "role": "Gaffer",
+  "credits": {
+    "production": [
+      "Potenza Producciones"
+    ],
+    "director": [],
+    "dop": [],
+    "gaffer": [
+      {
+        "id": "tarek-recolons"
+      }
+    ],
+    "electrics": []
+  },
+  "poster": "assets/projects/lo-que-queda-de-ti-2025/poster.jpg"
+}

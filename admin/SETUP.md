@@ -5,11 +5,39 @@ After the first setup, day-to-day usage is just "go to `/admin`, log in, edit".
 
 ---
 
+## Cloudflare Pages build command (do this once)
+
+**v3.14.16+ requires a build step.** The Decap admin edits `films` and
+`people` as folder-based collections (one file per entry) because the
+relation widget doesn't index file-based collections reliably. A tiny
+build script (`scripts/build.js`) aggregates those folders back to the
+single `data/films.json` and `data/people.json` files the production
+site reads.
+
+In the Cloudflare Pages dashboard for this project:
+1. Go to **Settings → Builds & deployments**
+2. **Build command**: `npm run build`
+3. **Build output directory**: `/` (unchanged — site is plain static)
+4. **Environment variables**: none required (the Worker handles secrets)
+5. Save
+
+If you skip this, the live site will keep serving the old
+`data/films.json` / `data/people.json` aggregates even after the admin
+publishes new entries. Symptom: admin edits save fine, but the public
+site shows stale data.
+
+For local development, just run `npm run build` from the repo root
+before opening `index.html` in your browser. The build is idempotent
+and takes <1 second.
+
+---
+
 ## Prerequisites
 
 - A GitHub account (Tarek or whoever will edit content)
 - Cloudflare account (for the OAuth proxy Worker)
 - `wrangler` CLI installed locally (`npm install -g wrangler`) — or use the Cloudflare dashboard instead
+- Node.js 18+ (only needed locally to run `npm run build`)
 
 ## Step 1: Tarek gets a GitHub account
 

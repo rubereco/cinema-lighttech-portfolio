@@ -1,0 +1,12 @@
+{
+  "name": "cinema-lighttech-portfolio",
+  "version": "3.14.16",
+  "private": true,
+  "description": "Tarek Recolons' cinema + lighting tech portfolio. Static site with a Decap CMS admin panel for self-serve content edits.",
+  "scripts": {
+    "build": "node scripts/build.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

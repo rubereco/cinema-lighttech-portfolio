@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "lastUpdated": "2026-08-04",
-    "version": "1.2"
+    "version": "1.3",
+    "lastUpdated": "2026-08-06"
   },
   "people": [
     {
@@ -23,6 +23,18 @@
     {
       "id": "isabel-coixet",
       "name": "Isabel Coixet",
+      "kind": "director",
+      "portrait": null
+    },
+    {
+      "id": "marc-ortiz-prades",
+      "name": "Marc Ortiz Prades",
+      "kind": "director",
+      "portrait": null
+    },
+    {
+      "id": "miguel-faus",
+      "name": "Miguel Faus",
       "kind": "director",
       "portrait": null
     },
@@ -53,18 +65,6 @@
       },
       "url": "https://nilsdalmases.com",
       "urlLabel": "Portfolio"
-    },
-    {
-      "id": "marc-ortiz-prades",
-      "name": "Marc Ortiz Prades",
-      "kind": "director",
-      "portrait": null
-    },
-    {
-      "id": "miguel-faus",
-      "name": "Miguel Faus",
-      "kind": "director",
-      "portrait": null
     },
     {
       "id": "placeholder-electric-1",

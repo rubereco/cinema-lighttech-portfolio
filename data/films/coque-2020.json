@@ -1,0 +1,21 @@
+{
+  "id": "coque-2020",
+  "title": "Coque",
+  "year": 2020,
+  "type": "Cortometraje",
+  "role": "Gaffer",
+  "credits": {
+    "production": [
+      "Somos Acme SL"
+    ],
+    "director": [],
+    "dop": [],
+    "gaffer": [
+      {
+        "id": "tarek-recolons"
+      }
+    ],
+    "electrics": []
+  },
+  "poster": "assets/projects/coque-2020/poster.jpg"
+}

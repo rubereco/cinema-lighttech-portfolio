@@ -1,0 +1,14 @@
+{
+  "id": "nils-dalmases",
+  "name": "Nils Dalmases",
+  "kind": "dop",
+  "relationship": "dp",
+  "portrait": "assets/images/partners/nils-dalmases.jpg",
+  "count": 0,
+  "description": {
+    "en": "Cinematographer. Portfolio at nilsdalmases.com.",
+    "es": "Director de fotografía. Portfolio en nilsdalmases.com."
+  },
+  "url": "https://nilsdalmases.com",
+  "urlLabel": "Portfolio"
+}

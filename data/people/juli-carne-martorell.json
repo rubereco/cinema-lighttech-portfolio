@@ -1,0 +1,14 @@
+{
+  "id": "juli-carne-martorell",
+  "name": "Juli Carné Martorell",
+  "kind": "dop",
+  "relationship": "dp",
+  "portrait": "assets/images/partners/juli-carne-martorell.jpg",
+  "count": 0,
+  "description": {
+    "en": "Cinematographer. Portfolio at julicarnemartorell.com.",
+    "es": "Director de fotografía. Portfolio en julicarnemartorell.com."
+  },
+  "url": "https://www.julicarnemartorell.com",
+  "urlLabel": "Portfolio"
+}

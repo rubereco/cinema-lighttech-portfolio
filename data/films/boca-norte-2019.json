@@ -1,0 +1,22 @@
+{
+  "id": "boca-norte-2019",
+  "title": "Boca Norte",
+  "year": 2019,
+  "type": "Serie TV",
+  "role": "Gaffer",
+  "credits": {
+    "production": [
+      "Playz",
+      "RTVE"
+    ],
+    "director": [],
+    "dop": [],
+    "gaffer": [
+      {
+        "id": "tarek-recolons"
+      }
+    ],
+    "electrics": []
+  },
+  "poster": "assets/projects/boca-norte-2019/poster.jpg"
+}

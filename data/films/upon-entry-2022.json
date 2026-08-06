@@ -1,0 +1,19 @@
+{
+  "id": "upon-entry-2022",
+  "title": "Upon Entry",
+  "year": 2022,
+  "type": "Largometraje",
+  "role": "Grip",
+  "credits": {
+    "production": [],
+    "director": [
+      {
+        "id": "alejandro-rojas"
+      }
+    ],
+    "dop": [],
+    "gaffer": [],
+    "electrics": []
+  },
+  "poster": "assets/projects/upon-entry-2022/poster.jpg"
+}

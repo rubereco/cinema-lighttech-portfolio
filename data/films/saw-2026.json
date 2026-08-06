@@ -1,0 +1,18 @@
+{
+  "id": "saw-2026",
+  "title": "Saw",
+  "year": 2026,
+  "type": "Largometraje",
+  "role": "Gaffer",
+  "credits": {
+    "production": [],
+    "director": [],
+    "dop": [],
+    "gaffer": [
+      {
+        "id": "tarek-recolons"
+      }
+    ],
+    "electrics": []
+  }
+}

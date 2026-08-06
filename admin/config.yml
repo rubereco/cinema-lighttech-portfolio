@@ -74,95 +74,96 @@ publish_mode: editorial_workflow
 collections:
   # 1) Films — canonical film records. Adding a film here makes it
   #    available to be referenced by the Work collection below.
+  #    v3.14.16: folder-based collection (one file per film in
+  #    data/films/<id>.json). Folder collections work reliably with
+  #    the relation widget — file collections with a nested list
+  #    don't (the relation index comes back empty). A tiny build
+  #    step (scripts/build.js) regenerates the legacy data/films.json
+  #    aggregate that the production site reads.
   - name: "films"
     label: "Films"
     label_singular: "Film"
     description: "Canonical film records (title, year, role, type, credits)."
-    files:
-      - name: "films-data"
-        label: "Films"
-        file: "data/films.json"
-        format: "json"
+    folder: "data/films"
+    extension: "json"
+    format: "json"
+    create: true
+    delete: true
+    slug: "{{id}}"
+    fields:
+      - { name: "id",    label: "ID (kebab-case-title-year)", widget: "string", hint: "e.g. els-mals-noms-2025" }
+      - { name: "title", label: "Title",   widget: "string" }
+      - { name: "year",  label: "Year",    widget: "number", value_type: "int", min: 1950, max: 2100 }
+      - { name: "role",  label: "Tarek's role on this film", widget: "string", hint: "e.g. Gaffer, Best Boy Electric, Electric" }
+      - name: "type"
+        label: "Type"
+        widget: "select"
+        options:
+          - { label: "Feature (Largometraje)", value: "Largometraje" }
+          - { label: "TV Series (Serie TV)",    value: "Serie TV" }
+          - { label: "Short (Cortometraje)",    value: "Cortometraje" }
+          - { label: "Commercial",              value: "Comercial" }
+          - { label: "Other",                   value: "Otro" }
+      - name: "credits"
+        label: "Credits"
+        widget: "object"
+        collapsed: true
         fields:
-          - name: "films"
-            label: "Films"
+          - name: "production"
+            label: "Production companies"
             widget: "list"
-            summary: "{{fields.title}} ({{fields.year}}) — {{fields.role}}"
-            fields:
-              - { name: "id",    label: "ID (kebab-case-title-year)", widget: "string", hint: "e.g. els-mals-noms-2025" }
-              - { name: "title", label: "Title",   widget: "string" }
-              - { name: "year",  label: "Year",    widget: "number", value_type: "int", min: 1950, max: 2100 }
-              - { name: "role",  label: "Tarek's role on this film", widget: "string", hint: "e.g. Gaffer, Best Boy Electric, Electric" }
-              - name: "type"
-                label: "Type"
-                widget: "select"
-                options:
-                  - { label: "Feature (Largometraje)", value: "Largometraje" }
-                  - { label: "TV Series (Serie TV)",    value: "Serie TV" }
-                  - { label: "Short (Cortometraje)",    value: "Cortometraje" }
-                  - { label: "Commercial",              value: "Comercial" }
-                  - { label: "Other",                   value: "Otro" }
-              - name: "credits"
-                label: "Credits"
-                widget: "object"
-                collapsed: true
-                fields:
-                  - name: "production"
-                    label: "Production companies"
-                    widget: "list"
-                    field: { name: "name", label: "Company", widget: "string" }
-                    required: false
-                    hint: "Free-text for now — production companies aren't in the companies collection (only equipment houses are). Once you add production entries to a collection, this can become a relation widget too."
-                  - name: "director"
-                    label: "Director"
-                    widget: "list"
-                    # v3.14.14: relation widget. Each list item is
-                    # a {id: "..."} object — required by Decap's
-                    # list widget. The data was previously a flat
-                    # string array; the migration in this commit
-                    # upgraded it to the object shape the schema
-                    # expected all along.
-                    field:
-                      name: "id"
-                      label: "Director"
-                      widget: "relation"
-                      collection: "people"
-                      searchFields: ["name"]
-                      valueField: "id"
-                      displayFields: ["name", "kind"]
-                  - name: "dop"
-                    label: "Cinematographer"
-                    widget: "list"
-                    field:
-                      name: "id"
-                      label: "Cinematographer"
-                      widget: "relation"
-                      collection: "people"
-                      searchFields: ["name"]
-                      valueField: "id"
-                      displayFields: ["name", "kind"]
-                  - name: "gaffer"
-                    label: "Gaffer"
-                    widget: "list"
-                    field:
-                      name: "id"
-                      label: "Gaffer"
-                      widget: "relation"
-                      collection: "people"
-                      searchFields: ["name"]
-                      valueField: "id"
-                      displayFields: ["name", "kind"]
-                  - name: "electrics"
-                    label: "Electrics"
-                    widget: "list"
-                    field:
-                      name: "id"
-                      label: "Electric"
-                      widget: "relation"
-                      collection: "people"
-                      searchFields: ["name"]
-                      valueField: "id"
-                      displayFields: ["name", "kind"]
+            field: { name: "name", label: "Company", widget: "string" }
+            required: false
+            hint: "Free-text for now — production companies aren't in the companies collection (only equipment houses are). Once you add production entries to a collection, this can become a relation widget too."
+          - name: "director"
+            label: "Director"
+            widget: "list"
+            # v3.14.14: relation widget. Each list item is
+            # a {id: "..."} object — required by Decap's
+            # list widget. v3.14.16: people collection is now
+            # folder-based, so the relation widget's index
+            # actually loads.
+            field:
+              name: "id"
+              label: "Director"
+              widget: "relation"
+              collection: "people"
+              searchFields: ["name"]
+              valueField: "id"
+              displayFields: ["name", "kind"]
+          - name: "dop"
+            label: "Cinematographer"
+            widget: "list"
+            field:
+              name: "id"
+              label: "Cinematographer"
+              widget: "relation"
+              collection: "people"
+              searchFields: ["name"]
+              valueField: "id"
+              displayFields: ["name", "kind"]
+          - name: "gaffer"
+            label: "Gaffer"
+            widget: "list"
+            field:
+              name: "id"
+              label: "Gaffer"
+              widget: "relation"
+              collection: "people"
+              searchFields: ["name"]
+              valueField: "id"
+              displayFields: ["name", "kind"]
+          - name: "electrics"
+            label: "Electrics"
+            widget: "list"
+            field:
+              name: "id"
+              label: "Electric"
+              widget: "relation"
+              collection: "people"
+              searchFields: ["name"]
+              valueField: "id"
+              displayFields: ["name", "kind"]
 
   # 2) Work — the ordered list of films shown on the homepage. Each
   #    row references a film by id. Reorder via drag-and-drop in the UI.
@@ -196,54 +197,49 @@ collections:
                 displayFields: ["title", "year"]
 
   # 3) People — all people entries. Some are film credits (kind: director,
-  #    dop, gaffer, electric), some are partners (kind: collaborator
-  #    with a relationship: dp | electric). The CMS doesn't enforce
-  #    which kind/relationship combos make sense — keep them in sync
-  #    with the existing data shape.
+  #    dop, gaffer, electric), some are partners (relationship: dp | electric).
+  #    v3.14.16: folder-based collection. See films comment for the
+  #    rationale. One file per person in data/people/<id>.json.
   - name: "people"
     label: "People"
     label_singular: "Person"
     description: "Directors, DPs, gaffers, electrics, and partner collaborators."
-    files:
-      - name: "people-data"
-        label: "People"
-        file: "data/people.json"
-        format: "json"
+    folder: "data/people"
+    extension: "json"
+    format: "json"
+    create: true
+    delete: true
+    slug: "{{id}}"
+    fields:
+      - { name: "id",   label: "ID (kebab-case)",  widget: "string", hint: "e.g. juli-carne-martorell" }
+      - { name: "name", label: "Name",              widget: "string" }
+      - name: "kind"
+        label: "Kind (film credit role)"
+        widget: "select"
+        options:
+          - { label: "Subject (Tarek himself)",     value: "subject" }
+          - { label: "Director (film credit)",      value: "director" }
+          - { label: "DP / DoP (film credit)",      value: "dop" }
+          - { label: "Gaffer (film credit)",        value: "gaffer" }
+          - { label: "Electric (film credit)",      value: "electric" }
+        hint: "v3.14.15: 'collaborator' removed. A person can be BOTH a film credit (kind) AND a partner (relationship) — e.g. an electric with relationship: 'electric' shows up on the partners page AND can be selected as the electric on a film."
+      - { name: "relationship", label: "Partner page section (optional)", widget: "select", required: false, options: ["dp", "electric"], hint: "v3.14.15: set this to put the person on the partners page in that section (dp = Cinematographers, electric = Electricians). Leave empty to keep them only as a film credit. Independent of kind — an electric with relationship: 'electric' works as both." }
+      - { name: "portrait",  label: "Portrait path", widget: "string", required: false, hint: "e.g. assets/images/partners/juli-carne-martorell.jpg" }
+      - { name: "count",     label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
+      - { name: "imdb",      label: "IMDb id",     widget: "string", required: false }
+      - { name: "imdbUrl",   label: "IMDb URL",    widget: "string", required: false }
+      - { name: "instagram", label: "Instagram handle", widget: "string", required: false }
+      - { name: "instagramUrl", label: "Instagram URL", widget: "string", required: false }
+      - name: "description"
+        label: "Description"
+        widget: "object"
+        collapsed: true
+        required: false
         fields:
-          - name: "people"
-            label: "People"
-            widget: "list"
-            summary: "{{fields.name}} ({{fields.kind}}{{fields.relationship ? ' / ' + fields.relationship : ''}})"
-            fields:
-              - { name: "id",   label: "ID (kebab-case)",  widget: "string", hint: "e.g. juli-carne-martorell" }
-              - { name: "name", label: "Name",              widget: "string" }
-              - name: "kind"
-                label: "Kind (film credit role)"
-                widget: "select"
-                options:
-                  - { label: "Subject (Tarek himself)",     value: "subject" }
-                  - { label: "Director (film credit)",      value: "director" }
-                  - { label: "DP / DoP (film credit)",      value: "dop" }
-                  - { label: "Gaffer (film credit)",        value: "gaffer" }
-                  - { label: "Electric (film credit)",      value: "electric" }
-                hint: "v3.14.15: 'collaborator' removed. A person can be BOTH a film credit (kind) AND a partner (relationship) — e.g. an electric with relationship: 'electric' shows up on the partners page AND can be selected as the electric on a film."
-              - { name: "relationship", label: "Partner page section (optional)", widget: "select", required: false, options: ["dp", "electric"], hint: "v3.14.15: set this to put the person on the partners page in that section (dp = Cinematographers, electric = Electricians). Leave empty to keep them only as a film credit. Independent of kind — an electric with relationship: 'electric' works as both." }
-              - { name: "portrait",  label: "Portrait path", widget: "string", required: false, hint: "e.g. assets/images/partners/juli-carne-martorell.jpg" }
-              - { name: "count",     label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
-              - { name: "imdb",      label: "IMDb id",     widget: "string", required: false }
-              - { name: "imdbUrl",   label: "IMDb URL",    widget: "string", required: false }
-              - { name: "instagram", label: "Instagram handle", widget: "string", required: false }
-              - { name: "instagramUrl", label: "Instagram URL", widget: "string", required: false }
-              - name: "description"
-                label: "Description"
-                widget: "object"
-                collapsed: true
-                required: false
-                fields:
-                  - { name: "en", label: "English", widget: "text", required: false }
-                  - { name: "es", label: "Spanish", widget: "text", required: false }
-              - { name: "url",      label: "Website URL",     widget: "string", required: false }
-              - { name: "urlLabel", label: "URL label",       widget: "string", required: false, hint: "e.g. 'Portfolio', 'Website'" }
+          - { name: "en", label: "English", widget: "text", required: false }
+          - { name: "es", label: "Spanish", widget: "text", required: false }
+      - { name: "url",      label: "Website URL",     widget: "string", required: false }
+      - { name: "urlLabel", label: "URL label",       widget: "string", required: false, hint: "e.g. 'Portfolio', 'Website'" }
 
   # 4) Companies — partner businesses (equipment houses, post houses,
   #    any other non-individual partner).
