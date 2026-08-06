@@ -377,7 +377,8 @@ const FILM_MODAL = (() => {
   // ─── Inline-first data loader (file:// compatibility) ────────────────
   const BLOCKS = [
     { src: "data/films.json",  inline: "tarek-films"  },
-    { src: "data/people.json", inline: "tarek-people" }
+    { src: "data/people.json", inline: "tarek-people" },
+    { src: "data/jobs.json",   inline: "tarek-jobs"   }
   ];
 
   function readInline(id) {
@@ -401,15 +402,18 @@ const FILM_MODAL = (() => {
 
   let filmsById = null;
   let peopleById = null;
+  let jobsById = null;
   let modal = null;
 
   async function loadData() {
-    const [films, people] = await Promise.all(BLOCKS.map(loadBlock));
+    const [films, people, jobs] = await Promise.all(BLOCKS.map(loadBlock));
     if (!films || !people) return false;
     filmsById = {};
     for (const f of (films.films || [])) filmsById[f.id] = f;
     peopleById = {};
     for (const p of (people.people || [])) peopleById[p.id] = p;
+    jobsById = {};
+    for (const j of (jobs?.jobs || [])) jobsById[j.id] = j;
     return true;
   }
 
@@ -420,38 +424,52 @@ const FILM_MODAL = (() => {
     return div.innerHTML;
   }
 
-  function personNames(ids) {
-    if (!ids || !ids.length) return null;
-    return ids.map((id) => {
-      const person = peopleById[id];
-      return person ? person.name : id;
-    });
-  }
-
-  // v3.14.17: with credits now a flat list of {personId, role,
-  // description.i18n}, we group by role pattern and map to the
-  // 4 crew rows (director / dop / gaffer / electrics) that the
-  // modal still has. The role is free-text on the credit, so
-  // we use regex patterns to bucket it. People with roles that
-  // don't match any pattern (e.g. "Sound Mixer", "1st AC")
-  // simply don't render in the modal — they'd need a UI row
-  // added for them.
-  const ROLE_TO_ROW = [
-    { row: "director",  pattern: /^\s*director\s*$/i },
-    { row: "dop",       pattern: /director of photo|cinemat|^\s*d[\sop]*p?\s*$/i },
-    { row: "gaffer",    pattern: /gaffer/i },
-    { row: "electrics", pattern: /electric|spark|best boy/i },
-  ];
+  // v3.14.18: credits.people[].jobId points at the Jobs
+  // collection. Map each jobId to one of the modal's 4 rows.
+  // The job's category is preserved in the data; the UI bucketing
+  // is by jobId so "gaffer" stays separate from "electric" /
+  // "sparks" / "best-boy-electric". The role name appears in
+  // parens next to the person when there are multiple credits
+  // in the same row (e.g. "Juli Carné Martorell (Camera Operator)").
+  const JOBID_TO_ROW = {
+    director:               "director",
+    "assistant-director":   "director",
+    dop:                    "dop",
+    "camera-operator":      "dop",
+    "1st-ac":               "dop",
+    "2nd-ac":               "dop",
+    gaffer:                 "gaffer",
+    "best-boy-electric":    "electrics",
+    electric:               "electrics",
+    sparks:                 "electrics",
+    // sound / production / other: no UI row yet — would need a row
+  };
   function groupCrewByRow(people) {
     const out = { director: [], dop: [], gaffer: [], electrics: [] };
     for (const credit of people || []) {
-      const role = credit.role || "";
-      const name = peopleById[credit.personId]?.name || credit.personId;
-      for (const { row, pattern } of ROLE_TO_ROW) {
-        if (pattern.test(role)) { out[row].push(name); break; }
+      const row = JOBID_TO_ROW[credit.jobId];
+      if (!row) continue;
+      const job = jobsById?.[credit.jobId];
+      const personName = peopleById[credit.personId]?.name || credit.personId;
+      const jobName = job?.name?.en || credit.jobId;
+      // If the row already has this person, append the job name.
+      const existing = out[row].find((c) => c.personId === credit.personId);
+      if (existing) {
+        existing.jobs.push(jobName);
+      } else {
+        out[row].push({ personId: credit.personId, name: personName, jobs: [jobName] });
       }
     }
     return out;
+  }
+  function renderCrewRow(arr) {
+    if (!arr || !arr.length) return renderList(null);
+    // "Name" when one job, "Name (job1, job2)" when multiple.
+    const lines = arr.map((c) => {
+      const jobs = c.jobs.length > 1 ? ` (${c.jobs.join(", ")})` : "";
+      return `${c.name}${jobs}`;
+    });
+    return renderList(lines);
   }
 
   function renderList(arr) {
@@ -507,16 +525,15 @@ const FILM_MODAL = (() => {
     }
 
     // Crew rows
-    // v3.14.17: credits.people is a flat list of {personId, role,
-    // description.i18n}. Group by role pattern, then render into
-    // the 4 fixed rows (director / dop / gaffer / electrics).
+    // v3.14.18: credits.people[].jobId → Jobs collection, then
+    // bucketed by the job's category into one of 4 UI rows.
     const credits = film.credits || {};
     const grouped = groupCrewByRow(credits.people);
     document.getElementById("film-modal-production").innerHTML = renderList(credits.production);
-    document.getElementById("film-modal-director").innerHTML  = renderList(grouped.director);
-    document.getElementById("film-modal-dop").innerHTML       = renderList(grouped.dop);
-    document.getElementById("film-modal-gaffer").innerHTML    = renderList(grouped.gaffer);
-    document.getElementById("film-modal-electrics").innerHTML = renderList(grouped.electrics);
+    document.getElementById("film-modal-director").innerHTML  = renderCrewRow(grouped.director);
+    document.getElementById("film-modal-dop").innerHTML       = renderCrewRow(grouped.dop);
+    document.getElementById("film-modal-gaffer").innerHTML    = renderCrewRow(grouped.gaffer);
+    document.getElementById("film-modal-electrics").innerHTML = renderCrewRow(grouped.electrics);
 
     // Hide whole dt/dd pairs that have no data, so we don't show
     // empty "Director: —" lines for films where that field is empty.

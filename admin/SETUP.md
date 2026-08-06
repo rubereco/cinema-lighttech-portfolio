@@ -159,29 +159,52 @@ Without editorial_workflow, step 10 would have triggered TWO separate Cloudflare
 - **Save succeeds but live site doesn't change** — Cloudflare Pages hasn't rebuilt yet. Wait 60s and hard-refresh. Check the Pages deploy log at https://dash.cloudflare.com → Pages → your project → Deployments. **Also confirm the build command is set to `npm run build`** (see top of this file) — without it, the live site keeps serving the old data/films.json and data/people.json aggregates even after the publish.
 - **JSON syntax error in i18n** — roll back via git: `git checkout HEAD~1 -- data/i18n.json`, then commit + push the fix.
 
-## Data model (v3.14.17)
+## Data model (v3.14.18)
 
-Three collections work together for credits and people:
+Four collections, fully normalized. No duplication of role info anywhere.
 
-1. **People** (`data/people/<id>.json`):
-   - `kind`: primary role tag (subject / director / dop / gaffer / electric) — used for the relation dropdown and quick identification
-   - `relationship`: optional (dp / electric) — drives the partners page category
-   - `works`: list of `{role, year, project, description.i18n}` — the person's portfolio. A director who's also a dop has both. A gaffer who started as sparks has both, with different years.
-   - Plus bio fields (portrait, description.i18n, imdb, instagram, url, urlLabel)
+1. **Jobs** (`data/jobs/<id>.json`) — the catalog of possible roles. Each job has:
+   - `id` (kebab-case): e.g. `gaffer`, `dop`, `sparks`
+   - `name.en` / `name.es`: human-readable, i18n
+   - `category`: which department (direction / cinematography / lighting / sound / production / other). Drives the partners page section a jobId falls into.
 
-2. **Films** (`data/films/<id>.json`):
-   - `people`: flat list of `{personId, role, department, description.i18n}` — every credit on this film
-   - `production`: free-text list of production companies (separate from the credits.people list)
-   - No more role-grouped fields (director / dop / gaffer / electrics). One person can be on a film multiple times if they did multiple roles.
+   Adding a new role is just adding a file: `data/jobs/<id>.json`.
 
-3. **Work order** (`data/work.json`):
+2. **People** (`data/people/<id>.json`) — just a collaborator. Bio + contact + partnership:
+   - `partnership` (optional): `{jobIds: [...], since: <year>, description.i18n}` — which jobs this person partners with Tarek in. The partners page shows them in each section that matches their jobIds' categories.
+   - `portrait`, `description.i18n` (bio), `imdb`, `instagram`, `url`, `urlLabel`
+   - **No `kind` field** — a person is not "a dop" or "a gaffer", they are a person. Their role on a specific film is on that film, not on them.
+   - **No `works` field** — the list of films they've worked on is derived from the film credits, no duplication.
+
+3. **Films** (`data/films/<id>.json`):
+   - `credits.people`: flat list of `{personId, jobId, description.i18n}` — every credit on this film references a person AND a job. The person can be on a film multiple times if they did multiple jobs.
+   - `credits.production`: free-text list of production companies.
+   - The film modal groups credits by the jobId's category: direction → Director row, cinematography → DoP row, lighting → split into Gaffer + Electrics rows, etc.
+
+4. **Work order** (`data/work.json`):
    - Unchanged. Ordered list of `{filmId}` rows. Drives the homepage poster wall.
 
-Adding a credit on a film: open the film → Credits → "+ Add person" → pick from the People dropdown → set role (free-text: "Director", "DoP", "Gaffer", "Best Boy Electric", "Sparks", "1st AC", whatever) → optionally set department + i18n description.
+5. **Companies** (`data/companies.json`):
+   - Unchanged. Equipment houses, post houses, etc. (not normalized the same way — they're a small fixed list, no need for a folder collection yet.)
 
-Adding a work to a person: open the person → Works → "+ Add work" → role / year / project / optional i18n description.
+**Adding a credit on a film:** open the film → credits → "+ Add person" → pick from the People dropdown → pick a Job from the Jobs dropdown (shows "Director of Photography (cinematography)" so you know what you're picking) → optional i18n description. Doesn't auto-add the person to a partnership.
 
-These two are independent — a credit on a film does NOT auto-add a work to the person, and vice versa. That gives you full control: a recurring collaborator with no specific film credit yet can be on the partners page with no works; a one-off film credit can be added without polluting the person's works.
+**Adding a partnership:** open the person → Partnership → set `jobIds` (one or more from the Jobs dropdown) → optional `since` year → optional i18n description. Makes them appear on the partners page in the sections for those jobIds' categories.
+
+These two are independent — a credit on a film does NOT auto-add a partnership, and vice versa. Gives Tarek full control over each separately.
+
+**Current job catalog (15 entries):**
+
+| Category | Jobs |
+|---|---|
+| Direction | director, assistant-director |
+| Cinematography | dop, camera-operator, 1st-ac, 2nd-ac |
+| Lighting | gaffer, best-boy-electric, electric, sparks |
+| Sound | sound-mixer |
+| Production | producer, production-manager |
+| Other | writer, editor |
+
+Add more via the admin (Jobs collection) as needed.
 
 ## For future work (Phase 2, not now)
 
@@ -189,3 +212,4 @@ These two are independent — a credit on a film does NOT auto-add a work to the
 - **Cloudflare R2** — large photo uploads bypass the repo, land in a bucket. Good for >100 MB of photos total.
 - **Structured i18n fields** — promote `data/i18n.json` from raw JSON editor to per-key widgets. Useful if Tarek is editing translations often.
 - **Film detail per-credit descriptions** — the new `description.i18n` on each film credit is currently collected but not rendered on the public site. Would need a small UI change to show "Marc Ortiz Prades — Director — 'A character study set in Barcelona...'" on the film detail page.
+- **Production companies as a Jobs-style collection** — currently `credits.production` is a free-text list. Could be its own folder collection so it's searchable + consistent.

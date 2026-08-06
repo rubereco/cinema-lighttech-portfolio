@@ -1,15 +1,21 @@
 {
   "id": "placeholder-electric-1",
   "name": "Marc Vidal",
-  "kind": "electric",
-  "relationship": "electric",
   "portrait": null,
-  "count": 6,
   "description": {
     "en": "PLACEHOLDER — replace with real collaborator data. Reliable electrician with extensive feature-film experience.",
     "es": "PLACEHOLDER — reemplazar con datos reales del colaborador. Eléctrico fiable con amplia experiencia en largometrajes."
   },
   "url": null,
   "urlLabel": null,
-  "works": []
+  "partnership": {
+    "jobIds": [
+      "electric"
+    ],
+    "since": null,
+    "description": {
+      "en": "",
+      "es": ""
+    }
+  }
 }

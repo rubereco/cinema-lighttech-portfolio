@@ -13,11 +13,11 @@
     "people": [
       {
         "personId": "isabel-coixet",
-        "role": "Director",
         "description": {
           "en": "",
           "es": ""
-        }
+        },
+        "jobId": "director"
       }
     ]
   },

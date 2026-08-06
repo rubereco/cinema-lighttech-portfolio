@@ -62,16 +62,26 @@ const films = readDir("data/films").sort((a, b) => {
   if ((b.year ?? 0) !== (a.year ?? 0)) return (b.year ?? 0) - (a.year ?? 0);
   return (a.id ?? "").localeCompare(b.id ?? "");
 });
-writeAggregate("data/films.json", "films", films, { version: "1.2" });
+writeAggregate("data/films.json", "films", films, { version: "1.3" });
 
-// ─── People: sort by kind order, then by id ────────────────────────
-const KIND_ORDER = { subject: 0, director: 1, dop: 2, gaffer: 3, electric: 4 };
+// ─── People: sort by partnership first (regular collaborators
+//     before one-off film credits), then by name ─────────────────
 const people = readDir("data/people").sort((a, b) => {
-  const ka = KIND_ORDER[a.kind] ?? 99;
-  const kb = KIND_ORDER[b.kind] ?? 99;
-  if (ka !== kb) return ka - kb;
-  return (a.id ?? "").localeCompare(b.id ?? "");
+  const ap = a.partnership?.jobIds?.length ? 0 : 1;
+  const bp = b.partnership?.jobIds?.length ? 0 : 1;
+  if (ap !== bp) return ap - bp;
+  return (a.name ?? "").localeCompare(b.name ?? "");
 });
-writeAggregate("data/people.json", "people", people, { version: "1.4" });
+writeAggregate("data/people.json", "people", people, { version: "1.5" });
+
+// ─── Jobs: sort by category order, then by name ──────────────────
+const CATEGORY_ORDER = { direction: 0, cinematography: 1, lighting: 2, sound: 3, production: 4, other: 5 };
+const jobs = readDir("data/jobs").sort((a, b) => {
+  const ca = CATEGORY_ORDER[a.category] ?? 99;
+  const cb = CATEGORY_ORDER[b.category] ?? 99;
+  if (ca !== cb) return ca - cb;
+  return (a.name?.en ?? "").localeCompare(b.name?.en ?? "");
+});
+writeAggregate("data/jobs.json", "jobs", jobs, { version: "1.0" });
 
 console.log("build complete.");

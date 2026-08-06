@@ -9,11 +9,11 @@
     "people": [
       {
         "personId": "alejandro-rojas",
-        "role": "Director",
         "description": {
           "en": "",
           "es": ""
-        }
+        },
+        "jobId": "director"
       }
     ]
   },

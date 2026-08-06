@@ -107,15 +107,14 @@ collections:
       - name: "people"
         label: "People on this film"
         widget: "list"
-        # v3.14.17: replaced the four role-grouped fields
-        # (director / dop / gaffer / electrics) with a single
-        # flat list. Each entry is {personId, role, department,
-        # description.i18n} — a person can show up multiple
-        # times if they did multiple roles (e.g. Director + DP),
-        # the role is free-text so "Best Boy Electric" / "Sparks"
-        # / "1st AC" all work, and the description supports
-        # per-credit i18n for the film detail page.
-        summary: "{{fields.role}} — {{fields.personId}}"
+        # v3.14.18: credits.people now references the Jobs
+        # collection (data/jobs/) by jobId — a normalized
+        # relationship, no free-text role strings. The dropdown
+        # shows job name (i18n) so Tarek picks "Director of
+        # Photography" not "dop" or "DoP" or "DP". The
+        # description is per-credit i18n for the film detail
+        # page.
+        summary: "{{fields.jobId}} — {{fields.personId}}"
         fields:
           - name: "personId"
             label: "Person"
@@ -123,20 +122,14 @@ collections:
             collection: "people"
             searchFields: ["name"]
             valueField: "id"
-            displayFields: ["name", "kind"]
-          - { name: "role", label: "Role on this film", widget: "string", hint: "Free-text — e.g. Director, DoP, Gaffer, Best Boy Electric, Sparks, 1st AC" }
-          - name: "department"
-            label: "Department (for grouping on the public page)"
-            widget: "select"
-            required: false
-            options:
-              - { label: "Direction",          value: "direction" }
-              - { label: "Cinematography",     value: "cinematography" }
-              - { label: "Lighting",           value: "lighting" }
-              - { label: "Sound",              value: "sound" }
-              - { label: "Production",         value: "production" }
-              - { label: "Other",              value: "other" }
-            hint: "Used to group credits under section headers on the film detail page. Optional — leave blank to skip grouping."
+            displayFields: ["name"]
+          - name: "jobId"
+            label: "Job / role on this film"
+            widget: "relation"
+            collection: "jobs"
+            searchFields: ["name.en", "name.es", "id"]
+            valueField: "id"
+            displayFields: ["name.en", "category"]
           - name: "description"
             label: "Description (per credit, optional)"
             widget: "object"
@@ -146,7 +139,42 @@ collections:
               - { name: "en", label: "English", widget: "text", required: false }
               - { name: "es", label: "Spanish", widget: "text", required: false }
 
-  # 2) Work — the ordered list of films shown on the homepage. Each
+  # 2) Jobs — the catalog of possible roles. One file per job in
+  #    data/jobs/<id>.json. v3.14.18: new normalized table so the
+  #    person is just a collaborator (no role on them), and the
+  #    role on a credit references a job here. Adding a new role
+  #    is just adding a file here — no schema change.
+  - name: "jobs"
+    label: "Jobs / roles"
+    label_singular: "Job"
+    description: "Catalog of roles. Each film credit references one of these by id."
+    folder: "data/jobs"
+    extension: "json"
+    format: "json"
+    create: true
+    delete: true
+    slug: "{{id}}"
+    fields:
+      - { name: "id", label: "ID (kebab-case)", widget: "string", hint: "e.g. gaffer, dop, sparks" }
+      - name: "name"
+        label: "Name (i18n)"
+        widget: "object"
+        fields:
+          - { name: "en", label: "English", widget: "string" }
+          - { name: "es", label: "Spanish", widget: "string" }
+      - name: "category"
+        label: "Department category"
+        widget: "select"
+        options:
+          - { label: "Direction",       value: "direction" }
+          - { label: "Cinematography",  value: "cinematography" }
+          - { label: "Lighting",        value: "lighting" }
+          - { label: "Sound",           value: "sound" }
+          - { label: "Production",      value: "production" }
+          - { label: "Other",           value: "other" }
+        hint: "Drives which section the job (and any person partnering in it) shows up in on the partners page. A 'gaffer' is lighting, a 'dop' is cinematography, etc."
+
+  # 3) Work — the ordered list of films shown on the homepage. Each
   #    row references a film by id. Reorder via drag-and-drop in the UI.
   - name: "work"
     label: "Work order"
@@ -194,34 +222,35 @@ collections:
     fields:
       - { name: "id",   label: "ID (kebab-case)",  widget: "string", hint: "e.g. juli-carne-martorell" }
       - { name: "name", label: "Name",              widget: "string" }
-      - name: "kind"
-        label: "Primary role"
-        widget: "select"
-        options:
-          - { label: "Subject (Tarek himself)",     value: "subject" }
-          - { label: "Director",                    value: "director" }
-          - { label: "DP / DoP",                    value: "dop" }
-          - { label: "Gaffer",                      value: "gaffer" }
-          - { label: "Electric",                    value: "electric" }
-        hint: "v3.14.17: 'kind' is now just a primary-role tag (for the relation dropdown and quick identification). The actual roles this person has played are in 'Works' below — a person can be both director and dop, or sparks-then-gaffer, etc. Free to leave as the most common role or pick 'subject' for non-crew folks."
-      - { name: "relationship", label: "Partner page section (optional)", widget: "select", required: false, options: ["dp", "electric"], hint: "v3.14.15: set this to put the person on the partners page in that section (dp = Cinematographers, electric = Electricians). Leave empty to keep them only as a film credit. Independent of kind — an electric with relationship: 'electric' works as both." }
-      - name: "works"
-        label: "Works / collaborations"
-        widget: "list"
+      # v3.14.18: stripped the 'kind' and 'relationship' and 'works'
+      # fields. A person is just a collaborator — the role they
+      # played on a specific film lives on that film's credit (as
+      # a jobId reference to the Jobs collection). The only role-
+      # adjacent field on the person is 'partnership', which is a
+      # RELATIONSHIP (not a role) listing which jobs this person
+      # partners with Tarek in for the partners page.
+      - name: "partnership"
+        label: "Partnership (optional — only set for regular collaborators)"
+        widget: "object"
+        collapsed: true
         required: false
-        summary: "{{fields.role}} — {{fields.project}} ({{fields.year}})"
-        # v3.14.17: the person's portfolio. Each entry is one
-        # collaboration (a film, a project, anything). Role is free-
-        # text — Tarek can put "Director of Photography", "DoP",
-        # "Gaffer", "Best Boy Electric", "Sparks", whatever.
-        # Description is per-work i18n so Tarek can add details
-        # about specific collaborations in EN + ES.
+        hint: "Leave empty for one-off film credits. Set this to make the person appear on the partners page in the section(s) for their jobId(s)."
         fields:
-          - { name: "role",     label: "Role",         widget: "string", hint: "e.g. Director of Photography, Gaffer, Best Boy Electric, Sparks" }
-          - { name: "year",     label: "Year",         widget: "number", value_type: "int", required: false, hint: "When this collaboration happened" }
-          - { name: "project",  label: "Project",      widget: "string", required: false, hint: "e.g. Els Mals Noms, or a non-film project" }
+          - name: "jobIds"
+            label: "Jobs they partner in"
+            widget: "list"
+            field:
+              name: "jobId"
+              label: "Job"
+              widget: "relation"
+              collection: "jobs"
+              searchFields: ["name.en", "name.es", "id"]
+              valueField: "id"
+              displayFields: ["name.en", "category"]
+            hint: "The jobs this person regularly partners with Tarek in. A person can partner in multiple jobs (e.g. dop + director). The partners page shows them in each job's section based on its category."
+          - { name: "since",     label: "Partner since (year)", widget: "number", value_type: "int", required: false }
           - name: "description"
-            label: "Description (per work, optional)"
+            label: "Partnership note (i18n, optional)"
             widget: "object"
             collapsed: true
             required: false
@@ -234,10 +263,11 @@ collections:
       - { name: "instagram", label: "Instagram handle", widget: "string", required: false }
       - { name: "instagramUrl", label: "Instagram URL", widget: "string", required: false }
       - name: "description"
-        label: "Description"
+        label: "Bio (i18n)"
         widget: "object"
         collapsed: true
         required: false
+        hint: "Free-text bio. The structured portfolio (which films they worked on, in which role) is NOT here — it's derived from the film credits, no duplication."
         fields:
           - { name: "en", label: "English", widget: "text", required: false }
           - { name: "es", label: "Spanish", widget: "text", required: false }

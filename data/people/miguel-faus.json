@@ -1,17 +1,5 @@
 {
   "id": "miguel-faus",
   "name": "Miguel Faus",
-  "kind": "director",
-  "portrait": null,
-  "works": [
-    {
-      "role": "Director",
-      "year": 2023,
-      "project": "Calladita",
-      "description": {
-        "en": "",
-        "es": ""
-      }
-    }
-  ]
+  "portrait": null
 }

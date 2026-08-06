@@ -1,17 +1,5 @@
 {
   "id": "marc-ortiz-prades",
   "name": "Marc Ortiz Prades",
-  "kind": "director",
-  "portrait": null,
-  "works": [
-    {
-      "role": "Director",
-      "year": 2025,
-      "project": "Els Mals Noms",
-      "description": {
-        "en": "",
-        "es": ""
-      }
-    }
-  ]
+  "portrait": null
 }

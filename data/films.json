@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.2",
+    "version": "1.3",
     "lastUpdated": "2026-08-06"
   },
   "films": [
@@ -15,11 +15,11 @@
         "people": [
           {
             "personId": "tarek-recolons",
-            "role": "Gaffer",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "gaffer"
           }
         ]
       }
@@ -38,19 +38,19 @@
         "people": [
           {
             "personId": "marc-ortiz-prades",
-            "role": "Director",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "director"
           },
           {
             "personId": "tarek-recolons",
-            "role": "Gaffer",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "gaffer"
           }
         ]
       },
@@ -69,11 +69,11 @@
         "people": [
           {
             "personId": "tarek-recolons",
-            "role": "Gaffer",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "gaffer"
           }
         ]
       },
@@ -108,11 +108,11 @@
         "people": [
           {
             "personId": "tarek-recolons",
-            "role": "Gaffer",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "gaffer"
           }
         ]
       },
@@ -129,19 +129,19 @@
         "people": [
           {
             "personId": "miguel-faus",
-            "role": "Director",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "director"
           },
           {
             "personId": "tarek-recolons",
-            "role": "Gaffer",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "gaffer"
           }
         ]
       },
@@ -171,11 +171,11 @@
         "people": [
           {
             "personId": "alejandro-rojas",
-            "role": "Director",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "director"
           }
         ]
       },
@@ -206,11 +206,11 @@
         "people": [
           {
             "personId": "tarek-recolons",
-            "role": "Gaffer",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "gaffer"
           }
         ]
       },
@@ -230,11 +230,11 @@
         "people": [
           {
             "personId": "tarek-recolons",
-            "role": "Gaffer",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "gaffer"
           }
         ]
       },
@@ -255,11 +255,11 @@
         "people": [
           {
             "personId": "isabel-coixet",
-            "role": "Director",
             "description": {
               "en": "",
               "es": ""
-            }
+            },
+            "jobId": "director"
           }
         ]
       },

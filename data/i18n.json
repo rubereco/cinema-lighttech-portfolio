@@ -84,8 +84,8 @@
       "intro": "The companies, cinematographers, and lighting technicians I work with.",
       "logosLabel": "Companies",
       "section": {
-        "electric": "Electricians / Lighting Technicians",
-        "dp": "Cinematographers"
+        "cinematography": "Cinematographers",
+        "lighting": "Lighting Technicians"
       },
       "empty": "No partners listed yet.",
       "count": {
@@ -184,8 +184,8 @@
       "intro": "Las empresas, directores de fotografía y técnicos de iluminación con los que trabajo.",
       "logosLabel": "Empresas",
       "section": {
-        "electric": "Eléctricos / Técnicos de Luz",
-        "dp": "Directores de Fotografía"
+        "cinematography": "Directores de Fotografía",
+        "lighting": "Técnicos de Iluminación"
       },
       "empty": "Aún no hay colaboradores listados.",
       "count": {

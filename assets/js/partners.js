@@ -1,35 +1,37 @@
 /* ════════════════════════════════════════════════════════════════════════
    partners.js — render the #partners section in index.html from
-   data/people.json + data/companies.json.
+   data/people.json + data/companies.json + data/jobs.json.
 
    v3.13.0: was a standalone partners.html page. The content moved into
    the main page where the old Kit & Rental section used to be — the
    partner accordion now lives at <section id="partners"> and is
    rendered into the empty <div id="partners-content"> stub.
 
+   v3.14.18: the data layer is now fully normalized — a person is
+   just a collaborator (no role, no works, no relationship), and
+   their role on a film is a jobId referencing the Jobs collection.
+   The partners page shows a person only if they have a
+   `partnership.jobIds` field. Their section on the page is
+   determined by the CATEGORY of the jobs they partner in:
+     - dop / camera-operator / 1st-ac / 2nd-ac → cinematography
+     - gaffer / electric / sparks / best-boy-electric → lighting
+   This is fully data-driven: add a new jobId to the Jobs
+   collection, the partners page picks it up automatically. Add
+   a new section by adding a CATEGORIES entry + an i18n label.
+
    Architecture (incremental, easy to maintain):
-   - Categories are defined in CATEGORIES below. Each has:
-       source        — "companies" (match by `kind`) or "people" (match by `relationship`)
-       id            — discriminator against the source; for source:companies this
-                       is matched against company.kind; for source:people this
-                       is matched against person.relationship.
-       labelKey      — i18n key for the section header
-       layout        — CSS class that defines the card's image aspect ratio
-                       ("landscape", "wide", "square", "default")
-   - To add a new category:
-       1. Add an entry to CATEGORIES (pick source: "companies" or "people")
-       2. Add a line in data/i18n.json (en + es) under partners.section.*
-       3. Add a CSS rule for the layout class (or reuse an existing one)
-   - To remove a category: just delete its CATEGORIES entry. Partners with
-     that kind/relationship will silently not render.
-   - The data layer is two entities: people (data/people.json) and
-     companies (data/companies.json). People have TWO orthogonal fields:
-       kind          — film credit role (subject, director, dop, gaffer, electric)
-       relationship  — partner page section (dp, electric); if set, the
-                       person also shows up on the partners page.
-     This lets a person be BOTH a film credit AND a partner without
-     conflict. The composePartners() function merges them into a
-     uniform partners[] list, filtered per category by source.
+   - CATEGORIES is the single source of truth for which sections
+     the partners accordion has. Each has:
+       id        — matches a job.category (e.g. "cinematography")
+       source    — "companies" (match by company.kind) or "people"
+                   (match by person's partnership.jobIds categories)
+       labelKey  — i18n key for the section header
+   - To add a new section: add a CATEGORIES entry + a label in
+     data/i18n.json + (if a new job is needed) a new entry in
+     data/jobs/<id>.json.
+   - The data layer is three entities: people, companies, jobs.
+     composePartners() joins them into a single partners[] list
+     bucketed per CATEGORIES entry.
    - The renderer is fully data-driven. No per-category JS code.
 
    Loads inline-first (file:// compatibility) with fetch() fallback.
@@ -48,38 +50,16 @@
    *  coverage (no partners) are auto-collapsed so the empty state is hidden. */
   const DEFAULT_OPEN = false;
 
-  /** Category config. Single source of truth for section order, labels, and
-   *  card layout. The order here is the order rendered on the page.
-   *
-   *  v3.12.0: customer feedback reshaped the categories. Removed the
-   *  rental-partner and commercial-partner/other buckets. Added the
-   *  electricians / lighting technicians bucket ("eléctricos / técnicos
-   *  de luz") for the people Tarek works with on set.
-   *
-   *  v3.12.3: removed the per-category `layout` property. The card is
-   *  now a uniform IMDb-style list row (64px circular avatar + text),
-   *  so per-category aspect ratios are no longer needed.
-   *
-   *  v3.13.2: reordered per client — the electricians / sparks bucket
-   *  now sits at the bottom of the list (was first). Equipment Houses
-   *  lead, then Cinematographers, then Electricians. The "sparks"
-   *  category still has defaultOpen:true so it ships expanded on
-   *  first visit.
-   *
-   *  Each category is a view over the *partners* page composition:
-   *    source: "companies" → match companies by `kind` === id
-   *    source: "people"   → match people by `relationship` === id (kind is the
-   *                         separate film-credit role and is not consulted here)
-   *  The two source kinds keep people and companies cleanly separated at
-   *  the storage layer. v3.14.15: people no longer need kind="collaborator"
-   *  to appear on the partners page — they just need a relationship set.
-   */
+  /** Category config. Single source of truth for section order and labels.
+   *  Each id matches a job.category from data/jobs/. The renderer groups
+   *  people by their partnership.jobIds → resolved through jobs → category.
+   *  v3.14.18: the id is a JOB CATEGORY, not a static relationship. Adding
+   *  a new section is just adding a CATEGORIES entry + an i18n label.
+   *  The "lighting" section covers gaffer, electric, sparks, best-boy —
+   *  any job in the lighting category. Same for cinematography. */
   const CATEGORIES = [
-    // v3.13.11: equipment-house removed from the accordion — equipment
-    // houses now live in a separate logo carousel below the accordion
-    // (see renderLogosCarousel()).
-    { id: "dp",                 source: "people",   relationship: "dp",     labelKey: "partners.section.dp" },
-    { id: "electric",           source: "people",   relationship: "electric", labelKey: "partners.section.electric", defaultOpen: true },
+    { id: "cinematography", source: "people", labelKey: "partners.section.cinematography" },
+    { id: "lighting",       source: "people", labelKey: "partners.section.lighting", defaultOpen: true },
   ];
 
   // ─── Loaders ──────────────────────────────────────────────────────────
@@ -107,26 +87,53 @@
   }
 
   async function loadContent() {
-    const [peopleData, companiesData] = await Promise.all([
+    const [peopleData, companiesData, jobsData] = await Promise.all([
       loadBlock("tarek-people",    "data/people.json"),
       loadBlock("tarek-companies", "data/companies.json"),
+      loadBlock("tarek-jobs",      "data/jobs.json"),
     ]);
-    return composePartners(peopleData, companiesData);
+    return composePartners(peopleData, companiesData, jobsData);
   }
 
-  /** Merge people + companies into a single shape the renderer understands.
-   *  v3.14.15: the "appears on partners page" decision is now driven by
-   *  `relationship` (dp | electric) — NOT by `kind`. This way a person
-   *  can be BOTH a film credit (kind: director, dop, gaffer, electric)
-   *  AND a partner (relationship: dp or electric) without conflict.
-   *  Example: an electric who's a regular collaborator has
-   *  kind: "electric" + relationship: "electric" — they show up in
-   *  the partners page (via the relationship) AND can be selected as
-   *  the electric on a film (via the kind). */
-  function composePartners(peopleData, companiesData) {
-    const collaborators = (peopleData?.people ?? []).filter(
-      (p) => p.relationship === "dp" || p.relationship === "electric"
+  /** Merge people + companies + jobs into a single shape the renderer
+   *  understands. v3.14.18: a person is just a collaborator; their
+   *  partnership is a list of jobIds. We resolve each jobId through
+   *  the jobs collection to get the category, and use that to bucket
+   *  the person into the right section on the partners page.
+   *  A person with no `partnership.jobIds` is filtered out (they're
+   *  a one-off film credit, not a regular collaborator). */
+  function composePartners(peopleData, companiesData, jobsData) {
+    const jobsById = {};
+    for (const j of (jobsData?.jobs ?? [])) jobsById[j.id] = j;
+
+    // People who are partners = have a non-empty partnership.jobIds
+    const partners = (peopleData?.people ?? []).filter(
+      (p) => Array.isArray(p.partnership?.jobIds) && p.partnership.jobIds.length > 0
     );
+
+    // For each partner, compute the set of categories they cover
+    // (a person who partners as both gaffer and electric covers "lighting"
+    // but only needs to appear in the lighting section once).
+    const partnersWithCategories = partners.map((p) => {
+      const categories = new Set();
+      for (const jobId of p.partnership.jobIds) {
+        const job = jobsById[jobId];
+        if (job?.category) categories.add(job.category);
+      }
+      return {
+        id: p.id,
+        name: p.name,
+        categories: [...categories],  // array for easy .includes() in render
+        partnership: p.partnership,
+        image: p.portrait ?? null,
+        imageAlt: null,
+        description: p.description ?? { en: "", es: "" },
+        url: p.url ?? null,
+        urlLabel: p.urlLabel ?? null,
+        origin: "person",
+      };
+    });
+
     const companies = companiesData?.companies ?? [];
     return {
       partners: [
@@ -142,28 +149,15 @@
           urlLabel: c.urlLabel ?? null,
           origin: "company",
         })),
-        ...collaborators.map((p) => ({
-          id: p.id,
-          name: p.name,
-          kind: p.kind,                       // film-credit kind (director, dop, gaffer, electric…)
-          relationship: p.relationship,       // "dp" | "electric" — drives which partners section
-          image: p.portrait ?? null,
-          imageAlt: null,
-          count: p.count ?? 0,
-          description: p.description ?? { en: "", es: "" },
-          url: p.url ?? null,
-          urlLabel: p.urlLabel ?? null,
-          origin: "person",
-        })),
+        ...partnersWithCategories,
       ],
       // v3.13.12: also return the raw companies so the logo carousel
       // can filter by kind:"equipment-house" without going through
-      // the merged list (the merged list keeps the raw `kind` field
-      // so the company type is preserved).
-      // v3.14.15: people no longer carry kind="collaborator" — they
-      // keep their real film-credit kind (director, dop, etc.) and
-      // get categorized on the partners page via `relationship`.
+      // the merged list.
+      // v3.14.18: also return jobsById for any future code that needs
+      // to resolve jobId → category or name.
       companies,
+      jobsById,
     };
   }
 
@@ -268,7 +262,7 @@
     const hasImage = image.trim() !== "";
 
     const dataType = partner.origin === "person"
-      ? partner.relationship || partner.kind
+      ? (partner.categories?.[0] || partner.kind)  // first category, used as CSS hook
       : partner.kind;
 
     const imgHtml = hasImage
@@ -385,7 +379,7 @@
       // the film-credit role and is no longer restricted to "collaborator".
       const items = partners.filter((p) => {
         if (category.source === "companies") return p.kind === category.id;
-        if (category.source === "people")     return p.relationship === category.id;
+        if (category.source === "people")     return p.categories?.includes(category.id);
         return false;
       });
       return sectionHtml(category, items, lang);

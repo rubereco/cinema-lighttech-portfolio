@@ -1,17 +1,5 @@
 {
   "id": "alejandro-rojas",
   "name": "Alejandro Rojas",
-  "kind": "director",
-  "portrait": null,
-  "works": [
-    {
-      "role": "Director",
-      "year": 2022,
-      "project": "Upon Entry",
-      "description": {
-        "en": "",
-        "es": ""
-      }
-    }
-  ]
+  "portrait": null
 }

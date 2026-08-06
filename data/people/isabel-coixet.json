@@ -1,17 +1,5 @@
 {
   "id": "isabel-coixet",
   "name": "Isabel Coixet",
-  "kind": "director",
-  "portrait": null,
-  "works": [
-    {
-      "role": "Director",
-      "year": 2017,
-      "project": "The Bookshop",
-      "description": {
-        "en": "",
-        "es": ""
-      }
-    }
-  ]
+  "portrait": null
 }

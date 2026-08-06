@@ -12,11 +12,11 @@
     "people": [
       {
         "personId": "tarek-recolons",
-        "role": "Gaffer",
         "description": {
           "en": "",
           "es": ""
-        }
+        },
+        "jobId": "gaffer"
       }
     ]
   },

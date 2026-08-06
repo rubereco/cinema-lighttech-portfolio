@@ -1,0 +1,8 @@
+{
+  "id": "producer",
+  "name": {
+    "en": "Producer",
+    "es": "Productor"
+  },
+  "category": "production"
+}
