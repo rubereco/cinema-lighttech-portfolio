@@ -112,23 +112,49 @@ collections:
                     widget: "list"
                     field: { name: "name", label: "Company", widget: "string" }
                     required: false
+                    hint: "Free-text for now — production companies aren't in the companies collection (only equipment houses are). Once you add production entries to a collection, this can become a relation widget too."
                   - name: "director"
-                    label: "Director (people.json id)"
+                    label: "Director"
                     widget: "list"
-                    field: { name: "id", label: "Person ID", widget: "string" }
-                    hint: "e.g. marc-ortiz-prades"
+                    # v3.14.13: relation widget. Each list item is
+                    # a dropdown of people from the People collection
+                    # — search by name, see the role in the dropdown,
+                    # and the selected entry's id is stored. No more
+                    # typos in raw IDs. Matches the existing data
+                    # shape (array of id strings, not objects).
+                    field:
+                      widget: "relation"
+                      collection: "people"
+                      searchFields: ["name"]
+                      valueField: "id"
+                      displayFields: ["name", "kind"]
                   - name: "dop"
-                    label: "Cinematographer (id)"
+                    label: "Cinematographer"
                     widget: "list"
-                    field: { name: "id", label: "Person ID", widget: "string" }
+                    field:
+                      widget: "relation"
+                      collection: "people"
+                      searchFields: ["name"]
+                      valueField: "id"
+                      displayFields: ["name", "kind"]
                   - name: "gaffer"
-                    label: "Gaffer (id)"
+                    label: "Gaffer"
                     widget: "list"
-                    field: { name: "id", label: "Person ID", widget: "string" }
+                    field:
+                      widget: "relation"
+                      collection: "people"
+                      searchFields: ["name"]
+                      valueField: "id"
+                      displayFields: ["name", "kind"]
                   - name: "electrics"
-                    label: "Electrics (ids)"
+                    label: "Electrics"
                     widget: "list"
-                    field: { name: "id", label: "Person ID", widget: "string" }
+                    field:
+                      widget: "relation"
+                      collection: "people"
+                      searchFields: ["name"]
+                      valueField: "id"
+                      displayFields: ["name", "kind"]
 
   # 2) Work — the ordered list of films shown on the homepage. Each
   #    row references a film by id. Reorder via drag-and-drop in the UI.
@@ -147,7 +173,19 @@ collections:
             widget: "list"
             summary: "→ {{fields.filmId}}"
             fields:
-              - { name: "filmId", label: "Film ID (must match an id in Films)", widget: "string", hint: "e.g. els-mals-noms-2025" }
+              - name: "filmId"
+                label: "Film"
+                # v3.14.13: relation widget so the user picks
+                # from a searchable dropdown of all films in the
+                # Films collection. Search by title, year, or id;
+                # dropdown shows title + year. Selected entry's id
+                # is stored — matches the existing data shape
+                # ({ filmId: "..." } per row).
+                widget: "relation"
+                collection: "films"
+                searchFields: ["title", "year", "id"]
+                valueField: "id"
+                displayFields: ["title", "year"]
 
   # 3) People — all people entries. Some are film credits (kind: director,
   #    dop, gaffer, electric), some are partners (kind: collaborator
