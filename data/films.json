@@ -15,7 +15,9 @@
         "director": [],
         "dop": [],
         "gaffer": [
-          "tarek-recolons"
+          {
+            "id": "tarek-recolons"
+          }
         ],
         "electrics": []
       }
@@ -32,11 +34,15 @@
           "Admirable Films"
         ],
         "director": [
-          "marc-ortiz-prades"
+          {
+            "id": "marc-ortiz-prades"
+          }
         ],
         "dop": [],
         "gaffer": [
-          "tarek-recolons"
+          {
+            "id": "tarek-recolons"
+          }
         ],
         "electrics": []
       },
@@ -55,7 +61,9 @@
         "director": [],
         "dop": [],
         "gaffer": [
-          "tarek-recolons"
+          {
+            "id": "tarek-recolons"
+          }
         ],
         "electrics": []
       },
@@ -93,7 +101,9 @@
         "director": [],
         "dop": [],
         "gaffer": [
-          "tarek-recolons"
+          {
+            "id": "tarek-recolons"
+          }
         ],
         "electrics": []
       },
@@ -108,11 +118,15 @@
       "credits": {
         "production": [],
         "director": [
-          "miguel-faus"
+          {
+            "id": "miguel-faus"
+          }
         ],
         "dop": [],
         "gaffer": [
-          "tarek-recolons"
+          {
+            "id": "tarek-recolons"
+          }
         ],
         "electrics": []
       },
@@ -127,7 +141,9 @@
       "credits": {
         "production": [],
         "director": [
-          "alejandro-rojas"
+          {
+            "id": "alejandro-rojas"
+          }
         ],
         "dop": [],
         "gaffer": [],
@@ -163,7 +179,9 @@
         "director": [],
         "dop": [],
         "gaffer": [
-          "tarek-recolons"
+          {
+            "id": "tarek-recolons"
+          }
         ],
         "electrics": []
       },
@@ -183,7 +201,9 @@
         "director": [],
         "dop": [],
         "gaffer": [
-          "tarek-recolons"
+          {
+            "id": "tarek-recolons"
+          }
         ],
         "electrics": []
       },
@@ -202,7 +222,9 @@
           "Green Films"
         ],
         "director": [
-          "isabel-coixet"
+          {
+            "id": "isabel-coixet"
+          }
         ],
         "dop": [],
         "gaffer": [],

@@ -116,13 +116,15 @@ collections:
                   - name: "director"
                     label: "Director"
                     widget: "list"
-                    # v3.14.13: relation widget. Each list item is
-                    # a dropdown of people from the People collection
-                    # — search by name, see the role in the dropdown,
-                    # and the selected entry's id is stored. No more
-                    # typos in raw IDs. Matches the existing data
-                    # shape (array of id strings, not objects).
+                    # v3.14.14: relation widget. Each list item is
+                    # a {id: "..."} object — required by Decap's
+                    # list widget. The data was previously a flat
+                    # string array; the migration in this commit
+                    # upgraded it to the object shape the schema
+                    # expected all along.
                     field:
+                      name: "id"
+                      label: "Director"
                       widget: "relation"
                       collection: "people"
                       searchFields: ["name"]
@@ -132,6 +134,8 @@ collections:
                     label: "Cinematographer"
                     widget: "list"
                     field:
+                      name: "id"
+                      label: "Cinematographer"
                       widget: "relation"
                       collection: "people"
                       searchFields: ["name"]
@@ -141,6 +145,8 @@ collections:
                     label: "Gaffer"
                     widget: "list"
                     field:
+                      name: "id"
+                      label: "Gaffer"
                       widget: "relation"
                       collection: "people"
                       searchFields: ["name"]
@@ -150,6 +156,8 @@ collections:
                     label: "Electrics"
                     widget: "list"
                     field:
+                      name: "id"
+                      label: "Electric"
                       widget: "relation"
                       collection: "people"
                       searchFields: ["name"]
