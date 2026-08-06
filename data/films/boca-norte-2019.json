@@ -20,5 +20,11 @@
       }
     ]
   },
-  "poster": "assets/projects/boca-norte-2019/poster.jpg"
+  "poster": "assets/projects/boca-norte-2019/poster.jpg",
+  "people": [
+    {
+      "personId": "isabel-coixet",
+      "jobId": "director"
+    }
+  ]
 }
