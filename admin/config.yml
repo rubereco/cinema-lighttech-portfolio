@@ -15,12 +15,19 @@
 #   `base_url` here, and Decap appends /auth and /callback.
 #
 # Media:
-#   media_folder: assets/images/uploads
-#   public_folder: /assets/images/uploads
-#   All Decap uploads go to that folder. Phase 1 doesn't auto-relocate
-#   to the partner/posters subfolders — Tarek or rubereco moves the
-#   file after upload if needed. Phase 2 (deferred) will use
-#   collection-specific media folders.
+#   media_folders: assets/images/uploads, assets/images/partners,
+#                  assets/projects
+#   public_folders: /assets/images/uploads, /assets/images/partners,
+#                   /assets/projects
+#   v3.14.25: switched from media_folder (singular) to media_folders
+#   (plural). Previously the media library only scanned
+#   assets/images/uploads, so the existing 5 partner logos in
+#   assets/images/partners/ and 10 film posters in assets/projects/
+#   were invisible. Tarek reported "i can't see the images on the
+#   media menu". Adding all three folders (same order for
+#   public_folders) makes them browsable. The image widget on
+#   people.portrait / companies.logo / films.poster now opens a
+#   picker showing all of them.
 #
 # v3.14.5: switched from the legacy `file:` (singular) pattern to
 # the modern `files:` (plural) pattern. Decap 3.15.1's JSON schema
@@ -49,8 +56,14 @@ logo_url: /assets/images/og-image.svg
 # Where uploaded media files go. All Decap uploads land here.
 # Phase 1: Tarek or rubereco can move them to the right subfolder
 # (e.g. assets/images/partners/ for company logos) after upload.
-media_folder: "assets/images/uploads"
-public_folder: "/assets/images/uploads"
+media_folders:
+  - "assets/images/uploads"
+  - "assets/images/partners"
+  - "assets/projects"
+public_folders:
+  - "/assets/images/uploads"
+  - "/assets/images/partners"
+  - "/assets/projects"
 
 # v3.14.12: enabled editorial workflow. Without this, every save
 # directly commits to wip/portfolio-r1, which triggers one
@@ -94,6 +107,20 @@ collections:
       - { name: "id",    label: "ID (kebab-case-title-year)", widget: "string", hint: "e.g. els-mals-noms-2025" }
       - { name: "title", label: "Title",   widget: "string" }
       - { name: "year",  label: "Year",    widget: "number", value_type: "int", min: 1950, max: 2100 }
+      # v3.14.25: image widget. The field already exists in 10 of
+      # 12 film data files (assets/projects/<id>/poster.jpg) and
+      # is read by main.js for the homepage poster wall and film
+      # modal. It just wasn't in the Decap schema before, so
+      # Tarek couldn't edit it from the admin. Now he can browse
+      # the existing posters in assets/projects/ or upload a new
+      # one. Two films (el-cuco-2023, saw-2026) have no poster
+      # yet — the production code skips films without one.
+      - name: "poster"
+        label: "Poster"
+        widget: "image"
+        required: false
+        allow_external_urls: false
+        hint: "Click to browse the media library. Existing posters live in assets/projects/<film-id>/poster.jpg."
       - { name: "role",  label: "Tarek's role on this film", widget: "string", hint: "e.g. Gaffer, Best Boy Electric, Electric" }
       - name: "type"
         label: "Type"
@@ -257,7 +284,17 @@ collections:
             fields:
               - { name: "en", label: "English", widget: "text", required: false }
               - { name: "es", label: "Spanish", widget: "text", required: false }
-      - { name: "portrait",  label: "Portrait path", widget: "string", required: false, hint: "e.g. assets/images/partners/juli-carne-martorell.jpg" }
+      # v3.14.25: image widget instead of string. Clicking the
+      # field opens the media library popup — browse / preview /
+      # pick from existing portraits in assets/images/partners/ or
+      # upload a new one. Stores the path as a string under the
+      # hood, so no data migration needed.
+      - name: "portrait"
+        label: "Portrait"
+        widget: "image"
+        required: false
+        allow_external_urls: false
+        hint: "Click to browse the media library. Existing portraits live in assets/images/partners/."
       - { name: "imdb",      label: "IMDb id",     widget: "string", required: false }
       - { name: "imdbUrl",   label: "IMDb URL",    widget: "string", required: false }
       - { name: "instagram", label: "Instagram handle", widget: "string", required: false }
@@ -301,7 +338,13 @@ collections:
                   - { label: "Post-production", value: "post-house" }
                   - { label: "Sound studio",    value: "sound-studio" }
                   - { label: "Other partner",   value: "other" }
-              - { name: "logo",    label: "Logo path",   widget: "string", hint: "e.g. assets/images/partners/movie-men.svg" }
+              # v3.14.25: image widget so the company logo gets
+              # the same media-library popup as people.portrait.
+              - name: "logo"
+                label: "Logo"
+                widget: "image"
+                allow_external_urls: false
+                hint: "Click to browse the media library. Existing logos live in assets/images/partners/."
               - { name: "logoAlt", label: "Logo alt text", widget: "string", required: false }
               - { name: "count",   label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
               - name: "description"
