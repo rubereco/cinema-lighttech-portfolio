@@ -14,20 +14,15 @@
 #   cloudflare-worker/oauth-proxy.js). The worker's URL is the
 #   `base_url` here, and Decap appends /auth and /callback.
 #
-# Media:
-#   media_folders: assets/images/uploads, assets/images/partners,
-#                  assets/projects
-#   public_folders: /assets/images/uploads, /assets/images/partners,
-#                   /assets/projects
-#   v3.14.25: switched from media_folder (singular) to media_folders
-#   (plural). Previously the media library only scanned
-#   assets/images/uploads, so the existing 5 partner logos in
-#   assets/images/partners/ and 10 film posters in assets/projects/
-#   were invisible. Tarek reported "i can't see the images on the
-#   media menu". Adding all three folders (same order for
-#   public_folders) makes them browsable. The image widget on
-#   people.portrait / companies.logo / films.poster now opens a
-#   picker showing all of them.
+# Where uploaded media files go. v3.14.27: consolidated all 15
+# user-editable images into this single folder. Decap's github
+# backend doesn't support media_folders (plural) at runtime —
+# its getMedia() only reads config.media_folder (singular) and
+# lists files in that one path via the GitHub contents API.
+# No recursion, no aggregation. So the picker would always
+# show "No assets found" if images live in different folders.
+# All editable images are flat in assets/images/uploads/ now.
+# (Tarek or rubereco can rename the folder later if needed.)
 #
 # v3.14.5: switched from the legacy `file:` (singular) pattern to
 # the modern `files:` (plural) pattern. Decap 3.15.1's JSON schema
@@ -56,29 +51,20 @@ logo_url: /assets/images/og-image.svg
 # Where uploaded media files go. All Decap uploads land here.
 # Phase 1: Tarek or rubereco can move them to the right subfolder
 # (e.g. assets/images/partners/ for company logos) after upload.
-media_folders:
-  - "assets/images/uploads"
-  - "assets/images/partners"
-  - "assets/projects"
-public_folders:
-  - "/assets/images/uploads"
-  - "/assets/images/partners"
-  - "/assets/projects"
-# v3.14.26: Decap's JSON schema validator requires EITHER
-# `media_folder` (singular) OR `media_library` at the top
-# level. The schema is out of date with the code — the code
-# supports `media_folders` (plural) at the top level (with a
-# ternary that prefers plural when present), but the schema
-# doesn't know about it. Without `media_folder` (singular),
-# the validator throws:
-#   config must have required property 'media_folder'
-#   config must have required property 'media_library'
-#   config must match a schema in anyOf
-# even though the actual code would handle the plural form
-# fine. Adding a top-level `media_folder` (singular) pointing
-# at the first folder satisfies the schema. The code sees
-# `media_folders` (plural) present and uses it instead, so
-# behavior is unchanged — all three folders are still scanned.
+# v3.14.27: consolidated all 15 user-editable images into
+# assets/images/uploads/. Decap's github backend doesn't
+# support media_folders (plural) at runtime — its
+# implementation of getMedia() in api.ts only reads
+# config.media_folder (singular) and lists files in that
+# one path via the GitHub contents API. No recursion, no
+# aggregation. So even though the config schema and core
+# code accept media_folders, the github backend ignores
+# it. The picker showed "No assets found" because the
+# singular media_folder points at uploads/ (empty), not
+# at partners/ or projects/ where the actual images live.
+# Fix: move all editable images to assets/images/uploads/,
+# update the data paths + production code, drop the plural
+# form. Now the media library sees all 15 images.
 media_folder: "assets/images/uploads"
 public_folder: "/assets/images/uploads"
 
@@ -125,19 +111,23 @@ collections:
       - { name: "title", label: "Title",   widget: "string" }
       - { name: "year",  label: "Year",    widget: "number", value_type: "int", min: 1950, max: 2100 }
       # v3.14.25: image widget. The field already exists in 10 of
-      # 12 film data files (assets/projects/<id>/poster.jpg) and
-      # is read by main.js for the homepage poster wall and film
-      # modal. It just wasn't in the Decap schema before, so
-      # Tarek couldn't edit it from the admin. Now he can browse
-      # the existing posters in assets/projects/ or upload a new
-      # one. Two films (el-cuco-2023, saw-2026) have no poster
-      # yet — the production code skips films without one.
+      # 12 film data files and is read by main.js for the
+      # homepage poster wall and film modal. It just wasn't in
+      # the Decap schema before, so Tarek couldn't edit it from
+      # the admin. Now he can browse the existing posters in
+      # assets/images/uploads/ or upload a new one. Two films
+      # (el-cuco-2023, saw-2026) have no poster yet — the
+      # production code skips films without one.
+      # v3.14.27: poster files moved from
+      # assets/projects/<id>/poster.jpg to
+      # assets/images/uploads/<id>.jpg (consolidated into the
+      # single media folder).
       - name: "poster"
         label: "Poster"
         widget: "image"
         required: false
         allow_external_urls: false
-        hint: "Click to browse the media library. Existing posters live in assets/projects/<film-id>/poster.jpg."
+        hint: "Click to browse the media library. Existing posters live in assets/images/uploads/."
       - { name: "role",  label: "Tarek's role on this film", widget: "string", hint: "e.g. Gaffer, Best Boy Electric, Electric" }
       - name: "type"
         label: "Type"
@@ -303,15 +293,18 @@ collections:
               - { name: "es", label: "Spanish", widget: "text", required: false }
       # v3.14.25: image widget instead of string. Clicking the
       # field opens the media library popup — browse / preview /
-      # pick from existing portraits in assets/images/partners/ or
-      # upload a new one. Stores the path as a string under the
-      # hood, so no data migration needed.
+      # pick from existing portraits in assets/images/uploads/
+      # or upload a new one. Stores the path as a string under
+      # the hood, so no data migration needed.
+      # v3.14.27: portrait files moved from
+      # assets/images/partners/ to assets/images/uploads/
+      # (consolidated into the single media folder).
       - name: "portrait"
         label: "Portrait"
         widget: "image"
         required: false
         allow_external_urls: false
-        hint: "Click to browse the media library. Existing portraits live in assets/images/partners/."
+        hint: "Click to browse the media library. Existing portraits live in assets/images/uploads/."
       - { name: "imdb",      label: "IMDb id",     widget: "string", required: false }
       - { name: "imdbUrl",   label: "IMDb URL",    widget: "string", required: false }
       - { name: "instagram", label: "Instagram handle", widget: "string", required: false }
@@ -357,11 +350,14 @@ collections:
                   - { label: "Other partner",   value: "other" }
               # v3.14.25: image widget so the company logo gets
               # the same media-library popup as people.portrait.
+              # v3.14.27: logo files moved from
+              # assets/images/partners/ to assets/images/uploads/
+              # (consolidated into the single media folder).
               - name: "logo"
                 label: "Logo"
                 widget: "image"
                 allow_external_urls: false
-                hint: "Click to browse the media library. Existing logos live in assets/images/partners/."
+                hint: "Click to browse the media library. Existing logos live in assets/images/uploads/."
               - { name: "logoAlt", label: "Logo alt text", widget: "string", required: false }
               - { name: "count",   label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
               - name: "description"

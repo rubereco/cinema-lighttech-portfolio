@@ -306,7 +306,7 @@ const POSTER_WALL = (() => {
     return `
       <li>
         <a class="poster-link" href="#film-${escapeAttr(slug)}" data-film-id="${escapeAttr(slug)}">
-          <img class="poster-img" src="assets/projects/${escapeAttr(slug)}/poster.jpg"
+          <img class="poster-img" src="${escapeAttr(film.poster)}"
                alt="${title}" loading="lazy" />
           <span class="poster-meta">
             <span class="poster-title">${title}</span>

@@ -8,7 +8,7 @@
       "id": "movie-men",
       "name": "Movie-men",
       "kind": "equipment-house",
-      "logo": "assets/images/partners/movie-men.svg?v=2",
+      "logo": "assets/images/uploads/movie-men.svg?v=2",
       "logoAlt": "Movie-men logo",
       "count": 12,
       "description": {
@@ -22,7 +22,7 @@
       "id": "kinolux",
       "name": "Kinolux",
       "kind": "equipment-house",
-      "logo": "assets/images/partners/kinolux.svg?v=1",
+      "logo": "assets/images/uploads/kinolux.svg?v=1",
       "logoAlt": "Kinolux logo",
       "count": 0,
       "description": {
@@ -36,7 +36,7 @@
       "id": "aluzine",
       "name": "Aluzine",
       "kind": "equipment-house",
-      "logo": "assets/images/partners/aluzine.png?v=1",
+      "logo": "assets/images/uploads/aluzine.png?v=1",
       "logoAlt": "Aluzine logo",
       "count": 0,
       "description": {
@@ -50,7 +50,7 @@
       "id": "cinetecnico",
       "name": "Cinetécnico",
       "kind": "equipment-house",
-      "logo": "assets/images/partners/cinetecnico.png?v=1",
+      "logo": "assets/images/uploads/cinetecnico.png?v=1",
       "logoAlt": "Cinetécnico logo",
       "count": 0,
       "description": {
