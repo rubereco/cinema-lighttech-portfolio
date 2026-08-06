@@ -53,13 +53,21 @@
   /** Category config. Single source of truth for section order and labels.
    *  Each id matches a job.category from data/jobs/. The renderer groups
    *  people by their partnership.jobIds → resolved through jobs → category.
-   *  v3.14.18: the id is a JOB CATEGORY, not a static relationship. Adding
-   *  a new section is just adding a CATEGORIES entry + an i18n label.
-   *  The "lighting" section covers gaffer, electric, sparks, best-boy —
-   *  any job in the lighting category. Same for cinematography. */
+   *  v3.14.19: covers all 6 categories (direction, cinematography, lighting,
+   *  sound, production, other). Sections without partners are auto-hidden
+   *  by the render() filter — so an empty "Sound" section won't render
+   *  until someone partners in a sound job.
+   *  Partnership can be for ANY job in the Jobs collection — not limited
+   *  to cinematography + lighting. Tarek can partner with a director
+   *  (direction), a sound mixer (sound), a producer (production), etc.,
+   *  and they'll show up in the matching section. */
   const CATEGORIES = [
+    { id: "direction",      source: "people", labelKey: "partners.section.direction" },
     { id: "cinematography", source: "people", labelKey: "partners.section.cinematography" },
     { id: "lighting",       source: "people", labelKey: "partners.section.lighting", defaultOpen: true },
+    { id: "sound",          source: "people", labelKey: "partners.section.sound" },
+    { id: "production",     source: "people", labelKey: "partners.section.production" },
+    { id: "other",          source: "people", labelKey: "partners.section.other" },
   ];
 
   // ─── Loaders ──────────────────────────────────────────────────────────
@@ -373,15 +381,17 @@
     const lang = getActiveLang();
     const partners = content.partners || [];
     const html = CATEGORIES.map((category) => {
-      // Filter by source first (companies / people), then by kind or relationship
-      // depending on the source. Two-step keeps page-config declarative.
-      // v3.14.15: people are matched on `relationship` only — `kind` is
-      // the film-credit role and is no longer restricted to "collaborator".
+      // Filter by source first (companies / people), then by category.
+      // v3.14.19: skip empty sections entirely — an empty "Sound"
+      // section shouldn't render at all if no one partners in a
+      // sound job. This way the partners page only shows sections
+      // that have actual partners, in the CATEGORIES order.
       const items = partners.filter((p) => {
         if (category.source === "companies") return p.kind === category.id;
         if (category.source === "people")     return p.categories?.includes(category.id);
         return false;
       });
+      if (items.length === 0) return "";   // hide empty sections
       return sectionHtml(category, items, lang);
     }).join("");
     target.innerHTML = `<ul class="partners-accordion" role="list">${html}</ul>`;
