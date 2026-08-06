@@ -232,15 +232,27 @@ To rollback: Cloudflare dashboard → Pages → `cinema-lighttech-portfolio` →
 
 ```bash
 cd cinema-lighttech-portfolio
+npm run build   # aggregates data/films/ + data/people/ → data/*.json
 python3 -m http.server 8000
 # Open http://localhost:8000 in any browser
 ```
 
-No build step, no `npm install`. Just a static file server.
+The build step (v3.14.16+) regenerates `data/films.json` and `data/people.json`
+from the folder-based collections that the Decap admin edits. It's idempotent,
+takes <1 second, requires Node 18+. If you skip the build, you'll see stale
+data on the local preview.
+
+## Build step (Cloudflare Pages)
+
+The Cloudflare Pages project for this site must have its build command set
+to `npm run build` (Settings → Builds & deployments → Build command).
+Without it, the live site keeps serving the old single-file aggregates even
+after Tarek publishes new entries through the admin.
 
 ## Open decisions (with Tarek)
 
-- Confirm the real contact email (currently placeholder `contact@tarekrecolons.com`)
+## Open decisions (with Tarek)
+
 - Decide hero photo: keep BTS / swap to portrait / drop background
 - Confirm bio voice (1st vs 3rd person; longer version?)
 - Confirm or trim the 11 credits to 6–8 for the public cut
