@@ -64,6 +64,23 @@ public_folders:
   - "/assets/images/uploads"
   - "/assets/images/partners"
   - "/assets/projects"
+# v3.14.26: Decap's JSON schema validator requires EITHER
+# `media_folder` (singular) OR `media_library` at the top
+# level. The schema is out of date with the code — the code
+# supports `media_folders` (plural) at the top level (with a
+# ternary that prefers plural when present), but the schema
+# doesn't know about it. Without `media_folder` (singular),
+# the validator throws:
+#   config must have required property 'media_folder'
+#   config must have required property 'media_library'
+#   config must match a schema in anyOf
+# even though the actual code would handle the plural form
+# fine. Adding a top-level `media_folder` (singular) pointing
+# at the first folder satisfies the schema. The code sees
+# `media_folders` (plural) present and uses it instead, so
+# behavior is unchanged — all three folders are still scanned.
+media_folder: "assets/images/uploads"
+public_folder: "/assets/images/uploads"
 
 # v3.14.12: enabled editorial workflow. Without this, every save
 # directly commits to wip/portfolio-r1, which triggers one
