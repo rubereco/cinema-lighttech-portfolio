@@ -258,6 +258,18 @@
     handler to bubble phase so it runs AFTER Decap's and can clear
     e.returnValue (v3.14.20 ran in capture phase, so Decap overwrote
     it).
+
+    v3.14.22: debounced tick() and guarded updateDraftCount() to
+    break an infinite loop. v3.14.21's MutationObserver fired on
+    EVERY DOM mutation, including our own updateDraftCount setting
+    textContent on the Publish button — which called tick() again,
+    which called updateDraftCount again, infinitely. The browser
+    froze when the user clicked "new job" because Decap's initial
+    render triggered hundreds of mutations, each of which re-entered
+    our handler. Fix: 150ms debounce on tick() (so even if the
+    observer fires 100 times in a burst, work only runs once at
+    the end) + textContent check in updateDraftCount (no-op if
+    text didn't change → no mutation → no re-entry).
   -->
   <script>
   (function () {
@@ -445,7 +457,14 @@
     }
     function updateDraftCount() {
       var btn = document.getElementById(PUBLISH_BTN_ID);
-      if (btn) btn.textContent = "Publish all (" + draftCount() + ")";
+      if (!btn) return;
+      var newText = "Publish all (" + draftCount() + ")";
+      // v3.14.22: only update if actually changed. Otherwise setting
+      // textContent is a DOM mutation, which the MutationObserver
+      // detects, which calls tick(), which calls updateDraftCount(),
+      // which sets textContent again — infinite loop that freezes
+      // the browser. The if-check breaks the cycle.
+      if (btn.textContent !== newText) btn.textContent = newText;
     }
 
     function publishAll() {
@@ -555,14 +574,26 @@
     }
 
     // ─── Boot ────────────────────────────────────────────────────────
+    // v3.14.22: tick is debounced. Without this, the MutationObserver
+    // fires on every DOM change (including our own updateDraftCount
+    // setting textContent), which calls tick, which calls
+    // updateDraftCount, which fires the MutationObserver again —
+    // infinite loop that freezes the browser when the user clicks
+    // "new job". Debouncing means even if the observer fires 100
+    // times in a burst, the work only runs once at the end.
+    var tickTimer = null;
     function tick() {
+      if (tickTimer) return; // already scheduled
+      tickTimer = setTimeout(function () {
+        tickTimer = null;
+        doTick();
+      }, 150);
+    }
+    function doTick() {
       installOverride();
       installPublishButton();
       var ctx = currentContext();
       if (ctx) {
-        // Also do a periodic snapshot (covers cases where Decap
-        // updates fields internally without firing input/change
-        // — e.g. populating a relation widget programmatically).
         clearTimeout(pendingSaveT);
         pendingSaveT = setTimeout(function () { snapshotNow(ctx); }, 250);
         if (lastHash !== window.location.hash) {
@@ -576,10 +607,8 @@
     }
     installFieldListeners();
     installBeforeUnloadSuppression();
-    // Use both interval and MutationObserver so we react to both time
-    // and DOM changes. Decap re-renders the entry editor frequently.
     setInterval(tick, 500);
-    new MutationObserver(function () { tick(); }).observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(tick).observe(document.body, { childList: true, subtree: true });
     tick();
     console.log("[decap-draft] boot complete, existing drafts:", draftCount());
 
