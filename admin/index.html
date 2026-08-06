@@ -270,6 +270,16 @@
     observer fires 100 times in a burst, work only runs once at
     the end) + textContent check in updateDraftCount (no-op if
     text didn't change → no mutation → no re-entry).
+
+    v3.14.23: readForm/writeForm was looking for inputs inside
+    a <form> element, but Decap's entry editor doesn't use a
+    <form> — it's a React component that handles submit via
+    onClick on the Save button. So querySelector("form") returned
+    null, readForm returned null, and the snapshot failed with
+    'no form data found'. Fix: query all inputs/textareas/selects
+    on the page directly (preferring ones with a name attribute).
+    Same for the Publish flow's waitFor — checks for any inputs
+    on the page rather than a form element.
   -->
   <script>
   (function () {
@@ -325,30 +335,50 @@
     }
 
     // ─── Form read/write ─────────────────────────────────────────────
-    function form() { return document.querySelector("form"); }
+    // v3.14.23: Decap doesn't render the entry editor inside a
+    // <form> element (it's a React component that handles submit
+    // via onClick on the Save button). So querySelector("form")
+    // returns null, and our old readForm/writeForm got nothing.
+    // Fix: query all inputs/textareas/selects on the page directly.
+    // The entry editor's inputs have name attributes (e.g. "id",
+    // "name.en", "name.es", "category"). We use the name attribute
+    // as the localStorage key. If an input has no name (or has
+    // one for a non-entry field, like a hidden CSRF token), we
+    // fall back to id, or skip it.
+    function getEntryInputs() {
+      // v3.14.23: prefer inputs that have a "name" attribute
+      // matching the entry schema. If there are no named inputs,
+      // fall back to all inputs (last resort).
+      var named = document.querySelectorAll("input[name], textarea[name], select[name]");
+      if (named.length > 0) return Array.prototype.slice.call(named);
+      return Array.prototype.slice.call(document.querySelectorAll("input, textarea, select"));
+    }
     function readForm() {
-      var f = form();
-      if (!f) return null;
+      var inputs = getEntryInputs();
+      if (!inputs.length) {
+        console.warn("[decap-draft] readForm: 0 inputs on page");
+        return null;
+      }
       var data = {};
-      var inputs = f.querySelectorAll("input, textarea, select");
       for (var i = 0; i < inputs.length; i++) {
         var el = inputs[i];
-        if (!el.name) continue;
-        if (el.type === "checkbox") data[el.name] = el.checked;
-        else if (el.type === "radio") { if (el.checked) data[el.name] = el.value; }
-        else data[el.name] = el.value;
+        var key = el.name || el.id || el.getAttribute("data-name");
+        if (!key) continue;
+        if (el.type === "checkbox") data[key] = el.checked;
+        else if (el.type === "radio") { if (el.checked) data[key] = el.value; }
+        else data[key] = el.value;
       }
+      console.log("[decap-draft] readForm: " + Object.keys(data).length + " fields, keys:", Object.keys(data));
       return data;
     }
     function writeForm(data) {
       if (!data) return;
-      var f = form();
-      if (!f) return;
-      var inputs = f.querySelectorAll("input, textarea, select");
+      var inputs = getEntryInputs();
       for (var i = 0; i < inputs.length; i++) {
         var el = inputs[i];
-        if (!el.name || !(el.name in data)) continue;
-        var newVal = data[el.name];
+        var key = el.name || el.id || el.getAttribute("data-name");
+        if (!key || !(key in data)) continue;
+        var newVal = data[key];
         if (el.type === "checkbox") el.checked = !!newVal;
         else if (el.type === "radio") el.checked = (el.value === newVal);
         else el.value = newVal;
@@ -497,10 +527,7 @@
           : "#/collections/" + collection + "/entries/" + encodeURIComponent(entryId);
         if (window.location.hash !== hash) window.location.hash = hash;
         waitFor(10000, function () {
-          var f = form();
-          if (!f) return false;
-          var fdata = readForm();
-          return fdata && Object.keys(fdata).length > 0;
+          return getEntryInputs().length > 0;
         }).then(function () {
           writeForm(d.value);
           return waitFor(2000, function () { return true; });
