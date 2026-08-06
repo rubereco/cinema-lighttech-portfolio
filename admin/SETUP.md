@@ -109,16 +109,20 @@ Commit and push this change.
 
 ## Step 7: First end-to-end test
 
-In the Decap editor:
+In the Decap editor (with `publish_mode: editorial_workflow` enabled):
 1. Click "Work order" → click into the first film row
 2. Change the role from "Gaffer" to "Gaffer (test edit)"
-3. Click "Publish" (or "Save" depending on workflow)
-4. Decap shows "Committing…", then "Site is deploying…"
-5. Wait 30-60 seconds
-6. Refresh `recalone.com` — the change should be live
-7. Revert the change so the site stays clean
+3. Click "Save as draft" (top right — NOT "Publish" yet)
+4. Decap shows "Saving draft…" — the change goes to a separate draft branch
+5. Now make a second change in another collection (e.g. add a new company in Companies)
+6. Click "Save as draft" again
+7. Click the **Workflow** tab at the top — you'll see both drafts
+8. Click **Publish** on one (or use the bulk publish if available) — Decap opens/updates a single PR to wip/portfolio-r1
+9. Merge the PR in GitHub (or wait for auto-merge)
+10. Cloudflare Pages rebuilds the preview URL with BOTH changes
+11. Refresh — both changes should be live
 
-If this works, you're done with setup. The whole flow takes ~15-20 minutes once the GitHub account + OAuth app exist.
+Without editorial_workflow, step 10 would have triggered TWO separate Cloudflare builds (one per save). With it, it's just ONE build for all your changes.
 
 ## What to do if something breaks
 

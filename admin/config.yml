@@ -52,10 +52,22 @@ logo_url: /assets/images/og-image.svg
 media_folder: "assets/images/uploads"
 public_folder: "/assets/images/uploads"
 
-# publish_mode intentionally omitted — defaults to "simple" (save = direct
-# commit). editorial_workflow adds a draft/review/publish flow that needs
-# extra GitHub config (PR templates, branch protection) — we can layer
-# it on later if Tarek wants reviews before publishing.
+# v3.14.12: enabled editorial workflow. Without this, every save
+# directly commits to wip/portfolio-r1, which triggers one
+# Cloudflare build per save. If Tarek is editing three collections
+# (add a film, add it to work order, add the director to people),
+# he'd wait for 3 separate Cloudflare deploys.
+#
+# With editorial_workflow, all saves go into a "draft" state on a
+# separate branch (cms/editorial-workflow). When Tarek is ready,
+# he clicks Publish once → Decap opens (or adds to) a single PR
+# to wip/portfolio-r1. One merge = one Cloudflare build. The
+# workflow tab in the UI shows all current drafts.
+#
+# Trade-off: Tarek (or rubereco) needs to merge the PR in
+# GitHub. If branch protection allows auto-merge on
+# wip/portfolio-r1, no manual step is needed.
+publish_mode: editorial_workflow
 
 # ─── Collections ──────────────────────────────────────────────────────
 
