@@ -367,28 +367,29 @@ const POSTER_WALL = (() => {
     render(state.work, state.films);
   }
 
-  // v3.14.35: auto-cycle the poster wall on mobile (horizontal
-  // scroll container). Every 5s, scroll to the next tile. Wraps
-  // back to the start when reaching the end. No smooth scrolling
-  // per Tarek ("no need for animation"). Resets on user touch/wheel.
-  // Skipped on desktop (the grid doesn't have a horizontal scroll).
+  // v3.14.35: auto-cycle the poster wall. Every 3s, scroll to the
+  // next tile. Wraps back to the start when reaching the end. No
+  // smooth scrolling per Tarek ("no need for animation"). Resets
+  // on user touch/wheel. Skipped if the wall doesn't actually
+  // overflow (i.e. all tiles fit in the visible area, or it's a
+  // grid on desktop).
   var wallCycleTimer = null;
-  var WALL_CYCLE_MS = 5000;
+  var WALL_CYCLE_MS = 3000;  // v3.14.36: was 5000, Tarek said 5s felt too long
   function startWallCycle() {
     stopWallCycle();
     var wall = document.getElementById("poster-wall");
     if (!wall) return;
-    // Only cycle if it's actually a horizontal scroller
-    // (mobile: display: flex + overflow-x: auto). On desktop
-    // it's a 3-col grid with overflow: visible, so skip.
-    var isScrollable = getComputedStyle(wall).overflowX === "auto" ||
-                       getComputedStyle(wall).overflowX === "scroll";
-    if (!isScrollable) return;
-    // Only cycle if there's more content than visible (i.e. scrollWidth > clientWidth)
-    if (wall.scrollWidth <= wall.clientWidth + 1) return;
+    // v3.14.36: dropped the getComputedStyle(overflowX) check.
+    // It's unreliable (some browsers report different values at
+    // different times). The scrollWidth > clientWidth check is
+    // the source of truth: if there's horizontal overflow, cycle;
+    // otherwise skip.
+    if (wall.scrollWidth <= wall.clientWidth + 1) {
+      console.info("[poster-wall] no horizontal overflow, skip cycle");
+      return;
+    }
+    console.info("[poster-wall] auto-cycle started,", wall.scrollWidth, "px content in", wall.clientWidth, "px viewport");
     wallCycleTimer = setInterval(function () {
-      // find the first tile whose left edge is at or past the
-      // current scrollLeft, then advance to the next one
       var tiles = wall.querySelectorAll(":scope > li");
       if (!tiles.length) return;
       var sl = wall.scrollLeft;
@@ -398,13 +399,14 @@ const POSTER_WALL = (() => {
       }
       if (!target) {
         // We're on the last tile — wrap to the first
-        target = tiles[0];
         wall.scrollLeft = 0;
+        console.info("[poster-wall] cycled to start");
       } else {
         // account for the left padding on the wall so the
         // tile snaps to the padding offset, not the raw left
         var padLeft = parseFloat(getComputedStyle(wall).paddingLeft) || 0;
         wall.scrollLeft = target.offsetLeft - padLeft;
+        console.info("[poster-wall] cycled to tile", target.offsetLeft);
       }
     }, WALL_CYCLE_MS);
   }
@@ -701,15 +703,17 @@ const FILM_MODAL = (() => {
   // v3.14.35: auto-cycle interval id so we can clear/restart it
   // whenever the user interacts (click, key, touch).
   let cycleTimer = null;
-  var CYCLE_INTERVAL_MS = 5000; // advance every 5s
+  var CYCLE_INTERVAL_MS = 3000; // v3.14.36: was 5000, Tarek said 5s felt too long
 
   function startCycle() {
     stopCycle();
+    if (orderedFilmIds.length < 2) return;
+    console.info("[film-modal] auto-cycle started,", orderedFilmIds.length, "films, interval", CYCLE_INTERVAL_MS, "ms");
     cycleTimer = setInterval(function () {
       if (currentIndex < 0) return;
-      // wrap to the first film when we hit the end
       var next = currentIndex + 1;
       if (next >= orderedFilmIds.length) next = 0;
+      console.info("[film-modal] cycling to", orderedFilmIds[next]);
       open(orderedFilmIds[next], { replaceHistory: true });
     }, CYCLE_INTERVAL_MS);
   }
