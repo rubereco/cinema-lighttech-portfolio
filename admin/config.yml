@@ -426,3 +426,47 @@ collections:
   #         fields:
   #           - { name: "en", label: "Inglés",  widget: "object", fields: [ /* esquema completo: nav, hero, work... */ ] }
   #           - { name: "es", label: "Español", widget: "object", fields: [ /* el mismo */ ] }
+
+  # 7) Hero carousel — the images that scroll across the homepage
+  #    hero. v3.14.29: was hardcoded as <image> elements inside
+  #    the SVG in index.html; now driven by data/hero.json, editable
+  #    from this admin. The production code (assets/js/hero-carousel.js)
+  #    reads the data via the inline tarek-hero JSON block and
+  #    injects <image> elements into the SVG.
+  #
+  #    Each item is one tile: a file (image widget), a size
+  #    (big = 500×500, small = 200×200) and an optional alt text.
+  #    The list order = display order. Drag to reorder in the UI.
+  #    Add/remove tiles freely — the carousel just wraps whatever
+  #    you give it.
+  - name: "hero"
+    label: "Hero carrusel"
+    label_singular: "Imagen del hero"
+    description: "Imágenes que se desplazan por el hero de la página principal. Mezcla grandes (500×500) y pequeñas (200×200) para variedad visual."
+    files:
+      - name: "hero-data"
+        label: "Imágenes del hero"
+        file: "data/hero.json"
+        format: "json"
+        fields:
+          - name: "items"
+            label: "Imágenes"
+            widget: "list"
+            summary: "{{fields.size}} — {{fields.file}}"
+            fields:
+              - name: "file"
+                label: "Imagen"
+                widget: "image"
+                allow_external_urls: false
+                hint: "Haz clic para explorar la biblioteca de medios. Las imágenes del hero viven en assets/images/uploads/."
+              - name: "size"
+                label: "Tamaño"
+                widget: "select"
+                options:
+                  - { label: "Grande (500×500)", value: "big" }
+                  - { label: "Pequeña (200×200)", value: "small" }
+                hint: "Grande = 500×500, pequeña = 200×200. El carrusel las alterna para variedad visual — una mezcla de ambas se ve mejor que un solo tamaño."
+              - name: "alt"
+                label: "Texto alternativo (accesibilidad, opcional)"
+                widget: "string"
+                required: false

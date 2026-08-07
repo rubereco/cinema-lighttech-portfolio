@@ -33,6 +33,7 @@ const BLOCKS = [
   ["data/people.json",    "tarek-people"],
   ["data/films.json",     "tarek-films"],
   ["data/work.json",      "tarek-work"],
+  ["data/hero.json",      "tarek-hero"],
   ["data/showcase.json",  "tarek-showcase"],
   ["data/kit.json",       "tarek-kit"],
   ["data/companies.json", "tarek-companies"],

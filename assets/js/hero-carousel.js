@@ -723,11 +723,76 @@
     defs.appendChild(cp2);
   }
 
+  // === Load hero tile data (v3.14.29) ===
+  // v3.14.29: tiles used to be hardcoded as <image> elements in
+  // index.html. Now they're driven by data/hero.json, editable
+  // from the Decap admin (/admin → Hero carrusel). Same inline-
+  // first / fetch-fallback pattern the other loaders use.
+  // 1) Try the inlined <script id="tarek-hero"> block (file://)
+  // 2) Fall back to fetch("data/hero.json") (live deploys)
+  function loadHeroData() {
+    function readInline(id) {
+      var el = document.getElementById(id);
+      if (!el) return null;
+      try { return JSON.parse(el.textContent); } catch (e) { return null; }
+    }
+    var inline = readInline("tarek-hero");
+    if (inline) return Promise.resolve(inline);
+    return fetch("data/hero.json", { cache: "no-cache" })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .catch(function (e) { console.warn("[hero-carousel] could not load data/hero.json", e); return null; });
+  }
+
+  // Inject <image> elements into the carousel <g>. Called BEFORE
+  // buildLayout so it can find the tiles via the same DOM query.
+  // SVG <image> elements need createElementNS, not createElement.
+  function injectHeroTiles(stage, data) {
+    var SVG_NS = "http://www.w3.org/2000/svg";
+    var container = document.getElementById("hero-carousel-tiles") || stage;
+    // Clear any existing tiles (idempotent — safe across re-inits)
+    while (container.firstChild) container.removeChild(container.firstChild);
+    var items = (data && data.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i] || {};
+      if (!it.file) continue;
+      var img = document.createElementNS(SVG_NS, "image");
+      img.setAttribute("href", it.file);
+      img.setAttribute("data-size", it.size === "small" ? "small" : "big");
+      if (it.alt) img.setAttribute("alt", it.alt);
+      container.appendChild(img);
+    }
+  }
+
   function init() {
     var hero = document.getElementById('top');
     var stage = document.getElementById('hero-carousel-svg');
     if (!hero || !stage) return;
     if (typeof gsap === 'undefined') return;
+
+    // v3.14.29: load tile data and inject <image> elements into
+    // the SVG. Synchronous when the inlined JSON block is present
+    // (file:// + most deploys); async only when we have to fetch.
+    // The carousel can't render with zero tiles, so we bail early
+    // if the data is empty or fetch fails.
+    var data = (function () {
+      var el = document.getElementById("tarek-hero");
+      if (el) {
+        try { return JSON.parse(el.textContent); } catch (e) { return null; }
+      }
+      return null;
+    })();
+
+    if (data) {
+      injectHeroTiles(stage, data);
+    } else {
+      // No inline data — async load, then init again with tiles.
+      loadHeroData().then(function (d) {
+        if (!d) return;
+        injectHeroTiles(stage, d);
+        init(); // re-run with the tiles now in the DOM
+      });
+      return;
+    }
 
     // v3.10+: the carousel runs on mobile too. The previous
     // `if (window.innerWidth < MOBILE_MAX_WIDTH) return;` short-circuit
