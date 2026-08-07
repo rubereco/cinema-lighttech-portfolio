@@ -494,7 +494,8 @@
   /* .hero-cta desktop override removed in v3.10.14 — the buttons
      were deleted from index.html. */
 
-  /* v3.14.43: WAVE / CURVE layout for desktop (≥768px).
+  /* v3.14.44: WAVE / CURVE layout for desktop (≥768px),
+     denser and more pronounced than v3.14.43.
      On desktop the wall becomes a curve carousel: the center
      item is the "picked" one (scale 1, no Y offset), and
      items to the sides get smaller and sink lower, creating
@@ -504,19 +505,33 @@
      tiles snap to the viewport's center so there's always
      a clear picked item.
 
+     Tarek: 'i want a more pronounced curve at the center,
+     more density, don't worry about duplicates if they
+     have to show they show'.
+     - Density: smaller tiles (200px vs 260px) + tighter
+       gap (2px vs 4px) = more tiles visible in the same
+       viewport. Plus setupLoop renders 3 copies of the
+       tile set on desktop (39 total) so the wall feels
+       very long and dense.
+     - Pronounced curve: switched from linear falloff to
+       power-curve falloff (Math.pow(d, 1.5)) so the
+       center item stays large and sides drop off sharply.
+
      Mobile (<768px) keeps the flat horizontal scroll from
      the base .poster-wall style. The transform is cleared
      by JS for mobile, and the wall stays a simple row. */
   @media (min-width: 768px) {
     .poster-wall {
       align-items: center;
-      /* Extra vertical padding so the Y-offset wave has room
-         to breathe without items getting clipped. */
-      padding-top: 50px;
-      padding-bottom: 50px;
+      /* Extra vertical padding so the deeper Y-offset wave
+         has room to breathe without items getting clipped. */
+      padding-top: 60px;
+      padding-bottom: 60px;
       /* Snap each tile to the viewport's center so there's
          always a clean "picked" item. */
       scroll-snap-type: x mandatory;
+      /* Tighter gap for more density. */
+      gap: 2px;
     }
     .poster-wall > li {
       scroll-snap-align: center;
@@ -527,6 +542,16 @@
          position, but long enough to smooth out frame
          stutter. */
       transition: transform 0.05s linear;
+      /* Smaller tiles for more density. ~5.5 tiles visible
+         on a 1100px viewport (was ~3.7 with 260px). */
+      width: min(18vw, 200px);
+      /* Performance: with 3x tile rendering (39 tiles),
+         tell the browser to skip rendering off-screen
+         tiles. contain-intrinsic-size is the estimated
+         size the browser reserves space for when the
+         tile is off-screen. */
+      content-visibility: auto;
+      contain-intrinsic-size: 200px 300px;
     }
   }
 

@@ -428,31 +428,44 @@ const POSTER_WALL = (() => {
       return;
     }
 
-    // Clone first and last, mark them so we can identify them.
+    var isDesktop = window.matchMedia("(min-width: 768px)").matches;
+
+    // Mobile: revolver — clone first and last, stick them at
+    // the opposite ends. The wall now looks like:
+    //   [L_clone, A, B, ..., K, L, A_clone]
+    // Start scrolled so A is fully visible with L_clone
+    // peeking on the left. Tarek: "i have to be able to
+    // see the little side of the last one from the left".
     var firstClone = tiles[0].cloneNode(true);
     var lastClone  = tiles[tiles.length - 1].cloneNode(true);
     firstClone.classList.add("poster-wall__clone");
     lastClone.classList.add("poster-wall__clone");
-
-    // Insert the last-clone at the beginning, append the
-    // first-clone at the end. Order is now:
-    //   [L_clone, A, B, ..., K, L, A_clone]
     wall.insertBefore(lastClone, tiles[0]);
     wall.appendChild(firstClone);
 
+    // v3.14.44: Desktop density. Tarek asked for more
+    // density, said duplicates are fine. Clone the whole
+    // original set 2 more times so the wall has 3 sets of
+    // 13 = 39 tiles on desktop. The wall feels much longer
+    // and denser. setupWave's scale/Y-offset applies to
+    // all of them uniformly, so the wave shape is preserved
+    // across copies.
+    if (isDesktop) {
+      for (var copy = 0; copy < 2; copy++) {
+        for (var j = 0; j < tiles.length; j++) {
+          var clone = tiles[j].cloneNode(true);
+          clone.classList.add("poster-wall__clone");
+          wall.appendChild(clone);
+        }
+      }
+    }
+
     // Start scrolled so A is fully visible with L_clone
     // peeking on the left. We scroll past L_clone by 85%
-    // of its width, leaving 15% (~40px) peeking on the left.
-    // Tarek: "i have to be able to see the little side of
-    // the last one from the left and see the second one from
-    // the right side".
+    // of its width, leaving 15% (~30px on desktop with
+    // 200px tiles) peeking on the left.
     var peek = Math.round(tiles[0].offsetWidth * 0.15);
     wall.scrollLeft = tiles[0].offsetLeft - peek;
-    console.info("[poster-wall] revolver:",
-      tiles.length, "tiles + 2 clones,",
-      "A at", tiles[0].offsetLeft, "px,",
-      "L_clone peek", peek, "px,",
-      "scrollLeft", wall.scrollLeft, "px");
 
     // Wrap behavior: instant jump when the user scrolls past
     // either edge. No animation, no transition. The _warping
@@ -461,8 +474,8 @@ const POSTER_WALL = (() => {
     wall.addEventListener("scroll", function () {
       if (wall._warping) return;
 
-      // Past the right edge (showing A_clone): jump to the
-      // starting position (A with L_clone peeking).
+      // Past the right edge (showing the last clone): jump
+      // to the starting position (A with L_clone peeking).
       if (wall.scrollLeft + wall.clientWidth >= wall.scrollWidth - 2) {
         wall._warping = true;
         wall.scrollLeft = tiles[0].offsetLeft - peek;
@@ -526,11 +539,23 @@ const POSTER_WALL = (() => {
         var tileCenterX = tileRect.left + tileRect.width / 2;
         var distance = Math.abs(tileCenterX - centerX);
 
-        // Scale: 1.0 at center, 0.5 at the edges.
-        var scale = Math.max(0.5, 1 - distance * 0.0015);
-        // Y offset: 0 at center, 60px at the edges.
-        // Items "sink" as they move away from center → wave shape.
-        var translateY = Math.min(60, distance * 0.15);
+        // v3.14.44: more pronounced curve. Switched from
+        // linear falloff (1 - d*k) to a power curve
+        // (1 - (d*k)^1.5). The center item stays at
+        // scale 1, items close to center stay relatively
+        // large, and items far from center drop off
+        // sharply. Same idea for the Y offset — power
+        // curve means items close to center barely sink,
+        // items far from center sink deep.
+        //   t = (distance * 0.003) ^ 1.5
+        //   distance 0   → t=0     → scale 1.0, Y  0
+        //   distance 100 → t=0.164 → scale 0.84, Y 16
+        //   distance 200 → t=0.465 → scale 0.54, Y 47
+        //   distance 300 → t=0.854 → scale 0.35, Y 85
+        //   distance 400 → t=1.0+  → scale 0.35, Y 100
+        var t = Math.pow(distance * 0.003, 1.5);
+        var scale = Math.max(0.35, 1 - t);
+        var translateY = Math.min(100, t * 100);
 
         tile.style.transform = "scale(" + scale + ") translateY(" + translateY + "px)";
       }
