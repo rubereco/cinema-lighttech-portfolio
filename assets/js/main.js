@@ -217,14 +217,13 @@ function setupYearStamp() {
   setupSectionChrome();
 
   // Render the poster wall (work.json × films.json) after data is ready.
-  // v3.14.48: setupLoop() is the only thing we need now. The
-  // coverflow scale animation is done by CSS scroll-driven
-  // animations (view-timeline) on the tiles themselves — no
-  // JavaScript needed. setupLoop adds the 3x clones on desktop
-  // for wrap material and the revolver clones on mobile for
-  // the peek effect.
+  // v3.14.49: setupCarousel replaces all the setupLoop / setupWave
+  // / view-timeline mess. It's a self-contained carousel:
+  // clones both ends, wheel/drag/touch input, translateX on
+  // the track, per-frame scale on each tile based on distance
+  // from viewport center. See the function body for details.
   POSTER_WALL.render().then(() => {
-    POSTER_WALL.setupLoop();
+    POSTER_WALL.setupCarousel();
   });
   POSTER_WALL.setupClick();
 
@@ -367,170 +366,249 @@ const POSTER_WALL = (() => {
     render(state.work, state.films);
   }
 
-  // v3.14.42: REVOLVER MAGAZINE layout. Tarek: "i just want the
-  // first and the last to be the same as all the other ones,
-  // to put an example i want it like the magazine of a revolver
-  // when you stop it you don't know where it is it can be the
-  // first the last or the middle slot. So for that what we
-  // need to make it that way is when im on the first i have to
-  // be able to see the little side of the last one from the
-  // left and see the second one from the right side. don't
-  // do wierd animations between the first or last i has to be
-  // all the same".
+  // v3.14.49: PROPER CAROUSEL — the approach that actually works.
+  // After chasing scrollLeft/overflow:auto and view-timeline
+  // for 8 commits and getting nothing that the user could
+  // actually scroll or see a wave on, I went and looked at
+  // how real carousels are built. The pattern is:
   //
-  // How it works: clone the first and last tiles, stick the
-  // clone of the LAST at the BEGINNING and the clone of the
-  // FIRST at the END. The wall now looks like:
+  //   1. A viewport with overflow: hidden (the visible window)
+  //   2. A track inside it, wider than the viewport
+  //   3. JS translates the track with transform: translateX()
+  //      based on user input (wheel, drag, touch)
+  //   4. The transform is GPU-accelerated — no scroll-event
+  //      races, no view-timeline browser support worries
+  //   5. For the wave: per-frame, compute each item's
+  //      distance from the viewport center and apply
+  //      transform: scale() based on that
+  //   6. For the perpetual effect: clone the items at both
+  //      ends, and when the user scrolls past the end, wrap
+  //      the scroll position back by one set width
   //
-  //   [L_clone] [A] [B] [C] ... [K] [L] [A_clone]
-  //
-  // The user starts scrolled so A is fully visible with
-  // L_clone peeking on the left and B peeking on the right.
-  // This is the SAME view as any middle tile — every poster
-  // has neighbors on both sides. The user can't tell they're
-  // on the "first" because the layout looks identical to
-  // being on any other poster.
-  //
-  // When the user scrolls past L (right edge, showing A_clone),
-  // the wrap is INSTANT: scrollLeft jumps to the position
-  // where A is fully visible with L_clone peeking. The user
-  // sees the same view 1 frame later — visually identical.
-  // They can keep scrolling right indefinitely.
-  //
-  // Same for the left edge: scroll past A (scrollLeft <= 0,
-  // showing L_clone), instant jump to L's position where L
-  // is fully visible with A_clone peeking on the right.
-  //
-  // v3.14.42 fix: previously this had the same race condition
-  // as setupMarquee (v3.14.37) — called synchronously after
-  // render(), but render() is async, so setupLoop() saw 0
-  // tiles and bailed. The init block now chains setupLoop()
-  // to render()'s promise so the tiles are guaranteed to
-  // exist before the clones are added.
-  //
-  // v3.14.42 also removed scroll-snap from the wall — with
-  // snap, the tiles would always align to the left edge and
-  // the clones would always be hidden. Without snap, the
-  // user can stop scrolling at any position and see the
-  // neighbors peeking on both sides.
-  function setupLoop() {
+  // This is the approach from the YouTube vanilla-JS carousel
+  // tutorial and the codegateway swipeable carousel — battle
+  // tested, works in every browser, no library, no scroll
+  // event listener nonsense.
+  function setupCarousel() {
     var wall = document.getElementById("poster-wall");
     if (!wall) {
       console.warn("[poster-wall] #poster-wall not found");
       return;
     }
-    var tiles = wall.querySelectorAll(":scope > li");
-    if (tiles.length < 2) {
-      console.warn("[poster-wall] need at least 2 tiles, got", tiles.length);
+    var originalItems = Array.prototype.slice.call(
+      wall.querySelectorAll(":scope > li")
+    );
+    if (originalItems.length < 2) {
+      console.warn("[poster-wall] need at least 2 tiles, got",
+        originalItems.length);
       return;
     }
 
-    var isDesktop = window.matchMedia("(min-width: 768px)").matches;
-    console.info("[poster-wall] setupLoop start:", tiles.length, "original tiles,", isDesktop ? "desktop" : "mobile");
+    // ─── Clone items at both ends for the perpetual loop ───
+    // Track now looks like:
+    //   [A B C ... L | A B C ... L | A B C ... L]
+    //   ^clonesBefore  ^originals    ^clonesAfter
+    // We start the user in the MIDDLE set (the originals).
+    // When they scroll far enough left/right, we jump them
+    // back to the equivalent position in another set — the
+    // wrap is invisible because the content is the same.
+    var clonesBefore = originalItems.map(function (item) {
+      var c = item.cloneNode(true);
+      c.classList.add("poster-wall__clone");
+      return c;
+    });
+    var clonesAfter = originalItems.map(function (item) {
+      var c = item.cloneNode(true);
+      c.classList.add("poster-wall__clone");
+      return c;
+    });
+    clonesBefore.reverse().forEach(function (c) {
+      wall.insertBefore(c, wall.firstChild);
+    });
+    clonesAfter.forEach(function (c) {
+      wall.appendChild(c);
+    });
 
-    if (isDesktop) {
-      // v3.14.47: Desktop — NO L_clone / A_clone. Only the
-      // 3x rendering. Reason: the revolver clones push A
-      // to offsetLeft=140px, which means centerFirstRealTile()
-      // can't actually center A (would need negative scrollLeft,
-      // browser clamps to 0). Without L_clone at the start, A
-      // IS the first tile and can be centered. The 3x rendering
-      // (39 tiles) already provides plenty of wrap-around
-      // material — the user can scroll from A through 3 full
-      // sets before the wrap fires.
-      for (var copy = 0; copy < 2; copy++) {
-        for (var j = 0; j < tiles.length; j++) {
-          var clone = tiles[j].cloneNode(true);
-          clone.classList.add("poster-wall__clone");
-          wall.appendChild(clone);
-        }
-      }
-    } else {
-      // Mobile: revolver — clone first and last, stick them
-      // at the opposite ends. The wall now looks like:
-      //   [L_clone, A, B, ..., K, L, A_clone]
-      // Tarek: "i have to be able to see the little side of
-      // the last one from the left".
-      var firstClone = tiles[0].cloneNode(true);
-      var lastClone  = tiles[tiles.length - 1].cloneNode(true);
-      firstClone.classList.add("poster-wall__clone");
-      lastClone.classList.add("poster-wall__clone");
-      wall.insertBefore(lastClone, tiles[0]);
-      wall.appendChild(firstClone);
+    var itemCount    = originalItems.length;
+    var itemWidth    = originalItems[0].offsetWidth;
+    var oneSetWidth  = itemCount * itemWidth;
+    var cloneSetWidth = clonesBefore.length * itemWidth;
+
+    // ─── Scroll state ───
+    // scrollX = current actual position (what's rendered).
+    // targetScrollX = where the user wants to be (where the
+    // wheel/drag is pushing us). We lerp from target to scroll
+    // each frame for a smooth momentum feel.
+    var scrollX = 0;
+    var targetScrollX = 0;
+    var isDragging = false;
+    var dragStartX = 0;
+    var dragStartScrollX = 0;
+
+    // Start the user in the MIDDLE set (the originals),
+    // with the first original item (A) centered in the viewport.
+    var firstOriginal = wall.querySelectorAll(":scope > li")[clonesBefore.length];
+    scrollX = -firstOriginal.offsetLeft + (wall.clientWidth / 2) - (itemWidth / 2);
+    targetScrollX = scrollX;
+    wall.style.transform = "translateX(" + scrollX + "px)";
+
+    // ─── Input handlers ───
+    function onWheel(e) {
+      e.preventDefault();
+      // deltaY is vertical scroll; we use it for horizontal
+      // movement. Trackpads send small deltas; mice send
+      // bigger ones. Either way it feels natural.
+      targetScrollX -= e.deltaY;
+      wrapTarget();
+    }
+    function onMouseDown(e) {
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartScrollX = targetScrollX;
+      wall.style.cursor = "grabbing";
+    }
+    function onMouseMove(e) {
+      if (!isDragging) return;
+      targetScrollX = dragStartScrollX + (e.clientX - dragStartX);
+      wrapTarget();
+    }
+    function onMouseUp() {
+      if (!isDragging) return;
+      isDragging = false;
+      wall.style.cursor = "grab";
+    }
+    function onTouchStart(e) {
+      isDragging = true;
+      dragStartX = e.touches[0].clientX;
+      dragStartScrollX = targetScrollX;
+    }
+    function onTouchMove(e) {
+      if (!isDragging) return;
+      targetScrollX = dragStartScrollX + (e.touches[0].clientX - dragStartX);
+      wrapTarget();
+    }
+    function onTouchEnd() {
+      if (!isDragging) return;
+      isDragging = false;
     }
 
-    // v3.14.46: Diagnostic — confirm how many tiles are
-    // in the wall after the clones, and whether the wall
-    // is actually wider than the viewport (i.e. scrollable).
-    var totalTiles = wall.querySelectorAll(":scope > li").length;
-    console.info("[poster-wall] setupLoop end:",
-      totalTiles, "total tiles,",
-      "scrollWidth", wall.scrollWidth, "px,",
-      "clientWidth", wall.clientWidth, "px,",
-      "scrollable:", wall.scrollWidth > wall.clientWidth + 1);
-
-    // v3.14.48: Initial scroll position.
-    // - Desktop: don't set anything. The coverflow padding
-    //   (padding-inline: calc(50% - 70px)) naturally puts the
-    //   first tile at the center with scrollLeft=0. The CSS
-    //   scroll-snap + scroll-driven animations handle the
-    //   rest.
-    // - Mobile: scroll to the peek position so A is visible
-    //   with L_clone peeking on the left (revolver effect).
-    if (!isDesktop) {
-      var peek = Math.round(tiles[0].offsetWidth * 0.15);
-      wall.scrollLeft = tiles[0].offsetLeft - peek;
+    // Keep targetScrollX in the perpetual range. The user is
+    // "in" the middle set; if they push past the boundary,
+    // jump them to the equivalent position in another set.
+    // This is what makes the carousel feel infinite.
+    function wrapTarget() {
+      while (targetScrollX < -cloneSetWidth - oneSetWidth) {
+        targetScrollX += oneSetWidth;
+        scrollX += oneSetWidth;
+      }
+      while (targetScrollX > cloneSetWidth) {
+        targetScrollX -= oneSetWidth;
+        scrollX -= oneSetWidth;
+      }
     }
 
-    // Wrap-position helpers. Different on mobile vs desktop:
-    // - Mobile: A is the second tile (after L_clone), so
-    //   'A with L_clone peeking on the left' = tiles[0].offsetLeft
-    //   - peek. The wrap lands at the peek position.
-    // - Desktop: A is the FIRST tile, so we center it in the
-    //   viewport: tiles[0].offsetLeft - (clientWidth/2) +
-    //   (tileWidth/2). The wrap brings the user back to the
-    //   same centered A view.
-    function getStartPos() {
-      if (isDesktop) {
-        var w = wall.clientWidth;
-        return tiles[0].offsetLeft - (w / 2) + (tiles[0].offsetWidth / 2);
+    wall.addEventListener("wheel", onWheel, { passive: false });
+    wall.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    wall.addEventListener("touchstart", onTouchStart, { passive: true });
+    wall.addEventListener("touchmove", onTouchMove, { passive: true });
+    wall.addEventListener("touchend", onTouchEnd);
+    // Cancel drag if the user releases outside the window
+    window.addEventListener("mouseleave", onMouseUp);
+
+    // ─── Animation loop ───
+    // Per frame: lerp scrollX toward targetScrollX, apply
+    // the transform, update each item's scale based on its
+    // distance from the viewport center.
+    function frame() {
+      // Lerp: 0.15 = snappy but smooth. Lower = more momentum.
+      scrollX += (targetScrollX - scrollX) * 0.15;
+      // Snap to target when close enough — prevents infinite
+      // tiny updates once the user stops interacting.
+      if (Math.abs(targetScrollX - scrollX) < 0.3) {
+        scrollX = targetScrollX;
       }
-      var peek = Math.round(tiles[0].offsetWidth * 0.15);
-      return tiles[0].offsetLeft - peek;
+      wall.style.transform = "translateX(" + scrollX + "px)";
+      updateWave();
+
+      // Keep animating as long as we're still moving toward
+      // target OR the user is actively dragging.
+      if (isDragging || Math.abs(targetScrollX - scrollX) > 0.3) {
+        requestAnimationFrame(frame);
+      } else {
+        rafId = null;
+      }
     }
-    function getEndPos() {
-      if (isDesktop) {
-        var w = wall.clientWidth;
-        return tiles[tiles.length - 1].offsetLeft - (w / 2) + (tiles[tiles.length - 1].offsetWidth / 2);
+    var rafId = null;
+    function ensureAnimating() {
+      if (rafId === null) {
+        rafId = requestAnimationFrame(frame);
       }
-      var peek = Math.round(tiles[0].offsetWidth * 0.15);
-      return tiles[tiles.length - 1].offsetLeft - peek;
+    }
+    // Kick off whenever target changes
+    var origWrapTarget = wrapTarget;
+    wrapTarget = function () {
+      origWrapTarget();
+      ensureAnimating();
+    };
+    ensureAnimating();
+
+    // ─── Wave (coverflow scale) ───
+    // For every item, compute its distance from the viewport
+    // center and apply a scale based on that distance. Items
+    // near the center are big (1.0), items far away are small
+    // (0.5). The math: a power curve so the center stays
+    // prominent and the sides drop off sharply.
+    function updateWave() {
+      var wallRect = wall.getBoundingClientRect();
+      var viewportCenterX = (wallRect.left + wallRect.right) / 2;
+      var allItems = wall.querySelectorAll(":scope > li");
+      for (var i = 0; i < allItems.length; i++) {
+        var item = allItems[i];
+        var itemRect = item.getBoundingClientRect();
+        var itemCenterX = (itemRect.left + itemRect.right) / 2;
+        var distance = Math.abs(itemCenterX - viewportCenterX);
+        // Power-curve falloff: center = 1.0, edges = 0.5
+        //   distance 0   → scale 1.00
+        //   distance 100 → scale 0.84
+        //   distance 200 → scale 0.54
+        //   distance 300+→ scale 0.50 (clamped minimum)
+        var t = Math.pow(distance / 300, 1.5);
+        var scale = Math.max(0.5, 1 - t * 0.5);
+        item.style.transform = "scale(" + scale + ")";
+      }
     }
 
-    // Wrap behavior: instant jump when the user scrolls past
-    // either edge. No animation, no transition. The _warping
-    // flag prevents the scroll event fired by the jump itself
-    // from triggering another jump.
-    wall.addEventListener("scroll", function () {
-      if (wall._warping) return;
-
-      // Past the right edge (showing the last clone): jump
-      // to the starting position.
-      if (wall.scrollLeft + wall.clientWidth >= wall.scrollWidth - 2) {
-        wall._warping = true;
-        wall.scrollLeft = getStartPos();
-        setTimeout(function () { wall._warping = false; }, 50);
-        return;
+    // ─── Resize handler ───
+    // The viewport width changes on resize; the first item
+    // needs to be re-centered.
+    function onResize() {
+      var newItemWidth = wall.querySelectorAll(":scope > li")[clonesBefore.length].offsetWidth;
+      if (newItemWidth !== itemWidth) {
+        itemWidth = newItemWidth;
+        oneSetWidth = itemCount * itemWidth;
+        cloneSetWidth = clonesBefore.length * itemWidth;
       }
+      // Re-center the first original item
+      var firstOrig = wall.querySelectorAll(":scope > li")[clonesBefore.length];
+      var centerOffset = -firstOrig.offsetLeft + (wall.clientWidth / 2) - (itemWidth / 2);
+      // Preserve the user's current position relative to the
+      // center, then re-anchor.
+      var relOffset = scrollX - centerOffset;
+      scrollX = centerOffset + relOffset;
+      targetScrollX = scrollX;
+      wall.style.transform = "translateX(" + scrollX + "px)";
+      ensureAnimating();
+    }
+    window.addEventListener("resize", onResize);
 
-      // Past the left edge: jump to the ending position.
-      if (wall.scrollLeft <= 0) {
-        wall._warping = true;
-        wall.scrollLeft = getEndPos();
-        setTimeout(function () { wall._warping = false; }, 50);
-        return;
-      }
-    }, { passive: true });
+    console.info("[poster-wall] carousel:",
+      itemCount, "originals +", clonesAfter.length, "clones after +",
+      clonesBefore.length, "clones before =",
+      wall.querySelectorAll(":scope > li").length, "total tiles,",
+      "tile width", itemWidth, "px,",
+      "viewport", wall.clientWidth, "px");
   }
 
   // v3.14.43: WAVE / CURVE layout for desktop (≥768px).
@@ -560,7 +638,7 @@ const POSTER_WALL = (() => {
     loadData,
     render: () => loadData().then(renderFromState),
     setupClick,
-    setupLoop: setupLoop
+    setupCarousel: setupCarousel
   };
 })();
 

@@ -299,43 +299,28 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  /* v3.14.48: The coverflow pattern, learned properly.
-     - scroll-snap-type: x mandatory + scroll-snap-align: center
-       on each tile = the wall snaps so there's always a tile
-       centered in the viewport.
-     - padding-inline: calc(50% - half-tile-width) = puts the
-       first tile at the center on initial load AND makes
-       scroll-snap-align: center work correctly (the snap
-       needs padding room on both sides to land a tile in
-       the middle of the viewport).
-     - cursor: grab = tells the user the wall is draggable.
-     The scale animation (center tile big, sides smaller) is
-     done with CSS scroll-driven animations on the tiles
-     themselves — no JavaScript scroll listener needed. The
-     browser tracks each tile's position in the scroll
-     container via view-timeline and animates the transform
-     based on that. */
+  /* v3.14.49: The pattern that actually works.
+     - display: flex so items lay out horizontally
+     - overflow: hidden (NOT auto) — the wall is the viewport;
+       JS translates the wall itself with transform: translateX().
+       The CSS scroll approach (overflow-x: auto + scrollLeft)
+       was the source of every "can't scroll" bug.
+     - cursor: grab → grabbing on active for the drag affordance
+     - user-select: none so dragging doesn't select text
+     - will-change: transform hints the browser to GPU-accel
+     - position: relative so the transform is contained */
   display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: hidden;
+  position: relative;
   cursor: grab;
-  /* The coverflow padding: half the viewport width minus
-     half the tile width. On a 1200px viewport with 140px
-     tiles: 600 - 70 = 530px on each side. The first tile
-     starts at 530px, its center is at 600px (the viewport
-     center), so it's centered on initial load. Same for
-     the last tile at max scroll. */
-  padding-inline: calc(50% - 70px);
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+  touch-action: pan-y;
 }
 .poster-wall:active {
   cursor: grabbing;
 }
-.poster-wall::-webkit-scrollbar { display: none; }
-
 .poster-wall > li {
   margin: 0;
   padding: 0;
@@ -344,45 +329,12 @@
   background: var(--c-surface);
   flex: 0 0 auto;
   width: 140px;
-  /* Snap each tile to the viewport's center. Works in tandem
-     with the padding-inline on .poster-wall — the padding
-     provides the "snap room" so a tile can actually land in
-     the middle. */
-  scroll-snap-align: center;
-  /* v3.14.48: CSS scroll-driven animation. This is the
-     coverflow effect, done natively by the browser with
-     zero JavaScript.
-     - view-timeline-name: --li creates a timeline that
-       tracks THIS tile's progress through the scroll
-       container.
-     - view-timeline-axis: inline = horizontal tracking.
-     - animation-timeline: --li = link the scale animation
-       to the tile's progress.
-     - animation-range: contain = the animation runs while
-       the tile is inside the scroll container's view.
-     The keyframes scale the tile from 0.5 at the edges
-     (entering from left or exiting to right) to 1 at the
-     center, and back to 0.5. The browser interpolates
-     smoothly as the user scrolls — no JS scroll listener
-     updating transforms on every frame.
-     Browser support: Chrome 115+, Edge 115+, Safari 26+,
-     Firefox 136+. In older browsers the tiles just stay
-     at scale 1 (no coverflow, but carousel still works). */
-  view-timeline-name: --li;
-  view-timeline-axis: inline;
-  animation: poster-scale linear both;
-  animation-timeline: --li;
-  animation-range: contain;
-}
-@keyframes poster-scale {
-  /* Tile at the left edge of the scroll container:
-     small (0.5). */
-  0%   { transform: scale(0.5); }
-  /* Tile at the center of the scroll container:
-     big (1.0). This is the "picked" frame. */
-  50%  { transform: scale(1); }
-  /* Tile at the right edge: small again. */
-  100% { transform: scale(0.5); }
+  transform-origin: center;
+  will-change: transform;
+  /* v3.14.49: scale is now set by JS (updateWave in
+     setupCarousel) per-frame based on each item's distance
+     from the viewport center. No CSS animation — that was
+     unreliable cross-browser. */
 }
 
 .poster-link {
