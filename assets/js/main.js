@@ -217,17 +217,14 @@ function setupYearStamp() {
   setupSectionChrome();
 
   // Render the poster wall (work.json × films.json) after data is ready.
-  // v3.14.42: setupLoop() must run AFTER render() completes,
-  // because render() is async (loads data → writes to DOM). If we
-  // called setupLoop() synchronously, it would see 0 tiles and
-  // bail — no clones, no wrap, no revolver. Chaining to the
-  // promise guarantees the tiles exist when setupLoop() runs.
-  // v3.14.43: setupWave() runs after setupLoop() so it can
-  // override the initial scroll position (center A on desktop)
-  // and apply the wave/curve transform on every scroll.
+  // v3.14.48: setupLoop() is the only thing we need now. The
+  // coverflow scale animation is done by CSS scroll-driven
+  // animations (view-timeline) on the tiles themselves — no
+  // JavaScript needed. setupLoop adds the 3x clones on desktop
+  // for wrap material and the revolver clones on mobile for
+  // the peek effect.
   POSTER_WALL.render().then(() => {
     POSTER_WALL.setupLoop();
-    POSTER_WALL.setupWave();
   });
   POSTER_WALL.setupClick();
 
@@ -472,6 +469,19 @@ const POSTER_WALL = (() => {
       "clientWidth", wall.clientWidth, "px,",
       "scrollable:", wall.scrollWidth > wall.clientWidth + 1);
 
+    // v3.14.48: Initial scroll position.
+    // - Desktop: don't set anything. The coverflow padding
+    //   (padding-inline: calc(50% - 70px)) naturally puts the
+    //   first tile at the center with scrollLeft=0. The CSS
+    //   scroll-snap + scroll-driven animations handle the
+    //   rest.
+    // - Mobile: scroll to the peek position so A is visible
+    //   with L_clone peeking on the left (revolver effect).
+    if (!isDesktop) {
+      var peek = Math.round(tiles[0].offsetWidth * 0.15);
+      wall.scrollLeft = tiles[0].offsetLeft - peek;
+    }
+
     // Wrap-position helpers. Different on mobile vs desktop:
     // - Mobile: A is the second tile (after L_clone), so
     //   'A with L_clone peeking on the left' = tiles[0].offsetLeft
@@ -537,99 +547,20 @@ const POSTER_WALL = (() => {
   //   - translateY: 0 at center, 60px at the edges
   // The center item is the "picked" one (largest, no Y offset).
   // Items to the sides get smaller and sink lower, creating a
-  // smooth wave/curve.
-  //
-  // On mobile (<768px), the transform is cleared so the wall
-  // is just a flat horizontal scroll (the revolver from
-  // setupLoop handles the wrap).
-  function setupWave() {
-    var wall = document.getElementById("poster-wall");
-    if (!wall) return;
-    var tiles = wall.querySelectorAll(":scope > li");
-    if (!tiles.length) return;
-
-    var desktopQuery = window.matchMedia("(min-width: 768px)");
-
-    function updateWave() {
-      if (!desktopQuery.matches) {
-        // Mobile: no transform, wall is a flat horizontal scroll.
-        for (var i = 0; i < tiles.length; i++) {
-          tiles[i].style.transform = "";
-        }
-        return;
-      }
-
-      var wallRect = wall.getBoundingClientRect();
-      var centerX = wallRect.left + wallRect.width / 2;
-
-      for (var i = 0; i < tiles.length; i++) {
-        var tile = tiles[i];
-        var tileRect = tile.getBoundingClientRect();
-        var tileCenterX = tileRect.left + tileRect.width / 2;
-        var distance = Math.abs(tileCenterX - centerX);
-
-        // v3.14.45: SCALE ONLY. Tarek: "i only want the
-        // images to grow when the images grow they make
-        // the effect they are more spread out but its
-        // just one is bigger than the other". So we
-        // dropped the translateY entirely — the wave
-        // was sinking side items down, which made them
-        // look "spread out". Now everything stays on
-        // the same row; the only difference is size.
-        //   t = (distance * 0.003) ^ 1.5
-        //   distance 0   → t=0     → scale 1.00
-        //   distance 100 → t=0.164 → scale 0.84
-        //   distance 200 → t=0.465 → scale 0.54
-        //   distance 300 → t=0.854 → scale 0.35
-        //   distance 400 → t=1.0+  → scale 0.35
-        var t = Math.pow(distance * 0.003, 1.5);
-        var scale = Math.max(0.35, 1 - t);
-
-        tile.style.transform = "scale(" + scale + ")";
-      }
-    }
-
-    // On desktop, start with the first real tile (A) centered
-    // in the viewport so the user sees a clean "picked" frame
-    // on load — not the peek position from setupLoop (which
-    // is for mobile). On mobile, the peek position from
-    // setupLoop is correct, so this function is a no-op.
-    function centerFirstRealTile() {
-      if (!desktopQuery.matches) return;
-      var firstRealTile = null;
-      for (var i = 0; i < tiles.length; i++) {
-        if (!tiles[i].classList.contains("poster-wall__clone")) {
-          firstRealTile = tiles[i];
-          break;
-        }
-      }
-      if (!firstRealTile) return;
-
-      var tileLeft = firstRealTile.offsetLeft;
-      var tileWidth = firstRealTile.offsetWidth;
-      var wallWidth = wall.clientWidth;
-      // scrollLeft = tileLeft - (wallWidth/2) + (tileWidth/2)
-      // → the tile's center aligns with the viewport's center.
-      wall.scrollLeft = tileLeft - (wallWidth / 2) + (tileWidth / 2);
-    }
-
-    // Set the initial position BEFORE adding the scroll listener,
-    // so the first updateWave() call sees the correct position
-    // (not the peek position from setupLoop).
-    centerFirstRealTile();
-
-    wall.addEventListener("scroll", updateWave, { passive: true });
-    window.addEventListener("resize", updateWave);
-    desktopQuery.addEventListener("change", updateWave);
-    updateWave();
-  }
+  // v3.14.48: REMOVED setupWave entirely. The coverflow scale
+  // animation is now done with CSS scroll-driven animations
+  // (view-timeline) in sections.css — no JavaScript scroll
+  // listener updating transforms on every frame. The browser
+  // tracks each tile's position in the scroll container
+  // natively and interpolates the scale smoothly. This is the
+  // standard pattern, learned from addyosmani.com/blog/coverflow
+  // and the scroll-driven-animations.style demos.
 
   return {
     loadData,
     render: () => loadData().then(renderFromState),
     setupClick,
-    setupLoop: setupLoop,
-    setupWave: setupWave
+    setupLoop: setupLoop
   };
 })();
 

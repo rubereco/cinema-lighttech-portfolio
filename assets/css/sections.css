@@ -299,29 +299,37 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  /* v3.14.42: revolver magazine. NO scroll-snap — we need the
-     user to be able to stop scrolling at any position so they
-     can see L_clone peeking on the left when on A (and vice
-     versa). With scroll-snap, the tiles would snap to the left
-     edge and the clones would always be hidden. The wrap
-     behavior is handled by JS (setupLoop), not by CSS snap.
-     Tarek: "when im on the first i have to be able to see the
-     little side of the last one from the left". */
+  /* v3.14.48: The coverflow pattern, learned properly.
+     - scroll-snap-type: x mandatory + scroll-snap-align: center
+       on each tile = the wall snaps so there's always a tile
+       centered in the viewport.
+     - padding-inline: calc(50% - half-tile-width) = puts the
+       first tile at the center on initial load AND makes
+       scroll-snap-align: center work correctly (the snap
+       needs padding room on both sides to land a tile in
+       the middle of the viewport).
+     - cursor: grab = tells the user the wall is draggable.
+     The scale animation (center tile big, sides smaller) is
+     done with CSS scroll-driven animations on the tiles
+     themselves — no JavaScript scroll listener needed. The
+     browser tracks each tile's position in the scroll
+     container via view-timeline and animates the transform
+     based on that. */
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
+  scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding-left: max(0.9rem, 2.5vw);
-  padding-right: max(0.9rem, 2.5vw);
-  gap: max(4px, 0.4vw);
-  /* v3.14.47: cursor hints that the wall is draggable/scrollable.
-     On desktop, users often expect the page mouse wheel to scroll
-     the page — but here the wheel needs to scroll the wall. The
-     grab cursor signals "this is a draggable surface, scroll
-     here". */
   cursor: grab;
+  /* The coverflow padding: half the viewport width minus
+     half the tile width. On a 1200px viewport with 140px
+     tiles: 600 - 70 = 530px on each side. The first tile
+     starts at 530px, its center is at 600px (the viewport
+     center), so it's centered on initial load. Same for
+     the last tile at max scroll. */
+  padding-inline: calc(50% - 70px);
 }
 .poster-wall:active {
   cursor: grabbing;
@@ -335,7 +343,46 @@
   overflow: hidden;
   background: var(--c-surface);
   flex: 0 0 auto;
-  width: min(65vw, 260px);
+  width: 140px;
+  /* Snap each tile to the viewport's center. Works in tandem
+     with the padding-inline on .poster-wall — the padding
+     provides the "snap room" so a tile can actually land in
+     the middle. */
+  scroll-snap-align: center;
+  /* v3.14.48: CSS scroll-driven animation. This is the
+     coverflow effect, done natively by the browser with
+     zero JavaScript.
+     - view-timeline-name: --li creates a timeline that
+       tracks THIS tile's progress through the scroll
+       container.
+     - view-timeline-axis: inline = horizontal tracking.
+     - animation-timeline: --li = link the scale animation
+       to the tile's progress.
+     - animation-range: contain = the animation runs while
+       the tile is inside the scroll container's view.
+     The keyframes scale the tile from 0.5 at the edges
+     (entering from left or exiting to right) to 1 at the
+     center, and back to 0.5. The browser interpolates
+     smoothly as the user scrolls — no JS scroll listener
+     updating transforms on every frame.
+     Browser support: Chrome 115+, Edge 115+, Safari 26+,
+     Firefox 136+. In older browsers the tiles just stay
+     at scale 1 (no coverflow, but carousel still works). */
+  view-timeline-name: --li;
+  view-timeline-axis: inline;
+  animation: poster-scale linear both;
+  animation-timeline: --li;
+  animation-range: contain;
+}
+@keyframes poster-scale {
+  /* Tile at the left edge of the scroll container:
+     small (0.5). */
+  0%   { transform: scale(0.5); }
+  /* Tile at the center of the scroll container:
+     big (1.0). This is the "picked" frame. */
+  50%  { transform: scale(1); }
+  /* Tile at the right edge: small again. */
+  100% { transform: scale(0.5); }
 }
 
 .poster-link {
@@ -512,50 +559,17 @@
   /* .hero-cta desktop override removed in v3.10.14 — the buttons
      were deleted from index.html. */
 
-  /* v3.14.46: WAVE / CURVE layout for desktop (≥768px).
-     Tarek: 'i only see five movies, what i'm expecting
-     is to see at least 10 movies in one frame, so make
-     them be smaller, remove or make margins thinner'.
-     - Tiles: min(12vw, 140px) — was 200px. On a 1200px
-       viewport that's 140px → ~8.5 tiles fit, and with
-       the wave's smaller side tiles, ~10+ are visible.
-     - Gap: 0 (was 2px) — tiles flush against each other.
-     - Padding: 0 (was 30px top/bottom) — wave no longer
-       needs vertical breathing room since there's no
-       translateY.
-     - Full viewport width: width: 100vw + margin:
-       calc(50% - 50vw) extends the wall past the section's
-       container so it's not clipped on the sides. */
-
-  @media (min-width: 768px) {
-    .poster-wall {
-      align-items: center;
-      padding-top: 0;
-      padding-bottom: 0;
-      padding-left: 0;
-      padding-right: 0;
-      scroll-snap-type: x proximity;
-      gap: 0;
-      /* v3.14.46: FULL VIEWPORT WIDTH. The .section > *
-         rule was constraining .poster-wall to width: 100%
-         of the section's content area; we removed that
-         rule above so this 100vw can take effect. */
-      width: 100vw;
-      margin-left: calc(50% - 50vw);
-      margin-right: calc(50% - 50vw);
-    }
-    .poster-wall > li {
-      scroll-snap-align: center;
-      transform-origin: center;
-      transition: transform 0.05s linear;
-      /* v3.14.46: Tarek asked for smaller tiles so more
-         fit in one frame. min(12vw, 140px) → on a 1200px
-         viewport each tile is 140px, ~8.5 tiles fit, and
-         the wave's scale falloff means ~10+ are visible
-         (smaller side tiles count too). */
-      width: min(12vw, 140px);
-    }
-  }
+  /* v3.14.48: REMOVED the old @media (min-width: 768px) block
+     for the poster wall. It was overriding the new coverflow
+     rules (scroll-snap-type: x mandatory, padding-inline for
+     centering, view-timeline scale animation) with
+     scroll-snap-type: x proximity and wrong width/padding
+     values. The new coverflow rules in the base .poster-wall
+     style above apply on ALL viewports — no desktop override
+     needed. The same rules work for both mobile and desktop;
+     the only difference is setupLoop adds the revolver clones
+     on mobile and the 3x rendering on desktop (more tiles
+     to scroll through). */
 
   /* Desktop — slightly larger poster title */
   @media (min-width: 1024px) {
