@@ -237,11 +237,20 @@
   background: #141417;
 }
 
-/* v3.10.25: poster wall and chrome fill the section's content
-   area (not the raw viewport). They opt out of the .section > *
-   container constraint so they can be wider than var(--container),
-   but they still respect the section's horizontal padding. */
-.section-posters > .poster-wall,
+/* v3.14.46: poster wall and chrome fill the section's content
+   area. The wall opts out of the .section > * container
+   constraint so it can be wider than var(--container) on
+   desktop (full viewport width via width: 100vw). The
+   chrome stays at 100% of the section. */
+.section-posters > .poster-wall {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  /* No width: 100% here — the wall sets its own width
+     (100vw on desktop) inside the @media (min-width: 768px)
+     block in the .poster-wall rule below. On mobile it
+     falls back to the natural flex width. */
+}
 .section-posters > .section-chrome {
   max-width: none;
   margin-left: 0;
@@ -494,54 +503,34 @@
   /* .hero-cta desktop override removed in v3.10.14 — the buttons
      were deleted from index.html. */
 
-  /* v3.14.45: WAVE / CURVE layout for desktop (≥768px).
-     On desktop the wall becomes a curve carousel: the center
-     item is the "picked" one (scale 1), and items to the
-     sides get smaller. JS (setupWave) updates the scale on
-     every scroll based on each tile's distance from the
-     viewport center. scroll-snap-align: center makes the
-     tiles snap to the viewport's center so there's always
-     a clear picked item.
-
-     Changes from v3.14.44:
-     - Full-viewport width: the wall extends beyond the
-       section's max-width to fill the viewport. The body's
-       overflow-x: hidden (set globally) prevents the page
-       from getting a horizontal scrollbar.
-     - Removed content-visibility: auto / contain-intrinsic-
-       size: was breaking scroll on some browsers.
-     - scroll-snap-type: x proximity (was mandatory): less
-       aggressive snap, smoother feel while still landing
-       cleanly on a tile.
-     - No more Y offset (translateY): Tarek said the wave
-       was making items "spread out" at the edges — he
-       wants pure scale, just bigger/smaller, all in the
-       same row. */
-
-  /* v3.14.45: Prevent the page from getting a horizontal
-     scrollbar when the poster wall extends full-width. */
-  body { overflow-x: hidden; }
+  /* v3.14.46: WAVE / CURVE layout for desktop (≥768px).
+     Tarek: 'i only see five movies, what i'm expecting
+     is to see at least 10 movies in one frame, so make
+     them be smaller, remove or make margins thinner'.
+     - Tiles: min(12vw, 140px) — was 200px. On a 1200px
+       viewport that's 140px → ~8.5 tiles fit, and with
+       the wave's smaller side tiles, ~10+ are visible.
+     - Gap: 0 (was 2px) — tiles flush against each other.
+     - Padding: 0 (was 30px top/bottom) — wave no longer
+       needs vertical breathing room since there's no
+       translateY.
+     - Full viewport width: width: 100vw + margin:
+       calc(50% - 50vw) extends the wall past the section's
+       container so it's not clipped on the sides. */
 
   @media (min-width: 768px) {
     .poster-wall {
       align-items: center;
-      padding-top: 30px;
-      padding-bottom: 30px;
-      /* proximity (not mandatory) — less aggressive snap,
-         smoother scroll, but tiles still land on a snap
-         point. */
+      padding-top: 0;
+      padding-bottom: 0;
+      padding-left: 0;
+      padding-right: 0;
       scroll-snap-type: x proximity;
-      /* Tighter gap for more density. */
-      gap: 2px;
-      /* v3.14.45: FULL VIEWPORT WIDTH. The wall extends
-         beyond the section's max-width using the standard
-         full-bleed pattern:
-           width: 100vw → fills the viewport
-           margin-left/right: calc(50% - 50vw) → centers
-             the wall within the section while keeping it
-             full-width.
-         The page's overflow-x: hidden (set on body) keeps
-         the page from scrolling horizontally. */
+      gap: 0;
+      /* v3.14.46: FULL VIEWPORT WIDTH. The .section > *
+         rule was constraining .poster-wall to width: 100%
+         of the section's content area; we removed that
+         rule above so this 100vw can take effect. */
       width: 100vw;
       margin-left: calc(50% - 50vw);
       margin-right: calc(50% - 50vw);
@@ -549,15 +538,13 @@
     .poster-wall > li {
       scroll-snap-align: center;
       transform-origin: center;
-      /* Tiny transition so the wave feels smooth on scroll,
-         not jittery. 50ms is short enough that the user
-         perceives the transform as following the scroll
-         position, but long enough to smooth out frame
-         stutter. */
       transition: transform 0.05s linear;
-      /* Smaller tiles for more density. ~5.5 tiles visible
-         on a 1100px viewport (was ~3.7 with 260px). */
-      width: min(18vw, 200px);
+      /* v3.14.46: Tarek asked for smaller tiles so more
+         fit in one frame. min(12vw, 140px) → on a 1200px
+         viewport each tile is 140px, ~8.5 tiles fit, and
+         the wave's scale falloff means ~10+ are visible
+         (smaller side tiles count too). */
+      width: min(12vw, 140px);
     }
   }
 

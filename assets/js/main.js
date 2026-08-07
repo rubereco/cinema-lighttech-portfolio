@@ -429,6 +429,7 @@ const POSTER_WALL = (() => {
     }
 
     var isDesktop = window.matchMedia("(min-width: 768px)").matches;
+    console.info("[poster-wall] setupLoop start:", tiles.length, "original tiles,", isDesktop ? "desktop" : "mobile");
 
     // Mobile: revolver — clone first and last, stick them at
     // the opposite ends. The wall now looks like:
@@ -459,6 +460,16 @@ const POSTER_WALL = (() => {
         }
       }
     }
+
+    // v3.14.46: Diagnostic — confirm how many tiles are
+    // in the wall after the clones, and whether the wall
+    // is actually wider than the viewport (i.e. scrollable).
+    var totalTiles = wall.querySelectorAll(":scope > li").length;
+    console.info("[poster-wall] setupLoop end:",
+      totalTiles, "total tiles,",
+      "scrollWidth", wall.scrollWidth, "px,",
+      "clientWidth", wall.clientWidth, "px,",
+      "scrollable:", wall.scrollWidth > wall.clientWidth + 1);
 
     // Start scrolled so A is fully visible with L_clone
     // peeking on the left. We scroll past L_clone by 85%
