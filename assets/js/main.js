@@ -363,20 +363,34 @@ const POSTER_WALL = (() => {
     render(state.work, state.films);
   }
 
-  // v3.14.39: simple loop. NO animation, NO duplicate, NO track.
-  // The user scrolls manually. When they reach the end and keep
-  // scrolling, reset scrollLeft to 0 so the carousel "loops"
-  // back to the first poster. Tarek: "i don't want the films
-  // to be animated, the user is the one that scrolls them".
+  // v3.14.40: the "warp" loop. When the user scrolls to the end
+  // of the wall, animate a quick rewind back to the start. This
+  // is the "perpetual carousel" wrap — the wall appears to be
+  // infinitely long, but it's actually just one row that loops.
+  //
+  // Tarek: "learn how to do the warp thing and apply it good".
+  // The previous instant scrollLeft=0 worked but felt like a
+  // jump. A quick animated rewind (CSS transition) feels like
+  // the row is "wrapping" rather than the user's scroll
+  // snapping to zero. Combined with scroll-snap, the user
+  // lands cleanly on the first poster after the rewind.
   function setupLoop() {
     var wall = document.getElementById("poster-wall");
     if (!wall) return;
     wall.addEventListener("scroll", function () {
-      // If the user has scrolled to (or past) the end, jump
-      // back to the start. The reset is instant and the user
-      // sees the first poster again — they can keep scrolling.
+      // If the user has scrolled to (or past) the end, warp
+      // back to the start. Use smooth-scroll behavior so the
+      // wrap is a quick animated rewind, not a jump.
+      // Guard with a "warping" flag so the scroll event fired
+      // by the warp itself doesn't trigger another warp.
+      if (wall._warping) return;
       if (wall.scrollLeft + wall.clientWidth >= wall.scrollWidth - 2) {
-        wall.scrollLeft = 0;
+        wall._warping = true;
+        wall.scrollTo({ left: 0, behavior: "smooth" });
+        // Clear the flag after the smooth scroll has had time
+        // to settle. 350ms is enough for ~1-2 viewport-widths
+        // at typical speeds.
+        setTimeout(function () { wall._warping = false; }, 350);
       }
     }, { passive: true });
   }
@@ -537,6 +551,14 @@ const FILM_MODAL = (() => {
     }
     if (!modal) return;
 
+    // v3.14.40: track the previous index so we can pick a wrap-
+    // aware slide direction for the modal content. If we just
+    // swapped content, the new film appears instantly — feels
+    // like a jump. If we slide it in from the direction of
+    // travel (or the wrap-around direction), the carousel feels
+    // continuous, even when going last→first or first→last.
+    const prevIndex = currentIndex;
+
     // Title + meta
     const titleEl = document.getElementById("film-modal-title");
     titleEl.textContent = film.title || "Untitled";
@@ -600,6 +622,35 @@ const FILM_MODAL = (() => {
     updatePosition();
     updateNavButtons();
 
+    // v3.14.40: play the wrap-aware slide animation. We pick
+    // the direction based on whether the index moved forward
+    // or backward — INCLUDING across the wrap boundary.
+    //   Going from film 12 → 13 (next): slide in from right.
+    //   Going from film 13 → 1  (next wrap): slide in from right.
+    //   Going from film 1  → 13 (prev wrap): slide in from left.
+    //   Going from film 2  → 1  (prev): slide in from left.
+    // The animation is a quick (200ms) slide + fade so the
+    // transition feels continuous, not janky. CSS handles the
+    // actual keyframes (see .film-modal__body--slide-in-left /
+    // --slide-in-right in modal.css).
+    if (prevIndex >= 0 && currentIndex >= 0 && prevIndex !== currentIndex) {
+      const n = orderedFilmIds.length;
+      // "Forward" if the new index is ahead in the loop. Going
+      // from 13 → 1 is forward (delta of +1 in modulo n). Going
+      // from 1 → 13 is backward (delta of -1 in modulo n).
+      const delta = ((currentIndex - prevIndex) % n + n) % n;
+      const isForward = delta !== 0 && delta <= n / 2;
+      const content = modal.querySelector(".film-modal__content");
+      if (content) {
+        content.classList.remove("film-modal__content--slide-in-left", "film-modal__content--slide-in-right");
+        // Force a reflow so re-adding the class triggers the
+        // animation again on rapid prev/next clicks.
+        // eslint-disable-next-line no-unused-expressions
+        content.offsetWidth;
+        content.classList.add(isForward ? "film-modal__content--slide-in-right" : "film-modal__content--slide-in-left");
+      }
+    }
+
     // v3.14.39: no more auto-cycle. The user navigates manually
     // with prev/next (which wrap last→first and first→last).
     // Tarek: "i don't want the films to be animated, the user
@@ -637,13 +688,16 @@ const FILM_MODAL = (() => {
     }
   }
 
-  // v3.14.34: enable/disable prev/next buttons based on position.
-  // First film: no prev. Last film: no next. Middle: both.
+  // v3.14.40: prev/next are ALWAYS clickable. The carousel wraps
+  // (navigate() uses modulo), so the user can press ←/→ infinitely
+  // in either direction. Disabling the buttons at the ends was the
+  // bug that made the modal "stop" after the user reached the last
+  // film — the button grayed out and clicks no longer fired.
   function updateNavButtons() {
     const prev = modal?.querySelector("[data-film-modal-prev]");
     const next = modal?.querySelector("[data-film-modal-next]");
-    if (prev) prev.disabled = currentIndex <= 0;
-    if (next) next.disabled = currentIndex < 0 || currentIndex >= orderedFilmIds.length - 1;
+    if (prev) prev.disabled = false;
+    if (next) next.disabled = false;
   }
 
   // v3.14.35: navigate uses replaceState (not pushState) so the

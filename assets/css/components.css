@@ -338,6 +338,42 @@
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* v3.14.40: wrap-aware slide animation for prev/next nav.
+   When the user navigates between films, the new content
+   slides in from the direction of travel. This makes the
+   carousel feel continuous, especially when wrapping from
+   the last film to the first (or vice versa) — without
+   this, the wrap is an instant jump that feels janky.
+   The animation is quick (200ms) and goes back to the
+   resting state (scale 1, translate -50/-50) so the modal
+   doesn't end up in a weird position. */
+@keyframes film-modal-slide-in-from-right {
+  from {
+    transform: translate(calc(-50% + 32px), -50%) scale(1);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes film-modal-slide-in-from-left {
+  from {
+    transform: translate(calc(-50% - 32px), -50%) scale(1);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+.film-modal__content--slide-in-right {
+  animation: film-modal-slide-in-from-right 200ms ease-out;
+}
+.film-modal__content--slide-in-left {
+  animation: film-modal-slide-in-from-left 200ms ease-out;
+}
+
 /* Lock body scroll while modal is open (set by JS on <html>) */
 html.film-modal-open,
 html.film-modal-open body {
