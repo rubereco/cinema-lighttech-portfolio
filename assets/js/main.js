@@ -431,27 +431,16 @@ const POSTER_WALL = (() => {
     var isDesktop = window.matchMedia("(min-width: 768px)").matches;
     console.info("[poster-wall] setupLoop start:", tiles.length, "original tiles,", isDesktop ? "desktop" : "mobile");
 
-    // Mobile: revolver — clone first and last, stick them at
-    // the opposite ends. The wall now looks like:
-    //   [L_clone, A, B, ..., K, L, A_clone]
-    // Start scrolled so A is fully visible with L_clone
-    // peeking on the left. Tarek: "i have to be able to
-    // see the little side of the last one from the left".
-    var firstClone = tiles[0].cloneNode(true);
-    var lastClone  = tiles[tiles.length - 1].cloneNode(true);
-    firstClone.classList.add("poster-wall__clone");
-    lastClone.classList.add("poster-wall__clone");
-    wall.insertBefore(lastClone, tiles[0]);
-    wall.appendChild(firstClone);
-
-    // v3.14.44: Desktop density. Tarek asked for more
-    // density, said duplicates are fine. Clone the whole
-    // original set 2 more times so the wall has 3 sets of
-    // 13 = 39 tiles on desktop. The wall feels much longer
-    // and denser. setupWave's scale/Y-offset applies to
-    // all of them uniformly, so the wave shape is preserved
-    // across copies.
     if (isDesktop) {
+      // v3.14.47: Desktop — NO L_clone / A_clone. Only the
+      // 3x rendering. Reason: the revolver clones push A
+      // to offsetLeft=140px, which means centerFirstRealTile()
+      // can't actually center A (would need negative scrollLeft,
+      // browser clamps to 0). Without L_clone at the start, A
+      // IS the first tile and can be centered. The 3x rendering
+      // (39 tiles) already provides plenty of wrap-around
+      // material — the user can scroll from A through 3 full
+      // sets before the wrap fires.
       for (var copy = 0; copy < 2; copy++) {
         for (var j = 0; j < tiles.length; j++) {
           var clone = tiles[j].cloneNode(true);
@@ -459,6 +448,18 @@ const POSTER_WALL = (() => {
           wall.appendChild(clone);
         }
       }
+    } else {
+      // Mobile: revolver — clone first and last, stick them
+      // at the opposite ends. The wall now looks like:
+      //   [L_clone, A, B, ..., K, L, A_clone]
+      // Tarek: "i have to be able to see the little side of
+      // the last one from the left".
+      var firstClone = tiles[0].cloneNode(true);
+      var lastClone  = tiles[tiles.length - 1].cloneNode(true);
+      firstClone.classList.add("poster-wall__clone");
+      lastClone.classList.add("poster-wall__clone");
+      wall.insertBefore(lastClone, tiles[0]);
+      wall.appendChild(firstClone);
     }
 
     // v3.14.46: Diagnostic — confirm how many tiles are
@@ -471,12 +472,30 @@ const POSTER_WALL = (() => {
       "clientWidth", wall.clientWidth, "px,",
       "scrollable:", wall.scrollWidth > wall.clientWidth + 1);
 
-    // Start scrolled so A is fully visible with L_clone
-    // peeking on the left. We scroll past L_clone by 85%
-    // of its width, leaving 15% (~30px on desktop with
-    // 200px tiles) peeking on the left.
-    var peek = Math.round(tiles[0].offsetWidth * 0.15);
-    wall.scrollLeft = tiles[0].offsetLeft - peek;
+    // Wrap-position helpers. Different on mobile vs desktop:
+    // - Mobile: A is the second tile (after L_clone), so
+    //   'A with L_clone peeking on the left' = tiles[0].offsetLeft
+    //   - peek. The wrap lands at the peek position.
+    // - Desktop: A is the FIRST tile, so we center it in the
+    //   viewport: tiles[0].offsetLeft - (clientWidth/2) +
+    //   (tileWidth/2). The wrap brings the user back to the
+    //   same centered A view.
+    function getStartPos() {
+      if (isDesktop) {
+        var w = wall.clientWidth;
+        return tiles[0].offsetLeft - (w / 2) + (tiles[0].offsetWidth / 2);
+      }
+      var peek = Math.round(tiles[0].offsetWidth * 0.15);
+      return tiles[0].offsetLeft - peek;
+    }
+    function getEndPos() {
+      if (isDesktop) {
+        var w = wall.clientWidth;
+        return tiles[tiles.length - 1].offsetLeft - (w / 2) + (tiles[tiles.length - 1].offsetWidth / 2);
+      }
+      var peek = Math.round(tiles[0].offsetWidth * 0.15);
+      return tiles[tiles.length - 1].offsetLeft - peek;
+    }
 
     // Wrap behavior: instant jump when the user scrolls past
     // either edge. No animation, no transition. The _warping
@@ -486,19 +505,18 @@ const POSTER_WALL = (() => {
       if (wall._warping) return;
 
       // Past the right edge (showing the last clone): jump
-      // to the starting position (A with L_clone peeking).
+      // to the starting position.
       if (wall.scrollLeft + wall.clientWidth >= wall.scrollWidth - 2) {
         wall._warping = true;
-        wall.scrollLeft = tiles[0].offsetLeft - peek;
+        wall.scrollLeft = getStartPos();
         setTimeout(function () { wall._warping = false; }, 50);
         return;
       }
 
-      // Past the left edge (showing L_clone): jump to the
-      // ending position (L with A_clone peeking).
+      // Past the left edge: jump to the ending position.
       if (wall.scrollLeft <= 0) {
         wall._warping = true;
-        wall.scrollLeft = tiles[tiles.length - 1].offsetLeft - peek;
+        wall.scrollLeft = getEndPos();
         setTimeout(function () { wall._warping = false; }, 50);
         return;
       }
@@ -573,8 +591,9 @@ const POSTER_WALL = (() => {
 
     // On desktop, start with the first real tile (A) centered
     // in the viewport so the user sees a clean "picked" frame
-    // on load — not L_clone peeking on the left (which is the
-    // mobile default from setupLoop).
+    // on load — not the peek position from setupLoop (which
+    // is for mobile). On mobile, the peek position from
+    // setupLoop is correct, so this function is a no-op.
     function centerFirstRealTile() {
       if (!desktopQuery.matches) return;
       var firstRealTile = null;

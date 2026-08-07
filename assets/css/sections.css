@@ -316,6 +316,15 @@
   padding-left: max(0.9rem, 2.5vw);
   padding-right: max(0.9rem, 2.5vw);
   gap: max(4px, 0.4vw);
+  /* v3.14.47: cursor hints that the wall is draggable/scrollable.
+     On desktop, users often expect the page mouse wheel to scroll
+     the page — but here the wheel needs to scroll the wall. The
+     grab cursor signals "this is a draggable surface, scroll
+     here". */
+  cursor: grab;
+}
+.poster-wall:active {
+  cursor: grabbing;
 }
 .poster-wall::-webkit-scrollbar { display: none; }
 
