@@ -299,18 +299,19 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  /* v3.14.49: The pattern that actually works.
-     - display: flex so items lay out horizontally
-     - overflow: hidden (NOT auto) — the wall is the viewport;
-       JS translates the wall itself with transform: translateX().
-       The CSS scroll approach (overflow-x: auto + scrollLeft)
-       was the source of every "can't scroll" bug.
-     - cursor: grab → grabbing on active for the drag affordance
-     - user-select: none so dragging doesn't select text
-     - will-change: transform hints the browser to GPU-accel
-     - position: relative so the transform is contained */
+  /* v3.14.52: NO overflow: hidden on the wall.
+     The transform: translateX(scrollX) on the wall moves
+     the wall's box for the purpose of overflow: hidden,
+     which clips the items to the transformed (off-screen)
+     position. Without overflow: hidden, the items are
+     visible at their visual position (translated by
+     scrollX). The body's overflow-x: hidden clips them
+     at the viewport edge instead.
+     This was the bug that made the carousel go invisible
+     in v3.14.50+ — items were being rendered at the
+     correct visual positions but clipped to the wall's
+     translated box, which was off-screen. */
   display: flex;
-  overflow: hidden;
   position: relative;
   cursor: grab;
   user-select: none;
@@ -321,6 +322,18 @@
 .poster-wall:active {
   cursor: grabbing;
 }
+
+/* v3.14.52: Note — the body's overflow-x: hidden is
+   set in reset.css. It clips carousel items that are
+   translated past the viewport edge so they don't
+   cause horizontal page scroll. We can't keep
+   overflow: hidden on .poster-wall itself because the
+   wall's transform: translateX(scrollX) moves the
+   wall's box, and overflow: hidden then clips items
+   to the translated (off-screen) box — making the
+   whole carousel invisible. So: no overflow: hidden
+   on the wall, let the body's overflow-x: hidden
+   do the clipping at the viewport edge instead. */
 .poster-wall > li {
   margin: 0;
   padding: 0;

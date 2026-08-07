@@ -223,7 +223,11 @@ function setupYearStamp() {
   // the track, per-frame scale on each tile based on distance
   // from viewport center. See the function body for details.
   POSTER_WALL.render().then(() => {
-    POSTER_WALL.setupCarousel();
+    try {
+      POSTER_WALL.setupCarousel();
+    } catch (err) {
+      console.error("[poster-wall] setupCarousel threw:", err);
+    }
   });
   POSTER_WALL.setupClick();
 
@@ -624,7 +628,25 @@ const POSTER_WALL = (() => {
       clonesBefore.length, "clones before =",
       wall.querySelectorAll(":scope > li").length, "total tiles,",
       "tile width", itemWidth, "px,",
-      "viewport", wall.clientWidth, "px");
+      "viewport", wall.clientWidth, "px,",
+      "scrollX", scrollX);
+
+    // v3.14.52: After initial transform, log the actual
+    // visual position of the first ORIGINAL tile so we can
+    // see if it landed in the viewport (centered) or
+    // somewhere off-screen.
+    setTimeout(function () {
+      var firstOrig = wall.querySelectorAll(":scope > li")[clonesBefore.length];
+      var rect = firstOrig.getBoundingClientRect();
+      var center = (rect.left + rect.right) / 2;
+      var dist = Math.abs(center - window.innerWidth / 2);
+      console.info("[poster-wall] first original tile:",
+        "left", Math.round(rect.left), "right", Math.round(rect.right),
+        "center", Math.round(center),
+        "viewport center", Math.round(window.innerWidth / 2),
+        "distance", Math.round(dist),
+        "scale", firstOrig.style.transform || "(none)");
+    }, 200);
   }
 
   // v3.14.43: WAVE / CURVE layout for desktop (≥768px).
