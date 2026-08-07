@@ -1275,9 +1275,35 @@
   <div id="film-modal" class="film-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="film-modal-title">
     <div class="film-modal__backdrop" data-film-modal-close tabindex="-1"></div>
     <article class="film-modal__content" role="document">
-      <button class="film-modal__close" data-film-modal-close type="button" data-i18n-attr="aria-label:film.closeAria" aria-label="Close film details">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M18 6L6 18M6 6l12 12"/>
+      <!-- v3.14.34: Paramount+ style chrome — back arrow at top-left,
+           position indicator in the middle ("Selected Work 2 of 13"),
+           close X stays at top-right. Sits above the poster+info grid. -->
+      <header class="film-modal__chrome">
+        <button class="film-modal__back-arrow" data-film-modal-close type="button" aria-label="Back to work">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span class="film-modal__position" id="film-modal-position"></span>
+        <button class="film-modal__close" data-film-modal-close type="button" data-i18n-attr="aria-label:film.closeAria" aria-label="Close film details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- v3.14.34: prev/next arrows on the left/right edges of the
+           modal, like the Paramount+ detail view. Click to navigate
+           between films in work.json order. Hidden on the first
+           and last film (no prev on the first, no next on the last). -->
+      <button class="film-modal__nav film-modal__nav--prev" data-film-modal-prev type="button" aria-label="Previous film">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <button class="film-modal__nav film-modal__nav--next" data-film-modal-next type="button" aria-label="Next film">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 18l6-6-6-6"/>
         </svg>
       </button>
 
