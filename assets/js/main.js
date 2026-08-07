@@ -644,6 +644,21 @@ const POSTER_WALL = (() => {
     // visible (scale ~0.60) and the next one snapped to
     // the 0.45 floor. 700 keeps ~2 visible side tiles
     // before the floor.
+    //
+    // v3.14.55: per-tile margin to make the carousel
+    // behave like a card-fan:
+    //   - Non-highlighted tiles (scale ≤ 1) have
+    //     margin 0 and touch each other.
+    //   - The highlighted tile (scale > 1) gets a
+    //     growing margin on each side, exactly
+    //     (scale - 1) * itemWidth / 2 — the half-width
+    //     that the scaled tile grows beyond its layout
+    //     box. This is what stops the expanded tile
+    //     from overlapping its neighbors while still
+    //     letting the non-highlighted tiles stay
+    //     touching. The layout space is 400 + 2*margin
+    //     = 400 * scale, so the scaled tile fits
+    //     exactly within its layout space.
     function updateWave() {
       var viewportCenterX = window.innerWidth / 2;
       var allItems = wall.querySelectorAll(":scope > li");
@@ -654,7 +669,10 @@ const POSTER_WALL = (() => {
         var distance = Math.abs(itemCenterX - viewportCenterX);
         var t = Math.pow(distance / 700, 1.5);
         var scale = Math.max(0.45, 1.10 - t * 0.65);
+        var marginPx = Math.max(0, (scale - 1) * itemWidth / 2);
         item.style.transform = "scale(" + scale + ")";
+        item.style.marginLeft = marginPx + "px";
+        item.style.marginRight = marginPx + "px";
       }
     }
 
@@ -687,7 +705,9 @@ const POSTER_WALL = (() => {
       wall.querySelectorAll(":scope > li").length, "total tiles,",
       "tile width", itemWidth, "px,",
       "viewport", wall.clientWidth, "px,",
-      "scrollX", scrollX, "(snap to nearest on scrollend)");
+      "scrollX", scrollX, "(snap to nearest on scrollend,",
+      "highlighted tile gets growing margin so its",
+      "expansion never overlaps non-highlighted tiles)");
 
     // v3.14.52: After initial transform, log the actual
     // visual position of the first ORIGINAL tile so we can
