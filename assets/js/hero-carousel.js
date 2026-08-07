@@ -314,7 +314,15 @@
   // empty band AFTER the last tile, before the loop wrapped. The fix
   // for that is in buildLayout(): X_RANGE is computed from the actual
   // rightmost tile's right edge, not hard-coded.
-  var BIG_SPACING = 900 * SCALE;
+  // v3.14.32: was 900, which made the visible gap between big
+  // tiles 400px (900 - BIG_WIDTH=500). The wrap-around distance
+  // (WRAP_MARGIN) was only 200, so the loop had two different
+  // inter-tile distances: 400 between most tiles, 200 across
+  // the wrap. Tarek: "the carousel images are not always
+  // between the same distance ... i prefer that distance that
+  // is shorter". Now BIG_SPACING = BIG_WIDTH + WRAP_MARGIN
+  // so every gap (inter-tile AND wrap) is exactly WRAP_MARGIN.
+  var BIG_SPACING = (500 + 200) * SCALE; // = 700 * SCALE => 200px visible gap
   var X_RANGE = BIG_SPACING * 4; // upper bound; buildLayout() refines it
 
   // Left margin: how far right the first big is from x=0 on load.
