@@ -322,6 +322,16 @@
   scroll-snap-align: start;
 }
 
+/* v3.14.41: clones of the first and last tile (used to give
+   the wall a revolver-magazine layout — every tile has a
+   neighbor peeking on both sides). We disable scroll-snap
+   on the clones so the user never lands on a clone; they
+   always scroll past it, which triggers the instant wrap
+   in setupLoop(). */
+.poster-wall > li.poster-wall__clone {
+  scroll-snap-align: none;
+}
+
 .poster-link {
   display: block;
   position: relative;

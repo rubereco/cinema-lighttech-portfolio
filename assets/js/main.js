@@ -363,34 +363,97 @@ const POSTER_WALL = (() => {
     render(state.work, state.films);
   }
 
-  // v3.14.40: the "warp" loop. When the user scrolls to the end
-  // of the wall, animate a quick rewind back to the start. This
-  // is the "perpetual carousel" wrap — the wall appears to be
-  // infinitely long, but it's actually just one row that loops.
+  // v3.14.41: REVOLVER MAGAZINE layout. Tarek: "i just want the
+  // first and the last to be the same as all the other ones,
+  // to put an example i want it like the magazine of a revolver
+  // when you stop it you don't know where it is it can be the
+  // first the last or the middle slot. So for that what we
+  // need to make it that way is when im on the first i have to
+  // be able to see the little side of the last one from the
+  // left and see the second one from the right side. don't
+  // do wierd animations between the first or last i has to be
+  // all the same".
   //
-  // Tarek: "learn how to do the warp thing and apply it good".
-  // The previous instant scrollLeft=0 worked but felt like a
-  // jump. A quick animated rewind (CSS transition) feels like
-  // the row is "wrapping" rather than the user's scroll
-  // snapping to zero. Combined with scroll-snap, the user
-  // lands cleanly on the first poster after the rewind.
+  // How it works: clone the first and last tiles, stick the
+  // clone of the LAST at the BEGINNING and the clone of the
+  // FIRST at the END. The wall now looks like:
+  //
+  //   [L_clone] [A] [B] [C] ... [K] [L] [A_clone]
+  //
+  // The user starts scrolled to the start of A, so they see:
+  //   L_clone peeking on the left
+  //   A fully visible in the middle
+  //   B peeking on the right
+  //
+  // Same view as any middle tile — every poster has neighbors
+  // on both sides. The user can't tell they're on the "first"
+  // because the layout looks identical to being on any other
+  // poster.
+  //
+  // When the user scrolls past L (right edge), the wrap is
+  // INSTANT: scrollLeft jumps to A's offset. No animation,
+  // no transition. The user sees A in the same screen
+  // position, with L_clone peeking on the left — visually
+  // identical to where they were 1 frame ago, except now
+  // they're "before" the start instead of "after" the end.
+  // They can keep scrolling right indefinitely.
+  //
+  // Same for the left edge: scroll past A (scrollLeft <= 0),
+  // instant jump to L's offset. L is in the same screen
+  // position, with A_clone peeking on the right.
+  //
+  // The .poster-wall__clone class disables scroll-snap on the
+  // clones (see sections.css) so the user never lands on a
+  // clone — they always scroll past it and trigger the wrap.
   function setupLoop() {
     var wall = document.getElementById("poster-wall");
     if (!wall) return;
+    var tiles = wall.querySelectorAll(":scope > li");
+    if (tiles.length < 2) return;
+
+    // Clone first and last, mark them so CSS can disable their
+    // scroll-snap (we don't want the user to land on a clone).
+    var firstClone = tiles[0].cloneNode(true);
+    var lastClone  = tiles[tiles.length - 1].cloneNode(true);
+    firstClone.classList.add("poster-wall__clone");
+    lastClone.classList.add("poster-wall__clone");
+
+    // Insert the last-clone at the beginning, append the
+    // first-clone at the end. Order is now:
+    //   [L_clone, A, B, ..., K, L, A_clone]
+    wall.insertBefore(lastClone, tiles[0]);
+    wall.appendChild(firstClone);
+
+    // Scroll to the start of the original first tile, so the
+    // user sees L_clone peeking on the left and A in the
+    // middle. This is the "revolver" starting position —
+    // indistinguishable from any other tile.
+    wall.scrollLeft = tiles[0].offsetLeft;
+
+    // Wrap behavior: instant jump when the user scrolls past
+    // either edge. No animation, no transition. The _warping
+    // flag prevents the scroll event fired by the jump itself
+    // from triggering another jump.
     wall.addEventListener("scroll", function () {
-      // If the user has scrolled to (or past) the end, warp
-      // back to the start. Use smooth-scroll behavior so the
-      // wrap is a quick animated rewind, not a jump.
-      // Guard with a "warping" flag so the scroll event fired
-      // by the warp itself doesn't trigger another warp.
       if (wall._warping) return;
+
+      // Past the right edge (showing A_clone): jump to A.
       if (wall.scrollLeft + wall.clientWidth >= wall.scrollWidth - 2) {
         wall._warping = true;
-        wall.scrollTo({ left: 0, behavior: "smooth" });
-        // Clear the flag after the smooth scroll has had time
-        // to settle. 350ms is enough for ~1-2 viewport-widths
-        // at typical speeds.
-        setTimeout(function () { wall._warping = false; }, 350);
+        wall.scrollLeft = tiles[0].offsetLeft;
+        // 50ms is enough to let the scroll event from the
+        // jump itself fire and be ignored, but short enough
+        // that the user perceives it as instant.
+        setTimeout(function () { wall._warping = false; }, 50);
+        return;
+      }
+
+      // Past the left edge (showing L_clone): jump to L.
+      if (wall.scrollLeft <= 0) {
+        wall._warping = true;
+        wall.scrollLeft = tiles[tiles.length - 1].offsetLeft;
+        setTimeout(function () { wall._warping = false; }, 50);
+        return;
       }
     }, { passive: true });
   }
@@ -551,14 +614,6 @@ const FILM_MODAL = (() => {
     }
     if (!modal) return;
 
-    // v3.14.40: track the previous index so we can pick a wrap-
-    // aware slide direction for the modal content. If we just
-    // swapped content, the new film appears instantly — feels
-    // like a jump. If we slide it in from the direction of
-    // travel (or the wrap-around direction), the carousel feels
-    // continuous, even when going last→first or first→last.
-    const prevIndex = currentIndex;
-
     // Title + meta
     const titleEl = document.getElementById("film-modal-title");
     titleEl.textContent = film.title || "Untitled";
@@ -622,34 +677,10 @@ const FILM_MODAL = (() => {
     updatePosition();
     updateNavButtons();
 
-    // v3.14.40: play the wrap-aware slide animation. We pick
-    // the direction based on whether the index moved forward
-    // or backward — INCLUDING across the wrap boundary.
-    //   Going from film 12 → 13 (next): slide in from right.
-    //   Going from film 13 → 1  (next wrap): slide in from right.
-    //   Going from film 1  → 13 (prev wrap): slide in from left.
-    //   Going from film 2  → 1  (prev): slide in from left.
-    // The animation is a quick (200ms) slide + fade so the
-    // transition feels continuous, not janky. CSS handles the
-    // actual keyframes (see .film-modal__body--slide-in-left /
-    // --slide-in-right in modal.css).
-    if (prevIndex >= 0 && currentIndex >= 0 && prevIndex !== currentIndex) {
-      const n = orderedFilmIds.length;
-      // "Forward" if the new index is ahead in the loop. Going
-      // from 13 → 1 is forward (delta of +1 in modulo n). Going
-      // from 1 → 13 is backward (delta of -1 in modulo n).
-      const delta = ((currentIndex - prevIndex) % n + n) % n;
-      const isForward = delta !== 0 && delta <= n / 2;
-      const content = modal.querySelector(".film-modal__content");
-      if (content) {
-        content.classList.remove("film-modal__content--slide-in-left", "film-modal__content--slide-in-right");
-        // Force a reflow so re-adding the class triggers the
-        // animation again on rapid prev/next clicks.
-        // eslint-disable-next-line no-unused-expressions
-        content.offsetWidth;
-        content.classList.add(isForward ? "film-modal__content--slide-in-right" : "film-modal__content--slide-in-left");
-      }
-    }
+    // v3.14.41: no more slide-in animation. The user said
+    // "don't do wierd animations between the first or last
+    // i has to be all the same" — every film swap is instant,
+    // no slide, no fade. Just swap the content.
 
     // v3.14.39: no more auto-cycle. The user navigates manually
     // with prev/next (which wrap last→first and first→last).
@@ -729,6 +760,19 @@ const FILM_MODAL = (() => {
     modal.classList.remove("film-modal--open");
     modal.setAttribute("aria-hidden", "true");
     document.documentElement.classList.remove("film-modal-open");
+
+    // v3.14.41: just clear the hash directly with replaceState.
+    // Previously used history.back() to "undo" the pushState from
+    // open(), but that fired popstate, which checked the URL hash
+    // and re-opened the modal if the previous state still had a
+    // #film-… (e.g. user opened a film, then prev/next'd to a
+    // different one, then clicked close — back() landed on the
+    // first-opened film's URL and the popstate handler re-opened
+    // it). replaceState doesn't fire popstate, so the modal
+    // closes cleanly in one click.
+    if (window.location.hash.startsWith("#film-")) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
 
     // v3.14.35: thanks to replaceState on every in-modal nav, the
     // history chain is always exactly 1 deep while the modal is
