@@ -220,12 +220,12 @@ function setupYearStamp() {
   POSTER_WALL.render();
   POSTER_WALL.setupClick();
 
-  // v3.14.35: start the poster wall's auto-advance (skipped on
-  // desktop automatically by startWallCycle). Pauses when the
-  // modal opens, resumes when it closes.
-  POSTER_WALL.startWallCycle();
-  window.addEventListener("tarek:film-open", function () { POSTER_WALL.stopWallCycle(); });
-  window.addEventListener("tarek:film-close", function () { POSTER_WALL.startWallCycle(); });
+  // v3.14.37: wrap the rendered tiles in a duplicated track and
+  // start the perpetual carousel animation. The CSS handles the
+  // continuous scroll; the animation is paused on hover/focus
+  // so the user can inspect a poster or click it without it
+  // sliding out from under their cursor.
+  POSTER_WALL.setupMarquee();
 
   // Film detail modal — loads films.json + people.json, listens for
   // tarek:film-open events from the poster wall, handles deep links.
@@ -348,11 +348,10 @@ const POSTER_WALL = (() => {
       // Placeholder: real modal/drawer hookup lands in a future commit
       console.info("[poster-wall] tarek:film-open", { filmId });
     });
-    // v3.14.35: any user touch/wheel on the wall restarts the
-    // auto-cycle timer (so swiping pauses auto-advance for a
-    // fresh 5s window, same as the modal's resetCycle).
-    ul.addEventListener("touchstart", resetWallCycle, { passive: true });
-    ul.addEventListener("wheel", resetWallCycle, { passive: true });
+    // v3.14.37: no more touchstart/wheel → resetCycle listeners.
+    // The wall is now a perpetual carousel (CSS animation), so
+    // there's no discrete cycle to reset. The animation pauses
+    // itself on hover/focus via CSS (animation-play-state).
   }
 
   async function loadData() {
@@ -367,63 +366,73 @@ const POSTER_WALL = (() => {
     render(state.work, state.films);
   }
 
-  // v3.14.35: auto-cycle the poster wall. Every 3s, scroll to the
-  // next tile. Wraps back to the start when reaching the end. No
-  // smooth scrolling per Tarek ("no need for animation"). Resets
-  // on user touch/wheel. Skipped if the wall doesn't actually
-  // overflow (i.e. all tiles fit in the visible area, or it's a
-  // grid on desktop).
-  var wallCycleTimer = null;
-  var WALL_CYCLE_MS = 3000;  // v3.14.36: was 5000, Tarek said 5s felt too long
-  function startWallCycle() {
-    stopWallCycle();
+  // v3.14.37: PERPETUAL CAROUSEL. The wall is now a continuous
+  // scroll that loops forever — no start, no end, just an
+  // infinite ticker of posters. Tarek: "i just want them to
+  // be a continous scroll, not start finish. maybe its call
+  // a perpetual carousel".
+  //
+  // Implementation: after render, wrap the rendered tiles in
+  // a <div class="poster-wall__track"> and duplicate that
+  // whole track. The CSS @keyframes poster-marquee animates
+  // the track from translateX(0) to translateX(-50%) — which
+  // is exactly one full copy width — and loops. When the
+  // animation hits -50% it jumps back to 0, but because the
+  // track content is duplicated, the jump lands on the
+  // identical content (copy B) that the viewer just saw, so
+  // the loop is invisible. Seamless.
+  //
+  // The animation-duration is set per-track by JS based on
+  // the track's pixel width and a target scroll speed, so
+  // the perceived speed stays constant regardless of how
+  // many tiles are in the wall.
+  var MARQUEE_SPEED_PX_PER_SEC = 80; // v3.14.37: tune to taste
+  function setupMarquee() {
     var wall = document.getElementById("poster-wall");
     if (!wall) return;
-    // v3.14.36: dropped the getComputedStyle(overflowX) check.
-    // It's unreliable (some browsers report different values at
-    // different times). The scrollWidth > clientWidth check is
-    // the source of truth: if there's horizontal overflow, cycle;
-    // otherwise skip.
-    if (wall.scrollWidth <= wall.clientWidth + 1) {
-      console.info("[poster-wall] no horizontal overflow, skip cycle");
-      return;
+    var tiles = Array.prototype.slice.call(wall.children);
+    if (tiles.length < 2) return; // need at least 2 to have something to scroll
+
+    // Build the first track from the rendered tiles
+    var track = document.createElement("div");
+    track.className = "poster-wall__track";
+    for (var i = 0; i < tiles.length; i++) {
+      track.appendChild(tiles[i]);
     }
-    console.info("[poster-wall] auto-cycle started,", wall.scrollWidth, "px content in", wall.clientWidth, "px viewport");
-    wallCycleTimer = setInterval(function () {
-      var tiles = wall.querySelectorAll(":scope > li");
-      if (!tiles.length) return;
-      var sl = wall.scrollLeft;
-      var target = null;
-      for (var i = 0; i < tiles.length; i++) {
-        if (tiles[i].offsetLeft > sl + 1) { target = tiles[i]; break; }
-      }
-      if (!target) {
-        // We're on the last tile — wrap to the first
-        wall.scrollLeft = 0;
-        console.info("[poster-wall] cycled to start");
-      } else {
-        // account for the left padding on the wall so the
-        // tile snaps to the padding offset, not the raw left
-        var padLeft = parseFloat(getComputedStyle(wall).paddingLeft) || 0;
-        wall.scrollLeft = target.offsetLeft - padLeft;
-        console.info("[poster-wall] cycled to tile", target.offsetLeft);
-      }
-    }, WALL_CYCLE_MS);
+    // Duplicate it — the second copy is what the animation
+    // "lands on" when it wraps, so the wrap is invisible.
+    var trackClone = track.cloneNode(true);
+
+    wall.innerHTML = "";
+    wall.appendChild(track);
+    wall.appendChild(trackClone);
+
+    // Set animation duration so the scroll speed is constant
+    // regardless of how many tiles are in the wall.
+    // Distance to travel = half the duplicated track width
+    // (because we only need to move one full copy to make the
+    // duplicate line up with the original).
+    var trackWidth = track.scrollWidth;
+    if (trackWidth > 0) {
+      var durationSec = (trackWidth / MARQUEE_SPEED_PX_PER_SEC);
+      track.style.animationDuration = durationSec + "s";
+      trackClone.style.animationDuration = durationSec + "s";
+      console.info("[poster-wall] perpetual carousel:",
+        tiles.length, "tiles,",
+        Math.round(trackWidth), "px track,",
+        durationSec.toFixed(1), "s loop (",
+        MARQUEE_SPEED_PX_PER_SEC, "px/s)");
+    }
   }
-  function stopWallCycle() {
-    if (wallCycleTimer) { clearInterval(wallCycleTimer); wallCycleTimer = null; }
-  }
-  function resetWallCycle() { startWallCycle(); }
 
   return {
     loadData,
     render: () => { loadData().then(renderFromState); },
     setupClick,
-    // v3.14.35: expose startCycle so FILM_MODAL can pause the poster
-    // wall's auto-advance while the modal is open (otherwise the
-    // wall and the modal would be advancing independently).
-    startWallCycle: startWallCycle,
-    stopWallCycle: stopWallCycle
+    // v3.14.37: expose setupMarquee so the IIFE init can call it
+    // after render. No start/stop — the CSS animation runs
+    // forever, paused on hover.
+    setupMarquee: setupMarquee
   };
 })();
 
@@ -729,8 +738,10 @@ const FILM_MODAL = (() => {
     document.documentElement.classList.remove("film-modal-open");
     // v3.14.35: stop the auto-cycle when the modal closes.
     stopCycle();
-    // v3.14.35: tell the poster wall to resume its auto-advance.
-    window.dispatchEvent(new CustomEvent("tarek:film-close"));
+    // v3.14.37: no more tarek:film-close dispatch — the wall is
+    // a perpetual carousel now, it doesn't need to be resumed
+    // (it never stopped, the CSS animation just keeps running
+    // behind the modal).
 
     // v3.14.35: thanks to replaceState on every in-modal nav, the
     // history chain is always exactly 1 deep while the modal is
