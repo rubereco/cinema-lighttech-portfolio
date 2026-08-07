@@ -562,13 +562,19 @@ const POSTER_WALL = (() => {
     // along a power curve so the drop-off is steep near
     // the center and flat at the edges.
     //
-    // v3.14.50: more pronounced than v3.14.49 because at
-    // 140px tiles the falloff was so steep that only the
-    // center tile was visibly different — the side tiles
-    // hit the 0.5 clamp before they were even off-screen.
-    // With 200px tiles + a wider falloff (the 500px
-    // denominator below), the wave is now visible across
-    // 3-4 tiles on each side.
+    // v3.14.51 BUGFIX: the viewport center must be
+    // window.innerWidth / 2, NOT wall.getBoundingClientRect()
+    // center. The wall has transform: translateX(scrollX)
+    // applied, so its bounding rect is at the ORIGINAL
+    // position + scrollX. With scrollX=-2100 the wall's
+    // rect.left is at -2100 (off-screen), and the "center"
+    // comes out at -1500 — 2100px to the LEFT of the
+    // actual visible center. Every item's distance to
+    // "center" comes out > 2000px, so they all snap to the
+    // 0.45 minimum scale. The carousel goes invisible.
+    // Using window.innerWidth / 2 fixes it: that's the
+    // actual center of the visible viewport, regardless
+    // of the wall's transform.
     //
     //   distance 0   → t=0.0  → scale 1.10 (picked, big)
     //   distance 100 → t=0.09 → scale 1.04
@@ -577,8 +583,7 @@ const POSTER_WALL = (() => {
     //   distance 400 → t=0.72 → scale 0.60
     //   distance 500+→ t=1.0  → scale 0.45 (clamped)
     function updateWave() {
-      var wallRect = wall.getBoundingClientRect();
-      var viewportCenterX = (wallRect.left + wallRect.right) / 2;
+      var viewportCenterX = window.innerWidth / 2;
       var allItems = wall.querySelectorAll(":scope > li");
       for (var i = 0; i < allItems.length; i++) {
         var item = allItems[i];
