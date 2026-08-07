@@ -282,6 +282,20 @@
   padding-right: max(20px, 4vw);
 }
 
+/* v3.14.53: give the poster wall a bit of breathing room
+   below the section header. The wall is the section's
+   second child after .section-head; without this margin
+   the tiles start immediately under the headline, which
+   feels cramped on desktop. */
+.section-posters > .poster-wall {
+  margin-top: 48px;
+}
+/* Extra bottom space so the carousel doesn't feel
+   pressed against the next section's edge. */
+.section-posters {
+  padding-bottom: 80px;
+}
+
 /* v3.11.1: on tablet+ restore the guttered layout from v3.10.25.
    Mobile (<560px) stays full-bleed per Buddie's "fill all the
    screen" feedback — the poster wall reaches the screen edges.
@@ -359,7 +373,13 @@
 .poster-link {
   display: block;
   position: relative;
-  aspect-ratio: 2 / 3; /* 2:3 movie-poster ratio */
+  /* v3.14.53: DOUBLE HEIGHT. Was 2/3 (200×300). Tarek
+     wanted the portraits to feel taller and more
+     "portrait-y" — 1/3 (200×600) gives a very vertical
+     frame that makes the wave feel more dramatic. The
+     poster-img inside still uses object-fit: cover, so
+     any image gets cropped to the new ratio. */
+  aspect-ratio: 1 / 3;
   text-decoration: none;
   color: inherit;
 }

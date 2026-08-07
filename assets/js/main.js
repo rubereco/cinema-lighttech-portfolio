@@ -457,6 +457,57 @@ const POSTER_WALL = (() => {
     wall.style.transform = "translateX(" + scrollX + "px)";
 
     // ─── Input handlers ───
+    // v3.14.53: snapToNearest — when the user stops
+    // scrolling (mouseup, touchend, or after a wheel
+    // burst), find the tile closest to the viewport
+    // center and animate targetScrollX so that tile
+    // lands at center. The existing lerp in the frame
+    // loop (0.15/frame) handles the smooth animation.
+    // This makes "one portrait is the highlighted one"
+    // an actual user-controlled state — whatever the
+    // user scrolls to becomes the focus.
+    function snapToNearest() {
+      if (isDragging) return;
+      var viewportCenterX = window.innerWidth / 2;
+      var allItems = wall.querySelectorAll(":scope > li");
+      var bestI = 0;
+      var bestDist = Infinity;
+      for (var i = 0; i < allItems.length; i++) {
+        var rect = allItems[i].getBoundingClientRect();
+        var center = (rect.left + rect.right) / 2;
+        var dist = Math.abs(center - viewportCenterX);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestI = i;
+        }
+      }
+      // The nearest tile is at visual position `center`.
+      // We want it at viewportCenterX, so shift the wall
+      // by (viewportCenterX - center). That keeps the
+      // perpetual wrap consistent — the item's offsetLeft
+      // is unchanged, only the wall's transform shifts.
+      var rect = allItems[bestI].getBoundingClientRect();
+      var tileCenter = (rect.left + rect.right) / 2;
+      var shift = viewportCenterX - tileCenter;
+      if (Math.abs(shift) < 1) return; // already centered
+      targetScrollX += shift;
+      wrapTarget();
+      ensureAnimating();
+    }
+
+    // Debounce the wheel-snap: only snap after 120ms of
+    // no wheel events. Trackpads fire many small wheel
+    // events in quick succession; we don't want to snap
+    // between each one.
+    var wheelSnapTimer = null;
+    function scheduleWheelSnap() {
+      if (wheelSnapTimer !== null) clearTimeout(wheelSnapTimer);
+      wheelSnapTimer = setTimeout(function () {
+        wheelSnapTimer = null;
+        snapToNearest();
+      }, 120);
+    }
+
     function onWheel(e) {
       e.preventDefault();
       // deltaY is vertical scroll; we use it for horizontal
@@ -464,6 +515,7 @@ const POSTER_WALL = (() => {
       // bigger ones. Either way it feels natural.
       targetScrollX -= e.deltaY;
       wrapTarget();
+      scheduleWheelSnap();
     }
     function onMouseDown(e) {
       isDragging = true;
@@ -480,6 +532,7 @@ const POSTER_WALL = (() => {
       if (!isDragging) return;
       isDragging = false;
       wall.style.cursor = "grab";
+      snapToNearest();
     }
     function onTouchStart(e) {
       isDragging = true;
@@ -494,6 +547,7 @@ const POSTER_WALL = (() => {
     function onTouchEnd() {
       if (!isDragging) return;
       isDragging = false;
+      snapToNearest();
     }
 
     // Keep targetScrollX in the perpetual range. The user is
@@ -629,7 +683,7 @@ const POSTER_WALL = (() => {
       wall.querySelectorAll(":scope > li").length, "total tiles,",
       "tile width", itemWidth, "px,",
       "viewport", wall.clientWidth, "px,",
-      "scrollX", scrollX);
+      "scrollX", scrollX, "(snap to nearest on scrollend)");
 
     // v3.14.52: After initial transform, log the actual
     // visual position of the first ORIGINAL tile so we can
