@@ -539,25 +539,24 @@ const POSTER_WALL = (() => {
         var tileCenterX = tileRect.left + tileRect.width / 2;
         var distance = Math.abs(tileCenterX - centerX);
 
-        // v3.14.44: more pronounced curve. Switched from
-        // linear falloff (1 - d*k) to a power curve
-        // (1 - (d*k)^1.5). The center item stays at
-        // scale 1, items close to center stay relatively
-        // large, and items far from center drop off
-        // sharply. Same idea for the Y offset — power
-        // curve means items close to center barely sink,
-        // items far from center sink deep.
+        // v3.14.45: SCALE ONLY. Tarek: "i only want the
+        // images to grow when the images grow they make
+        // the effect they are more spread out but its
+        // just one is bigger than the other". So we
+        // dropped the translateY entirely — the wave
+        // was sinking side items down, which made them
+        // look "spread out". Now everything stays on
+        // the same row; the only difference is size.
         //   t = (distance * 0.003) ^ 1.5
-        //   distance 0   → t=0     → scale 1.0, Y  0
-        //   distance 100 → t=0.164 → scale 0.84, Y 16
-        //   distance 200 → t=0.465 → scale 0.54, Y 47
-        //   distance 300 → t=0.854 → scale 0.35, Y 85
-        //   distance 400 → t=1.0+  → scale 0.35, Y 100
+        //   distance 0   → t=0     → scale 1.00
+        //   distance 100 → t=0.164 → scale 0.84
+        //   distance 200 → t=0.465 → scale 0.54
+        //   distance 300 → t=0.854 → scale 0.35
+        //   distance 400 → t=1.0+  → scale 0.35
         var t = Math.pow(distance * 0.003, 1.5);
         var scale = Math.max(0.35, 1 - t);
-        var translateY = Math.min(100, t * 100);
 
-        tile.style.transform = "scale(" + scale + ") translateY(" + translateY + "px)";
+        tile.style.transform = "scale(" + scale + ")";
       }
     }
 

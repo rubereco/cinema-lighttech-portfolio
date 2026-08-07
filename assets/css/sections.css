@@ -494,44 +494,57 @@
   /* .hero-cta desktop override removed in v3.10.14 — the buttons
      were deleted from index.html. */
 
-  /* v3.14.44: WAVE / CURVE layout for desktop (≥768px),
-     denser and more pronounced than v3.14.43.
+  /* v3.14.45: WAVE / CURVE layout for desktop (≥768px).
      On desktop the wall becomes a curve carousel: the center
-     item is the "picked" one (scale 1, no Y offset), and
-     items to the sides get smaller and sink lower, creating
-     a wave shape. JS (setupWave) updates the transform on
+     item is the "picked" one (scale 1), and items to the
+     sides get smaller. JS (setupWave) updates the scale on
      every scroll based on each tile's distance from the
      viewport center. scroll-snap-align: center makes the
      tiles snap to the viewport's center so there's always
      a clear picked item.
 
-     Tarek: 'i want a more pronounced curve at the center,
-     more density, don't worry about duplicates if they
-     have to show they show'.
-     - Density: smaller tiles (200px vs 260px) + tighter
-       gap (2px vs 4px) = more tiles visible in the same
-       viewport. Plus setupLoop renders 3 copies of the
-       tile set on desktop (39 total) so the wall feels
-       very long and dense.
-     - Pronounced curve: switched from linear falloff to
-       power-curve falloff (Math.pow(d, 1.5)) so the
-       center item stays large and sides drop off sharply.
+     Changes from v3.14.44:
+     - Full-viewport width: the wall extends beyond the
+       section's max-width to fill the viewport. The body's
+       overflow-x: hidden (set globally) prevents the page
+       from getting a horizontal scrollbar.
+     - Removed content-visibility: auto / contain-intrinsic-
+       size: was breaking scroll on some browsers.
+     - scroll-snap-type: x proximity (was mandatory): less
+       aggressive snap, smoother feel while still landing
+       cleanly on a tile.
+     - No more Y offset (translateY): Tarek said the wave
+       was making items "spread out" at the edges — he
+       wants pure scale, just bigger/smaller, all in the
+       same row. */
 
-     Mobile (<768px) keeps the flat horizontal scroll from
-     the base .poster-wall style. The transform is cleared
-     by JS for mobile, and the wall stays a simple row. */
+  /* v3.14.45: Prevent the page from getting a horizontal
+     scrollbar when the poster wall extends full-width. */
+  body { overflow-x: hidden; }
+
   @media (min-width: 768px) {
     .poster-wall {
       align-items: center;
-      /* Extra vertical padding so the deeper Y-offset wave
-         has room to breathe without items getting clipped. */
-      padding-top: 60px;
-      padding-bottom: 60px;
-      /* Snap each tile to the viewport's center so there's
-         always a clean "picked" item. */
-      scroll-snap-type: x mandatory;
+      padding-top: 30px;
+      padding-bottom: 30px;
+      /* proximity (not mandatory) — less aggressive snap,
+         smoother scroll, but tiles still land on a snap
+         point. */
+      scroll-snap-type: x proximity;
       /* Tighter gap for more density. */
       gap: 2px;
+      /* v3.14.45: FULL VIEWPORT WIDTH. The wall extends
+         beyond the section's max-width using the standard
+         full-bleed pattern:
+           width: 100vw → fills the viewport
+           margin-left/right: calc(50% - 50vw) → centers
+             the wall within the section while keeping it
+             full-width.
+         The page's overflow-x: hidden (set on body) keeps
+         the page from scrolling horizontally. */
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
     }
     .poster-wall > li {
       scroll-snap-align: center;
@@ -545,13 +558,6 @@
       /* Smaller tiles for more density. ~5.5 tiles visible
          on a 1100px viewport (was ~3.7 with 260px). */
       width: min(18vw, 200px);
-      /* Performance: with 3x tile rendering (39 tiles),
-         tell the browser to skip rendering off-screen
-         tiles. contain-intrinsic-size is the estimated
-         size the browser reserves space for when the
-         tile is off-screen. */
-      content-visibility: auto;
-      contain-intrinsic-size: 200px 300px;
     }
   }
 
