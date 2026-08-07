@@ -730,14 +730,19 @@
   // first / fetch-fallback pattern the other loaders use.
   // 1) Try the inlined <script id="tarek-hero"> block (file://)
   // 2) Fall back to fetch("data/hero.json") (live deploys)
+  // v3.14.30: added a one-time console diagnostic so we can
+  // see in DevTools whether the inline JSON is being read,
+  // the fetch fallback is firing, or the injection failed.
+  var _heroDiag = false; // set true to silence the [hero-carousel] log line
+  function readHeroInline() {
+    var el = document.getElementById("tarek-hero");
+    if (!el) return null;
+    try { return JSON.parse(el.textContent); } catch (e) { return null; }
+  }
   function loadHeroData() {
-    function readInline(id) {
-      var el = document.getElementById(id);
-      if (!el) return null;
-      try { return JSON.parse(el.textContent); } catch (e) { return null; }
-    }
-    var inline = readInline("tarek-hero");
+    var inline = readHeroInline();
     if (inline) return Promise.resolve(inline);
+    if (!_heroDiag) console.info("[hero-carousel] no inline tarek-hero, fetching data/hero.json");
     return fetch("data/hero.json", { cache: "no-cache" })
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
       .catch(function (e) { console.warn("[hero-carousel] could not load data/hero.json", e); return null; });
@@ -752,6 +757,7 @@
     // Clear any existing tiles (idempotent — safe across re-inits)
     while (container.firstChild) container.removeChild(container.firstChild);
     var items = (data && data.items) || [];
+    if (!_heroDiag) console.info("[hero-carousel] injecting " + items.length + " tiles into", container.id || "(stage)");
     for (var i = 0; i < items.length; i++) {
       var it = items[i] || {};
       if (!it.file) continue;
@@ -762,6 +768,12 @@
       container.appendChild(img);
     }
   }
+
+  // v3.14.30: hold the loaded data in a closure var so the
+  // async fetch path can populate it and the recursive
+  // init() call uses it without re-fetching (which would
+  // be an infinite loop).
+  var _heroData = null;
 
   function init() {
     var hero = document.getElementById('top');
@@ -774,22 +786,23 @@
     // (file:// + most deploys); async only when we have to fetch.
     // The carousel can't render with zero tiles, so we bail early
     // if the data is empty or fetch fails.
-    var data = (function () {
-      var el = document.getElementById("tarek-hero");
-      if (el) {
-        try { return JSON.parse(el.textContent); } catch (e) { return null; }
-      }
-      return null;
-    })();
+    var data = _heroData || readHeroInline();
+    if (!_heroDiag) console.info("[hero-carousel] init(), data:", data ? (data.items ? data.items.length + " items" : "present but no items[]") : "missing");
 
     if (data) {
       injectHeroTiles(stage, data);
     } else {
-      // No inline data — async load, then init again with tiles.
+      // No inline data — async load, then continue init.
+      // _heroData is set in the .then() so the recursive
+      // init() call uses the fetched data instead of
+      // re-fetching (which would be an infinite loop).
       loadHeroData().then(function (d) {
-        if (!d) return;
-        injectHeroTiles(stage, d);
-        init(); // re-run with the tiles now in the DOM
+        if (!d) {
+          if (!_heroDiag) console.warn("[hero-carousel] no data available, carousel will be empty");
+          return;
+        }
+        _heroData = d;
+        init();
       });
       return;
     }
