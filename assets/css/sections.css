@@ -290,60 +290,36 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  /* v3.14.37: perpetual carousel. Was a horizontal snap-scroll
-     row (v3.14.33) that the user could swipe through. Now it's
-     a continuous, never-stopping scroll that loops forever —
-     no start, no end, just an infinite ticker of posters.
-     Tarek: "i just want them to be a continous scroll, not
-     start finish. maybe its call a perpetual carousel".
-
-     The wall contains a <div class="poster-wall__track"> that
-     JS duplicates after render. The CSS animation moves the
-     track from translateX(0) to translateX(-50%) (one full
-     copy width) and loops. When it hits -50% it jumps back to
-     0, but because the content is duplicated, the jump is
-     invisible — the viewer sees a seamless loop.
-
-     overflow: hidden (not overflow-x: auto) because we don't
-     want a scrollbar — the animation drives the motion. */
-  display: block;
-  overflow: hidden;
+  /* v3.14.39: simple scrollable row. NO animation, NO duplicate,
+     NO track. The user scrolls manually. When they reach the
+     end and keep scrolling, JS resets scrollLeft to 0 so the
+     carousel "loops" back to the first poster. scroll-snap
+     snaps each tile to the start of the row for a clean feel.
+     Tarek: "i don't want the films to be animated, the user
+     is the one that scrolls them". */
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: max(0.9rem, 2.5vw);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   padding-left: max(0.9rem, 2.5vw);
   padding-right: max(0.9rem, 2.5vw);
-}
-/* The inner track holds the actual tiles (twice — JS duplicates
-   it for the seamless wrap). animation-duration is set per-
-   track by JS based on the track width so the scroll speed
-   stays constant regardless of how many tiles there are. */
-.poster-wall__track {
-  display: flex;
   gap: max(4px, 0.4vw);
-  width: max-content;
-  animation: poster-marquee 40s linear infinite;
-  will-change: transform;
 }
-/* Pause on hover/focus so the user can inspect a poster or
-   click it without the carousel moving under their finger. */
-.poster-wall:hover .poster-wall__track,
-.poster-wall:focus-within .poster-wall__track {
-  animation-play-state: paused;
-}
-@keyframes poster-marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
+.poster-wall::-webkit-scrollbar { display: none; }
 
 .poster-wall > li {
   margin: 0;
   padding: 0;
   position: relative;
   overflow: hidden;
-  background: var(--c-surface); /* placeholder color until the image loads */
-  /* v3.14.37: fixed width so all tiles are the same size and
-     the marquee can compute a clean loop distance. flex: 0 0
-     auto = no shrink, no grow, base on content. */
+  background: var(--c-surface);
   flex: 0 0 auto;
   width: min(65vw, 260px);
+  scroll-snap-align: start;
 }
 
 .poster-link {
@@ -520,14 +496,13 @@
   /* .hero-cta desktop override removed in v3.10.14 — the buttons
      were deleted from index.html. */
 
-  /* v3.14.37: removed the tablet/desktop 3-col grid override.
-     The wall is now a perpetual carousel on all viewports —
-     a continuous horizontal scroll that loops forever.
-     The tiles are smaller on mobile (65vw, capped 260px) so
-     the user always sees several at once, which is the whole
-     point of a marquee. */
+  /* v3.14.39: removed the tablet/desktop 3-col grid override.
+     The wall is a simple horizontal scroll on all viewports.
+     On desktop the user sees more tiles at once (because the
+     viewport is wider and each tile is capped at 260px) but
+     they still scroll manually. */
 
-  /* Desktop — 3 columns (10 films = 3×4 grid, last row has 1 cell — bigger portraits) */
+  /* Desktop — slightly larger poster title */
   @media (min-width: 1024px) {
     .poster-title { font-size: clamp(1rem, 1.1vw, 1.25rem); }
   }

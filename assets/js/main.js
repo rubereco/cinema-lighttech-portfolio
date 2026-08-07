@@ -217,12 +217,12 @@ function setupYearStamp() {
   setupSectionChrome();
 
   // Render the poster wall (work.json × films.json) after data is ready.
-  // v3.14.37: setupMarquee() must run AFTER render() completes,
-  // because render() is async (loads data → writes to DOM). If we
-  // called setupMarquee() synchronously, it would see 0 tiles and
-  // bail. Chaining to the promise guarantees the tiles exist.
-  POSTER_WALL.render().then(() => POSTER_WALL.setupMarquee());
+  // v3.14.39: setupLoop() handles the "scroll past end → reset to
+  // start" loop behavior. No animation, no duplicate. The user
+  // scrolls manually.
+  POSTER_WALL.render();
   POSTER_WALL.setupClick();
+  POSTER_WALL.setupLoop();
 
   // Film detail modal — loads films.json + people.json, listens for
   // tarek:film-open events from the poster wall, handles deep links.
@@ -363,76 +363,29 @@ const POSTER_WALL = (() => {
     render(state.work, state.films);
   }
 
-  // v3.14.37: PERPETUAL CAROUSEL. The wall is now a continuous
-  // scroll that loops forever — no start, no end, just an
-  // infinite ticker of posters. Tarek: "i just want them to
-  // be a continous scroll, not start finish. maybe its call
-  // a perpetual carousel".
-  //
-  // Implementation: after render, wrap the rendered tiles in
-  // a <div class="poster-wall__track"> and duplicate that
-  // whole track. The CSS @keyframes poster-marquee animates
-  // the track from translateX(0) to translateX(-50%) — which
-  // is exactly one full copy width — and loops. When the
-  // animation hits -50% it jumps back to 0, but because the
-  // track content is duplicated, the jump lands on the
-  // identical content (copy B) that the viewer just saw, so
-  // the loop is invisible. Seamless.
-  //
-  // The animation-duration is set per-track by JS based on
-  // the track's pixel width and a target scroll speed, so
-  // the perceived speed stays constant regardless of how
-  // many tiles are in the wall.
-  var MARQUEE_SPEED_PX_PER_SEC = 80; // v3.14.37: tune to taste
-  function setupMarquee() {
+  // v3.14.39: simple loop. NO animation, NO duplicate, NO track.
+  // The user scrolls manually. When they reach the end and keep
+  // scrolling, reset scrollLeft to 0 so the carousel "loops"
+  // back to the first poster. Tarek: "i don't want the films
+  // to be animated, the user is the one that scrolls them".
+  function setupLoop() {
     var wall = document.getElementById("poster-wall");
     if (!wall) return;
-    var tiles = Array.prototype.slice.call(wall.children);
-    if (tiles.length < 2) return; // need at least 2 to have something to scroll
-
-    // Build the first track from the rendered tiles
-    var track = document.createElement("div");
-    track.className = "poster-wall__track";
-    for (var i = 0; i < tiles.length; i++) {
-      track.appendChild(tiles[i]);
-    }
-    // Duplicate it — the second copy is what the animation
-    // "lands on" when it wraps, so the wrap is invisible.
-    var trackClone = track.cloneNode(true);
-
-    wall.innerHTML = "";
-    wall.appendChild(track);
-    wall.appendChild(trackClone);
-
-    // Set animation duration so the scroll speed is constant
-    // regardless of how many tiles are in the wall.
-    // Distance to travel = half the duplicated track width
-    // (because we only need to move one full copy to make the
-    // duplicate line up with the original).
-    var trackWidth = track.scrollWidth;
-    if (trackWidth > 0) {
-      var durationSec = (trackWidth / MARQUEE_SPEED_PX_PER_SEC);
-      track.style.animationDuration = durationSec + "s";
-      trackClone.style.animationDuration = durationSec + "s";
-      console.info("[poster-wall] perpetual carousel:",
-        tiles.length, "tiles,",
-        Math.round(trackWidth), "px track,",
-        durationSec.toFixed(1), "s loop (",
-        MARQUEE_SPEED_PX_PER_SEC, "px/s)");
-    }
+    wall.addEventListener("scroll", function () {
+      // If the user has scrolled to (or past) the end, jump
+      // back to the start. The reset is instant and the user
+      // sees the first poster again — they can keep scrolling.
+      if (wall.scrollLeft + wall.clientWidth >= wall.scrollWidth - 2) {
+        wall.scrollLeft = 0;
+      }
+    }, { passive: true });
   }
 
   return {
     loadData,
-    // v3.14.37: render() now returns the promise so callers can
-    // chain setupMarquee() AFTER the tiles are in the DOM.
-    // Before this, setupMarquee() was called synchronously
-    // after render() — but render() is async (loads data first),
-    // so setupMarquee() saw 0 tiles and bailed, leaving the
-    // wall as raw <li>s that stacked as block elements.
     render: () => loadData().then(renderFromState),
     setupClick,
-    setupMarquee: setupMarquee
+    setupLoop: setupLoop
   };
 })();
 
@@ -647,11 +600,10 @@ const FILM_MODAL = (() => {
     updatePosition();
     updateNavButtons();
 
-    // v3.14.35: start the auto-cycle (advance every 5s). Resets
-    // automatically on every open() call, so navigating to a new
-    // film restarts the timer. Also restarts on user interaction
-    // (handled in the click/keyboard listeners).
-    startCycle();
+    // v3.14.39: no more auto-cycle. The user navigates manually
+    // with prev/next (which wrap last→first and first→last).
+    // Tarek: "i don't want the films to be animated, the user
+    // is the one that scrolls them".
 
     // Focus the close button so ESC and Tab work from the keyboard.
     const closeBtn = modal.querySelector(".film-modal__close");
@@ -704,44 +656,25 @@ const FILM_MODAL = (() => {
   // and close() = one back = exit).
   function navigate(delta) {
     if (currentIndex < 0) return;
-    const target = currentIndex + delta;
-    if (target < 0 || target >= orderedFilmIds.length) return;
+    // v3.14.39: wrap at the ends. Going past the last film
+    // lands on the first; going past the first (←) lands on
+    // the last. This is the "perpetual carousel" the user
+    // wants — you can keep going in either direction.
+    const n = orderedFilmIds.length;
+    if (n < 2) return;
+    const target = ((currentIndex + delta) % n + n) % n;
     open(orderedFilmIds[target], { replaceHistory: true });
   }
 
-  // v3.14.35: auto-cycle interval id so we can clear/restart it
-  // whenever the user interacts (click, key, touch).
-  let cycleTimer = null;
-  var CYCLE_INTERVAL_MS = 3000; // v3.14.36: was 5000, Tarek said 5s felt too long
-
-  function startCycle() {
-    stopCycle();
-    if (orderedFilmIds.length < 2) return;
-    console.info("[film-modal] auto-cycle started,", orderedFilmIds.length, "films, interval", CYCLE_INTERVAL_MS, "ms");
-    cycleTimer = setInterval(function () {
-      if (currentIndex < 0) return;
-      var next = currentIndex + 1;
-      if (next >= orderedFilmIds.length) next = 0;
-      console.info("[film-modal] cycling to", orderedFilmIds[next]);
-      open(orderedFilmIds[next], { replaceHistory: true });
-    }, CYCLE_INTERVAL_MS);
-  }
-  function stopCycle() {
-    if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; }
-  }
-  function resetCycle() { startCycle(); }
+  // v3.14.39: removed the auto-cycle machinery. The user
+  // navigates manually with prev/next. No more setInterval,
+  // no more resetCycle, no more touchstart/mousedown listeners.
 
   function close() {
     if (!modal || !modal.classList.contains("film-modal--open")) return;
     modal.classList.remove("film-modal--open");
     modal.setAttribute("aria-hidden", "true");
     document.documentElement.classList.remove("film-modal-open");
-    // v3.14.35: stop the auto-cycle when the modal closes.
-    stopCycle();
-    // v3.14.37: no more tarek:film-close dispatch — the wall is
-    // a perpetual carousel now, it doesn't need to be resumed
-    // (it never stopped, the CSS animation just keeps running
-    // behind the modal).
 
     // v3.14.35: thanks to replaceState on every in-modal nav, the
     // history chain is always exactly 1 deep while the modal is
@@ -779,13 +712,11 @@ const FILM_MODAL = (() => {
       // v3.14.34: prev/next nav
       if (ev.target.closest("[data-film-modal-prev]")) {
         ev.preventDefault();
-        resetCycle();  // v3.14.35: user just interacted, restart the 5s timer
         navigate(-1);
         return;
       }
       if (ev.target.closest("[data-film-modal-next]")) {
         ev.preventDefault();
-        resetCycle();  // v3.14.35
         navigate(+1);
         return;
       }
@@ -799,20 +730,12 @@ const FILM_MODAL = (() => {
         close();
       } else if (ev.key === "ArrowLeft") {
         ev.preventDefault();
-        resetCycle();  // v3.14.35
         navigate(-1);
       } else if (ev.key === "ArrowRight") {
         ev.preventDefault();
-        resetCycle();  // v3.14.35
         navigate(+1);
       }
     });
-
-    // v3.14.35: any touch on the modal restarts the auto-cycle too,
-    // so swiping the poster or tapping anywhere pauses the auto-advance
-    // for a fresh 5s window.
-    modal.addEventListener("touchstart", resetCycle, { passive: true });
-    modal.addEventListener("mousedown", resetCycle);
 
     // tarek:film-open from POSTER_WALL (or anywhere else)
     window.addEventListener("tarek:film-open", (ev) => {
