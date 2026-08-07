@@ -217,12 +217,13 @@ function setupYearStamp() {
   setupSectionChrome();
 
   // Render the poster wall (work.json × films.json) after data is ready.
-  // v3.14.39: setupLoop() handles the "scroll past end → reset to
-  // start" loop behavior. No animation, no duplicate. The user
-  // scrolls manually.
-  POSTER_WALL.render();
+  // v3.14.42: setupLoop() must run AFTER render() completes,
+  // because render() is async (loads data → writes to DOM). If we
+  // called setupLoop() synchronously, it would see 0 tiles and
+  // bail — no clones, no wrap, no revolver. Chaining to the
+  // promise guarantees the tiles exist when setupLoop() runs.
+  POSTER_WALL.render().then(() => POSTER_WALL.setupLoop());
   POSTER_WALL.setupClick();
-  POSTER_WALL.setupLoop();
 
   // Film detail modal — loads films.json + people.json, listens for
   // tarek:film-open events from the poster wall, handles deep links.
@@ -363,7 +364,7 @@ const POSTER_WALL = (() => {
     render(state.work, state.films);
   }
 
-  // v3.14.41: REVOLVER MAGAZINE layout. Tarek: "i just want the
+  // v3.14.42: REVOLVER MAGAZINE layout. Tarek: "i just want the
   // first and the last to be the same as all the other ones,
   // to put an example i want it like the magazine of a revolver
   // when you stop it you don't know where it is it can be the
@@ -380,39 +381,48 @@ const POSTER_WALL = (() => {
   //
   //   [L_clone] [A] [B] [C] ... [K] [L] [A_clone]
   //
-  // The user starts scrolled to the start of A, so they see:
-  //   L_clone peeking on the left
-  //   A fully visible in the middle
-  //   B peeking on the right
+  // The user starts scrolled so A is fully visible with
+  // L_clone peeking on the left and B peeking on the right.
+  // This is the SAME view as any middle tile — every poster
+  // has neighbors on both sides. The user can't tell they're
+  // on the "first" because the layout looks identical to
+  // being on any other poster.
   //
-  // Same view as any middle tile — every poster has neighbors
-  // on both sides. The user can't tell they're on the "first"
-  // because the layout looks identical to being on any other
-  // poster.
-  //
-  // When the user scrolls past L (right edge), the wrap is
-  // INSTANT: scrollLeft jumps to A's offset. No animation,
-  // no transition. The user sees A in the same screen
-  // position, with L_clone peeking on the left — visually
-  // identical to where they were 1 frame ago, except now
-  // they're "before" the start instead of "after" the end.
+  // When the user scrolls past L (right edge, showing A_clone),
+  // the wrap is INSTANT: scrollLeft jumps to the position
+  // where A is fully visible with L_clone peeking. The user
+  // sees the same view 1 frame later — visually identical.
   // They can keep scrolling right indefinitely.
   //
-  // Same for the left edge: scroll past A (scrollLeft <= 0),
-  // instant jump to L's offset. L is in the same screen
-  // position, with A_clone peeking on the right.
+  // Same for the left edge: scroll past A (scrollLeft <= 0,
+  // showing L_clone), instant jump to L's position where L
+  // is fully visible with A_clone peeking on the right.
   //
-  // The .poster-wall__clone class disables scroll-snap on the
-  // clones (see sections.css) so the user never lands on a
-  // clone — they always scroll past it and trigger the wrap.
+  // v3.14.42 fix: previously this had the same race condition
+  // as setupMarquee (v3.14.37) — called synchronously after
+  // render(), but render() is async, so setupLoop() saw 0
+  // tiles and bailed. The init block now chains setupLoop()
+  // to render()'s promise so the tiles are guaranteed to
+  // exist before the clones are added.
+  //
+  // v3.14.42 also removed scroll-snap from the wall — with
+  // snap, the tiles would always align to the left edge and
+  // the clones would always be hidden. Without snap, the
+  // user can stop scrolling at any position and see the
+  // neighbors peeking on both sides.
   function setupLoop() {
     var wall = document.getElementById("poster-wall");
-    if (!wall) return;
+    if (!wall) {
+      console.warn("[poster-wall] #poster-wall not found");
+      return;
+    }
     var tiles = wall.querySelectorAll(":scope > li");
-    if (tiles.length < 2) return;
+    if (tiles.length < 2) {
+      console.warn("[poster-wall] need at least 2 tiles, got", tiles.length);
+      return;
+    }
 
-    // Clone first and last, mark them so CSS can disable their
-    // scroll-snap (we don't want the user to land on a clone).
+    // Clone first and last, mark them so we can identify them.
     var firstClone = tiles[0].cloneNode(true);
     var lastClone  = tiles[tiles.length - 1].cloneNode(true);
     firstClone.classList.add("poster-wall__clone");
@@ -424,11 +434,19 @@ const POSTER_WALL = (() => {
     wall.insertBefore(lastClone, tiles[0]);
     wall.appendChild(firstClone);
 
-    // Scroll to the start of the original first tile, so the
-    // user sees L_clone peeking on the left and A in the
-    // middle. This is the "revolver" starting position —
-    // indistinguishable from any other tile.
-    wall.scrollLeft = tiles[0].offsetLeft;
+    // Start scrolled so A is fully visible with L_clone
+    // peeking on the left. We scroll past L_clone by 85%
+    // of its width, leaving 15% (~40px) peeking on the left.
+    // Tarek: "i have to be able to see the little side of
+    // the last one from the left and see the second one from
+    // the right side".
+    var peek = Math.round(tiles[0].offsetWidth * 0.15);
+    wall.scrollLeft = tiles[0].offsetLeft - peek;
+    console.info("[poster-wall] revolver:",
+      tiles.length, "tiles + 2 clones,",
+      "A at", tiles[0].offsetLeft, "px,",
+      "L_clone peek", peek, "px,",
+      "scrollLeft", wall.scrollLeft, "px");
 
     // Wrap behavior: instant jump when the user scrolls past
     // either edge. No animation, no transition. The _warping
@@ -437,21 +455,20 @@ const POSTER_WALL = (() => {
     wall.addEventListener("scroll", function () {
       if (wall._warping) return;
 
-      // Past the right edge (showing A_clone): jump to A.
+      // Past the right edge (showing A_clone): jump to the
+      // starting position (A with L_clone peeking).
       if (wall.scrollLeft + wall.clientWidth >= wall.scrollWidth - 2) {
         wall._warping = true;
-        wall.scrollLeft = tiles[0].offsetLeft;
-        // 50ms is enough to let the scroll event from the
-        // jump itself fire and be ignored, but short enough
-        // that the user perceives it as instant.
+        wall.scrollLeft = tiles[0].offsetLeft - peek;
         setTimeout(function () { wall._warping = false; }, 50);
         return;
       }
 
-      // Past the left edge (showing L_clone): jump to L.
+      // Past the left edge (showing L_clone): jump to the
+      // ending position (L with A_clone peeking).
       if (wall.scrollLeft <= 0) {
         wall._warping = true;
-        wall.scrollLeft = tiles[tiles.length - 1].offsetLeft;
+        wall.scrollLeft = tiles[tiles.length - 1].offsetLeft - peek;
         setTimeout(function () { wall._warping = false; }, 50);
         return;
       }

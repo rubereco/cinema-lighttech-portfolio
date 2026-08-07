@@ -290,18 +290,17 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  /* v3.14.39: simple scrollable row. NO animation, NO duplicate,
-     NO track. The user scrolls manually. When they reach the
-     end and keep scrolling, JS resets scrollLeft to 0 so the
-     carousel "loops" back to the first poster. scroll-snap
-     snaps each tile to the start of the row for a clean feel.
-     Tarek: "i don't want the films to be animated, the user
-     is the one that scrolls them". */
+  /* v3.14.42: revolver magazine. NO scroll-snap — we need the
+     user to be able to stop scrolling at any position so they
+     can see L_clone peeking on the left when on A (and vice
+     versa). With scroll-snap, the tiles would snap to the left
+     edge and the clones would always be hidden. The wrap
+     behavior is handled by JS (setupLoop), not by CSS snap.
+     Tarek: "when im on the first i have to be able to see the
+     little side of the last one from the left". */
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scroll-padding-left: max(0.9rem, 2.5vw);
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -319,17 +318,6 @@
   background: var(--c-surface);
   flex: 0 0 auto;
   width: min(65vw, 260px);
-  scroll-snap-align: start;
-}
-
-/* v3.14.41: clones of the first and last tile (used to give
-   the wall a revolver-magazine layout — every tile has a
-   neighbor peeking on both sides). We disable scroll-snap
-   on the clones so the user never lands on a clone; they
-   always scroll past it, which triggers the instant wrap
-   in setupLoop(). */
-.poster-wall > li.poster-wall__clone {
-  scroll-snap-align: none;
 }
 
 .poster-link {
