@@ -220,6 +220,13 @@ function setupYearStamp() {
   POSTER_WALL.render();
   POSTER_WALL.setupClick();
 
+  // v3.14.35: start the poster wall's auto-advance (skipped on
+  // desktop automatically by startWallCycle). Pauses when the
+  // modal opens, resumes when it closes.
+  POSTER_WALL.startWallCycle();
+  window.addEventListener("tarek:film-open", function () { POSTER_WALL.stopWallCycle(); });
+  window.addEventListener("tarek:film-close", function () { POSTER_WALL.startWallCycle(); });
+
   // Film detail modal — loads films.json + people.json, listens for
   // tarek:film-open events from the poster wall, handles deep links.
   FILM_MODAL.init();
@@ -341,6 +348,11 @@ const POSTER_WALL = (() => {
       // Placeholder: real modal/drawer hookup lands in a future commit
       console.info("[poster-wall] tarek:film-open", { filmId });
     });
+    // v3.14.35: any user touch/wheel on the wall restarts the
+    // auto-cycle timer (so swiping pauses auto-advance for a
+    // fresh 5s window, same as the modal's resetCycle).
+    ul.addEventListener("touchstart", resetWallCycle, { passive: true });
+    ul.addEventListener("wheel", resetWallCycle, { passive: true });
   }
 
   async function loadData() {
@@ -355,10 +367,61 @@ const POSTER_WALL = (() => {
     render(state.work, state.films);
   }
 
+  // v3.14.35: auto-cycle the poster wall on mobile (horizontal
+  // scroll container). Every 5s, scroll to the next tile. Wraps
+  // back to the start when reaching the end. No smooth scrolling
+  // per Tarek ("no need for animation"). Resets on user touch/wheel.
+  // Skipped on desktop (the grid doesn't have a horizontal scroll).
+  var wallCycleTimer = null;
+  var WALL_CYCLE_MS = 5000;
+  function startWallCycle() {
+    stopWallCycle();
+    var wall = document.getElementById("poster-wall");
+    if (!wall) return;
+    // Only cycle if it's actually a horizontal scroller
+    // (mobile: display: flex + overflow-x: auto). On desktop
+    // it's a 3-col grid with overflow: visible, so skip.
+    var isScrollable = getComputedStyle(wall).overflowX === "auto" ||
+                       getComputedStyle(wall).overflowX === "scroll";
+    if (!isScrollable) return;
+    // Only cycle if there's more content than visible (i.e. scrollWidth > clientWidth)
+    if (wall.scrollWidth <= wall.clientWidth + 1) return;
+    wallCycleTimer = setInterval(function () {
+      // find the first tile whose left edge is at or past the
+      // current scrollLeft, then advance to the next one
+      var tiles = wall.querySelectorAll(":scope > li");
+      if (!tiles.length) return;
+      var sl = wall.scrollLeft;
+      var target = null;
+      for (var i = 0; i < tiles.length; i++) {
+        if (tiles[i].offsetLeft > sl + 1) { target = tiles[i]; break; }
+      }
+      if (!target) {
+        // We're on the last tile — wrap to the first
+        target = tiles[0];
+        wall.scrollLeft = 0;
+      } else {
+        // account for the left padding on the wall so the
+        // tile snaps to the padding offset, not the raw left
+        var padLeft = parseFloat(getComputedStyle(wall).paddingLeft) || 0;
+        wall.scrollLeft = target.offsetLeft - padLeft;
+      }
+    }, WALL_CYCLE_MS);
+  }
+  function stopWallCycle() {
+    if (wallCycleTimer) { clearInterval(wallCycleTimer); wallCycleTimer = null; }
+  }
+  function resetWallCycle() { startWallCycle(); }
+
   return {
     loadData,
     render: () => { loadData().then(renderFromState); },
-    setupClick
+    setupClick,
+    // v3.14.35: expose startCycle so FILM_MODAL can pause the poster
+    // wall's auto-advance while the modal is open (otherwise the
+    // wall and the modal would be advancing independently).
+    startWallCycle: startWallCycle,
+    stopWallCycle: stopWallCycle
   };
 })();
 
@@ -501,7 +564,8 @@ const FILM_MODAL = (() => {
   }
 
   // ─── Open / close ────────────────────────────────────────────────────
-  function open(filmId) {
+  function open(filmId, opts) {
+    opts = opts || {};
     const film = filmsById && filmsById[filmId];
     if (!film) {
       console.warn(`[film-modal] no film with id "${filmId}"`);
@@ -572,14 +636,29 @@ const FILM_MODAL = (() => {
     updatePosition();
     updateNavButtons();
 
+    // v3.14.35: start the auto-cycle (advance every 5s). Resets
+    // automatically on every open() call, so navigating to a new
+    // film restarts the timer. Also restarts on user interaction
+    // (handled in the click/keyboard listeners).
+    startCycle();
+
     // Focus the close button so ESC and Tab work from the keyboard.
     const closeBtn = modal.querySelector(".film-modal__close");
     if (closeBtn) closeBtn.focus({ preventScroll: true });
 
-    // Push the hash for deep linking. Use pushState so browser back
-    // closes the modal instead of leaving the page.
+    // v3.14.35: history handling — pushState on the INITIAL open
+    // (so browser back closes the modal), replaceState on every
+    // subsequent in-modal navigation (so the history chain stays
+    // 1 deep and close()'s history.back() = exit, not "previous
+    // film"). The deep-link case (loaded with #film-…) also uses
+    // replaceState so we don't end up with a push on top of the
+    // page-load entry.
     if (window.location.hash !== `#film-${filmId}`) {
-      window.history.pushState({ filmModal: filmId }, "", `#film-${filmId}`);
+      if (opts.replaceHistory) {
+        window.history.replaceState({ filmModal: filmId }, "", `#film-${filmId}`);
+      } else {
+        window.history.pushState({ filmModal: filmId }, "", `#film-${filmId}`);
+      }
     }
   }
 
@@ -604,32 +683,63 @@ const FILM_MODAL = (() => {
     if (next) next.disabled = currentIndex < 0 || currentIndex >= orderedFilmIds.length - 1;
   }
 
+  // v3.14.35: navigate uses replaceState (not pushState) so the
+  // history chain doesn't grow as the user walks through films.
+  // Before this, open() always pushed, so each prev/next added an
+  // entry, and close()'s history.back() only undid ONE step —
+  // meaning the user had to click close N times to fully exit.
+  // Now: the initial open pushes (so back closes the modal),
+  // but each in-modal nav replaces (so the chain stays 1 deep
+  // and close() = one back = exit).
   function navigate(delta) {
     if (currentIndex < 0) return;
     const target = currentIndex + delta;
     if (target < 0 || target >= orderedFilmIds.length) return;
-    open(orderedFilmIds[target]);
+    open(orderedFilmIds[target], { replaceHistory: true });
   }
+
+  // v3.14.35: auto-cycle interval id so we can clear/restart it
+  // whenever the user interacts (click, key, touch).
+  let cycleTimer = null;
+  var CYCLE_INTERVAL_MS = 5000; // advance every 5s
+
+  function startCycle() {
+    stopCycle();
+    cycleTimer = setInterval(function () {
+      if (currentIndex < 0) return;
+      // wrap to the first film when we hit the end
+      var next = currentIndex + 1;
+      if (next >= orderedFilmIds.length) next = 0;
+      open(orderedFilmIds[next], { replaceHistory: true });
+    }, CYCLE_INTERVAL_MS);
+  }
+  function stopCycle() {
+    if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; }
+  }
+  function resetCycle() { startCycle(); }
 
   function close() {
     if (!modal || !modal.classList.contains("film-modal--open")) return;
     modal.classList.remove("film-modal--open");
     modal.setAttribute("aria-hidden", "true");
     document.documentElement.classList.remove("film-modal-open");
+    // v3.14.35: stop the auto-cycle when the modal closes.
+    stopCycle();
+    // v3.14.35: tell the poster wall to resume its auto-advance.
+    window.dispatchEvent(new CustomEvent("tarek:film-close"));
 
-    // Pop the hash. If the user landed on a deep link, replaceState
-    // (don't push) so back goes to the previous page, not "open then
-    // close the modal". Otherwise, push a null state so back closes
-    // the modal gracefully.
+    // v3.14.35: thanks to replaceState on every in-modal nav, the
+    // history chain is always exactly 1 deep while the modal is
+    // open (the initial push). So history.back() always takes us
+    // back to the pre-modal state, regardless of how many prev/next
+    // clicks happened. The deep-link case (page loaded with #film-…)
+    // is handled by the init() block which uses replaceState too,
+    // so the state.filmModal marker is never set for deep links.
     if (window.location.hash.startsWith("#film-")) {
-      // Did the user land here with this hash already? If so, the
-      // history entry is the page-load one — replace it. Otherwise
-      // we pushed it on open, so go back one to undo.
-      // Simpler heuristic: if history.state has filmModal, we
-      // pushed it; otherwise it was the page-load entry.
       if (window.history.state && window.history.state.filmModal) {
         window.history.back();
       } else {
+        // Deep-link or already-closed state: just clear the hash
         window.history.replaceState(null, "", window.location.pathname + window.location.search);
       }
     }
@@ -654,11 +764,13 @@ const FILM_MODAL = (() => {
       // v3.14.34: prev/next nav
       if (ev.target.closest("[data-film-modal-prev]")) {
         ev.preventDefault();
+        resetCycle();  // v3.14.35: user just interacted, restart the 5s timer
         navigate(-1);
         return;
       }
       if (ev.target.closest("[data-film-modal-next]")) {
         ev.preventDefault();
+        resetCycle();  // v3.14.35
         navigate(+1);
         return;
       }
@@ -672,12 +784,20 @@ const FILM_MODAL = (() => {
         close();
       } else if (ev.key === "ArrowLeft") {
         ev.preventDefault();
+        resetCycle();  // v3.14.35
         navigate(-1);
       } else if (ev.key === "ArrowRight") {
         ev.preventDefault();
+        resetCycle();  // v3.14.35
         navigate(+1);
       }
     });
+
+    // v3.14.35: any touch on the modal restarts the auto-cycle too,
+    // so swiping the poster or tapping anywhere pauses the auto-advance
+    // for a fresh 5s window.
+    modal.addEventListener("touchstart", resetCycle, { passive: true });
+    modal.addEventListener("mousedown", resetCycle);
 
     // tarek:film-open from POSTER_WALL (or anywhere else)
     window.addEventListener("tarek:film-open", (ev) => {
