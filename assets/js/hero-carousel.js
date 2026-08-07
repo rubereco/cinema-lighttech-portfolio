@@ -723,16 +723,24 @@
     defs.appendChild(cp2);
   }
 
-  // === Load hero tile data (v3.14.29) ===
+  // === Load hero tile data (v3.14.29–31) ===
   // v3.14.29: tiles used to be hardcoded as <image> elements in
   // index.html. Now they're driven by data/hero.json, editable
-  // from the Decap admin (/admin → Hero carrusel). Same inline-
-  // first / fetch-fallback pattern the other loaders use.
-  // 1) Try the inlined <script id="tarek-hero"> block (file://)
-  // 2) Fall back to fetch("data/hero.json") (live deploys)
-  // v3.14.30: added a one-time console diagnostic so we can
-  // see in DevTools whether the inline JSON is being read,
-  // the fetch fallback is firing, or the injection failed.
+  // from the Decap admin (/admin → Hero carrusel).
+  //
+  // v3.14.31: Tarek reported "after deleting the image and hard
+  // refreshing i can still see the image". Root cause: init()
+  // was reading the inlined tarek-hero JSON block in index.html
+  // (for file:// compatibility) and never re-fetching. The
+  // inlined block is only refreshed when `npm run build` runs
+  // (= every Cloudflare Pages deploy). Locally, if Tarek edits
+  // data/hero.json via git/admin and just hard-refreshes, the
+  // inlined block is stale and the carousel shows old data.
+  //
+  // Fix: ALWAYS fetch data/hero.json (cache: "no-cache") on
+  // init. The inline block is now only a fallback for file://
+  // (where fetch is blocked by CORS) or for fetch errors.
+  // The live site always shows the latest data from the repo.
   var _heroDiag = false; // set true to silence the [hero-carousel] log line
   function readHeroInline() {
     var el = document.getElementById("tarek-hero");
@@ -740,12 +748,24 @@
     try { return JSON.parse(el.textContent); } catch (e) { return null; }
   }
   function loadHeroData() {
-    var inline = readHeroInline();
-    if (inline) return Promise.resolve(inline);
-    if (!_heroDiag) console.info("[hero-carousel] no inline tarek-hero, fetching data/hero.json");
+    // file:// — fetch is blocked by CORS, inline is the only option
+    if (location.protocol === "file:") {
+      var inline = readHeroInline();
+      if (!_heroDiag) console.info("[hero-carousel] file:// protocol — using inline tarek-hero:", inline ? (inline.items ? inline.items.length + " items" : "present") : "missing");
+      return Promise.resolve(inline);
+    }
+    // http(s) — always fetch fresh, fall back to inline on error
+    if (!_heroDiag) console.info("[hero-carousel] fetching data/hero.json (cache: no-cache)");
     return fetch("data/hero.json", { cache: "no-cache" })
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .catch(function (e) { console.warn("[hero-carousel] could not load data/hero.json", e); return null; });
+      .then(function (d) {
+        if (!_heroDiag) console.info("[hero-carousel] fetched", d && d.items ? d.items.length + " items" : "(no items)");
+        return d;
+      })
+      .catch(function (e) {
+        console.warn("[hero-carousel] fetch failed, falling back to inline", e);
+        return readHeroInline();
+      });
   }
 
   // Inject <image> elements into the carousel <g>. Called BEFORE
@@ -769,547 +789,525 @@
     }
   }
 
-  // v3.14.30: hold the loaded data in a closure var so the
-  // async fetch path can populate it and the recursive
-  // init() call uses it without re-fetching (which would
-  // be an infinite loop).
-  var _heroData = null;
-
   function init() {
     var hero = document.getElementById('top');
     var stage = document.getElementById('hero-carousel-svg');
     if (!hero || !stage) return;
     if (typeof gsap === 'undefined') return;
 
-    // v3.14.29: load tile data and inject <image> elements into
-    // the SVG. Synchronous when the inlined JSON block is present
-    // (file:// + most deploys); async only when we have to fetch.
-    // The carousel can't render with zero tiles, so we bail early
-    // if the data is empty or fetch fails.
-    var data = _heroData || readHeroInline();
-    if (!_heroDiag) console.info("[hero-carousel] init(), data:", data ? (data.items ? data.items.length + " items" : "present but no items[]") : "missing");
-
-    if (data) {
-      injectHeroTiles(stage, data);
-    } else {
-      // No inline data — async load, then continue init.
-      // _heroData is set in the .then() so the recursive
-      // init() call uses the fetched data instead of
-      // re-fetching (which would be an infinite loop).
-      loadHeroData().then(function (d) {
-        if (!d) {
-          if (!_heroDiag) console.warn("[hero-carousel] no data available, carousel will be empty");
-          return;
-        }
-        _heroData = d;
-        init();
-      });
-      return;
-    }
-
-    // v3.10+: the carousel runs on mobile too. The previous
-    // `if (window.innerWidth < MOBILE_MAX_WIDTH) return;` short-circuit
-    // is gone — the CSS now shows the SVG in the top 2/3 of the hero
-    // on mobile, and the tile layout is scaled by SCALE in buildLayout
-    // so the visible region on a 375-wide phone shows 1.5–2 bigs.
-
-    // Build the layout from the photos in the SVG
-    var layout = buildLayout(stage);
-    if (!layout.length) return;
-
-    // Recreate clip-paths with the (scaled) tile sizes so the rounded
-    // corners still match.
-    setupClipPaths(stage);
-
-    // Set initial sizing + position for each tile (phase = 0).
-    gsap.set(stage.querySelectorAll('image'), {
-      attr: { preserveAspectRatio: 'xMidYMid slice' }
-    });
-    layout.forEach(function (item) {
-      if (item.size === 'big') {
-        gsap.set(item.tile, {
-          attr: { width: BIG_WIDTH, height: BIG_HEIGHT, 'clip-path': 'url(#hc-cp1)' },
-          x: item.baseX,
-          y: item.y
-        });
-      } else {
-        gsap.set(item.tile, {
-          attr: { width: SMALL_WIDTH, height: SMALL_HEIGHT, 'clip-path': 'url(#hc-cp2)', opacity: 0.9 },
-          x: item.baseX,
-          y: item.y
-        });
-      }
-    });
-
-    // Reduced motion: keep the visual composition, drop the interactivity.
-    var prefersReduced = window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) return;
-
-    // === Phase-based scrub state ===
-    //   phase       — target value, updated by wheel/drag events
-    //   currentPhase — smoothly-lerped value, drives the actual tile x
-    //                  each frame
-    // phase is allowed to grow unbounded (positive or negative). We
-    // wrap displayX per-tile, not phase itself, which avoids the
-    // "lerp the long way around" problem at wrap boundaries.
-    var phase = 0;
-    var currentPhase = 0;
-
-    // === Drag state (v3.10.49) ===
-    //   isDragging        — true between pointerdown and pointerup.
-    //                       While true, the native pointermove handler
-    //                       updates phase directly; the tick() does
-    //                       the per-tile wrap math but skips auto-
-    //                       scroll and lerp (they'd fight the drag).
-    //   pressX            — pointer x at pointerdown, in the hero's
-    //                       LOCAL coordinate system
-    //                       (e.clientX - rect.left). Capturing in
-    //                       local coords — NOT e.offsetX, which is
-    //                       relative to the event target (could be
-    //                       a child <image>) — is what fixes the
-    //                       coordinate-mismatch bug from v3.10.46.
-    //   dragStartPhase    — phase at pointerdown. The drag delta
-    //                       (currentX - pressX) * sensitivity is
-    //                       added to this, so the carousel follows
-    //                       the finger relative to the press point.
-    //   velocitySamples   — recent (phase/ms) samples from pointer
-    //                       move, averaged at pointerup to get the
-    //                       release velocity for momentum. Keeps
-    //                       last VELOCITY_SAMPLE_COUNT.
-    //   lastDragPhase/Time — used to compute instant velocity
-    //                       between successive pointermove events.
-    var isDragging = false;
-    var pressX = 0;
-    var dragStartPhase = 0;
-    var velocitySamples = [];
-    var lastDragPhase = 0;
-    var lastDragTime = 0;
-
-    // === Momentum state (v3.10.49) ===
-    // Momentum is now driven by a requestAnimationFrame loop
-    // (momentumLoop, defined below) instead of the GSAP tick. This
-    // is the cleanest way to ensure a rapid pointerdown during
-    // momentum cancels the in-flight RAF and starts fresh — no
-    // reliance on the GSAP Observer's internal state.
-    //   momentumVelocity  — current momentum (phase/frame at 60fps).
-    //                       Decays by FRICTION each frame.
-    //   momentumRAF       — the requestAnimationFrame id, or null
-    //                       when no momentum is running. Stored so
-    //                       a new pointerdown can cancel it.
-    //   isMomentumActive  — true while the RAF loop is running.
-    //                       tick() checks this and skips auto-
-    //                       scroll/lerp so the loop owns the phase
-    //                       update exclusively.
-    var momentumVelocity = 0;
-    var momentumRAF = null;
-    var isMomentumActive = false;
-    // v3.10.50: true while a press during momentum is "coasting"
-    // the carousel to its natural stop position. During this phase
-    // momentumLoop uses PRESS_DECAY_FRICTION (slower decay) instead
-    // of FRICTION, so the coast is more pronounced — the carousel
-    // stops at a "future position" (where the momentum would have
-    // carried it) rather than at the abrupt-stop position. Cleared
-    // on pointermove (user starts dragging) or when velocity drops
-    // below threshold.
-    var inPressDecay = false;
-
-    // === Auto-scroll state (v3.10.37, unchanged) ===
-    //   isUserPressing  — kept for clarity; equivalent to isDragging
-    //                     in v3.10.49 (we have only one input
-    //                     source now). tick() still reads it for
-    //                     the auto-scroll gate.
-    //   lastWheelTime   — timestamp of the most recent wheel
-    //                     event. Auto-scroll stays paused for
-    //                     WHEEL_IDLE_DELAY ms after each wheel
-    //                     click so the wheel's phase update
-    //                     doesn't get mixed with the auto-drift.
-    var isUserPressing = false;
-    var lastWheelTime = 0;
-
-    // === Band-based zone detection ===
-    var inCarouselBand = false;
-    function updateBand(clientX, clientY) {
-      var wasIn = inCarouselBand;
-      inCarouselBand = isInCarouselBand(hero, clientX, clientY);
-      if (inCarouselBand !== wasIn) {
-        hero.style.cursor = inCarouselBand ? 'ew-resize' : 'default';
-      }
-    }
-    function leaveBand() {
-      if (!inCarouselBand) return;
-      inCarouselBand = false;
-      hero.style.cursor = 'default';
-    }
-
-    hero.addEventListener('mousemove', function (e) {
-      updateBand(e.clientX, e.clientY);
-    });
-    hero.addEventListener('mouseleave', leaveBand);
-    // Capture the band at pointer/touch PRESS time, not only on
-    // mousemove. Otherwise a user who clicks before moving the mouse
-    // would see inCarouselBand=false (stale initial value) and the
-    // drag would silently no-op.
-    hero.addEventListener('pointerdown', function (e) {
-      updateBand(e.clientX, e.clientY);
-    });
-    hero.addEventListener('touchmove', function (e) {
-      if (e.touches && e.touches[0]) {
-        updateBand(e.touches[0].clientX, e.touches[0].clientY);
-      }
-    }, { passive: true });
-    hero.addEventListener('touchstart', function (e) {
-      if (e.touches && e.touches[0]) {
-        updateBand(e.touches[0].clientX, e.touches[0].clientY);
-      }
-    }, { passive: true });
-    hero.addEventListener('touchend', leaveBand);
-    hero.addEventListener('touchcancel', leaveBand);
-
-    // === Per-frame update ===
-    // Two modes (v3.10.49 — momentum moved to a RAF loop, see
-    // momentumLoop below):
-    //   1) Auto-scroll (idle, no user input, no recent wheel):
-    //      advance both phase and currentPhase by the constant
-    //      AUTO_SCROLL_VELOCITY. The carousel drifts right at
-    //      a slow, steady pace — like a museum display.
-    //   2) At rest (lerp): currentPhase eases toward phase. Used
-    //      when the user is actively dragging, or within
-    //      WHEEL_IDLE_DELAY ms of a wheel event (so the wheel
-    //      doesn't combine with the auto-drift).
-    //
-    // When momentum is active (isMomentumActive = true), the RAF
-    // loop owns the phase update, so tick() does nothing for the
-    // phase/currentPhase math — it just runs the per-tile wrap.
-    // This keeps the two update paths from fighting each other.
-    // gsap.ticker.deltaRatio() scales the physics by frame time
-    // so the auto-scroll velocity feels right at 30/60/120fps.
-    function tick() {
-      if (!isMomentumActive) {
-        var now = performance.now();
-        if (!isUserPressing && (now - lastWheelTime) > WHEEL_IDLE_DELAY) {
-          // Mode 1: idle auto-scroll. Both phase and currentPhase
-          // advance by the same delta so they stay in sync — no
-          // lerp needed. deltaRatio() keeps the speed framerate-
-          // independent.
-          var deltaRatio = gsap.ticker.deltaRatio();
-          phase += AUTO_SCROLL_VELOCITY * deltaRatio;
-          currentPhase += AUTO_SCROLL_VELOCITY * deltaRatio;
-        } else {
-          // Mode 2: lerp toward phase. currentPhase eases into
-          // the latest target the user/wheel set. This is what
-          // smooths the drag (the user's pointermove updates
-          // phase; the lerp eases currentPhase to catch up over
-          // 1-3 frames, filtering the touch-sensor noise that
-          // v3.10.39/40/41 tried to handle with dead zones —
-          // see the v3.10.42 rollback note below).
-          currentPhase += (phase - currentPhase) * LERP_FACTOR;
-        }
-      }
-      // Snap when very close, to avoid a permanent fractional tween
-      if (Math.abs(phase - currentPhase) < 0.05) currentPhase = phase;
-
-      layout.forEach(function (item) {
-        var displayX = item.baseX + currentPhase * item.stepFrac;
-        // Wrap into the tile's valid range.
-        while (displayX > item.offset + X_RANGE) displayX -= X_RANGE;
-        while (displayX < item.offset) displayX += X_RANGE;
-        gsap.set(item.tile, { x: displayX });
-      });
-    }
-    gsap.ticker.add(tick);
-
-    // === Release momentum loop (v3.10.49) ===
-    // requestAnimationFrame-driven momentum decay. On pointerup we
-    // start this loop (if release velocity > VELOCITY_THRESHOLD).
-    // Each frame: advance phase and currentPhase by the current
-    // velocity, then decay velocity by FRICTION^deltaRatio (so the
-    // physics is framerate-independent). Exits when velocity drops
-    // below threshold; tick() then resumes its normal auto-scroll
-    // vs. lerp decision.
-    //
-    // The critical property: if a new pointerdown fires while the
-    // loop is running, pointerdown cancels the RAF and zeroes
-    // momentumVelocity. The next tick() frame sees isMomentumActive
-    // = false and resumes normal behavior. There is NO global
-    // accumulator that leaks between gestures — that's what fixes
-    // the snap-back bug Buddie reported. Each click is a clean slate.
-    function momentumLoop() {
-      momentumRAF = null;
-      if (Math.abs(momentumVelocity) <= VELOCITY_THRESHOLD) {
-        isMomentumActive = false;
-        momentumVelocity = 0;
-        inPressDecay = false;
+    // v3.14.31: always go through loadHeroData (fetch on http,
+    // inline on file://). The rest of init() runs inside the
+    // .then() so buildLayout() runs AFTER the tiles are in the SVG.
+    loadHeroData().then(function (data) {
+      if (!data || !data.items || !data.items.length) {
+        if (!_heroDiag) console.warn("[hero-carousel] no items in data, carousel will be empty");
         return;
       }
-      var deltaRatio = gsap.ticker.deltaRatio();
-      phase += momentumVelocity * deltaRatio;
-      currentPhase += momentumVelocity * deltaRatio;
-      // v3.10.50: use PRESS_DECAY_FRICTION (slower decay) when
-      // the user pressed during momentum and the carousel is
-      // coasting to a "future position". Otherwise use the
-      // normal FRICTION (post-release glide from a drag).
-      // Closer to 1 = slower decay = more positions simulated.
-      var currentFriction = inPressDecay ? PRESS_DECAY_FRICTION : FRICTION;
-      momentumVelocity *= Math.pow(currentFriction, deltaRatio);
-      momentumRAF = requestAnimationFrame(momentumLoop);
-    }
+      injectHeroTiles(stage, data);
 
-    // === Wheel handler ===
-    // Raw deltaY → phase increment. Proportional to the wheel
-    // intensity (trackpad small deltas produce small moves; big
-    // mouse wheel turns produce big moves).
-    // v3.10.37: also stamp lastWheelTime so the idle auto-scroll
-    // in tick() stays paused for WHEEL_IDLE_DELAY ms after each
-    // wheel event — without this, the wheel's phase update would
-    // be combined with the auto-drift and the carousel would
-    // appear to scroll faster than the user wheeled it.
-    function onWheel(e) {
-      if (!inCarouselBand) return;
-      e.preventDefault();
-      var deltaY = readWheelDelta(e);
-      if (WHEEL_INVERTED) deltaY = -deltaY;
-      if (!deltaY) return;
-      phase += deltaY * WHEEL_SENSITIVITY;
-      lastWheelTime = performance.now();
-    }
-    hero.addEventListener('wheel', onWheel, { passive: false });
+      // v3.10+: the carousel runs on mobile too. The previous
+      // `if (window.innerWidth < MOBILE_MAX_WIDTH) return;` short-circuit
+      // is gone — the CSS now shows the SVG in the top 2/3 of the hero
+      // on mobile, and the tile layout is scaled by SCALE in buildLayout
+      // so the visible region on a 375-wide phone shows 1.5–2 bigs.
 
-    // === Native Pointer Events (v3.10.49) — replaces GSAP Observer ===
-    // Why native over the Observer:
-    //   The GSAP Observer tracks gesture state (self.deltaX,
-    //   self.startX, the onPress callback itself) across the
-    //   pointerdown/pointerup cycle, and that state does NOT
-    //   reset cleanly when the user does a rapid
-    //   click-release-click during momentum. The Observer treats
-    //   the second click as a continuation of the first gesture,
-    //   leaking residual travel into the new drag — which is
-    //   exactly the "snap back to the first hold" bug Buddie
-    //   reported (v3.10.45, 46, 47, 48 were all attempts to
-    //   work around this within the Observer; none fully fixed
-    //   it).
-    //
-    //   Native Pointer Events fire reliably for every click, with
-    //   no global state to worry about. The press position is
-    //   captured fresh on every pointerdown, in the hero's LOCAL
-    //   coordinate system, and the drag delta is computed
-    //   relative to that local position. There is literally no
-    //   cross-gesture state that can leak.
-    //
-    // setPointerCapture (v3.10.49):
-    //   Called on pointerdown so the hero continues to receive
-    //   pointermove events even if the pointer leaves the
-    //   element's bounds mid-drag. Without this, fast drags
-    //   would lose tracking when the cursor went off the hero.
-    //
-    // preventDefault on pointerdown (v3.10.9 carryover, was on
-    // the Observer before):
-    //   Critical on mobile: without it, the browser would
-    //   scroll the page horizontally instead of letting the
-    //   carousel capture the drag, so mobile users couldn't
-    //   see the other tiles. We do it in the listener now.
+      // Build the layout from the photos in the SVG
+      var layout = buildLayout(stage);
+      if (!layout.length) return;
 
-    function onPointerDown(e) {
-      // v3.10.50: Press-during-momentum now COASTS to a "future
-      // position" instead of snapping to the press position.
-      // If there's in-flight release momentum, we DON'T cancel
-      // the RAF — we let it keep running, but flag it as
-      // "press decay" so momentumLoop uses PRESS_DECAY_FRICTION
-      // (slower decay) for a more pronounced coast. The drag
-      // will pick up from wherever the carousel is at that
-      // moment. If the user never drags (just taps), the coast
-      // continues until the momentum naturally decays, and the
-      // carousel stops at the "future position" — the place
-      // it would have reached if the user hadn't pressed.
-      //
-      // The snap-back fix from v3.10.49 is still intact for the
-      // case where the user actually DRAGS: pointermove cancels
-      // the press decay (see below) and zeroes the velocity, so
-      // the drag starts clean. The flag distinguishes "tap during
-      // momentum" (let it coast) from "drag during momentum"
-      // (cancel and take over).
-      if (momentumRAF !== null) {
-        inPressDecay = true;
-        // DON'T cancel momentumRAF, DON'T zero momentumVelocity.
-        // The RAF is still updating phase + currentPhase each
-        // frame, and momentumLoop will check inPressDecay to
-        // apply the slower friction.
-      } else {
-        inPressDecay = false;
-      }
+      // Recreate clip-paths with the (scaled) tile sizes so the rounded
+      // corners still match.
+      setupClipPaths(stage);
 
-      // Capture press position in the hero's LOCAL coordinate
-      // system. This is the fix for the v3.10.46 coordinate-
-      // mismatch bug: e.offsetX would be relative to whatever
-      // child element the pointer was over (an <image>, the
-      // text, etc.), but e.clientX - rect.left is always
-      // relative to the hero regardless of which child was
-      // hit-tested. Both sides of the drag-delta subtraction
-      // (pressX and the current pointerX) are in the same
-      // frame, so the math is always correct.
-      var rect = hero.getBoundingClientRect();
-      pressX = e.clientX - rect.left;
-
-      // Snapshot the phase so the drag is relative to the
-      // press point, not absolute. (Equivalent to v3.10.45's
-      // dragStartPhase = phase in the Observer's onPress.)
-      dragStartPhase = phase;
-
-      // Reset velocity sampling for the new gesture.
-      lastDragPhase = phase;
-      lastDragTime = performance.now();
-      velocitySamples = [];
-
-      isDragging = true;
-      isUserPressing = true;
-
-      // Keep move events flowing even if pointer leaves the hero.
-      try { hero.setPointerCapture(e.pointerId); } catch (err) {}
-
-      // Stop the browser from doing its own thing (page scroll on
-      // mobile, text selection on desktop).
-      e.preventDefault();
-    }
-
-    function onPointerMove(e) {
-      // Only act on moves while we're actually dragging. The
-      // pointermove event fires for any pointer movement over
-      // the element, not just drags — gating on isDragging
-      // prevents accidental phase updates from a stray hover.
-      if (!isDragging) return;
-
-      // v3.10.50: If we were in press decay (tap during
-      // momentum), the user is now actually dragging — cancel
-      // the press decay, zero the velocity, and re-anchor the
-      // drag to the CURRENT position so the math is clean.
-      // Without this re-anchor, the drag would be relative to
-      // the press position while the phase has been moving
-      // forward from the coast, which would feel laggy/wrong.
-      if (inPressDecay) {
-        if (momentumRAF !== null) {
-          cancelAnimationFrame(momentumRAF);
-          momentumRAF = null;
+      // Set initial sizing + position for each tile (phase = 0).
+      gsap.set(stage.querySelectorAll('image'), {
+        attr: { preserveAspectRatio: 'xMidYMid slice' }
+      });
+      layout.forEach(function (item) {
+        if (item.size === 'big') {
+          gsap.set(item.tile, {
+            attr: { width: BIG_WIDTH, height: BIG_HEIGHT, 'clip-path': 'url(#hc-cp1)' },
+            x: item.baseX,
+            y: item.y
+          });
+        } else {
+          gsap.set(item.tile, {
+            attr: { width: SMALL_WIDTH, height: SMALL_HEIGHT, 'clip-path': 'url(#hc-cp2)', opacity: 0.9 },
+            x: item.baseX,
+            y: item.y
+          });
         }
-        isMomentumActive = false;
-        momentumVelocity = 0;
-        inPressDecay = false;
-        // Re-anchor: the drag starts from the current phase
-        // and the current pointer position, so the delta
-        // (currentX - pressX) is zero at this moment and
-        // grows from here as the user drags.
-        var pressRect = hero.getBoundingClientRect();
-        pressX = e.clientX - pressRect.left;
+      });
+      // Reduced motion: keep the visual composition, drop the interactivity.
+      var prefersReduced = window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) return;
+  
+      // === Phase-based scrub state ===
+      //   phase       — target value, updated by wheel/drag events
+      //   currentPhase — smoothly-lerped value, drives the actual tile x
+      //                  each frame
+      // phase is allowed to grow unbounded (positive or negative). We
+      // wrap displayX per-tile, not phase itself, which avoids the
+      // "lerp the long way around" problem at wrap boundaries.
+      var phase = 0;
+      var currentPhase = 0;
+  
+      // === Drag state (v3.10.49) ===
+      //   isDragging        — true between pointerdown and pointerup.
+      //                       While true, the native pointermove handler
+      //                       updates phase directly; the tick() does
+      //                       the per-tile wrap math but skips auto-
+      //                       scroll and lerp (they'd fight the drag).
+      //   pressX            — pointer x at pointerdown, in the hero's
+      //                       LOCAL coordinate system
+      //                       (e.clientX - rect.left). Capturing in
+      //                       local coords — NOT e.offsetX, which is
+      //                       relative to the event target (could be
+      //                       a child <image>) — is what fixes the
+      //                       coordinate-mismatch bug from v3.10.46.
+      //   dragStartPhase    — phase at pointerdown. The drag delta
+      //                       (currentX - pressX) * sensitivity is
+      //                       added to this, so the carousel follows
+      //                       the finger relative to the press point.
+      //   velocitySamples   — recent (phase/ms) samples from pointer
+      //                       move, averaged at pointerup to get the
+      //                       release velocity for momentum. Keeps
+      //                       last VELOCITY_SAMPLE_COUNT.
+      //   lastDragPhase/Time — used to compute instant velocity
+      //                       between successive pointermove events.
+      var isDragging = false;
+      var pressX = 0;
+      var dragStartPhase = 0;
+      var velocitySamples = [];
+      var lastDragPhase = 0;
+      var lastDragTime = 0;
+  
+      // === Momentum state (v3.10.49) ===
+      // Momentum is now driven by a requestAnimationFrame loop
+      // (momentumLoop, defined below) instead of the GSAP tick. This
+      // is the cleanest way to ensure a rapid pointerdown during
+      // momentum cancels the in-flight RAF and starts fresh — no
+      // reliance on the GSAP Observer's internal state.
+      //   momentumVelocity  — current momentum (phase/frame at 60fps).
+      //                       Decays by FRICTION each frame.
+      //   momentumRAF       — the requestAnimationFrame id, or null
+      //                       when no momentum is running. Stored so
+      //                       a new pointerdown can cancel it.
+      //   isMomentumActive  — true while the RAF loop is running.
+      //                       tick() checks this and skips auto-
+      //                       scroll/lerp so the loop owns the phase
+      //                       update exclusively.
+      var momentumVelocity = 0;
+      var momentumRAF = null;
+      var isMomentumActive = false;
+      // v3.10.50: true while a press during momentum is "coasting"
+      // the carousel to its natural stop position. During this phase
+      // momentumLoop uses PRESS_DECAY_FRICTION (slower decay) instead
+      // of FRICTION, so the coast is more pronounced — the carousel
+      // stops at a "future position" (where the momentum would have
+      // carried it) rather than at the abrupt-stop position. Cleared
+      // on pointermove (user starts dragging) or when velocity drops
+      // below threshold.
+      var inPressDecay = false;
+  
+      // === Auto-scroll state (v3.10.37, unchanged) ===
+      //   isUserPressing  — kept for clarity; equivalent to isDragging
+      //                     in v3.10.49 (we have only one input
+      //                     source now). tick() still reads it for
+      //                     the auto-scroll gate.
+      //   lastWheelTime   — timestamp of the most recent wheel
+      //                     event. Auto-scroll stays paused for
+      //                     WHEEL_IDLE_DELAY ms after each wheel
+      //                     click so the wheel's phase update
+      //                     doesn't get mixed with the auto-drift.
+      var isUserPressing = false;
+      var lastWheelTime = 0;
+  
+      // === Band-based zone detection ===
+      var inCarouselBand = false;
+      function updateBand(clientX, clientY) {
+        var wasIn = inCarouselBand;
+        inCarouselBand = isInCarouselBand(hero, clientX, clientY);
+        if (inCarouselBand !== wasIn) {
+          hero.style.cursor = inCarouselBand ? 'ew-resize' : 'default';
+      }
+    }
+      function leaveBand() {
+        if (!inCarouselBand) return;
+        inCarouselBand = false;
+        hero.style.cursor = 'default';
+    }
+  
+      hero.addEventListener('mousemove', function (e) {
+        updateBand(e.clientX, e.clientY);
+      });
+      hero.addEventListener('mouseleave', leaveBand);
+      // Capture the band at pointer/touch PRESS time, not only on
+      // mousemove. Otherwise a user who clicks before moving the mouse
+      // would see inCarouselBand=false (stale initial value) and the
+      // drag would silently no-op.
+      hero.addEventListener('pointerdown', function (e) {
+        updateBand(e.clientX, e.clientY);
+      });
+      hero.addEventListener('touchmove', function (e) {
+        if (e.touches && e.touches[0]) {
+          updateBand(e.touches[0].clientX, e.touches[0].clientY);
+      }
+      }, { passive: true });
+      hero.addEventListener('touchstart', function (e) {
+        if (e.touches && e.touches[0]) {
+          updateBand(e.touches[0].clientX, e.touches[0].clientY);
+      }
+      }, { passive: true });
+      hero.addEventListener('touchend', leaveBand);
+      hero.addEventListener('touchcancel', leaveBand);
+  
+      // === Per-frame update ===
+      // Two modes (v3.10.49 — momentum moved to a RAF loop, see
+      // momentumLoop below):
+      //   1) Auto-scroll (idle, no user input, no recent wheel):
+      //      advance both phase and currentPhase by the constant
+      //      AUTO_SCROLL_VELOCITY. The carousel drifts right at
+      //      a slow, steady pace — like a museum display.
+      //   2) At rest (lerp): currentPhase eases toward phase. Used
+      //      when the user is actively dragging, or within
+      //      WHEEL_IDLE_DELAY ms of a wheel event (so the wheel
+      //      doesn't combine with the auto-drift).
+      //
+      // When momentum is active (isMomentumActive = true), the RAF
+      // loop owns the phase update, so tick() does nothing for the
+      // phase/currentPhase math — it just runs the per-tile wrap.
+      // This keeps the two update paths from fighting each other.
+      // gsap.ticker.deltaRatio() scales the physics by frame time
+      // so the auto-scroll velocity feels right at 30/60/120fps.
+      function tick() {
+        if (!isMomentumActive) {
+          var now = performance.now();
+          if (!isUserPressing && (now - lastWheelTime) > WHEEL_IDLE_DELAY) {
+            // Mode 1: idle auto-scroll. Both phase and currentPhase
+            // advance by the same delta so they stay in sync — no
+            // lerp needed. deltaRatio() keeps the speed framerate-
+            // independent.
+            var deltaRatio = gsap.ticker.deltaRatio();
+            phase += AUTO_SCROLL_VELOCITY * deltaRatio;
+            currentPhase += AUTO_SCROLL_VELOCITY * deltaRatio;
+          } else {
+            // Mode 2: lerp toward phase. currentPhase eases into
+            // the latest target the user/wheel set. This is what
+            // smooths the drag (the user's pointermove updates
+            // phase; the lerp eases currentPhase to catch up over
+            // 1-3 frames, filtering the touch-sensor noise that
+            // v3.10.39/40/41 tried to handle with dead zones —
+            // see the v3.10.42 rollback note below).
+            currentPhase += (phase - currentPhase) * LERP_FACTOR;
+        }
+      }
+        // Snap when very close, to avoid a permanent fractional tween
+        if (Math.abs(phase - currentPhase) < 0.05) currentPhase = phase;
+  
+        layout.forEach(function (item) {
+          var displayX = item.baseX + currentPhase * item.stepFrac;
+          // Wrap into the tile's valid range.
+          while (displayX > item.offset + X_RANGE) displayX -= X_RANGE;
+          while (displayX < item.offset) displayX += X_RANGE;
+          gsap.set(item.tile, { x: displayX });
+        });
+    }
+      gsap.ticker.add(tick);
+  
+      // === Release momentum loop (v3.10.49) ===
+      // requestAnimationFrame-driven momentum decay. On pointerup we
+      // start this loop (if release velocity > VELOCITY_THRESHOLD).
+      // Each frame: advance phase and currentPhase by the current
+      // velocity, then decay velocity by FRICTION^deltaRatio (so the
+      // physics is framerate-independent). Exits when velocity drops
+      // below threshold; tick() then resumes its normal auto-scroll
+      // vs. lerp decision.
+      //
+      // The critical property: if a new pointerdown fires while the
+      // loop is running, pointerdown cancels the RAF and zeroes
+      // momentumVelocity. The next tick() frame sees isMomentumActive
+      // = false and resumes normal behavior. There is NO global
+      // accumulator that leaks between gestures — that's what fixes
+      // the snap-back bug Buddie reported. Each click is a clean slate.
+      function momentumLoop() {
+        momentumRAF = null;
+        if (Math.abs(momentumVelocity) <= VELOCITY_THRESHOLD) {
+          isMomentumActive = false;
+          momentumVelocity = 0;
+          inPressDecay = false;
+          return;
+      }
+        var deltaRatio = gsap.ticker.deltaRatio();
+        phase += momentumVelocity * deltaRatio;
+        currentPhase += momentumVelocity * deltaRatio;
+        // v3.10.50: use PRESS_DECAY_FRICTION (slower decay) when
+        // the user pressed during momentum and the carousel is
+        // coasting to a "future position". Otherwise use the
+        // normal FRICTION (post-release glide from a drag).
+        // Closer to 1 = slower decay = more positions simulated.
+        var currentFriction = inPressDecay ? PRESS_DECAY_FRICTION : FRICTION;
+        momentumVelocity *= Math.pow(currentFriction, deltaRatio);
+        momentumRAF = requestAnimationFrame(momentumLoop);
+    }
+  
+      // === Wheel handler ===
+      // Raw deltaY → phase increment. Proportional to the wheel
+      // intensity (trackpad small deltas produce small moves; big
+      // mouse wheel turns produce big moves).
+      // v3.10.37: also stamp lastWheelTime so the idle auto-scroll
+      // in tick() stays paused for WHEEL_IDLE_DELAY ms after each
+      // wheel event — without this, the wheel's phase update would
+      // be combined with the auto-drift and the carousel would
+      // appear to scroll faster than the user wheeled it.
+      function onWheel(e) {
+        if (!inCarouselBand) return;
+        e.preventDefault();
+        var deltaY = readWheelDelta(e);
+        if (WHEEL_INVERTED) deltaY = -deltaY;
+        if (!deltaY) return;
+        phase += deltaY * WHEEL_SENSITIVITY;
+        lastWheelTime = performance.now();
+    }
+      hero.addEventListener('wheel', onWheel, { passive: false });
+  
+      // === Native Pointer Events (v3.10.49) — replaces GSAP Observer ===
+      // Why native over the Observer:
+      //   The GSAP Observer tracks gesture state (self.deltaX,
+      //   self.startX, the onPress callback itself) across the
+      //   pointerdown/pointerup cycle, and that state does NOT
+      //   reset cleanly when the user does a rapid
+      //   click-release-click during momentum. The Observer treats
+      //   the second click as a continuation of the first gesture,
+      //   leaking residual travel into the new drag — which is
+      //   exactly the "snap back to the first hold" bug Buddie
+      //   reported (v3.10.45, 46, 47, 48 were all attempts to
+      //   work around this within the Observer; none fully fixed
+      //   it).
+      //
+      //   Native Pointer Events fire reliably for every click, with
+      //   no global state to worry about. The press position is
+      //   captured fresh on every pointerdown, in the hero's LOCAL
+      //   coordinate system, and the drag delta is computed
+      //   relative to that local position. There is literally no
+      //   cross-gesture state that can leak.
+      //
+      // setPointerCapture (v3.10.49):
+      //   Called on pointerdown so the hero continues to receive
+      //   pointermove events even if the pointer leaves the
+      //   element's bounds mid-drag. Without this, fast drags
+      //   would lose tracking when the cursor went off the hero.
+      //
+      // preventDefault on pointerdown (v3.10.9 carryover, was on
+      // the Observer before):
+      //   Critical on mobile: without it, the browser would
+      //   scroll the page horizontally instead of letting the
+      //   carousel capture the drag, so mobile users couldn't
+      //   see the other tiles. We do it in the listener now.
+  
+      function onPointerDown(e) {
+        // v3.10.50: Press-during-momentum now COASTS to a "future
+        // position" instead of snapping to the press position.
+        // If there's in-flight release momentum, we DON'T cancel
+        // the RAF — we let it keep running, but flag it as
+        // "press decay" so momentumLoop uses PRESS_DECAY_FRICTION
+        // (slower decay) for a more pronounced coast. The drag
+        // will pick up from wherever the carousel is at that
+        // moment. If the user never drags (just taps), the coast
+        // continues until the momentum naturally decays, and the
+        // carousel stops at the "future position" — the place
+        // it would have reached if the user hadn't pressed.
+        //
+        // The snap-back fix from v3.10.49 is still intact for the
+        // case where the user actually DRAGS: pointermove cancels
+        // the press decay (see below) and zeroes the velocity, so
+        // the drag starts clean. The flag distinguishes "tap during
+        // momentum" (let it coast) from "drag during momentum"
+        // (cancel and take over).
+        if (momentumRAF !== null) {
+          inPressDecay = true;
+          // DON'T cancel momentumRAF, DON'T zero momentumVelocity.
+          // The RAF is still updating phase + currentPhase each
+          // frame, and momentumLoop will check inPressDecay to
+          // apply the slower friction.
+        } else {
+          inPressDecay = false;
+      }
+  
+        // Capture press position in the hero's LOCAL coordinate
+        // system. This is the fix for the v3.10.46 coordinate-
+        // mismatch bug: e.offsetX would be relative to whatever
+        // child element the pointer was over (an <image>, the
+        // text, etc.), but e.clientX - rect.left is always
+        // relative to the hero regardless of which child was
+        // hit-tested. Both sides of the drag-delta subtraction
+        // (pressX and the current pointerX) are in the same
+        // frame, so the math is always correct.
+        var rect = hero.getBoundingClientRect();
+        pressX = e.clientX - rect.left;
+  
+        // Snapshot the phase so the drag is relative to the
+        // press point, not absolute. (Equivalent to v3.10.45's
+        // dragStartPhase = phase in the Observer's onPress.)
         dragStartPhase = phase;
+  
+        // Reset velocity sampling for the new gesture.
         lastDragPhase = phase;
         lastDragTime = performance.now();
         velocitySamples = [];
-      }
-
-      // Same coordinate frame as the press (see onPointerDown).
-      var rect = hero.getBoundingClientRect();
-      var currentX = e.clientX - rect.left;
-      var deltaX = currentX - pressX;
-
-      var now = performance.now();
-      var newPhase = dragStartPhase + deltaX * DRAG_SENSITIVITY / 1000;
-
-      // Sample instant velocity (phase per ms) for the release-
-      // momentum calculation in onPointerUp. We track the last
-      // VELOCITY_SAMPLE_COUNT samples and average them on
-      // release — averaging smooths out jitter from individual
-      // pointermove events (touch sensor noise, mouse
-      // acceleration curves, etc.).
-      var dt = now - lastDragTime;
-      if (dt > 0) {
-        var instantVelocity = (newPhase - lastDragPhase) / dt;
-        velocitySamples.push(instantVelocity);
-        if (velocitySamples.length > VELOCITY_SAMPLE_COUNT) {
-          velocitySamples.shift();
-        }
-      }
-      lastDragPhase = newPhase;
-      lastDragTime = now;
-
-      // Only update phase here — NOT currentPhase. The lerp in
-      // tick() catches currentPhase up to phase over 1-3 frames,
-      // which is what filters the touch-sensor noise on every
-      // pointermove. Bypassing the lerp (setting currentPhase
-      // directly here) was tried in v3.10.39 and reintroduced
-      // stutter on fast drags — see the v3.10.42 rollback note.
-      phase = newPhase;
-
-      e.preventDefault();
+  
+        isDragging = true;
+        isUserPressing = true;
+  
+        // Keep move events flowing even if pointer leaves the hero.
+        try { hero.setPointerCapture(e.pointerId); } catch (err) {}
+  
+        // Stop the browser from doing its own thing (page scroll on
+        // mobile, text selection on desktop).
+        e.preventDefault();
     }
-
-    function onPointerUp(e) {
-      // If we're not in a drag (e.g., a stray pointerup from a
-      // click that started before the carousel initialized),
-      // bail. The release-momentum + auto-scroll logic below
-      // would still run, but isDragging gates that.
-      if (!isDragging) return;
-      isDragging = false;
-      isUserPressing = false;
-
-      // Release the pointer capture so the browser can do its
-      // normal thing again.
-      try { hero.releasePointerCapture(e.pointerId); } catch (err) {}
-
-      // v3.10.50: If we're in press decay, the user just
-      // tapped (no drag happened) — the RAF is still running
-      // and will continue coasting to the "future position".
-      // Do NOT compute a release velocity (velocitySamples is
-      // empty since the user didn't move) and do NOT start a
-      // new RAF. Just bail and let the existing coast play out.
-      if (inPressDecay) {
-        return;
-      }
-
-      // Compute release velocity from samples. If the user
-      // didn't move enough to produce samples, no momentum
-      // (they just clicked without dragging).
-      if (velocitySamples.length > 0) {
-        var sum = 0;
-        for (var i = 0; i < velocitySamples.length; i++) {
-          sum += velocitySamples[i];
+  
+      function onPointerMove(e) {
+        // Only act on moves while we're actually dragging. The
+        // pointermove event fires for any pointer movement over
+        // the element, not just drags — gating on isDragging
+        // prevents accidental phase updates from a stray hover.
+        if (!isDragging) return;
+  
+        // v3.10.50: If we were in press decay (tap during
+        // momentum), the user is now actually dragging — cancel
+        // the press decay, zero the velocity, and re-anchor the
+        // drag to the CURRENT position so the math is clean.
+        // Without this re-anchor, the drag would be relative to
+        // the press position while the phase has been moving
+        // forward from the coast, which would feel laggy/wrong.
+        if (inPressDecay) {
+          if (momentumRAF !== null) {
+            cancelAnimationFrame(momentumRAF);
+            momentumRAF = null;
         }
-        var avgVelocityPerMs = sum / velocitySamples.length;
-        // Convert phase/ms → phase/frame (16.67ms at 60fps).
-        // The RAF loop scales by deltaRatio() (from
-        // gsap.ticker) for variable framerates.
-        momentumVelocity = avgVelocityPerMs * 16.67;
-        // v3.10.36 carryover: PC gets a quarter of the push,
-        // so a 10-50px mouse drag doesn't go flying across
-        // the loop. Mobile is unchanged.
-        if (!isMobile) momentumVelocity *= PC_VELOCITY_SCALE;
-
-        // Only start the momentum loop if the release velocity
-        // is meaningful. Otherwise, isMomentumActive stays
-        // false and tick()'s auto-scroll takes over
-        // immediately (after the WHEEL_IDLE_DELAY if relevant).
-        if (Math.abs(momentumVelocity) > VELOCITY_THRESHOLD) {
-          isMomentumActive = true;
-          momentumRAF = requestAnimationFrame(momentumLoop);
+          isMomentumActive = false;
+          momentumVelocity = 0;
+          inPressDecay = false;
+          // Re-anchor: the drag starts from the current phase
+          // and the current pointer position, so the delta
+          // (currentX - pressX) is zero at this moment and
+          // grows from here as the user drags.
+          var pressRect = hero.getBoundingClientRect();
+          pressX = e.clientX - pressRect.left;
+          dragStartPhase = phase;
+          lastDragPhase = phase;
+          lastDragTime = performance.now();
+          velocitySamples = [];
+      }
+  
+        // Same coordinate frame as the press (see onPointerDown).
+        var rect = hero.getBoundingClientRect();
+        var currentX = e.clientX - rect.left;
+        var deltaX = currentX - pressX;
+  
+        var now = performance.now();
+        var newPhase = dragStartPhase + deltaX * DRAG_SENSITIVITY / 1000;
+  
+        // Sample instant velocity (phase per ms) for the release-
+        // momentum calculation in onPointerUp. We track the last
+        // VELOCITY_SAMPLE_COUNT samples and average them on
+        // release — averaging smooths out jitter from individual
+        // pointermove events (touch sensor noise, mouse
+        // acceleration curves, etc.).
+        var dt = now - lastDragTime;
+        if (dt > 0) {
+          var instantVelocity = (newPhase - lastDragPhase) / dt;
+          velocitySamples.push(instantVelocity);
+          if (velocitySamples.length > VELOCITY_SAMPLE_COUNT) {
+            velocitySamples.shift();
+        }
+      }
+        lastDragPhase = newPhase;
+        lastDragTime = now;
+  
+        // Only update phase here — NOT currentPhase. The lerp in
+        // tick() catches currentPhase up to phase over 1-3 frames,
+        // which is what filters the touch-sensor noise on every
+        // pointermove. Bypassing the lerp (setting currentPhase
+        // directly here) was tried in v3.10.39 and reintroduced
+        // stutter on fast drags — see the v3.10.42 rollback note.
+        phase = newPhase;
+  
+        e.preventDefault();
+    }
+  
+      function onPointerUp(e) {
+        // If we're not in a drag (e.g., a stray pointerup from a
+        // click that started before the carousel initialized),
+        // bail. The release-momentum + auto-scroll logic below
+        // would still run, but isDragging gates that.
+        if (!isDragging) return;
+        isDragging = false;
+        isUserPressing = false;
+  
+        // Release the pointer capture so the browser can do its
+        // normal thing again.
+        try { hero.releasePointerCapture(e.pointerId); } catch (err) {}
+  
+        // v3.10.50: If we're in press decay, the user just
+        // tapped (no drag happened) — the RAF is still running
+        // and will continue coasting to the "future position".
+        // Do NOT compute a release velocity (velocitySamples is
+        // empty since the user didn't move) and do NOT start a
+        // new RAF. Just bail and let the existing coast play out.
+        if (inPressDecay) {
+          return;
+      }
+  
+        // Compute release velocity from samples. If the user
+        // didn't move enough to produce samples, no momentum
+        // (they just clicked without dragging).
+        if (velocitySamples.length > 0) {
+          var sum = 0;
+          for (var i = 0; i < velocitySamples.length; i++) {
+            sum += velocitySamples[i];
+        }
+          var avgVelocityPerMs = sum / velocitySamples.length;
+          // Convert phase/ms → phase/frame (16.67ms at 60fps).
+          // The RAF loop scales by deltaRatio() (from
+          // gsap.ticker) for variable framerates.
+          momentumVelocity = avgVelocityPerMs * 16.67;
+          // v3.10.36 carryover: PC gets a quarter of the push,
+          // so a 10-50px mouse drag doesn't go flying across
+          // the loop. Mobile is unchanged.
+          if (!isMobile) momentumVelocity *= PC_VELOCITY_SCALE;
+  
+          // Only start the momentum loop if the release velocity
+          // is meaningful. Otherwise, isMomentumActive stays
+          // false and tick()'s auto-scroll takes over
+          // immediately (after the WHEEL_IDLE_DELAY if relevant).
+          if (Math.abs(momentumVelocity) > VELOCITY_THRESHOLD) {
+            isMomentumActive = true;
+            momentumRAF = requestAnimationFrame(momentumLoop);
         }
       }
     }
-
-    hero.addEventListener('pointerdown',   onPointerDown);
-    hero.addEventListener('pointermove',   onPointerMove);
-    hero.addEventListener('pointerup',     onPointerUp);
-    hero.addEventListener('pointercancel', onPointerUp);
-    // pointerleave is NOT a cancel — the user might just be
-    // moving the pointer off the hero briefly. With
-    // setPointerCapture we keep getting pointermove events
-    // even outside the hero, so we don't need pointerleave
-    // to do anything special.
-
-    // === Resize: re-check the mobile breakpoint ===
-    // If the user resizes from desktop down to mobile (or vice versa),
-    // the carousel state needs to be re-evaluated. On resize to mobile,
-    // we don't actually stop the ticker (would require more plumbing)
-    // — but the SVG is hidden via CSS so the user sees the static
-    // background, not the carousel. The state will be correct on
-    // next page load.
+  
+      hero.addEventListener('pointerdown',   onPointerDown);
+      hero.addEventListener('pointermove',   onPointerMove);
+      hero.addEventListener('pointerup',     onPointerUp);
+      hero.addEventListener('pointercancel', onPointerUp);
+      // pointerleave is NOT a cancel — the user might just be
+      // moving the pointer off the hero briefly. With
+      // setPointerCapture we keep getting pointermove events
+      // even outside the hero, so we don't need pointerleave
+      // to do anything special.
+  
+      // === Resize: re-check the mobile breakpoint ===
+      // If the user resizes from desktop down to mobile (or vice versa),
+      // the carousel state needs to be re-evaluated. On resize to mobile,
+      // we don't actually stop the ticker (would require more plumbing)
+      // — but the SVG is hidden via CSS so the user sees the static
+      // background, not the carousel. The state will be correct on
+      // next page load.
+    });
   }
 
   function boot() {
