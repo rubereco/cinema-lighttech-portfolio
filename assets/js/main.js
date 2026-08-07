@@ -217,15 +217,12 @@ function setupYearStamp() {
   setupSectionChrome();
 
   // Render the poster wall (work.json × films.json) after data is ready.
-  POSTER_WALL.render();
+  // v3.14.37: setupMarquee() must run AFTER render() completes,
+  // because render() is async (loads data → writes to DOM). If we
+  // called setupMarquee() synchronously, it would see 0 tiles and
+  // bail. Chaining to the promise guarantees the tiles exist.
+  POSTER_WALL.render().then(() => POSTER_WALL.setupMarquee());
   POSTER_WALL.setupClick();
-
-  // v3.14.37: wrap the rendered tiles in a duplicated track and
-  // start the perpetual carousel animation. The CSS handles the
-  // continuous scroll; the animation is paused on hover/focus
-  // so the user can inspect a poster or click it without it
-  // sliding out from under their cursor.
-  POSTER_WALL.setupMarquee();
 
   // Film detail modal — loads films.json + people.json, listens for
   // tarek:film-open events from the poster wall, handles deep links.
@@ -427,11 +424,14 @@ const POSTER_WALL = (() => {
 
   return {
     loadData,
-    render: () => { loadData().then(renderFromState); },
+    // v3.14.37: render() now returns the promise so callers can
+    // chain setupMarquee() AFTER the tiles are in the DOM.
+    // Before this, setupMarquee() was called synchronously
+    // after render() — but render() is async (loads data first),
+    // so setupMarquee() saw 0 tiles and bailed, leaving the
+    // wall as raw <li>s that stacked as block elements.
+    render: () => loadData().then(renderFromState),
     setupClick,
-    // v3.14.37: expose setupMarquee so the IIFE init can call it
-    // after render. No start/stop — the CSS animation runs
-    // forever, paused on hover.
     setupMarquee: setupMarquee
   };
 })();
