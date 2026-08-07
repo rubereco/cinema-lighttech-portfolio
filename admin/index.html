@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Content Manager · Recalone</title>
+  <title>Gestor de Contenido · Recalone</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b0b0d'/%3E%3Ctext x='50' y='68' font-family='sans-serif' font-size='60' font-weight='700' fill='%23E8A33D' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E" />
   <style>
     /* v3.14.4: !important on body bg so Decap's CSS can't
@@ -82,16 +82,16 @@
     a clear error message instead of a silent dark page.
   -->
   <div class="boot" id="boot">
-    <p class="boot__title">Loading content manager…</p>
-    <p class="boot__progress" id="boot-status">Loading Decap CMS from jsDelivr</p>
+    <p class="boot__title">Cargando gestor de contenido…</p>
+    <p class="boot__progress" id="boot-status">Cargando Decap CMS desde jsDelivr</p>
   </div>
 
   <script>
     // Show the loading state immediately, then track Decap's progress.
     window.addEventListener("error", function (event) {
       showError(
-        "Page script error",
-        (event.error && event.error.stack) || event.message || "Unknown error"
+        "Error de script en la página",
+        (event.error && event.error.stack) || event.message || "Error desconocido"
       );
     });
 
@@ -109,11 +109,11 @@
           '<pre>' + escapeHtml(String(details)) + '</pre>' +
         '</div>' +
         '<p class="boot__hint">' +
-          'Common causes: <br>' +
-          '• Invalid <code>config.yml</code> (check browser console for parse errors) <br>' +
-          '• CDN blocked (try a different network) <br>' +
-          '• <code>base_url</code> in config.yml doesn\'t match the deployed Worker URL <br>' +
-          'Open the browser DevTools (F12) → Console tab for the full error.' +
+          'Causas comunes: <br>' +
+          '• <code>config.yml</code> inválido (revisa la consola del navegador para errores de parseo) <br>' +
+          '• CDN bloqueada (prueba con otra red) <br>' +
+          '• <code>base_url</code> en config.yml no coincide con la URL del Worker desplegado <br>' +
+          'Abre las DevTools del navegador (F12) → pestaña Console para ver el error completo.' +
         '</p>';
     }
 
@@ -132,7 +132,7 @@
         script.src = url;
         script.async = false;
         script.onload = function () { resolve(url); };
-        script.onerror = function () { reject(new Error("Failed to load: " + url)); };
+        script.onerror = function () { reject(new Error("Error al cargar: " + url)); };
         document.head.appendChild(script);
       });
     }
@@ -140,7 +140,7 @@
     (async function () {
       // Make sure unhandled errors hit our error UI.
       window.addEventListener("unhandledrejection", function (event) {
-        showError("Unhandled error", (event.reason && event.reason.stack) || event.reason);
+        showError("Error no controlado", (event.reason && event.reason.stack) || event.reason);
       });
 
       // v3.14.3: 3.7.4 was never published (Decap jumped 3.7.2 → 3.8.0
@@ -155,15 +155,15 @@
 
       for (var i = 0; i < sources.length; i++) {
         try {
-          setStatus("Loading Decap CMS (try " + (i + 1) + "/" + sources.length + ")…");
+          setStatus("Cargando Decap CMS (intento " + (i + 1) + "/" + sources.length + ")…");
           await loadDecap(sources[i]);
-          setStatus("Decap loaded, initializing editor…");
+          setStatus("Decap cargado, inicializando editor…");
           break;
         } catch (err) {
           if (i === sources.length - 1) {
             showError(
-              "Could not load Decap CMS",
-              "Tried both CDNs and both failed:\n" +
+              "No se pudo cargar Decap CMS",
+              "Se intentaron ambas CDN y ambas fallaron:\n" +
                 sources.join("\n") +
                 "\n\nCheck your network connection, or open the browser DevTools (F12) → Network tab to see what was blocked."
             );
@@ -176,7 +176,7 @@
       var tries = 0;
       function waitForCMS() {
         if (window.CMS) {
-          setStatus("Editor ready");
+          setStatus("Editor listo");
           // v3.14.4: stop trying to detect Decap's specific DOM
           // selectors (they change between Decap versions and we
           // were leaving the boot screen stuck on top of an
@@ -193,11 +193,11 @@
           setTimeout(function () {
             if (document.getElementById("boot")) {
               showError(
-                "Decap loaded but the editor never appeared",
-                "This usually means config.yml has an error. " +
-                "Open the browser DevTools (F12) → Console tab and look for " +
-                "a yellow or red error message — it'll point at the broken " +
-                "field in config.yml."
+                "Decap cargó pero el editor nunca apareció",
+                "Esto suele significar que config.yml tiene un error. " +
+                "Abre las DevTools del navegador (F12) → pestaña Console y busca un " +
+                "mensaje de error amarillo o rojo — señalará el campo " +
+                "roto en config.yml."
               );
             }
           }, 20000);
@@ -206,9 +206,9 @@
           setTimeout(waitForCMS, 100);
         } else {
           showError(
-            "Decap loaded but CMS global is missing",
-            "The script loaded but the global `CMS` object never appeared. " +
-            "This is unusual — try a hard refresh (Ctrl+Shift+R or Cmd+Shift+R)."
+            "Decap cargó pero falta el global CMS",
+            "El script cargó pero el objeto global `CMS` nunca apareció. " +
+            "Esto es inusual — prueba con una recarga forzada (Ctrl+Shift+R o Cmd+Shift+R)."
           );
         }
       }
@@ -217,33 +217,34 @@
   </script>
 
   <!--
-    v3.14.24: stripped-down localStorage draft layer.
+    v3.14.24: capa de borradores en localStorage (versión mínima).
 
-    Tarek's feedback on v3.14.20-23: too much. Auto-save on every
-    keystroke felt like a "screenshot every second". Toasts, draft
-    counts, the orange "Publish all (N)" with the big N — all
-    unnecessary noise for a small admin. The Publish flow walked
-    drafts one-by-one and reported each; he just wanted the button
-    to work and shut up.
+    Feedback de Tarek sobre v3.14.20-23: demasiado. El autoguardado
+    en cada tecla se sentía como "una captura por segundo". Los
+    toasts, los contadores de borradores, el botón naranja
+    "Publish all (N)" con la N enorme — todo ruido innecesario
+    para un admin pequeño. El flujo de Publish recorría los
+    borradores uno a uno e informaba de cada uno; él solo quería
+    que el botón funcionara y se callara.
 
-    What it does now, in three sentences:
+    Lo que hace ahora, en tres frases:
 
-      1. Click Save -> form state is written to localStorage under
-         `decap-draft:<collection>:<entryId>`. Nothing else
-         happens. No toast, no count, no console log.
+      1. Click en Guardar -> el estado del formulario se escribe
+         en localStorage bajo `decap-draft:<colección>:<id>`. No
+         pasa nada más. Sin toast, sin contador, sin log en consola.
 
-      2. The "Publish" button next to Save walks every localStorage
-         draft, navigates to that entry, fills the form, clicks
-         Decap's real Save (which commits to the editorial workflow
-         draft branch), and removes the draft from localStorage.
-         Silent. If a save fails the draft stays so the next click
-         retries it.
+      2. El botón "Publicar" junto a Guardar recorre todos los
+         borradores de localStorage, navega a cada entrada, rellena
+         el formulario, hace click en el Guardar real de Decap (que
+         hace commit a la rama de borradores del editorial workflow)
+         y elimina el borrador de localStorage. Silencioso. Si un
+         guardado falla, el borrador se queda para reintentarlo.
 
-      3. Navigating between entries (or refreshing) restores the
-         draft into the form so work-in-progress isn't lost.
+      3. Navegar entre entradas (o refrescar) restaura el borrador
+         en el formulario para no perder el trabajo en curso.
 
-    That's it. No auto-save, no toasts, no draft count, no
-    MutationObserver, no console logs.
+    Eso es todo. Sin autoguardado, sin toasts, sin contador, sin
+    MutationObserver, sin logs en consola.
   -->
   <script>
   (function () {
@@ -301,11 +302,18 @@
     // The listener is on document (capture) so it survives
     // Decap's form re-renders. publishInProgress flag lets the
     // Publish flow click the real Save without being intercepted.
+    // v3.14.28: match both "Save" (English) and "Guardar"
+    // (Spanish, used when locale: es) so the override works
+    // regardless of Decap's UI language.
     document.addEventListener("click", function (e) {
       if (publishInProgress) return;
       var btn = e.target.closest && e.target.closest("button");
       if (!btn) return;
-      if ((btn.textContent || "").trim().indexOf("Save") !== 0) return;
+      var t = (btn.textContent || "").trim();
+      // Match the localized save button. "Save" covers English,
+      // "Guardar" covers Spanish. Both are Decap's button text
+      // for the same action.
+      if (t.indexOf("Save") !== 0 && t.indexOf("Guardar") !== 0) return;
       var c = ctx();
       if (!c) return;
       var data = readForm();
@@ -324,11 +332,14 @@
       try { writeForm(JSON.parse(raw)); } catch (_) {}
     }
 
-    // Find Decap's Save button (text starts with "Save").
+    // Find Decap's Save button (text starts with "Save" in English
+    // or "Guardar" in Spanish — the localized strings Decap uses
+    // for its commit/save action).
     function findSave() {
       var bs = document.querySelectorAll("button");
       for (var i = 0; i < bs.length; i++) {
-        if ((bs[i].textContent || "").trim().indexOf("Save") === 0) return bs[i];
+        var t = (bs[i].textContent || "").trim();
+        if (t.indexOf("Save") === 0 || t.indexOf("Guardar") === 0) return bs[i];
       }
       return null;
     }
@@ -342,7 +353,7 @@
       var btn = document.createElement("button");
       btn.id = PUBLISH_BTN_ID;
       btn.type = "button";
-      btn.textContent = "Publish";
+      btn.textContent = "Publicar";
       btn.style.cssText = "margin-left:8px;";
       btn.addEventListener("click", function (e) {
         e.preventDefault();

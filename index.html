@@ -968,6 +968,52 @@
   ]
 }
 </script>
+  <script type="application/json" id="tarek-hero">
+{
+  "items": [
+    {
+      "file": "assets/images/uploads/hero-forest.jpg",
+      "size": "big",
+      "alt": ""
+    },
+    {
+      "file": "assets/images/uploads/hero-tunnel.jpg",
+      "size": "small",
+      "alt": ""
+    },
+    {
+      "file": "assets/images/uploads/hero-main.jpg",
+      "size": "big",
+      "alt": ""
+    },
+    {
+      "file": "assets/images/uploads/hero-red-ladder.jpg",
+      "size": "small",
+      "alt": ""
+    },
+    {
+      "file": "assets/images/uploads/hero-astera-bar.jpg",
+      "size": "big",
+      "alt": ""
+    },
+    {
+      "file": "assets/images/uploads/hero-hk-cinema.jpg",
+      "size": "small",
+      "alt": ""
+    },
+    {
+      "file": "assets/images/uploads/hero-headphones-blue.jpg",
+      "size": "big",
+      "alt": ""
+    },
+    {
+      "file": "assets/images/uploads/hero-lantern-stairs.jpg",
+      "size": "small",
+      "alt": ""
+    }
+  ]
+}
+</script>
   </head>
 <body>
 
@@ -1055,25 +1101,14 @@
           <clipPath id="hc-cp1"><rect width="500" height="500" rx="22"/></clipPath>
           <clipPath id="hc-cp2"><rect width="200" height="200" rx="16"/></clipPath>
         </defs>
-        <!-- v3.5: single row, INTERLEAVED big/small for visual variety.
-             Phase order follows the DOM order, so bigs and smalls are
-             spread across the x range, not grouped by size.
-             v3.13.8: 4 bigs + 4 smalls, perfectly alternating
-             (big, small, big, small, big, small, big, small).
-             4 BIG tiles: hero-forest, EVF (second main), astera-tube,
-             headphones-blue.
-             4 SMALL tiles: tunnel, red-ladder, HK-cinema, lantern-stairs.
-             04-monitor-bar is still sidelined. -->
-        <g class="hc-row hc-all">
-          <image href="assets/images/hero-forest.jpg" data-size="big" />
-          <image href="assets/hero/carousel/01-tunnel.jpg" data-size="small" />
-          <image href="assets/hero/main.jpg" data-size="big" />
-          <image href="assets/hero/carousel/03-red-ladder.jpg" data-size="small" />
-          <image href="assets/hero/carousel/02-astera-bar.jpg" data-size="big" />
-          <image href="assets/hero/carousel/05-hk-cinema.jpg" data-size="small" />
-          <image href="assets/hero/carousel/07-headphones-blue.jpg" data-size="big" />
-          <image href="assets/hero/carousel/06-lantern-stairs.jpg" data-size="small" />
-        </g>
+        <!-- v3.14.29: tiles are injected at runtime by
+             assets/js/hero-carousel.js from the tarek-hero
+             JSON block (data/hero.json, inlined by
+             scripts/inline-content.mjs at build time).
+             Order + size are now editable from the admin
+             (/admin → Hero carrusel). The <g> stays here as
+             the insertion point; it's empty by design. -->
+        <g class="hc-row hc-all" id="hero-carousel-tiles"></g>
       </svg>
 
       <!-- Dark overlay: keeps the centered text legible against moving tiles.
@@ -1240,9 +1275,35 @@
   <div id="film-modal" class="film-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="film-modal-title">
     <div class="film-modal__backdrop" data-film-modal-close tabindex="-1"></div>
     <article class="film-modal__content" role="document">
-      <button class="film-modal__close" data-film-modal-close type="button" data-i18n-attr="aria-label:film.closeAria" aria-label="Close film details">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M18 6L6 18M6 6l12 12"/>
+      <!-- v3.14.34: Paramount+ style chrome — back arrow at top-left,
+           position indicator in the middle ("Selected Work 2 of 13"),
+           close X stays at top-right. Sits above the poster+info grid. -->
+      <header class="film-modal__chrome">
+        <button class="film-modal__back-arrow" data-film-modal-close type="button" aria-label="Back to work">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span class="film-modal__position" id="film-modal-position"></span>
+        <button class="film-modal__close" data-film-modal-close type="button" data-i18n-attr="aria-label:film.closeAria" aria-label="Close film details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- v3.14.34: prev/next arrows on the left/right edges of the
+           modal, like the Paramount+ detail view. Click to navigate
+           between films in work.json order. Hidden on the first
+           and last film (no prev on the first, no next on the last). -->
+      <button class="film-modal__nav film-modal__nav--prev" data-film-modal-prev type="button" aria-label="Previous film">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <button class="film-modal__nav film-modal__nav--next" data-film-modal-next type="button" aria-label="Next film">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 18l6-6-6-6"/>
         </svg>
       </button>
 

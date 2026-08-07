@@ -346,12 +346,13 @@ html.film-modal-open body {
   padding-right: var(--film-modal-scrollbar, 0px);
 }
 
-/* Close button — top-right, circular, glassy */
+/* Close button — top-right, circular, glassy.
+   v3.14.34: no longer absolute — sits inside .film-modal__chrome
+   (the new top bar that also holds the back arrow and the position
+   indicator). The absolute positioning was for the old layout
+   where the X was overlaid on the poster; now it's a flex item. */
 .film-modal__close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 2;
+  position: static;
   width: 40px;
   height: 40px;
   display: inline-flex;
@@ -373,6 +374,98 @@ html.film-modal-open body {
   border-color: var(--c-border-strong);
   outline: none;
 }
+
+/* v3.14.34: chrome bar at the top of the modal — back arrow (left),
+   position indicator (center, e.g. "Selected Work 2 of 13"), close X
+   (right). The X is the existing .film-modal__close; the back arrow
+   is new and styled the same. */
+.film-modal__chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--c-border);
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+.film-modal__back-arrow {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--c-border);
+  border-radius: 50%;
+  color: var(--c-fg);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  position: static;  /* override the .film-modal__close absolute */
+  flex-shrink: 0;
+}
+.film-modal__back-arrow:hover,
+.film-modal__back-arrow:focus-visible {
+  background: rgba(0, 0, 0, 0.75);
+  border-color: var(--c-border-strong);
+  outline: none;
+}
+.film-modal__back-arrow svg { width: 20px; height: 20px; }
+
+.film-modal__position {
+  flex: 1;
+  text-align: center;
+  font-size: 0.85rem;
+  color: rgba(232, 232, 232, 0.75);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+/* v3.14.34: prev/next nav buttons, one on each side of the modal.
+   Same circular glassy style as the chrome buttons. Hidden when
+   there's no prev/next film to go to. */
+.film-modal__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--c-border);
+  border-radius: 50%;
+  color: var(--c-fg);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+.film-modal__nav:hover:not(:disabled),
+.film-modal__nav:focus-visible:not(:disabled) {
+  background: rgba(0, 0, 0, 0.85);
+  border-color: var(--c-border-strong);
+  outline: none;
+  transform: translateY(-50%) scale(1.05);
+}
+.film-modal__nav:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+.film-modal__nav--prev { left: -24px; }   /* half-out, peeking from the modal edge */
+.film-modal__nav--next { right: -24px; }
+@media (max-width: 700px) {
+  /* On mobile, the modal is near-fullscreen — pull the nav buttons
+     back inside the modal so they don't fall off the viewport. */
+  .film-modal__nav--prev { left: 8px; }
+  .film-modal__nav--next { right: 8px; }
+}
+.film-modal__nav svg { width: 24px; height: 24px; }
 
 .film-modal__close svg {
   width: 20px;

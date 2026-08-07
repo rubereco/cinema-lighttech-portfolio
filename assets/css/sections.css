@@ -290,10 +290,35 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: 1fr; /* mobile: 1 column */
-  gap: max(4px, 0.4vw); /* tiny gap by default */
+  /* v3.14.33: mobile is now a horizontal snap-scroll row
+     instead of a vertical 1-col grid. With 13+ films the
+     vertical layout became a "scrolling simulator" — every
+     film was a full-viewport-tall poster and the user had
+     to scroll the WHOLE page through all of them, no way
+     to skip ahead. Now the wall is one viewport-wide row
+     that swipes horizontally with native scroll-snap, so
+     each swipe lands cleanly on a poster and the section
+     itself stays compact regardless of film count. Adding
+     20 more films = more swipes, not more vertical scroll.
+
+     Desktop/tablet (>= 560px) override below to go back
+     to a 3-col grid — on larger screens you can see 6–9
+     posters at once, so horizontal scroll would be a
+     step backwards. */
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: max(0.9rem, 2.5vw);
+  -webkit-overflow-scrolling: touch; /* momentum on iOS */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/old Edge */
+  padding-left: max(0.9rem, 2.5vw);  /* first poster not flush left */
+  padding-right: max(0.9rem, 2.5vw); /* last poster not flush right */
+  gap: max(4px, 0.4vw);
 }
+/* Hide the scrollbar in webkit (Chrome, Safari, modern Edge). */
+.poster-wall::-webkit-scrollbar { display: none; }
 
 .poster-wall > li {
   margin: 0;
@@ -301,6 +326,16 @@
   position: relative;
   overflow: hidden;
   background: var(--c-surface); /* placeholder color until the image loads */
+  /* v3.14.33: each tile is a fixed width and snaps to the
+     start of the row when scrolling. flex: 0 0 auto prevents
+     the tiles from shrinking or growing to fill the row.
+     width is ~65% of the viewport (capped at 260px) so the
+     user always sees a sliver of the next poster, which is
+     the visual cue that more content is to the right.
+     Desktop/tablet override below resets width: auto. */
+  flex: 0 0 auto;
+  width: min(65vw, 260px);
+  scroll-snap-align: start;
 }
 
 .poster-link {
@@ -477,10 +512,19 @@
   /* .hero-cta desktop override removed in v3.10.14 — the buttons
      were deleted from index.html. */
 
-  /* Tablet — 3 columns */
+  /* Tablet — 3 columns.
+     v3.14.33: explicitly reset display/padding/scroll-snap
+     to undo the mobile horizontal-scroll styles above. */
   .poster-wall {
+    display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: max(6px, 0.3vw);
+    overflow: visible;
+    padding: 0;
+    scroll-snap-type: none;
+  }
+  .poster-wall > li {
+    width: auto;
   }
 
   /* Desktop — 3 columns (10 films = 3×4 grid, last row has 1 cell — bigger portraits) */

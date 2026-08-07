@@ -378,7 +378,8 @@ const FILM_MODAL = (() => {
   const BLOCKS = [
     { src: "data/films.json",  inline: "tarek-films"  },
     { src: "data/people.json", inline: "tarek-people" },
-    { src: "data/jobs.json",   inline: "tarek-jobs"   }
+    { src: "data/jobs.json",   inline: "tarek-jobs"   },
+    { src: "data/work.json",   inline: "tarek-work"   }  // v3.14.34: ordered list for prev/next
   ];
 
   function readInline(id) {
@@ -404,9 +405,14 @@ const FILM_MODAL = (() => {
   let peopleById = null;
   let jobsById = null;
   let modal = null;
+  // v3.14.34: ordered list of film ids that have a poster (mirrors
+  // the work section's display order). Powers the prev/next buttons
+  // and the "2 of 13" position indicator. Built once after data loads.
+  let orderedFilmIds = [];
+  let currentIndex = -1;
 
   async function loadData() {
-    const [films, people, jobs] = await Promise.all(BLOCKS.map(loadBlock));
+    const [films, people, jobs, work] = await Promise.all(BLOCKS.map(loadBlock));
     if (!films || !people) return false;
     filmsById = {};
     for (const f of (films.films || [])) filmsById[f.id] = f;
@@ -414,6 +420,18 @@ const FILM_MODAL = (() => {
     for (const p of (people.people || [])) peopleById[p.id] = p;
     jobsById = {};
     for (const j of (jobs?.jobs || [])) jobsById[j.id] = j;
+
+    // v3.14.34: build the ordered list from work.json rows, skipping
+    // films without a poster (matches the poster wall's filter — the
+    // user shouldn't be able to navigate to a film they can't see).
+    orderedFilmIds = [];
+    if (work && Array.isArray(work.rows)) {
+      for (const row of work.rows) {
+        if (!row || !row.filmId) continue;
+        const film = filmsById[row.filmId];
+        if (film && film.poster) orderedFilmIds.push(film.id);
+      }
+    }
     return true;
   }
 
@@ -548,6 +566,12 @@ const FILM_MODAL = (() => {
     modal.setAttribute("aria-hidden", "false");
     document.documentElement.classList.add("film-modal-open");
 
+    // v3.14.34: track which film is open, update the position
+    // indicator + prev/next button states.
+    currentIndex = orderedFilmIds.indexOf(filmId);
+    updatePosition();
+    updateNavButtons();
+
     // Focus the close button so ESC and Tab work from the keyboard.
     const closeBtn = modal.querySelector(".film-modal__close");
     if (closeBtn) closeBtn.focus({ preventScroll: true });
@@ -557,6 +581,34 @@ const FILM_MODAL = (() => {
     if (window.location.hash !== `#film-${filmId}`) {
       window.history.pushState({ filmModal: filmId }, "", `#film-${filmId}`);
     }
+  }
+
+  // v3.14.34: "Selected Work 2 of 13" — the Paramount+ style
+  // position indicator at the top of the modal.
+  function updatePosition() {
+    const el = document.getElementById("film-modal-position");
+    if (!el) return;
+    if (currentIndex < 0 || orderedFilmIds.length === 0) {
+      el.textContent = "";
+    } else {
+      el.textContent = "Selected Work " + (currentIndex + 1) + " of " + orderedFilmIds.length;
+    }
+  }
+
+  // v3.14.34: enable/disable prev/next buttons based on position.
+  // First film: no prev. Last film: no next. Middle: both.
+  function updateNavButtons() {
+    const prev = modal?.querySelector("[data-film-modal-prev]");
+    const next = modal?.querySelector("[data-film-modal-next]");
+    if (prev) prev.disabled = currentIndex <= 0;
+    if (next) next.disabled = currentIndex < 0 || currentIndex >= orderedFilmIds.length - 1;
+  }
+
+  function navigate(delta) {
+    if (currentIndex < 0) return;
+    const target = currentIndex + delta;
+    if (target < 0 || target >= orderedFilmIds.length) return;
+    open(orderedFilmIds[target]);
   }
 
   function close() {
@@ -597,14 +649,33 @@ const FILM_MODAL = (() => {
       if (closer) {
         ev.preventDefault();
         close();
+        return;
+      }
+      // v3.14.34: prev/next nav
+      if (ev.target.closest("[data-film-modal-prev]")) {
+        ev.preventDefault();
+        navigate(-1);
+        return;
+      }
+      if (ev.target.closest("[data-film-modal-next]")) {
+        ev.preventDefault();
+        navigate(+1);
+        return;
       }
     });
 
-    // ESC closes
+    // Keyboard: ESC closes, ←/→ navigate between films
     document.addEventListener("keydown", (ev) => {
-      if (ev.key === "Escape" && modal.classList.contains("film-modal--open")) {
+      if (!modal.classList.contains("film-modal--open")) return;
+      if (ev.key === "Escape") {
         ev.preventDefault();
         close();
+      } else if (ev.key === "ArrowLeft") {
+        ev.preventDefault();
+        navigate(-1);
+      } else if (ev.key === "ArrowRight") {
+        ev.preventDefault();
+        navigate(+1);
       }
     });
 

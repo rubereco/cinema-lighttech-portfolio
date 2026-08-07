@@ -1,11 +1,11 @@
 # ════════════════════════════════════════════════════════════════════════
-# Decap CMS config for Tarek Recolons portfolio
+# Configuración de Decap CMS para el portfolio de Tarek Recolons
 # ════════════════════════════════════════════════════════════════════════
 #
-# This file controls what the admin panel at /admin can edit. The
-# schema is intentionally small for Phase 1: films, work-order,
-# people, companies, translations. Site-wide config (brand colors,
-# themes, etc.) stays as code for now.
+# Este archivo controla lo que se puede editar desde el panel de admin en /admin. El
+# esquema es pequeño a propósito para la Fase 1: películas, orden de trabajo,
+# personas, empresas, traducciones. La configuración global del sitio (colores de marca,
+# temas, etc.) se queda como código por ahora.
 #
 # Auth:
 #   backend: github  — commits to this repo
@@ -43,7 +43,14 @@ backend:
   open_authoring: false
   squash_merges: true
 
-# Site URL — used by Decap for "Preview" buttons.
+# v3.14.28: locale: es makes Decap's built-in UI
+# strings come up in Spanish (Save → Guardar, Delete → Eliminar,
+# View Live → Ver en vivo, workflow labels, etc.). The schema
+# labels below are translated by hand because Decap's i18n
+# only covers built-in strings, not user-defined field labels.
+locale: es
+
+# URL del sitio — la usa Decap para los botones de "Vista previa".
 site_url: https://recalone.com
 display_url: https://recalone.com
 logo_url: /assets/images/og-image.svg
@@ -97,9 +104,9 @@ collections:
   #    step (scripts/build.js) regenerates the legacy data/films.json
   #    aggregate that the production site reads.
   - name: "films"
-    label: "Films"
-    label_singular: "Film"
-    description: "Canonical film records (title, year, role, type, credits)."
+    label: "Películas"
+    label_singular: "Película"
+    description: "Registros canónicos de películas (título, año, rol, tipo, créditos)."
     folder: "data/films"
     extension: "json"
     format: "json"
@@ -107,9 +114,9 @@ collections:
     delete: true
     slug: "{{id}}"
     fields:
-      - { name: "id",    label: "ID (kebab-case-title-year)", widget: "string", hint: "e.g. els-mals-noms-2025" }
-      - { name: "title", label: "Title",   widget: "string" }
-      - { name: "year",  label: "Year",    widget: "number", value_type: "int", min: 1950, max: 2100 }
+      - { name: "id",    label: "ID (kebab-case-título-año)", widget: "string", hint: "ej. els-mals-noms-2025" }
+      - { name: "title", label: "Título",  widget: "string" }
+      - { name: "year",  label: "Año",    widget: "number", value_type: "int", min: 1950, max: 2100 }
       # v3.14.25: image widget. The field already exists in 10 of
       # 12 film data files and is read by main.js for the
       # homepage poster wall and film modal. It just wasn't in
@@ -123,23 +130,23 @@ collections:
       # assets/images/uploads/<id>.jpg (consolidated into the
       # single media folder).
       - name: "poster"
-        label: "Poster"
+        label: "Póster"
         widget: "image"
         required: false
         allow_external_urls: false
-        hint: "Click to browse the media library. Existing posters live in assets/images/uploads/."
-      - { name: "role",  label: "Tarek's role on this film", widget: "string", hint: "e.g. Gaffer, Best Boy Electric, Electric" }
+        hint: "Haz clic para explorar la biblioteca de medios. Los pósteres existentes están en assets/images/uploads/."
+      - { name: "role",  label: "Rol de Tarek en esta película", widget: "string", hint: "ej. Gaffer, Best Boy Electric, Eléctrico" }
       - name: "type"
-        label: "Type"
+        label: "Tipo"
         widget: "select"
         options:
-          - { label: "Feature (Largometraje)", value: "Largometraje" }
-          - { label: "TV Series (Serie TV)",    value: "Serie TV" }
-          - { label: "Short (Cortometraje)",    value: "Cortometraje" }
-          - { label: "Commercial",              value: "Comercial" }
-          - { label: "Other",                   value: "Otro" }
+          - { label: "Largometraje", value: "Largometraje" }
+          - { label: "Serie TV",              value: "Serie TV" }
+          - { label: "Cortometraje",          value: "Cortometraje" }
+          - { label: "Comercial",            value: "Comercial" }
+          - { label: "Otro",                 value: "Otro" }
       - name: "people"
-        label: "People on this film"
+        label: "Personas en esta película"
         widget: "list"
         # v3.14.18: credits.people now references the Jobs
         # collection (data/jobs/) by jobId — a normalized
@@ -151,27 +158,27 @@ collections:
         summary: "{{fields.jobId}} — {{fields.personId}}"
         fields:
           - name: "personId"
-            label: "Person"
+            label: "Persona"
             widget: "relation"
             collection: "people"
             searchFields: ["name"]
             valueField: "id"
             displayFields: ["name"]
           - name: "jobId"
-            label: "Job / role on this film"
+            label: "Trabajo / rol en esta película"
             widget: "relation"
             collection: "jobs"
             searchFields: ["name.en", "name.es", "id"]
             valueField: "id"
             displayFields: ["name.en", "category"]
           - name: "description"
-            label: "Description (per credit, optional)"
+            label: "Descripción (por crédito, opcional)"
             widget: "object"
             collapsed: true
             required: false
             fields:
-              - { name: "en", label: "English", widget: "text", required: false }
-              - { name: "es", label: "Spanish", widget: "text", required: false }
+              - { name: "en", label: "Inglés",  widget: "text", required: false }
+              - { name: "es", label: "Español", widget: "text", required: false }
 
   # 2) Jobs — the catalog of possible roles. One file per job in
   #    data/jobs/<id>.json. v3.14.18: new normalized table so the
@@ -179,9 +186,9 @@ collections:
   #    role on a credit references a job here. Adding a new role
   #    is just adding a file here — no schema change.
   - name: "jobs"
-    label: "Jobs / roles"
-    label_singular: "Job"
-    description: "Catalog of roles. Each film credit references one of these by id."
+    label: "Trabajos / roles"
+    label_singular: "Trabajo"
+    description: "Catálogo de roles. Cada crédito de película referencia uno de estos por id."
     folder: "data/jobs"
     extension: "json"
     format: "json"
@@ -189,44 +196,44 @@ collections:
     delete: true
     slug: "{{id}}"
     fields:
-      - { name: "id", label: "ID (kebab-case)", widget: "string", hint: "e.g. gaffer, dop, sparks" }
+      - { name: "id", label: "ID (kebab-case)", widget: "string", hint: "ej. gaffer, dop, sparks" }
       - name: "name"
-        label: "Name (i18n)"
+        label: "Nombre (i18n)"
         widget: "object"
         fields:
-          - { name: "en", label: "English", widget: "string" }
-          - { name: "es", label: "Spanish", widget: "string" }
+          - { name: "en", label: "Inglés",  widget: "string" }
+          - { name: "es", label: "Español", widget: "string" }
       - name: "category"
-        label: "Department category"
+        label: "Categoría de departamento"
         widget: "select"
         options:
-          - { label: "Direction",       value: "direction" }
-          - { label: "Cinematography",  value: "cinematography" }
-          - { label: "Lighting",        value: "lighting" }
-          - { label: "Sound",           value: "sound" }
-          - { label: "Production",      value: "production" }
+          - { label: "Dirección",       value: "direction" }
+          - { label: "Cinematografía",  value: "cinematography" }
+          - { label: "Iluminación",     value: "lighting" }
+          - { label: "Sonido",          value: "sound" }
+          - { label: "Producción",      value: "production" }
           - { label: "Other",           value: "other" }
-        hint: "Drives which section the job (and any person partnering in it) shows up in on the partners page. A 'gaffer' is lighting, a 'dop' is cinematography, etc."
+        hint: "Determina en qué sección aparece el trabajo (y cualquier persona que colabore en él) en la página de colaboradores. Un 'gaffer' es iluminación, un 'dop' es cinematografía, etc."
 
   # 3) Work — the ordered list of films shown on the homepage. Each
   #    row references a film by id. Reorder via drag-and-drop in the UI.
   - name: "work"
-    label: "Work order"
-    label_singular: "Work row"
-    description: "Ordered list of films shown in the homepage credits table."
+    label: "Orden de trabajo"
+    label_singular: "Fila de trabajo"
+    description: "Lista ordenada de películas mostradas en la tabla de créditos de la página principal."
     files:
       - name: "work-data"
-        label: "Work rows"
+        label: "Filas de trabajo"
         file: "data/work.json"
         format: "json"
         fields:
           - name: "rows"
-            label: "Films in display order"
+            label: "Películas en orden de visualización"
             widget: "list"
             summary: "→ {{fields.filmId}}"
             fields:
               - name: "filmId"
-                label: "Film"
+                label: "Película"
                 # v3.14.13: relation widget so the user picks
                 # from a searchable dropdown of all films in the
                 # Films collection. Search by title, year, or id;
@@ -244,9 +251,9 @@ collections:
   #    v3.14.16: folder-based collection. See films comment for the
   #    rationale. One file per person in data/people/<id>.json.
   - name: "people"
-    label: "People"
-    label_singular: "Person"
-    description: "Directors, DPs, gaffers, electrics, and partner collaborators."
+    label: "Personas"
+    label_singular: "Persona"
+    description: "Directores, DPs, gaffers, eléctricos y colaboradores habituales."
     folder: "data/people"
     extension: "json"
     format: "json"
@@ -254,8 +261,8 @@ collections:
     delete: true
     slug: "{{id}}"
     fields:
-      - { name: "id",   label: "ID (kebab-case)",  widget: "string", hint: "e.g. juli-carne-martorell" }
-      - { name: "name", label: "Name",              widget: "string" }
+      - { name: "id",   label: "ID (kebab-case)",  widget: "string", hint: "ej. juli-carne-martorell" }
+      - { name: "name", label: "Nombre",            widget: "string" }
       # v3.14.18: stripped the 'kind' and 'relationship' and 'works'
       # fields. A person is just a collaborator — the role they
       # played on a specific film lives on that film's credit (as
@@ -264,33 +271,33 @@ collections:
       # RELATIONSHIP (not a role) listing which jobs this person
       # partners with Tarek in for the partners page.
       - name: "partnership"
-        label: "Partnership (optional — only set for regular collaborators)"
+        label: "Colaboración (opcional — solo para colaboradores habituales)"
         widget: "object"
         collapsed: true
         required: false
-        hint: "Leave empty for one-off film credits. Set this to make the person appear on the partners page in the section(s) for their jobId(s)."
+        hint: "Déjalo vacío para créditos puntuales. Configúralo para que la persona aparezca en la página de colaboradores en la(s) sección(es) de su(s) jobId(s)."
         fields:
           - name: "jobIds"
-            label: "Jobs they partner in"
+            label: "Trabajos en los que colabora"
             widget: "list"
             field:
               name: "jobId"
-              label: "Job"
+              label: "Trabajo"
               widget: "relation"
               collection: "jobs"
               searchFields: ["name.en", "name.es", "id"]
               valueField: "id"
               displayFields: ["name.en", "category"]
-            hint: "The jobs this person regularly partners with Tarek in. A person can partner in multiple jobs (e.g. dop + director). The partners page shows them in each job's section based on its category."
-          - { name: "since",     label: "Partner since (year)", widget: "number", value_type: "int", required: false }
+            hint: "Los trabajos en los que esta persona colabora habitualmente con Tarek. Una persona puede colaborar en varios trabajos (ej. dop + director). La página de colaboradores la muestra en la sección de cada trabajo según su categoría."
+          - { name: "since",     label: "Colabora desde (año)",   widget: "number", value_type: "int", required: false }
           - name: "description"
-            label: "Partnership note (i18n, optional)"
+            label: "Nota de colaboración (i18n, opcional)"
             widget: "object"
             collapsed: true
             required: false
             fields:
-              - { name: "en", label: "English", widget: "text", required: false }
-              - { name: "es", label: "Spanish", widget: "text", required: false }
+              - { name: "en", label: "Inglés",  widget: "text", required: false }
+              - { name: "es", label: "Español", widget: "text", required: false }
       # v3.14.25: image widget instead of string. Clicking the
       # field opens the media library popup — browse / preview /
       # pick from existing portraits in assets/images/uploads/
@@ -300,54 +307,54 @@ collections:
       # assets/images/partners/ to assets/images/uploads/
       # (consolidated into the single media folder).
       - name: "portrait"
-        label: "Portrait"
+        label: "Retrato"
         widget: "image"
         required: false
         allow_external_urls: false
-        hint: "Click to browse the media library. Existing portraits live in assets/images/uploads/."
-      - { name: "imdb",      label: "IMDb id",     widget: "string", required: false }
-      - { name: "imdbUrl",   label: "IMDb URL",    widget: "string", required: false }
-      - { name: "instagram", label: "Instagram handle", widget: "string", required: false }
-      - { name: "instagramUrl", label: "Instagram URL", widget: "string", required: false }
+        hint: "Haz clic para explorar la biblioteca de medios. Los retratos existentes están en assets/images/uploads/."
+      - { name: "imdb",      label: "ID de IMDb",     widget: "string", required: false }
+      - { name: "imdbUrl",   label: "URL de IMDb",   widget: "string", required: false }
+      - { name: "instagram", label: "Usuario de Instagram", widget: "string", required: false }
+      - { name: "instagramUrl", label: "URL de Instagram",  widget: "string", required: false }
       - name: "description"
         label: "Bio (i18n)"
         widget: "object"
         collapsed: true
         required: false
-        hint: "Free-text bio. The structured portfolio (which films they worked on, in which role) is NOT here — it's derived from the film credits, no duplication."
+        hint: "Bio en texto libre. El portfolio estructurado (en qué películas trabajó, en qué rol) NO está aquí — se deriva de los créditos de las películas, sin duplicación."
         fields:
-          - { name: "en", label: "English", widget: "text", required: false }
-          - { name: "es", label: "Spanish", widget: "text", required: false }
-      - { name: "url",      label: "Website URL",     widget: "string", required: false }
-      - { name: "urlLabel", label: "URL label",       widget: "string", required: false, hint: "e.g. 'Portfolio', 'Website'" }
+          - { name: "en", label: "Inglés",  widget: "text", required: false }
+          - { name: "es", label: "Español", widget: "text", required: false }
+      - { name: "url",      label: "URL del sitio web",  widget: "string", required: false }
+      - { name: "urlLabel", label: "Etiqueta de URL",   widget: "string", required: false, hint: "ej. 'Portfolio', 'Sitio web'" }
 
   # 4) Companies — partner businesses (equipment houses, post houses,
   #    any other non-individual partner).
   - name: "companies"
-    label: "Companies"
-    label_singular: "Company"
-    description: "Equipment houses, post houses, and other partner businesses."
+    label: "Empresas"
+    label_singular: "Empresa"
+    description: "Casas de equipo, postproducción y otros negocios colaboradores."
     files:
       - name: "companies-data"
-        label: "Companies"
+        label: "Empresas"
         file: "data/companies.json"
         format: "json"
         fields:
           - name: "companies"
-            label: "Companies"
+            label: "Empresas"
             widget: "list"
             summary: "{{fields.name}} ({{fields.kind}})"
             fields:
-              - { name: "id",   label: "ID (kebab-case)", widget: "string", hint: "e.g. movie-men" }
-              - { name: "name", label: "Name",             widget: "string" }
+              - { name: "id",   label: "ID (kebab-case)", widget: "string", hint: "ej. movie-men" }
+              - { name: "name", label: "Nombre",           widget: "string" }
               - name: "kind"
-                label: "Kind"
+                label: "Tipo"
                 widget: "select"
                 options:
-                  - { label: "Equipment house", value: "equipment-house" }
-                  - { label: "Post-production", value: "post-house" }
-                  - { label: "Sound studio",    value: "sound-studio" }
-                  - { label: "Other partner",   value: "other" }
+                  - { label: "Casa de equipo",    value: "equipment-house" }
+                  - { label: "Postproducción",   value: "post-house" }
+                  - { label: "Estudio de sonido", value: "sound-studio" }
+                  - { label: "Otro colaborador", value: "other" }
               # v3.14.25: image widget so the company logo gets
               # the same media-library popup as people.portrait.
               # v3.14.27: logo files moved from
@@ -357,48 +364,48 @@ collections:
                 label: "Logo"
                 widget: "image"
                 allow_external_urls: false
-                hint: "Click to browse the media library. Existing logos live in assets/images/uploads/."
-              - { name: "logoAlt", label: "Logo alt text", widget: "string", required: false }
-              - { name: "count",   label: "Collaboration count (hidden if 0)", widget: "number", value_type: "int", default: 0, required: false }
+                hint: "Haz clic para explorar la biblioteca de medios. Los logos existentes están en assets/images/uploads/."
+              - { name: "logoAlt", label: "Texto alternativo del logo", widget: "string", required: false }
+              - { name: "count",   label: "Número de colaboraciones (oculto si es 0)", widget: "number", value_type: "int", default: 0, required: false }
               - name: "description"
-                label: "Description"
+                label: "Descripción"
                 widget: "object"
                 collapsed: true
                 required: false
                 fields:
-                  - { name: "en", label: "English", widget: "text", required: false }
-                  - { name: "es", label: "Spanish", widget: "text", required: false }
-              - { name: "url",      label: "Website URL", widget: "string", required: false }
-              - { name: "urlLabel", label: "URL label",   widget: "string", required: false }
+                  - { name: "en", label: "Inglés",  widget: "text", required: false }
+                  - { name: "es", label: "Español", widget: "text", required: false }
+              - { name: "url",      label: "URL del sitio web", widget: "string", required: false }
+              - { name: "urlLabel", label: "Etiqueta de URL",  widget: "string", required: false }
 
   # 5) Site config — single object. Brand name, contact, stats.
   - name: "site"
-    label: "Site config"
-    label_singular: "Site"
-    description: "Brand name, contact info, stats shown on the homepage."
+    label: "Configuración del sitio"
+    label_singular: "Sitio"
+    description: "Nombre de marca, información de contacto, estadísticas mostradas en la página principal."
     files:
       - name: "site-data"
-        label: "Site"
+        label: "Sitio"
         file: "data/site.json"
         format: "json"
         fields:
-          - { name: "brand", label: "Brand name", widget: "string" }
+          - { name: "brand", label: "Nombre de marca", widget: "string" }
           - name: "contact"
-            label: "Contact"
+            label: "Contacto"
             widget: "object"
             fields:
-              - { name: "email",       label: "Email",         widget: "string" }
-              - { name: "imdbId",      label: "IMDb id",       widget: "string", required: false }
-              - { name: "imdbUrl",     label: "IMDb URL",      widget: "string", required: false }
-              - { name: "instagram",   label: "Instagram handle", widget: "string", required: false }
-              - { name: "instagramUrl", label: "Instagram URL",   widget: "string", required: false }
+              - { name: "email",       label: "Email",            widget: "string" }
+              - { name: "imdbId",      label: "ID de IMDb",       widget: "string", required: false }
+              - { name: "imdbUrl",     label: "URL de IMDb",      widget: "string", required: false }
+              - { name: "instagram",   label: "Usuario de Instagram", widget: "string", required: false }
+              - { name: "instagramUrl", label: "URL de Instagram",   widget: "string", required: false }
           - name: "stats"
-            label: "Stats (shown on the About section)"
+            label: "Estadísticas (mostradas en la sección Sobre mí)"
             widget: "object"
             fields:
-              - { name: "yearsExperience", label: "Years of experience", widget: "number", value_type: "int" }
-              - { name: "featureFilms",    label: "Feature films",        widget: "number", value_type: "int" }
-              - { name: "availability",    label: "Availability",         widget: "string", hint: "e.g. 'Spain + worldwide'" }
+              - { name: "yearsExperience", label: "Años de experiencia", widget: "number", value_type: "int" }
+              - { name: "featureFilms",    label: "Largometrajes",        widget: "number", value_type: "int" }
+              - { name: "availability",    label: "Disponibilidad",         widget: "string", hint: "ej. 'España + internacional'" }
 
   # 6) Translations — DEFERRED for Phase 1. The data file is too
   #    deeply nested to expose via the `object` widget without
@@ -417,5 +424,49 @@ collections:
   #         file: "data/i18n.json"
   #         format: "json"
   #         fields:
-  #           - { name: "en", label: "English", widget: "object", fields: [ /* full nav, hero, work... schema */ ] }
-  #           - { name: "es", label: "Spanish", widget: "object", fields: [ /* same */ ] }
+  #           - { name: "en", label: "Inglés",  widget: "object", fields: [ /* esquema completo: nav, hero, work... */ ] }
+  #           - { name: "es", label: "Español", widget: "object", fields: [ /* el mismo */ ] }
+
+  # 7) Hero carousel — the images that scroll across the homepage
+  #    hero. v3.14.29: was hardcoded as <image> elements inside
+  #    the SVG in index.html; now driven by data/hero.json, editable
+  #    from this admin. The production code (assets/js/hero-carousel.js)
+  #    reads the data via the inline tarek-hero JSON block and
+  #    injects <image> elements into the SVG.
+  #
+  #    Each item is one tile: a file (image widget), a size
+  #    (big = 500×500, small = 200×200) and an optional alt text.
+  #    The list order = display order. Drag to reorder in the UI.
+  #    Add/remove tiles freely — the carousel just wraps whatever
+  #    you give it.
+  - name: "hero"
+    label: "Hero carrusel"
+    label_singular: "Imagen del hero"
+    description: "Imágenes que se desplazan por el hero de la página principal. Mezcla grandes (500×500) y pequeñas (200×200) para variedad visual."
+    files:
+      - name: "hero-data"
+        label: "Imágenes del hero"
+        file: "data/hero.json"
+        format: "json"
+        fields:
+          - name: "items"
+            label: "Imágenes"
+            widget: "list"
+            summary: "{{fields.size}} — {{fields.file}}"
+            fields:
+              - name: "file"
+                label: "Imagen"
+                widget: "image"
+                allow_external_urls: false
+                hint: "Haz clic para explorar la biblioteca de medios. Las imágenes del hero viven en assets/images/uploads/."
+              - name: "size"
+                label: "Tamaño"
+                widget: "select"
+                options:
+                  - { label: "Grande (500×500)", value: "big" }
+                  - { label: "Pequeña (200×200)", value: "small" }
+                hint: "Grande = 500×500, pequeña = 200×200. El carrusel las alterna para variedad visual — una mezcla de ambas se ve mejor que un solo tamaño."
+              - name: "alt"
+                label: "Texto alternativo (accesibilidad, opcional)"
+                widget: "string"
+                required: false
