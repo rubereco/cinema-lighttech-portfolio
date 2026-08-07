@@ -356,12 +356,13 @@
   background: var(--c-surface);
   flex: 0 0 auto;
   /* v3.14.50: BIGGER TILES. 140px was "ridiculously small
-     for a pc layout" (Tarek). 200px is a real poster-card
-     size — the same width as a CD case, which is what these
-     film posters are. On a 1200px viewport: ~5-6 visible
+     for a pc layout" (Tarek). 200px → 400px (v3.14.54,
+     "double the width") is a real poster-card size — the
+     same width as a CD case, which is what these
+     film posters are. On a 1200px viewport: ~3 visible
      (the wave scale makes side tiles smaller so they read
      as decoration, not as "missing" tiles). */
-  width: 200px;
+  width: 400px;
   transform-origin: center;
   will-change: transform;
   /* v3.14.49: scale is now set by JS (updateWave in
@@ -373,13 +374,12 @@
 .poster-link {
   display: block;
   position: relative;
-  /* v3.14.53: DOUBLE HEIGHT. Was 2/3 (200×300). Tarek
-     wanted the portraits to feel taller and more
-     "portrait-y" — 1/3 (200×600) gives a very vertical
-     frame that makes the wave feel more dramatic. The
-     poster-img inside still uses object-fit: cover, so
-     any image gets cropped to the new ratio. */
-  aspect-ratio: 1 / 3;
+  /* v3.14.54: keeping 2:3 aspect ratio. Tile width
+     doubled (200px → 400px) so the height doubles
+     proportionally to 600px. The poster-img inside
+     still uses object-fit: cover so any image gets
+     cropped to fit. */
+  aspect-ratio: 2 / 3;
   text-decoration: none;
   color: inherit;
 }

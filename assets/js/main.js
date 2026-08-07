@@ -635,11 +635,15 @@ const POSTER_WALL = (() => {
     // of the wall's transform.
     //
     //   distance 0   → t=0.0  → scale 1.10 (picked, big)
-    //   distance 100 → t=0.09 → scale 1.04
-    //   distance 200 → t=0.25 → scale 0.93
-    //   distance 300 → t=0.46 → scale 0.78
-    //   distance 400 → t=0.72 → scale 0.60
-    //   distance 500+→ t=1.0  → scale 0.45 (clamped)
+    //   distance 200 → t=0.13 → scale 1.02
+    //   distance 400 → t=0.38 → scale 0.85
+    //   distance 700+→ t=1.0  → scale 0.45 (clamped)
+    // v3.14.54: falloff range pushed 500→700 to match
+    // the doubled tile width (400px). With 500px
+    // falloff, only the immediate neighbor was clearly
+    // visible (scale ~0.60) and the next one snapped to
+    // the 0.45 floor. 700 keeps ~2 visible side tiles
+    // before the floor.
     function updateWave() {
       var viewportCenterX = window.innerWidth / 2;
       var allItems = wall.querySelectorAll(":scope > li");
@@ -648,7 +652,7 @@ const POSTER_WALL = (() => {
         var itemRect = item.getBoundingClientRect();
         var itemCenterX = (itemRect.left + itemRect.right) / 2;
         var distance = Math.abs(itemCenterX - viewportCenterX);
-        var t = Math.pow(distance / 500, 1.5);
+        var t = Math.pow(distance / 700, 1.5);
         var scale = Math.max(0.45, 1.10 - t * 0.65);
         item.style.transform = "scale(" + scale + ")";
       }
