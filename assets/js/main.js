@@ -556,10 +556,26 @@ const POSTER_WALL = (() => {
 
     // ─── Wave (coverflow scale) ───
     // For every item, compute its distance from the viewport
-    // center and apply a scale based on that distance. Items
-    // near the center are big (1.0), items far away are small
-    // (0.5). The math: a power curve so the center stays
-    // prominent and the sides drop off sharply.
+    // center and apply a scale based on that distance. The
+    // center item is the "picked" one (scale 1.1, visibly
+    // bigger than the rest). Items on either side shrink
+    // along a power curve so the drop-off is steep near
+    // the center and flat at the edges.
+    //
+    // v3.14.50: more pronounced than v3.14.49 because at
+    // 140px tiles the falloff was so steep that only the
+    // center tile was visibly different — the side tiles
+    // hit the 0.5 clamp before they were even off-screen.
+    // With 200px tiles + a wider falloff (the 500px
+    // denominator below), the wave is now visible across
+    // 3-4 tiles on each side.
+    //
+    //   distance 0   → t=0.0  → scale 1.10 (picked, big)
+    //   distance 100 → t=0.09 → scale 1.04
+    //   distance 200 → t=0.25 → scale 0.93
+    //   distance 300 → t=0.46 → scale 0.78
+    //   distance 400 → t=0.72 → scale 0.60
+    //   distance 500+→ t=1.0  → scale 0.45 (clamped)
     function updateWave() {
       var wallRect = wall.getBoundingClientRect();
       var viewportCenterX = (wallRect.left + wallRect.right) / 2;
@@ -569,13 +585,8 @@ const POSTER_WALL = (() => {
         var itemRect = item.getBoundingClientRect();
         var itemCenterX = (itemRect.left + itemRect.right) / 2;
         var distance = Math.abs(itemCenterX - viewportCenterX);
-        // Power-curve falloff: center = 1.0, edges = 0.5
-        //   distance 0   → scale 1.00
-        //   distance 100 → scale 0.84
-        //   distance 200 → scale 0.54
-        //   distance 300+→ scale 0.50 (clamped minimum)
-        var t = Math.pow(distance / 300, 1.5);
-        var scale = Math.max(0.5, 1 - t * 0.5);
+        var t = Math.pow(distance / 500, 1.5);
+        var scale = Math.max(0.45, 1.10 - t * 0.65);
         item.style.transform = "scale(" + scale + ")";
       }
     }

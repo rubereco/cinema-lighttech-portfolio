@@ -328,7 +328,13 @@
   overflow: hidden;
   background: var(--c-surface);
   flex: 0 0 auto;
-  width: 140px;
+  /* v3.14.50: BIGGER TILES. 140px was "ridiculously small
+     for a pc layout" (Tarek). 200px is a real poster-card
+     size — the same width as a CD case, which is what these
+     film posters are. On a 1200px viewport: ~5-6 visible
+     (the wave scale makes side tiles smaller so they read
+     as decoration, not as "missing" tiles). */
+  width: 200px;
   transform-origin: center;
   will-change: transform;
   /* v3.14.49: scale is now set by JS (updateWave in
