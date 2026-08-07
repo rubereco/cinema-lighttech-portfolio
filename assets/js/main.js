@@ -222,7 +222,13 @@ function setupYearStamp() {
   // called setupLoop() synchronously, it would see 0 tiles and
   // bail — no clones, no wrap, no revolver. Chaining to the
   // promise guarantees the tiles exist when setupLoop() runs.
-  POSTER_WALL.render().then(() => POSTER_WALL.setupLoop());
+  // v3.14.43: setupWave() runs after setupLoop() so it can
+  // override the initial scroll position (center A on desktop)
+  // and apply the wave/curve transform on every scroll.
+  POSTER_WALL.render().then(() => {
+    POSTER_WALL.setupLoop();
+    POSTER_WALL.setupWave();
+  });
   POSTER_WALL.setupClick();
 
   // Film detail modal — loads films.json + people.json, listens for
@@ -475,11 +481,101 @@ const POSTER_WALL = (() => {
     }, { passive: true });
   }
 
+  // v3.14.43: WAVE / CURVE layout for desktop (≥768px).
+  // Tarek: "on pc i think we'll do another style of carrousel,
+  // could we do the style were the films act as a wave? so
+  // there is only one pick thats the middle film and the
+  // others do a curve smalling themselfs when going from the
+  // center to the sides".
+  //
+  // How it works: on every scroll, calculate each tile's
+  // distance from the viewport center. Apply a transform
+  // based on that distance:
+  //   - scale: 1.0 at center, 0.5 at the edges (linear falloff)
+  //   - translateY: 0 at center, 60px at the edges
+  // The center item is the "picked" one (largest, no Y offset).
+  // Items to the sides get smaller and sink lower, creating a
+  // smooth wave/curve.
+  //
+  // On mobile (<768px), the transform is cleared so the wall
+  // is just a flat horizontal scroll (the revolver from
+  // setupLoop handles the wrap).
+  function setupWave() {
+    var wall = document.getElementById("poster-wall");
+    if (!wall) return;
+    var tiles = wall.querySelectorAll(":scope > li");
+    if (!tiles.length) return;
+
+    var desktopQuery = window.matchMedia("(min-width: 768px)");
+
+    function updateWave() {
+      if (!desktopQuery.matches) {
+        // Mobile: no transform, wall is a flat horizontal scroll.
+        for (var i = 0; i < tiles.length; i++) {
+          tiles[i].style.transform = "";
+        }
+        return;
+      }
+
+      var wallRect = wall.getBoundingClientRect();
+      var centerX = wallRect.left + wallRect.width / 2;
+
+      for (var i = 0; i < tiles.length; i++) {
+        var tile = tiles[i];
+        var tileRect = tile.getBoundingClientRect();
+        var tileCenterX = tileRect.left + tileRect.width / 2;
+        var distance = Math.abs(tileCenterX - centerX);
+
+        // Scale: 1.0 at center, 0.5 at the edges.
+        var scale = Math.max(0.5, 1 - distance * 0.0015);
+        // Y offset: 0 at center, 60px at the edges.
+        // Items "sink" as they move away from center → wave shape.
+        var translateY = Math.min(60, distance * 0.15);
+
+        tile.style.transform = "scale(" + scale + ") translateY(" + translateY + "px)";
+      }
+    }
+
+    // On desktop, start with the first real tile (A) centered
+    // in the viewport so the user sees a clean "picked" frame
+    // on load — not L_clone peeking on the left (which is the
+    // mobile default from setupLoop).
+    function centerFirstRealTile() {
+      if (!desktopQuery.matches) return;
+      var firstRealTile = null;
+      for (var i = 0; i < tiles.length; i++) {
+        if (!tiles[i].classList.contains("poster-wall__clone")) {
+          firstRealTile = tiles[i];
+          break;
+        }
+      }
+      if (!firstRealTile) return;
+
+      var tileLeft = firstRealTile.offsetLeft;
+      var tileWidth = firstRealTile.offsetWidth;
+      var wallWidth = wall.clientWidth;
+      // scrollLeft = tileLeft - (wallWidth/2) + (tileWidth/2)
+      // → the tile's center aligns with the viewport's center.
+      wall.scrollLeft = tileLeft - (wallWidth / 2) + (tileWidth / 2);
+    }
+
+    // Set the initial position BEFORE adding the scroll listener,
+    // so the first updateWave() call sees the correct position
+    // (not the peek position from setupLoop).
+    centerFirstRealTile();
+
+    wall.addEventListener("scroll", updateWave, { passive: true });
+    window.addEventListener("resize", updateWave);
+    desktopQuery.addEventListener("change", updateWave);
+    updateWave();
+  }
+
   return {
     loadData,
     render: () => loadData().then(renderFromState),
     setupClick,
-    setupLoop: setupLoop
+    setupLoop: setupLoop,
+    setupWave: setupWave
   };
 })();
 

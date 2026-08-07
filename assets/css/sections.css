@@ -494,11 +494,41 @@
   /* .hero-cta desktop override removed in v3.10.14 — the buttons
      were deleted from index.html. */
 
-  /* v3.14.39: removed the tablet/desktop 3-col grid override.
-     The wall is a simple horizontal scroll on all viewports.
-     On desktop the user sees more tiles at once (because the
-     viewport is wider and each tile is capped at 260px) but
-     they still scroll manually. */
+  /* v3.14.43: WAVE / CURVE layout for desktop (≥768px).
+     On desktop the wall becomes a curve carousel: the center
+     item is the "picked" one (scale 1, no Y offset), and
+     items to the sides get smaller and sink lower, creating
+     a wave shape. JS (setupWave) updates the transform on
+     every scroll based on each tile's distance from the
+     viewport center. scroll-snap-align: center makes the
+     tiles snap to the viewport's center so there's always
+     a clear picked item.
+
+     Mobile (<768px) keeps the flat horizontal scroll from
+     the base .poster-wall style. The transform is cleared
+     by JS for mobile, and the wall stays a simple row. */
+  @media (min-width: 768px) {
+    .poster-wall {
+      align-items: center;
+      /* Extra vertical padding so the Y-offset wave has room
+         to breathe without items getting clipped. */
+      padding-top: 50px;
+      padding-bottom: 50px;
+      /* Snap each tile to the viewport's center so there's
+         always a clean "picked" item. */
+      scroll-snap-type: x mandatory;
+    }
+    .poster-wall > li {
+      scroll-snap-align: center;
+      transform-origin: center;
+      /* Tiny transition so the wave feels smooth on scroll,
+         not jittery. 50ms is short enough that the user
+         perceives the transform as following the scroll
+         position, but long enough to smooth out frame
+         stutter. */
+      transition: transform 0.05s linear;
+    }
+  }
 
   /* Desktop — slightly larger poster title */
   @media (min-width: 1024px) {
