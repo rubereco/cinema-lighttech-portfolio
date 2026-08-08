@@ -286,9 +286,46 @@
    below the section header. The wall is the section's
    second child after .section-head; without this margin
    the tiles start immediately under the headline, which
-   feels cramped on desktop. */
+   feels cramped on desktop.
+   v3.14.58: the wall is now vertically centered in the
+   section (auto top/bottom margins, flex column on the
+   section). Tarek: "i want the images to be centered
+   and align centered, not stickying to the top." The
+   previous 48px margin pinned the wall to the top
+   under the header, leaving all the empty space at the
+   bottom. The flex-column + auto-margins approach
+   pushes the header up, the chrome down, and centers
+   the wall in the remaining space — feels balanced on
+   any viewport height. The section also gets a
+   min-height: 100vh so there's actual empty space to
+   distribute (without it, the section is just the
+   height of its content, and the auto margins resolve
+   to 0 — the carousel ends up stuck under the header
+   anyway, which is what Tarek was complaining about). */
+.section-posters {
+  display: flex;
+  flex-direction: column;
+  /* v3.14.58: min-height ensures the section is taller than
+     its content so the auto margins (below) have room to
+     actually center the carousel. The total content height
+     is roughly:
+       --section-pad-y × 2   = 96 × 2 = 192px
+       + .section-head        ≈ 60px
+       + .poster-wall         ≈ 635px (largest tile in the wave)
+       + .section-chrome      ≈ 80px
+       ────────────────────── ≈ 967px
+     min-height: 100vh alone is 900px on a 900px viewport,
+     which is LESS than the content — the section collapses
+     to content-height, auto margins resolve to 0, and the
+     carousel ends up stuck under the header (the original
+     bug). Adding +80px gives the section just enough extra
+     room to be visibly taller than the content at 900px
+     viewports, scaling up naturally on taller screens. */
+  min-height: calc(100vh + 80px);
+}
 .section-posters > .poster-wall {
-  margin-top: 48px;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 /* Extra bottom space so the carousel doesn't feel
    pressed against the next section's edge. */
@@ -361,10 +398,17 @@
      same width as a CD case, which is what these
      film posters are. On a 1200px viewport: ~3 visible
      (the wave scale makes side tiles smaller so they read
-     as decoration, not as "missing" tiles). */
+     as decoration, not as "missing" tiles).
+     v3.14.57: WIDTH is now set by JS (updateWave) per-frame
+     based on each item's distance from the viewport center.
+     The 400px here is just the baseline for the math (and
+     a fallback if JS hasn't run yet). The wave now uses
+     width changes, not transform: scale — see updateWave
+     comment for why (transform: scale leaves visual gaps
+     between tiles because the layout box stays 400px). */
   width: 400px;
   transform-origin: center;
-  will-change: transform;
+  will-change: width;
   /* v3.14.49: scale is now set by JS (updateWave in
      setupCarousel) per-frame based on each item's distance
      from the viewport center. No CSS animation — that was
