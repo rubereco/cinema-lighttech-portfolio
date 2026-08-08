@@ -449,10 +449,24 @@ const POSTER_WALL = (() => {
     var dragStartX = 0;
     var dragStartScrollX = 0;
 
+    // v3.14.57: apply the wave ONCE before computing the
+    // initial scrollX. With width-based wave, the first
+    // updateWave() changes each tile's width based on its
+    // distance from the viewport center, which changes the
+    // offsetLeft of every tile after it. The old
+    // transform: scale() didn't change the layout box, so
+    // firstOriginal.offsetLeft was always the same as the
+    // CSS default. With width-based, the offsetLeft after
+    // the wave is DIFFERENT from before it — so we have to
+    // run the wave first, THEN center the first original.
+    // Without this fix, the first original would be
+    // off-screen by ~1800px on initial load (all 10 clones
+    // before it shrinking from 400px to 180px).
+    updateWave();
     // Start the user in the MIDDLE set (the originals),
     // with the first original item (A) centered in the viewport.
     var firstOriginal = wall.querySelectorAll(":scope > li")[clonesBefore.length];
-    scrollX = -firstOriginal.offsetLeft + (wall.clientWidth / 2) - (itemWidth / 2);
+    scrollX = -firstOriginal.offsetLeft + (wall.clientWidth / 2) - (firstOriginal.offsetWidth / 2);
     targetScrollX = scrollX;
     wall.style.transform = "translateX(" + scrollX + "px)";
 
@@ -614,44 +628,34 @@ const POSTER_WALL = (() => {
 
     // ─── Wave (coverflow scale) ───
     // For every item, compute its distance from the viewport
-    // center and apply a scale based on that distance. The
-    // center item is the "picked" one (scale 1.1, visibly
-    // bigger than the rest). Items on either side shrink
-    // along a power curve so the drop-off is steep near
-    // the center and flat at the edges.
+    // center and set its WIDTH based on that distance. The
+    // center item is the "picked" one (width 440 = 1.1× the
+    // 400px baseline), and items on either side shrink along
+    // a power curve so the drop-off is steep near the center
+    // and flat at the edges.
     //
-    // v3.14.51 BUGFIX: the viewport center must be
-    // window.innerWidth / 2, NOT wall.getBoundingClientRect()
-    // center. The wall has transform: translateX(scrollX)
-    // applied, so its bounding rect is at the ORIGINAL
-    // position + scrollX. With scrollX=-2100 the wall's
-    // rect.left is at -2100 (off-screen), and the "center"
-    // comes out at -1500 — 2100px to the LEFT of the
-    // actual visible center. Every item's distance to
-    // "center" comes out > 2000px, so they all snap to the
-    // 0.45 minimum scale. The carousel goes invisible.
-    // Using window.innerWidth / 2 fixes it: that's the
-    // actual center of the visible viewport, regardless
-    // of the wall's transform.
+    // v3.14.57: dropped transform: scale, use width instead.
+    // The previous version (v3.14.55 + v3.14.56) used
+    // transform: scale(s) which shrinks the VISUAL size of a
+    // tile but leaves its LAYOUT BOX at 400px. So a tile
+    // scaled to 0.82 was visually 328px wide but still
+    // occupied 400px in the flexbox — leaving a ~36px gap
+    // on each side where the next tile didn't start until
+    // the layout-box edge. That's the visible "margin"
+    // Tarek kept seeing even with marginLeft/marginRight
+    // set to 0.
     //
-    //   distance 0   → t=0.0  → scale 1.10 (picked, big)
-    //   distance 200 → t=0.13 → scale 1.02
-    //   distance 400 → t=0.38 → scale 0.85
-    //   distance 700+→ t=1.0  → scale 0.45 (clamped)
-    // v3.14.54: falloff range pushed 500→700 to match
-    // the doubled tile width (400px). With 500px
-    // falloff, only the immediate neighbor was clearly
-    // visible (scale ~0.60) and the next one snapped to
-    // the 0.45 floor. 700 keeps ~2 visible side tiles
-    // before the floor.
+    // With width = itemWidth * scale, the layout box MATCHES
+    // the visual size, so adjacent items are flush. The
+    // .poster-link inside has aspect-ratio: 2/3, so the
+    // image keeps its 2:3 frame at every width. No
+    // transform means no need for z-index tricks or
+    // overflow: visible on the tile.
     //
-    // v3.14.56: STUCK-TOGETHER layout. Per Tarek's brief,
-    // every image touches its neighbors — no gaps anywhere.
-    // The picked (center) tile scales up and visually
-    // bleeds over its neighbors; to keep the bleed from
-    // being hidden, the bigger tile gets a higher z-index.
-    // No margins on any tile. The "card-fan" trick of
-    // pushing neighbors away with growing margins is gone.
+    //   distance 0   → t=0.0  → width 440 (picked, big)
+    //   distance 200 → t=0.13 → width 408
+    //   distance 400 → t=0.38 → width 340
+    //   distance 700+→ t=1.0  → width 180 (clamped at 0.45)
     function updateWave() {
       var viewportCenterX = window.innerWidth / 2;
       var allItems = wall.querySelectorAll(":scope > li");
@@ -662,14 +666,12 @@ const POSTER_WALL = (() => {
         var distance = Math.abs(itemCenterX - viewportCenterX);
         var t = Math.pow(distance / 700, 1.5);
         var scale = Math.max(0.45, 1.10 - t * 0.65);
-        // No margin — tiles always touch. Scale alone drives
-        // the visual size. z-index keyed off scale so the
-        // biggest (center) tile paints on top of its smaller
-        // neighbors instead of being covered by them.
-        item.style.transform = "scale(" + scale + ")";
-        item.style.zIndex = Math.round(scale * 100);
-        item.style.marginLeft = "0px";
-        item.style.marginRight = "0px";
+        // Width-based sizing — layout box matches visual size,
+        // so adjacent tiles are flush. The inner .poster-link
+        // has aspect-ratio: 2/3, so the image stays 2:3 at
+        // every width. No transform, no z-index, no margin
+        // needed.
+        item.style.width = (itemWidth * scale) + "px";
       }
     }
 
@@ -703,8 +705,8 @@ const POSTER_WALL = (() => {
       "tile width", itemWidth, "px,",
       "viewport", wall.clientWidth, "px,",
       "scrollX", scrollX, "(snap to nearest on scrollend,",
-      "highlighted tile gets growing margin so its",
-      "expansion never overlaps non-highlighted tiles)");
+      "wave is width-based — tiles are always flush,",
+      "the picked (center) tile just gets a wider box)");
 
     // v3.14.52: After initial transform, log the actual
     // visual position of the first ORIGINAL tile so we can
