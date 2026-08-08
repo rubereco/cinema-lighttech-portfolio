@@ -645,20 +645,13 @@ const POSTER_WALL = (() => {
     // the 0.45 floor. 700 keeps ~2 visible side tiles
     // before the floor.
     //
-    // v3.14.55: per-tile margin to make the carousel
-    // behave like a card-fan:
-    //   - Non-highlighted tiles (scale ≤ 1) have
-    //     margin 0 and touch each other.
-    //   - The highlighted tile (scale > 1) gets a
-    //     growing margin on each side, exactly
-    //     (scale - 1) * itemWidth / 2 — the half-width
-    //     that the scaled tile grows beyond its layout
-    //     box. This is what stops the expanded tile
-    //     from overlapping its neighbors while still
-    //     letting the non-highlighted tiles stay
-    //     touching. The layout space is 400 + 2*margin
-    //     = 400 * scale, so the scaled tile fits
-    //     exactly within its layout space.
+    // v3.14.56: STUCK-TOGETHER layout. Per Tarek's brief,
+    // every image touches its neighbors — no gaps anywhere.
+    // The picked (center) tile scales up and visually
+    // bleeds over its neighbors; to keep the bleed from
+    // being hidden, the bigger tile gets a higher z-index.
+    // No margins on any tile. The "card-fan" trick of
+    // pushing neighbors away with growing margins is gone.
     function updateWave() {
       var viewportCenterX = window.innerWidth / 2;
       var allItems = wall.querySelectorAll(":scope > li");
@@ -669,10 +662,14 @@ const POSTER_WALL = (() => {
         var distance = Math.abs(itemCenterX - viewportCenterX);
         var t = Math.pow(distance / 700, 1.5);
         var scale = Math.max(0.45, 1.10 - t * 0.65);
-        var marginPx = Math.max(0, (scale - 1) * itemWidth / 2);
+        // No margin — tiles always touch. Scale alone drives
+        // the visual size. z-index keyed off scale so the
+        // biggest (center) tile paints on top of its smaller
+        // neighbors instead of being covered by them.
         item.style.transform = "scale(" + scale + ")";
-        item.style.marginLeft = marginPx + "px";
-        item.style.marginRight = marginPx + "px";
+        item.style.zIndex = Math.round(scale * 100);
+        item.style.marginLeft = "0px";
+        item.style.marginRight = "0px";
       }
     }
 

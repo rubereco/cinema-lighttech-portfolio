@@ -352,7 +352,12 @@
   margin: 0;
   padding: 0;
   position: relative;
-  overflow: hidden;
+  /* v3.14.56: overflow: visible on the tile so the
+     scaled-up center tile can bleed ON TOP of its
+     neighbors (no margins = stuck together). The
+     actual image clip happens on .poster-link below,
+     which keeps the 2:3 frame clean. */
+  overflow: visible;
   background: var(--c-surface);
   flex: 0 0 auto;
   /* v3.14.50: BIGGER TILES. 140px was "ridiculously small
@@ -369,11 +374,22 @@
      setupCarousel) per-frame based on each item's distance
      from the viewport center. No CSS animation — that was
      unreliable cross-browser. */
+  /* v3.14.56: z-index is set inline by updateWave() so the
+     biggest (center) tile paints above its smaller
+     neighbors. Default 0 so non-scaled tiles stack
+     normally. */
+  z-index: 0;
 }
 
 .poster-link {
   display: block;
   position: relative;
+  /* v3.14.56: clip the image to the 2:3 frame here
+     instead of on the li. The li is overflow: visible
+     so its scale() can extend over neighbors; the
+     image and meta inside the link stay inside the
+     2:3 box. */
+  overflow: hidden;
   /* v3.14.54: keeping 2:3 aspect ratio. Tile width
      doubled (200px → 400px) so the height doubles
      proportionally to 600px. The poster-img inside
