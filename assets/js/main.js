@@ -798,13 +798,32 @@ const POSTER_WALL = (() => {
       // every frame, which made the wrap boundary wiggle
       // because the wave changes widths every frame.)
       var allItems = wall.querySelectorAll(":scope > li");
+      var viewportW = window.innerWidth;
       for (var i = 0; i < allItems.length; i++) {
         var item = allItems[i];
         var visualPos = item.offsetLeft + scrollX;
-        while (visualPos > totalWidth + WRAP_BUFFER) {
+        // v3.14.66x2: wrap fires at the VIEWPORT edge.
+        // The previous version used `totalWidth + 2 *
+        // window.innerWidth` as the wrap boundary — which
+        // meant the wrap fired 2880px PAST the right edge
+        // of the viewport. By the time the wrap fired, the
+        // user had been staring at empty space for ~20000px
+        // of scroll, and concluded the wall "ends". Fix:
+        // the wrap fires the moment a tile crosses the
+        // viewport edge, so new tiles appear on the left as
+        // the user scrolls right (the standard infinite-
+        // carousel conveyor belt). The tile re-enters at
+        // `visualPos - totalWidth`, which is far enough
+        // offscreen left that the teleport is invisible (it
+        // happens at the exact moment the tile leaves the
+        // right edge). This matches the hero carousel's
+        // wrap, which uses `item.offset + X_RANGE` as the
+        // boundary (right at the clone's position, not
+        // 2 viewports past it).
+        while (visualPos > viewportW) {
           visualPos -= totalWidth;
         }
-        while (visualPos < -WRAP_BUFFER) {
+        while (visualPos < -viewportW) {
           visualPos += totalWidth;
         }
         item.style.transform = "translateX(" + (visualPos - item.offsetLeft) + "px)";
