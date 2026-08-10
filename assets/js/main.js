@@ -416,7 +416,23 @@ const POSTER_WALL = (() => {
     // When they scroll far enough left/right, we jump them
     // back to the equivalent position in another set — the
     // wrap is invisible because the content is the same.
+    // v3.14.65: was 1 set of clones on each side; now 2
+    // sets on each side (clonesBefore + clonesBefore2 before
+    // the originals, clonesAfter + clonesAfter2 after).
+    // The extra sets are buffer — they give the user a full
+    // extra "set's worth" of scroll room before the wrap
+    // boundary crosses the visible area, so the user never
+    // feels like the wall is running out of content. With
+    // the wider wrap range in wrapTarget() (one viewport
+    // past the boundary), the user genuinely can scroll
+    // ~3 sets of items before the wall recycles, and
+    // the recycle happens entirely offscreen.
     var clonesBefore = originalItems.map(function (item) {
+      var c = item.cloneNode(true);
+      c.classList.add("poster-wall__clone");
+      return c;
+    });
+    var clonesBefore2 = originalItems.map(function (item) {
       var c = item.cloneNode(true);
       c.classList.add("poster-wall__clone");
       return c;
@@ -426,17 +442,33 @@ const POSTER_WALL = (() => {
       c.classList.add("poster-wall__clone");
       return c;
     });
+    var clonesAfter2 = originalItems.map(function (item) {
+      var c = item.cloneNode(true);
+      c.classList.add("poster-wall__clone");
+      return c;
+    });
+    // Outer-most first (so the wall is [..., buf2, buf1,
+    // originals, buf1, buf2, ...] reading left to right).
+    clonesBefore2.reverse().forEach(function (c) {
+      wall.insertBefore(c, wall.firstChild);
+    });
     clonesBefore.reverse().forEach(function (c) {
       wall.insertBefore(c, wall.firstChild);
     });
     clonesAfter.forEach(function (c) {
       wall.appendChild(c);
     });
+    clonesAfter2.forEach(function (c) {
+      wall.appendChild(c);
+    });
 
     var itemCount    = originalItems.length;
     var itemWidth    = originalItems[0].offsetWidth;
     var oneSetWidth  = itemCount * itemWidth;
-    var cloneSetWidth = clonesBefore.length * itemWidth;
+    // v3.14.65: 2 sets of clones on each side now, so
+    // the "clone set width" is 2 * oneSetWidth.
+    var totalClonesBefore = clonesBefore.length + clonesBefore2.length;
+    var cloneSetWidth = totalClonesBefore * itemWidth;
 
     // ─── Scroll state ───
     // scrollX = current actual position (what's rendered).
@@ -484,7 +516,7 @@ const POSTER_WALL = (() => {
     // wall.getBoundingClientRect().left + window.innerWidth/2
     // to place the first original at the actual visible
     // viewport center, where the wave is also centered.
-    var firstOriginal = wall.querySelectorAll(":scope > li")[clonesBefore.length];
+    var firstOriginal = wall.querySelectorAll(":scope > li")[totalClonesBefore];
     var wallLeft = wall.getBoundingClientRect().left;
     scrollX = (window.innerWidth / 2) - wallLeft - firstOriginal.offsetLeft - (firstOriginal.offsetWidth / 2);
     targetScrollX = scrollX;
@@ -589,22 +621,27 @@ const POSTER_WALL = (() => {
     // jump them to the equivalent position in another set.
     // This is what makes the carousel feel infinite.
     //
-    // v3.14.64: tightened the wrap range. Was
-    //   [-cloneSetWidth - oneSetWidth, cloneSetWidth]
-    // (the user could scroll ~2 full sets past the boundary
-    // before the wrap kicked in, which made the carousel
-    // feel like it "ended" before the wrap happened). Now
-    //   [-oneSetWidth, 0]
-    // so the wrap happens as soon as the user scrolls past
-    // the originals into the clones — the user never sees
-    // a "dead end" because the wall is always being
-    // recycled under their cursor.
+    // v3.14.65: widen the wrap range to ONE FULL VIEWPORT
+    // past the boundary, so the wrap happens OFFSCREEN.
+    // Was [-oneSetWidth, 0] — the boundary between clones
+    // and originals landed exactly at the viewport edge when
+    // the wrap fired, so the user saw the items "refresh"
+    // / jump as the wall was recycled right in front of them.
+    // Now [-oneSetWidth - window.innerWidth, window.innerWidth]
+    // — the user has to scroll the boundary at least one
+    // full viewport width PAST the visible edge before the
+    // wrap triggers. The wall recycles in the blind spot,
+    // and the user just keeps seeing the same content from
+    // a different "set" with no visible seam. This is the
+    // classic infinite-carousel trick used by Netflix, Apple,
+    // etc.: the boundary never crosses the visible area.
     function wrapTarget() {
-      while (targetScrollX < -oneSetWidth) {
+      var offscreen = window.innerWidth;
+      while (targetScrollX < -oneSetWidth - offscreen) {
         targetScrollX += oneSetWidth;
         scrollX += oneSetWidth;
       }
-      while (targetScrollX > 0) {
+      while (targetScrollX > offscreen) {
         targetScrollX -= oneSetWidth;
         scrollX -= oneSetWidth;
       }
@@ -730,14 +767,14 @@ const POSTER_WALL = (() => {
     // The viewport width changes on resize; the first item
     // needs to be re-centered.
     function onResize() {
-      var newItemWidth = wall.querySelectorAll(":scope > li")[clonesBefore.length].offsetWidth;
+      var newItemWidth = wall.querySelectorAll(":scope > li")[totalClonesBefore].offsetWidth;
       if (newItemWidth !== itemWidth) {
         itemWidth = newItemWidth;
         oneSetWidth = itemCount * itemWidth;
-        cloneSetWidth = clonesBefore.length * itemWidth;
+        cloneSetWidth = totalClonesBefore * itemWidth;
       }
       // Re-center the first original item
-      var firstOrig = wall.querySelectorAll(":scope > li")[clonesBefore.length];
+      var firstOrig = wall.querySelectorAll(":scope > li")[totalClonesBefore];
       var centerOffset = -firstOrig.offsetLeft + (wall.clientWidth / 2) - (itemWidth / 2);
       // Preserve the user's current position relative to the
       // center, then re-anchor.
@@ -750,21 +787,16 @@ const POSTER_WALL = (() => {
     window.addEventListener("resize", onResize);
 
     console.info("[poster-wall] carousel:",
-      itemCount, "originals +", clonesAfter.length, "clones after +",
-      clonesBefore.length, "clones before =",
-      wall.querySelectorAll(":scope > li").length, "total tiles,",
-      "tile width", itemWidth, "px,",
-      "viewport", wall.clientWidth, "px,",
-      "scrollX", scrollX, "(snap to nearest on scrollend,",
-      "wave is width-based — tiles are always flush,",
-      "the picked (center) tile just gets a wider box)");
+      itemCount, "originals +", (clonesAfter.length + clonesAfter2.length), "clones after +",
+      totalClonesBefore, "clones before =",
+      wall.querySelectorAll(":scope > li").length, "total tiles (2 buffer sets on each side, wrap offscreen)");
 
     // v3.14.52: After initial transform, log the actual
     // visual position of the first ORIGINAL tile so we can
     // see if it landed in the viewport (centered) or
     // somewhere off-screen.
     setTimeout(function () {
-      var firstOrig = wall.querySelectorAll(":scope > li")[clonesBefore.length];
+      var firstOrig = wall.querySelectorAll(":scope > li")[totalClonesBefore];
       var rect = firstOrig.getBoundingClientRect();
       var center = (rect.left + rect.right) / 2;
       var dist = Math.abs(center - window.innerWidth / 2);
