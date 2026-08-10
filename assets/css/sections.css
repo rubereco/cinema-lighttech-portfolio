@@ -324,7 +324,19 @@
   min-height: calc(100vh + 80px);
 }
 .section-posters > .poster-wall {
-  margin-top: auto;
+  /* v3.14.63: was margin-top: auto; margin-bottom: auto;
+     which vertically centered the wall in the section's
+     available space. That put a huge gap between the
+     "SELECTED WORK" header and the carousel. Tarek:
+     "the overall carousel could be moved up a little so
+     the title of the section and the carousel don't have
+     that big space in between."
+
+     Now: no top margin (wall sits right under the header
+     with normal flow), keep margin-bottom: auto so any
+     extra section space goes BELOW the wall instead of
+     splitting evenly above/below. */
+  margin-top: 0;
   margin-bottom: auto;
 }
 /* Extra bottom space so the carousel doesn't feel
