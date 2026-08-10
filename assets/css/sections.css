@@ -311,9 +311,9 @@
      is roughly:
        --section-pad-y × 2   = 96 × 2 = 192px
        + .section-head        ≈ 60px
-       + .poster-wall         ≈ 635px (largest tile in the wave)
+       + .poster-wall         = 700px (v3.14.57a: fixed)
        + .section-chrome      ≈ 80px
-       ────────────────────── ≈ 967px
+       ────────────────────── ≈ 1032px
      min-height: 100vh alone is 900px on a 900px viewport,
      which is LESS than the content — the section collapses
      to content-height, auto margins resolve to 0, and the
@@ -369,6 +369,32 @@
   -webkit-user-select: none;
   will-change: transform;
   touch-action: pan-y;
+  /* v3.14.57a: the dark box is now FIXED. The wall is
+     a 700px-tall flex container with vertically-centered
+     items, so the carousel area is always the same size
+     regardless of which tile is the "highlighted" one.
+
+     Before this, the wall's height was the tallest tile
+     in the wave (≈635-660px for the scale-1.10 center
+     tile). When the user scrolled, the wave re-evaluated
+     and different tiles could momentarily be the tallest,
+     making the section's height jiggle and the dark
+     backdrop feel dizzy. Fix: pin the wall at 700px
+     and center the items inside it.
+
+     Math: 600px (unscaled tile height) × 1.10 (peak
+     wave scale) = 660px visual height. +20px clearance
+     top + 20px clearance bottom = 700px box.
+
+     With align-items: center, each tile's 600px layout
+     box sits centered in the 700px wall (50px above,
+     50px below). The aspect-ratio 2/3 keeps the image
+     inside the tile. Shorter scaled tiles (the side
+     ones at 0.85, 0.45) also sit centered — they just
+     have more empty dark space around them, which is
+     the desired "frame the picked one" effect. */
+  height: 700px;
+  align-items: center;
 }
 .poster-wall:active {
   cursor: grabbing;
