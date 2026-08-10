@@ -465,8 +465,28 @@ const POSTER_WALL = (() => {
     updateWave();
     // Start the user in the MIDDLE set (the originals),
     // with the first original item (A) centered in the viewport.
+    //
+    // v3.14.64: use the VIEWPORT center, not the wall's center.
+    // The wall is narrower than the viewport (the section has
+    // horizontal padding to center the content), so
+    // wall.clientWidth/2 and window.innerWidth/2 are at
+    // DIFFERENT x-positions. The wave uses the viewport
+    // center (window.innerWidth/2 in updateWave), so the
+    // tile that gets scaled up to 1.10 is the one at the
+    // viewport's center — NOT the wall's center. Using
+    // wall.clientWidth/2 here placed the first original at
+    // the wall's center, which was 360px to the LEFT of
+    // the viewport center on a 1920px screen with 360px
+    // section padding. The wave then made whichever tile
+    // happened to be at the viewport center the "picked"
+    // one — which was the 3rd original (Lo Que Queda De
+    // Ti), not the 1st (Els Mals Noms). Fix: use
+    // wall.getBoundingClientRect().left + window.innerWidth/2
+    // to place the first original at the actual visible
+    // viewport center, where the wave is also centered.
     var firstOriginal = wall.querySelectorAll(":scope > li")[clonesBefore.length];
-    scrollX = -firstOriginal.offsetLeft + (wall.clientWidth / 2) - (firstOriginal.offsetWidth / 2);
+    var wallLeft = wall.getBoundingClientRect().left;
+    scrollX = (window.innerWidth / 2) - wallLeft - firstOriginal.offsetLeft - (firstOriginal.offsetWidth / 2);
     targetScrollX = scrollX;
     wall.style.transform = "translateX(" + scrollX + "px)";
 
@@ -568,12 +588,23 @@ const POSTER_WALL = (() => {
     // "in" the middle set; if they push past the boundary,
     // jump them to the equivalent position in another set.
     // This is what makes the carousel feel infinite.
+    //
+    // v3.14.64: tightened the wrap range. Was
+    //   [-cloneSetWidth - oneSetWidth, cloneSetWidth]
+    // (the user could scroll ~2 full sets past the boundary
+    // before the wrap kicked in, which made the carousel
+    // feel like it "ended" before the wrap happened). Now
+    //   [-oneSetWidth, 0]
+    // so the wrap happens as soon as the user scrolls past
+    // the originals into the clones — the user never sees
+    // a "dead end" because the wall is always being
+    // recycled under their cursor.
     function wrapTarget() {
-      while (targetScrollX < -cloneSetWidth - oneSetWidth) {
+      while (targetScrollX < -oneSetWidth) {
         targetScrollX += oneSetWidth;
         scrollX += oneSetWidth;
       }
-      while (targetScrollX > cloneSetWidth) {
+      while (targetScrollX > 0) {
         targetScrollX -= oneSetWidth;
         scrollX -= oneSetWidth;
       }
