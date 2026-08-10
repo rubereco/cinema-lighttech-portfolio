@@ -520,7 +520,10 @@ const POSTER_WALL = (() => {
     var wallLeft = wall.getBoundingClientRect().left;
     scrollX = (window.innerWidth / 2) - wallLeft - firstOriginal.offsetLeft - (firstOriginal.offsetWidth / 2);
     targetScrollX = scrollX;
-    wall.style.transform = "translateX(" + scrollX + "px)";
+    // v3.14.66: NO wall.style.transform. The wall is
+    // static; the per-tile frame loop applies the wrap
+    // via per-tile transform: translateX(). The first
+    // frame() call below will position every tile.
 
     // ─── Input handlers ───
     // v3.14.53: snapToNearest — when the user stops
@@ -552,12 +555,15 @@ const POSTER_WALL = (() => {
       // by (viewportCenterX - center). That keeps the
       // perpetual wrap consistent — the item's offsetLeft
       // is unchanged, only the wall's transform shifts.
+      //
+      // v3.14.66: no more wrapTarget() here. scrollX is
+      // allowed to grow unbounded; the per-tile wrap in
+      // frame() handles the infinite loop visually.
       var rect = allItems[bestI].getBoundingClientRect();
       var tileCenter = (rect.left + rect.right) / 2;
       var shift = viewportCenterX - tileCenter;
       if (Math.abs(shift) < 1) return; // already centered
       targetScrollX += shift;
-      wrapTarget();
       ensureAnimating();
     }
 
@@ -580,7 +586,7 @@ const POSTER_WALL = (() => {
       // movement. Trackpads send small deltas; mice send
       // bigger ones. Either way it feels natural.
       targetScrollX -= e.deltaY;
-      wrapTarget();
+      ensureAnimating();
       scheduleWheelSnap();
     }
     function onMouseDown(e) {
@@ -592,7 +598,7 @@ const POSTER_WALL = (() => {
     function onMouseMove(e) {
       if (!isDragging) return;
       targetScrollX = dragStartScrollX + (e.clientX - dragStartX);
-      wrapTarget();
+      ensureAnimating();
     }
     function onMouseUp() {
       if (!isDragging) return;
@@ -608,7 +614,7 @@ const POSTER_WALL = (() => {
     function onTouchMove(e) {
       if (!isDragging) return;
       targetScrollX = dragStartScrollX + (e.touches[0].clientX - dragStartX);
-      wrapTarget();
+      ensureAnimating();
     }
     function onTouchEnd() {
       if (!isDragging) return;
@@ -616,36 +622,44 @@ const POSTER_WALL = (() => {
       snapToNearest();
     }
 
-    // Keep targetScrollX in the perpetual range. The user is
-    // "in" the middle set; if they push past the boundary,
-    // jump them to the equivalent position in another set.
-    // This is what makes the carousel feel infinite.
+    // v3.14.66: REMOVED wrapTarget entirely.
     //
-    // v3.14.65: widen the wrap range to ONE FULL VIEWPORT
-    // past the boundary, so the wrap happens OFFSCREEN.
-    // Was [-oneSetWidth, 0] — the boundary between clones
-    // and originals landed exactly at the viewport edge when
-    // the wrap fired, so the user saw the items "refresh"
-    // / jump as the wall was recycled right in front of them.
-    // Now [-oneSetWidth - window.innerWidth, window.innerWidth]
-    // — the user has to scroll the boundary at least one
-    // full viewport width PAST the visible edge before the
-    // wrap triggers. The wall recycles in the blind spot,
-    // and the user just keeps seeing the same content from
-    // a different "set" with no visible seam. This is the
-    // classic infinite-carousel trick used by Netflix, Apple,
-    // etc.: the boundary never crosses the visible area.
-    function wrapTarget() {
-      var offscreen = window.innerWidth;
-      while (targetScrollX < -oneSetWidth - offscreen) {
-        targetScrollX += oneSetWidth;
-        scrollX += oneSetWidth;
-      }
-      while (targetScrollX > offscreen) {
-        targetScrollX -= oneSetWidth;
-        scrollX -= oneSetWidth;
-      }
-    }
+    // The wrap pattern has changed fundamentally. The track
+    // no longer translates — each tile is positioned
+    // individually with its own per-frame translateX, and
+    // each tile's position is wrapped into its own valid
+    // range via a per-tile while-loop in frame(). This is
+    // the same pattern hero-carousel.js uses, and it
+    // produces a completely seamless infinite loop because:
+    //
+    //   - scrollX grows UNBOUNDED (no snap-back to a range)
+    //   - per tile, visualPos = offsetLeft + scrollX
+    //   - per tile, while visualPos > offsetLeft + totalWidth
+    //       visualPos -= totalWidth
+    //     while visualPos < offsetLeft
+    //       visualPos += totalWidth
+    //   - the tile's transform = translateX(visualPos - offsetLeft)
+    //
+    // The wrap is per-tile, per-frame — so no single moment
+    // has the whole wall "jumping" past the user. Each tile
+    // independently slides from one end of its valid range
+    // to the other, and when it hits an edge, it just
+    // re-enters from the other edge of the same range. From
+    // the user's POV, tiles never jump — they smoothly
+    // cycle forever. The boundary between clones and
+    // originals never crosses the visible area because the
+    // wrap range is one full totalWidth wide per tile.
+    //
+    // Why this works better than track-translate + wrap:
+    //   - Track-translate moves ALL tiles by the same delta
+    //     when wrapping, so the user sees a "flash" of all
+    //     tiles shifting simultaneously.
+    //   - Per-tile wrap moves only ONE tile at a time
+    //     (when it crosses its own range boundary), and the
+    //     other tiles don't move. The user only ever sees
+    //     one tile re-entering from the other side, which
+    //     reads as "this carousel has more items" instead
+    //     of "the whole wall just teleported".
 
     wall.addEventListener("wheel", onWheel, { passive: false });
     wall.addEventListener("mousedown", onMouseDown);
@@ -658,9 +672,40 @@ const POSTER_WALL = (() => {
     window.addEventListener("mouseleave", onMouseUp);
 
     // ─── Animation loop ───
-    // Per frame: lerp scrollX toward targetScrollX, apply
-    // the transform, update each item's scale based on its
-    // distance from the viewport center.
+    // v3.14.66: completely refactored. The wall no longer
+    // moves. scrollX is the user's scroll position and
+    // grows UNBOUNDED (positive or negative). Each tile
+    // is positioned individually with its own translateX,
+    // and its visual position is wrapped into a valid
+    // range via a per-tile while-loop. This is the hero
+    // carousel's pattern (hero-carousel.js, around line
+    // 1017-1023): phase grows unbounded, displayX is
+    // wrapped per-tile, no single moment has the whole
+    // wall "jumping" past the user.
+    //
+    // Per frame:
+    //   1. Lerp scrollX toward targetScrollX (smooth
+    //      momentum on wheel/drag release).
+    //   2. updateWave() — set each tile's width based
+    //      on distance from viewport center. This changes
+    //      the tile's offsetLeft (flex layout reflow).
+    //   3. For each tile, compute visualPos =
+    //      offsetLeft + scrollX, wrap it into
+    //      [-buffer, totalWidth + buffer] (where
+    //      buffer = window.innerWidth), and set the
+    //      tile's transform: translateX(visualPos -
+    //      offsetLeft). The wall itself is NOT
+    //      translated — the tiles are. The wrap range
+    //      is WIDER than the wall by one viewport on
+    //      each side, so the wrap only fires when the
+    //      tile is offscreen (see the longer comment
+    //      below for why this matters).
+    //
+    // The wrap is per-tile, per-frame, so no tile ever
+    // "jumps". A tile smoothly slides through its valid
+    // range and seamlessly re-enters from the other edge
+    // when it crosses. From the user's POV, the carousel
+    // just goes on forever.
     function frame() {
       // Lerp: 0.15 = snappy but smooth. Lower = more momentum.
       scrollX += (targetScrollX - scrollX) * 0.15;
@@ -669,8 +714,71 @@ const POSTER_WALL = (() => {
       if (Math.abs(targetScrollX - scrollX) < 0.3) {
         scrollX = targetScrollX;
       }
-      wall.style.transform = "translateX(" + scrollX + "px)";
+      // Step 1: wave sets each tile's width (changes offsetLeft
+      // via the flex layout).
       updateWave();
+      // Step 2: per-tile wrap + position. The wall is now
+      // STATIC; each tile carries its own translateX.
+      //
+      // THE KEY TRICK that makes this smooth (matching the
+      // hero carousel's "feels fantastic" behavior):
+      //
+      //   The wrap range is WIDER than the wall by TWO full
+      //   viewports on each side: [-buffer, totalWidth + buffer]
+      //   where buffer = 2 * window.innerWidth. This means the
+      //   wrap only fires when a tile is at least TWO full
+      //   viewport WIDTHS past the visible edge.
+      //
+      //   Why this matters: the wave re-evaluates each tile's
+      //   width every frame based on its visual distance from
+      //   the viewport center. If the wrap fired at the
+      //   visible edge, the wave would re-evaluate the tile
+      //   as it crossed from "in viewport" to "offscreen" and
+      //   the user would see the size flash. By pushing the
+      //   wrap boundary TWO viewports past the visible
+      //   edge, the wrap fires while the tile is COMPLETELY
+      //   offscreen — the wave re-evaluates offscreen too,
+      //   and by the time the tile re-enters the viewport
+      //   (smoothly, as the user scrolls), the wave is
+      //   already stable and the transition is invisible.
+      //
+      //   The hero carousel does the same thing — the wrap
+      //   there is `while displayX > item.offset + X_RANGE`,
+      //   where the visible area is also about X_RANGE wide.
+      //   The wrap boundary is right at the edge of (or
+      //   slightly past) the visible area, so the wrap
+      //   happens just as the tile is leaving or entering.
+      //
+      //   totalWidth is computed from the FIRST and LAST
+      //   tile's offsetLeft + width, i.e. the actual rendered
+      //   width of the wall (which varies frame-to-frame
+      //   because the wave changes each tile's width). This
+      //   is critical: using a static totalWidth (e.g.
+      //   allItems.length * itemWidth) would mismatch the
+      //   live offsetLeft values whenever the wave is
+      //   asymmetric, and the wrap would shift tiles by an
+      //   inconsistent amount.
+      var allItems = wall.querySelectorAll(":scope > li");
+      var firstItem = allItems[0];
+      var lastItem = allItems[allItems.length - 1];
+      var totalWidth = (lastItem.offsetLeft + lastItem.offsetWidth) - firstItem.offsetLeft;
+      var buffer = 2 * window.innerWidth;
+      for (var i = 0; i < allItems.length; i++) {
+        var item = allItems[i];
+        var visualPos = item.offsetLeft + scrollX;
+        // Per-tile wrap (hero-carousel.js pattern). The wrap
+        // only fires when visualPos crosses the offscreen
+        // boundary, so the wave re-evaluation happens entirely
+        // outside the visible area. The tile re-enters the
+        // viewport smoothly as the user continues scrolling.
+        while (visualPos > totalWidth + buffer) {
+          visualPos -= totalWidth;
+        }
+        while (visualPos < -buffer) {
+          visualPos += totalWidth;
+        }
+        item.style.transform = "translateX(" + (visualPos - item.offsetLeft) + "px)";
+      }
 
       // Keep animating as long as we're still moving toward
       // target OR the user is actively dragging.
@@ -686,12 +794,10 @@ const POSTER_WALL = (() => {
         rafId = requestAnimationFrame(frame);
       }
     }
-    // Kick off whenever target changes
-    var origWrapTarget = wrapTarget;
-    wrapTarget = function () {
-      origWrapTarget();
-      ensureAnimating();
-    };
+    // v3.14.66: Kick off the loop immediately so the
+    // per-tile positions are applied on first paint.
+    // (The old code kicked off via the wrapTarget override;
+    // now we just start it directly.)
     ensureAnimating();
 
     // ─── Wave (coverflow scale) ───
@@ -765,7 +871,9 @@ const POSTER_WALL = (() => {
 
     // ─── Resize handler ───
     // The viewport width changes on resize; the first item
-    // needs to be re-centered.
+    // needs to be re-centered. v3.14.66: no more
+    // wall.style.transform — the per-tile frame loop will
+    // pick up the new scrollX on its next iteration.
     function onResize() {
       var newItemWidth = wall.querySelectorAll(":scope > li")[totalClonesBefore].offsetWidth;
       if (newItemWidth !== itemWidth) {
@@ -773,15 +881,22 @@ const POSTER_WALL = (() => {
         oneSetWidth = itemCount * itemWidth;
         cloneSetWidth = totalClonesBefore * itemWidth;
       }
-      // Re-center the first original item
+      // Re-center the first original item at the viewport
+      // center. The centering math is unchanged from the
+      // track-translate world: it just gives us the scrollX
+      // value that places the first original at
+      // (window.innerWidth / 2). The frame loop will then
+      // apply the per-tile wrap, which is a no-op for the
+      // first original (its visualPos equals offsetLeft, so
+      // its transform is 0).
       var firstOrig = wall.querySelectorAll(":scope > li")[totalClonesBefore];
-      var centerOffset = -firstOrig.offsetLeft + (wall.clientWidth / 2) - (itemWidth / 2);
-      // Preserve the user's current position relative to the
-      // center, then re-anchor.
+      var wallLeft = wall.getBoundingClientRect().left;
+      var centerOffset = (window.innerWidth / 2) - wallLeft - firstOrig.offsetLeft - (firstOrig.offsetWidth / 2);
+      // Preserve the user's current relative offset, then
+      // re-anchor to the new center.
       var relOffset = scrollX - centerOffset;
       scrollX = centerOffset + relOffset;
       targetScrollX = scrollX;
-      wall.style.transform = "translateX(" + scrollX + "px)";
       ensureAnimating();
     }
     window.addEventListener("resize", onResize);
