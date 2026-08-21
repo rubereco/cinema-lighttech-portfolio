@@ -240,16 +240,15 @@
 /* v3.14.46: poster wall and chrome fill the section's content
    area. The wall opts out of the .section > * container
    constraint so it can be wider than var(--container) on
-   desktop (full viewport width via width: 100vw). The
-   chrome stays at 100% of the section. */
+   desktop. The chrome stays at 100% of the section. */
 .section-posters > .poster-wall {
   max-width: none;
   margin-left: 0;
   margin-right: 0;
-  /* No width: 100% here — the wall sets its own width
-     (100vw on desktop) inside the @media (min-width: 768px)
-     block in the .poster-wall rule below. On mobile it
-     falls back to the natural flex width. */
+  /* Width comes from .section > * (width: 100% of the section's
+     content box). Since the section's horizontal padding is
+     symmetric, the wall's center always coincides with the
+     viewport center — the slot-model carousel relies on that. */
 }
 .section-posters > .section-chrome {
   max-width: none;
@@ -311,7 +310,8 @@
      is roughly:
        --section-pad-y × 2   = 96 × 2 = 192px
        + .section-head        ≈ 60px
-       + .poster-wall         = 700px (v3.14.57a: fixed)
+       + .poster-wall         = 700px on desktop (v3.15.0: derived
+                                 from --tile-w; smaller on mobile)
        + .section-chrome      ≈ 80px
        ────────────────────── ≈ 1032px
      min-height: 100vh alone is 900px on a 900px viewport,
@@ -362,67 +362,34 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  /* v3.15.0: tile size is a custom property so CSS (height math below)
+     and JS (slot pitch) share one source of truth. Mobile default is a
+     small card; the min-width:900px block at the bottom of this file
+     overrides it to 400px on desktop. */
+  --tile-w: clamp(180px, 52vw, 240px);
   /* v3.14.52: NO overflow: hidden on the wall.
-     The transform: translateX(scrollX) on the wall moves
-     the wall's box for the purpose of overflow: hidden,
-     which clips the items to the transformed (off-screen)
-     position. Without overflow: hidden, the items are
-     visible at their visual position (translated by
-     scrollX). The body's overflow-x: hidden clips them
-     at the viewport edge instead.
-     This was the bug that made the carousel go invisible
-     in v3.14.50+ — items were being rendered at the
-     correct visual positions but clipped to the wall's
-     translated box, which was off-screen. */
+     The tiles are absolutely positioned at the wall's center and
+     translated by JS (slot-model carousel), so the wall's box never
+     matches the tiles' visual positions. The body's overflow-x: hidden
+     (reset.css) clips them at the viewport edge instead. */
   display: flex;
   position: relative;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
-  will-change: transform;
   touch-action: pan-y;
-  /* v3.14.57a: the dark box is now FIXED. The wall is
-     a 700px-tall flex container with vertically-centered
-     items, so the carousel area is always the same size
-     regardless of which tile is the "highlighted" one.
-
-     Before this, the wall's height was the tallest tile
-     in the wave (≈635-660px for the scale-1.10 center
-     tile). When the user scrolled, the wave re-evaluated
-     and different tiles could momentarily be the tallest,
-     making the section's height jiggle and the dark
-     backdrop feel dizzy. Fix: pin the wall at 700px
-     and center the items inside it.
-
-     Math: 600px (unscaled tile height) × 1.10 (peak
-     wave scale) = 660px visual height. +20px clearance
-     top + 20px clearance bottom = 700px box.
-
-     With align-items: center, each tile's 600px layout
-     box sits centered in the 700px wall (50px above,
-     50px below). The aspect-ratio 2/3 keeps the image
-     inside the tile. Shorter scaled tiles (the side
-     ones at 0.85, 0.45) also sit centered — they just
-     have more empty dark space around them, which is
-     the desired "frame the picked one" effect. */
-  height: 700px;
+  /* v3.15.0: height derives from --tile-w instead of a fixed 700px.
+     Peak visual tile height is 1.5 (2:3 aspect) × 1.10 (peak wave
+     scale) = 1.65 × tile width; +40px clearance. On desktop this
+     resolves to the same 700px as before; on phones it shrinks with
+     the tiles instead of leaving a huge fixed dark box. */
+  height: calc(var(--tile-w) * 1.65 + 40px);
   align-items: center;
 }
 .poster-wall:active {
   cursor: grabbing;
 }
 
-/* v3.14.52: Note — the body's overflow-x: hidden is
-   set in reset.css. It clips carousel items that are
-   translated past the viewport edge so they don't
-   cause horizontal page scroll. We can't keep
-   overflow: hidden on .poster-wall itself because the
-   wall's transform: translateX(scrollX) moves the
-   wall's box, and overflow: hidden then clips items
-   to the translated (off-screen) box — making the
-   whole carousel invisible. So: no overflow: hidden
-   on the wall, let the body's overflow-x: hidden
-   do the clipping at the viewport edge instead. */
 .poster-wall > li {
   margin: 0;
   padding: 0;
@@ -430,27 +397,26 @@
   overflow: hidden;
   background: var(--c-surface);
   flex: 0 0 auto;
-  /* v3.14.50: BIGGER TILES. 140px was "ridiculously small
-     for a pc layout" (Tarek). 200px → 400px (v3.14.54,
-     "double the width") is a real poster-card size — the
-     same width as a CD case, which is what these
-     film posters are. On a 1200px viewport: ~3 visible
-     (the wave scale makes side tiles smaller so they read
-     as decoration, not as "missing" tiles).
-     v3.14.57: WIDTH is now set by JS (updateWave) per-frame
-     based on each item's distance from the viewport center.
-     The 400px here is just the baseline for the math (and
-     a fallback if JS hasn't run yet). The wave now uses
-     width changes, not transform: scale — see updateWave
-     comment for why (transform: scale leaves visual gaps
-     between tiles because the layout box stays 400px). */
-  width: 400px;
+  /* v3.15.0: width is ALWAYS var(--tile-w). JS measures it once per
+     resize and never writes to it — the wave is transform-only, so the
+     layout box is stable and slot math stays exact. (Before JS marks
+     the wall live, the tiles render as a plain flush flex row — the
+     no-JS / pre-JS fallback.) */
+  width: var(--tile-w);
   transform-origin: center;
-  will-change: width;
-  /* v3.14.49: scale is now set by JS (updateWave in
-     setupCarousel) per-frame based on each item's distance
-     from the viewport center. No CSS animation — that was
-     unreliable cross-browser. */
+}
+
+/* v3.15.0: once JS is running, tiles leave the flow and are parked at
+   the wall's center; every frame setupCarousel() sets translateX +
+   scale from a pure slot-space model (see main.js). The margin math
+   centers the tile's 2:3 box on the wall's center point. */
+.poster-wall.poster-wall--live > li {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: calc(var(--tile-w) / -2);
+  margin-top: calc(var(--tile-w) * -0.75);
+  will-change: transform;
 }
 
 .poster-link {
@@ -632,17 +598,14 @@
   /* .hero-cta desktop override removed in v3.10.14 — the buttons
      were deleted from index.html. */
 
-  /* v3.14.48: REMOVED the old @media (min-width: 768px) block
-     for the poster wall. It was overriding the new coverflow
-     rules (scroll-snap-type: x mandatory, padding-inline for
-     centering, view-timeline scale animation) with
-     scroll-snap-type: x proximity and wrong width/padding
-     values. The new coverflow rules in the base .poster-wall
-     style above apply on ALL viewports — no desktop override
-     needed. The same rules work for both mobile and desktop;
-     the only difference is setupLoop adds the revolver clones
-     on mobile and the 3x rendering on desktop (more tiles
-     to scroll through). */
+  /* v3.15.0: desktop tile size. The slot-model carousel reads the
+     tile width from layout (see setupCarousel in main.js), so this
+     one custom property drives the whole geometry: slot pitch, wave
+     falloff, wall height. Mobile keeps the clamp() default declared
+     on the base .poster-wall rule. */
+  .poster-wall {
+    --tile-w: 400px;
+  }
 
   /* Desktop — slightly larger poster title */
   @media (min-width: 1024px) {

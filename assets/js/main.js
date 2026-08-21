@@ -217,11 +217,12 @@ function setupYearStamp() {
   setupSectionChrome();
 
   // Render the poster wall (work.json × films.json) after data is ready.
-  // v3.14.49: setupCarousel replaces all the setupLoop / setupWave
-  // / view-timeline mess. It's a self-contained carousel:
-  // clones both ends, wheel/drag/touch input, translateX on
-  // the track, per-frame scale on each tile based on distance
-  // from viewport center. See the function body for details.
+  // v3.15.0: setupCarousel is a slot-model infinite carousel — clones
+  // fill out N×S slots, every tile is absolutely parked at the wall
+  // center, and a per-frame pass sets translateX+scale from the
+  // fractional focus position (the wave). Wheel/drag/touch feed
+  // targetScrollX; snap lands on exact integer slots. See the
+  // function body for details.
   POSTER_WALL.render().then(() => {
     try {
       POSTER_WALL.setupCarousel();
@@ -370,636 +371,333 @@ const POSTER_WALL = (() => {
     render(state.work, state.films);
   }
 
-  // v3.14.49: PROPER CAROUSEL — the approach that actually works.
-  // After chasing scrollLeft/overflow:auto and view-timeline
-  // for 8 commits and getting nothing that the user could
-  // actually scroll or see a wave on, I went and looked at
-  // how real carousels are built. The pattern is:
+  // ─── v3.15.0: SLOT-MODEL CAROUSEL — infinite, mobile-aware, snap-exact ───
+  // Replaces the width-based wave (v3.14.57–66x), which rewrote each
+  // tile's style.width every frame. That reflowed the flex layout, so
+  // offsetLeft moved every frame while the wrap distance stayed fixed —
+  // the wrap boundary disagreed with real geometry ("wall ends"), the
+  // wave read unwrapped positions ("two tiles stay big"), and snap
+  // targets came from live getBoundingClientRect() mid-settle ("stuck"
+  // on slow scroll).
   //
-  //   1. A viewport with overflow: hidden (the visible window)
-  //   2. A track inside it, wider than the viewport
-  //   3. JS translates the track with transform: translateX()
-  //      based on user input (wheel, drag, touch)
-  //   4. The transform is GPU-accelerated — no scroll-event
-  //      races, no view-timeline browser support worries
-  //   5. For the wave: per-frame, compute each item's
-  //      distance from the viewport center and apply
-  //      transform: scale() based on that
-  //   6. For the perpetual effect: clone the items at both
-  //      ends, and when the user scrolls past the end, wrap
-  //      the scroll position back by one set width
+  // The model now is the same one hero-carousel.js uses: geometry comes
+  // from a STABLE slot space, never from live DOM layout.
   //
-  // This is the approach from the YouTube vanilla-JS carousel
-  // tutorial and the codegateway swipeable carousel — battle
-  // tested, works in every browser, no library, no scroll
-  // event listener nonsense.
+  //   - N films × S repeated sets = T tiles. Each tile's li is
+  //     absolutely parked at the wall center (CSS) and never changes
+  //     size — the width comes from the --tile-w custom property.
+  //   - The only state is scrollX, lerped toward targetScrollX.
+  //     focus = -scrollX / W is the fractional slot sitting under the
+  //     viewport center (W = slot pitch = tile width).
+  //   - Per frame, per tile: wrap its slot offset into (-T/2, T/2]
+  //     (the infinite loop — scrollX is unbounded and the wrap fires
+  //     many viewports offscreen, so no pop is ever visible), compute
+  //     the scale from the SAME wave curve as before but in slot space
+  //     (deterministic and single-peaked → exactly one big tile), then
+  //     place tiles flush via prefix sums of the scaled widths — pure
+  //     arithmetic, so tiles touch like the width-based version but
+  //     nothing ever reflows.
+  //   - Snap is exact: rest state is an integer focus, so snapping is
+  //     just targetScrollX = -round(focus) * W. The target never
+  //     depends on DOM reads, so it cannot oscillate.
+  //   - The frame loop only runs while scrollX ≠ targetScrollX (and
+  //     pauses in hidden tabs): at rest the geometry is static.
+  //
+  // Expandable by construction: N is counted from the rendered tiles
+  // and S is derived from the viewport width, so films added through
+  // the admin just widen the loop — nothing is hardcoded.
   function setupCarousel() {
     var wall = document.getElementById("poster-wall");
     if (!wall) {
       console.warn("[poster-wall] #poster-wall not found");
       return;
     }
-    var originalItems = Array.prototype.slice.call(
-      wall.querySelectorAll(":scope > li")
-    );
-    if (originalItems.length < 2) {
-      console.warn("[poster-wall] need at least 2 tiles, got",
-        originalItems.length);
+    var originals = Array.prototype.slice.call(wall.querySelectorAll(":scope > li"));
+    var N = originals.length;
+    if (N < 2) {
+      console.warn("[poster-wall] need at least 2 tiles, got", N);
       return;
     }
 
-    // ─── Clone items at both ends for the perpetual loop ───
-    // Track now looks like:
-    //   [A B C ... L | A B C ... L | A B C ... L]
-    //   ^clonesBefore  ^originals    ^clonesAfter
-    // We start the user in the MIDDLE set (the originals).
-    // When they scroll far enough left/right, we jump them
-    // back to the equivalent position in another set — the
-    // wrap is invisible because the content is the same.
-    // v3.14.65: was 1 set of clones on each side; now 2
-    // sets on each side (clonesBefore + clonesBefore2 before
-    // the originals, clonesAfter + clonesAfter2 after).
-    // The extra sets are buffer — they give the user a full
-    // extra "set's worth" of scroll room before the wrap
-    // boundary crosses the visible area, so the user never
-    // feels like the wall is running out of content. With
-    // the wider wrap range in wrapTarget() (one viewport
-    // past the boundary), the user genuinely can scroll
-    // ~3 sets of items before the wall recycles, and
-    // the recycle happens entirely offscreen.
-    var clonesBefore = originalItems.map(function (item) {
-      var c = item.cloneNode(true);
-      c.classList.add("poster-wall__clone");
-      return c;
-    });
-    var clonesBefore2 = originalItems.map(function (item) {
-      var c = item.cloneNode(true);
-      c.classList.add("poster-wall__clone");
-      return c;
-    });
-    var clonesAfter = originalItems.map(function (item) {
-      var c = item.cloneNode(true);
-      c.classList.add("poster-wall__clone");
-      return c;
-    });
-    var clonesAfter2 = originalItems.map(function (item) {
-      var c = item.cloneNode(true);
-      c.classList.add("poster-wall__clone");
-      return c;
-    });
-    // Outer-most first (so the wall is [..., buf2, buf1,
-    // originals, buf1, buf2, ...] reading left to right).
-    clonesBefore2.reverse().forEach(function (c) {
-      wall.insertBefore(c, wall.firstChild);
-    });
-    clonesBefore.reverse().forEach(function (c) {
-      wall.insertBefore(c, wall.firstChild);
-    });
-    clonesAfter.forEach(function (c) {
-      wall.appendChild(c);
-    });
-    clonesAfter2.forEach(function (c) {
-      wall.appendChild(c);
-    });
+    // Wave shape — the same curve the width-based version used.
+    var PEAK = 1.10;   // scale of the centered (picked) tile
+    var MIN_S = 0.45;  // scale floor far from the center
+    var EXP = 1.5;     // falloff exponent: steep near center, flat at edges
+    var RANGE = PEAK - MIN_S;
 
-    var itemCount    = originalItems.length;
-    var itemWidth    = originalItems[0].offsetWidth;
-    var oneSetWidth  = itemCount * itemWidth;
-    // v3.14.65: 2 sets of clones on each side now, so
-    // the "clone set width" is 2 * oneSetWidth.
-    var totalClonesBefore = clonesBefore.length + clonesBefore2.length;
-    var cloneSetWidth = totalClonesBefore * itemWidth;
+    // prefers-reduced-motion: settle instantly, no momentum animation.
+    var LERP = (window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? 1 : 0.15;
 
-    // v3.14.66x: totalWidth is the wrap-around distance —
-    // the width of one full "loop" through the wall. The
-    // per-tile wrap subtracts/adds this value to keep
-    // each tile's visualPos in a valid range.
-    //
-    // CRITICAL: totalWidth is computed ONCE at setup from
-    // the wall's natural width (allItems.length * itemWidth)
-    // and is NEVER recomputed per frame. The previous
-    // version (v3.14.66) recomputed it from the live
-    // offsetLeft + offsetWidth every frame, which made
-    // the wrap boundary wiggle because the wave changes
-    // widths every frame. With a fixed totalWidth, the
-    // wrap boundary is rock-solid and tile positions are
-    // smooth even after heavy scrolling. The "twitching"
-    // the user reported on heavy scroll was this exact
-    // bug.
-    //
-    // The wrap fires when visualPos leaves
-    // [-WRAP_BUFFER, totalWidth + WRAP_BUFFER], where
-    // WRAP_BUFFER = 2 * window.innerWidth. The buffer
-    // ensures the wrap only fires when the tile is at
-    // least 2 viewports past the visible edge, so the
-    // wave re-evaluation happens entirely offscreen.
-    var totalWidth = (originalItems.length + clonesBefore.length + clonesBefore2.length +
-                      clonesAfter.length + clonesAfter2.length) * itemWidth;
-    var WRAP_BUFFER = 2 * window.innerWidth;
+    var W = 0;         // tile width == slot pitch (CSS --tile-w, measured)
+    var FALLOFF = 700; // px over which the wave decays to MIN_S
+    var tiles = [];    // [{ el, slot }] — originals first, then clones
+    var clones = [];
+    var T = 0;         // total slots = N * sets
+    var jMin = 0;      // smallest wrapped relative slot offset (-floor(T/2))
 
-    // ─── Scroll state ───
-    // scrollX = current actual position (what's rendered).
-    // targetScrollX = where the user wants to be (where the
-    // wheel/drag is pushing us). We lerp from target to scroll
-    // each frame for a smooth momentum feel.
     var scrollX = 0;
     var targetScrollX = 0;
+    var restSlot = 0;  // integer slot the carousel is settled/snapping to
     var isDragging = false;
     var dragStartX = 0;
     var dragStartScrollX = 0;
+    var dragMoved = 0;
+    var rafId = null;
 
-    // v3.14.57: apply the wave ONCE before computing the
-    // initial scrollX. With width-based wave, the first
-    // updateWave() changes each tile's width based on its
-    // distance from the viewport center, which changes the
-    // offsetLeft of every tile after it. The old
-    // transform: scale() didn't change the layout box, so
-    // firstOriginal.offsetLeft was always the same as the
-    // CSS default. With width-based, the offsetLeft after
-    // the wave is DIFFERENT from before it — so we have to
-    // run the wave first, THEN center the first original.
-    // Without this fix, the first original would be
-    // off-screen by ~1800px on initial load (all 10 clones
-    // before it shrinking from 400px to 180px).
-    updateWave();
-
-    // v3.14.66x: UNIFORM-LAYOUT SETUP. The wave is a
-    // feedback loop (width → offsetLeft → distance →
-    // width), and computing the initial scrollX needs
-    // the converged offsetLeft. We can't just compute
-    // scrollX from the pre-wave offsetLeft (it'll be
-    // way off) or from the post-wave offsetLeft (the
-    // wave is wrong until scrollX is set).
-    //
-    // The trick: temporarily set scrollX to a huge
-    // negative value so ALL tiles are far from the
-    // viewport center. The wave then converges to
-    // "every tile at the minimum scale (0.45 / 180px)".
-    // The flex layout becomes uniform: offsetLeft = i *
-    // 180. This is the stable starting state — the wave
-    // is self-consistent here because every tile is at
-    // the same scale.
-    //
-    // Then we compute the REAL scrollX from this
-    // uniform offsetLeft (= 20 * 180 = 3600 for the
-    // first original). This puts the first original
-    // at roughly the viewport center.
-    //
-    // The frame loop (which now runs forever, see
-    // frame() comment) re-runs the wave every frame.
-    // After a few frames, the wave converges to the
-    // correct state with the first original at scale
-    // 1.10 and the rest falling off.
-    var _tempScrollX = -100000;
-    for (var _wsi = 0; _wsi < 4; _wsi++) {
-      void wall.offsetLeft;
-      updateWave(_tempScrollX);
-    }
-    // Now the layout is uniform (all tiles 180px).
-    // The first original is at offsetLeft = 20 * 180
-    // = 3600. Compute scrollX to center it.
-    var firstOriginal = wall.querySelectorAll(":scope > li")[totalClonesBefore];
-    var wallLeft = wall.getBoundingClientRect().left;
-    scrollX = (window.innerWidth / 2) - wallLeft - firstOriginal.offsetLeft - (firstOriginal.offsetWidth / 2);
-    targetScrollX = scrollX;
-    // v3.14.66: NO wall.style.transform. The wall is
-    // static; the per-tile frame loop applies the wrap
-    // via per-tile transform: translateX(). The first
-    // frame() call below will position every tile.
-
-    // ─── Input handlers ───
-    // v3.14.53: snapToNearest — when the user stops
-    // scrolling (mouseup, touchend, or after a wheel
-    // burst), find the tile closest to the viewport
-    // center and animate targetScrollX so that tile
-    // lands at center. The existing lerp in the frame
-    // loop (0.15/frame) handles the smooth animation.
-    // This makes "one portrait is the highlighted one"
-    // an actual user-controlled state — whatever the
-    // user scrolls to becomes the focus.
-    function snapToNearest() {
-      if (isDragging) return;
-      var viewportCenterX = window.innerWidth / 2;
-      var allItems = wall.querySelectorAll(":scope > li");
-      var bestI = 0;
-      var bestDist = Infinity;
-      for (var i = 0; i < allItems.length; i++) {
-        var rect = allItems[i].getBoundingClientRect();
-        var center = (rect.left + rect.right) / 2;
-        var dist = Math.abs(center - viewportCenterX);
-        if (dist < bestDist) {
-          bestDist = dist;
-          bestI = i;
+    // (Re)build the clone sets. Sets repeat the N originals so the wrap
+    // window (T/2 slots in each direction) always covers the viewport,
+    // even at maximum wave compression (min-scale packing). Films added
+    // via the admin simply increase N on the next page load.
+    function buildTiles(sets) {
+      for (var c = 0; c < clones.length; c++) {
+        if (clones[c].parentNode) clones[c].parentNode.removeChild(clones[c]);
+      }
+      clones = [];
+      tiles = [];
+      for (var s = 0; s < sets; s++) {
+        for (var k = 0; k < N; k++) {
+          var el;
+          if (s === 0) {
+            el = originals[k];
+          } else {
+            el = originals[k].cloneNode(true);
+            el.classList.add("poster-wall__clone");
+            el.setAttribute("aria-hidden", "true");
+            var link = el.querySelector("a");
+            if (link) link.tabIndex = -1;
+            wall.appendChild(el);
+            clones.push(el);
+          }
+          tiles.push({ el: el, slot: s * N + k });
         }
       }
-      // The nearest tile is at visual position `center`.
-      // We want it at viewportCenterX, so shift the wall
-      // by (viewportCenterX - center). That keeps the
-      // perpetual wrap consistent — the item's offsetLeft
-      // is unchanged, only the wall's transform shifts.
-      //
-      // v3.14.66: no more wrapTarget() here. scrollX is
-      // allowed to grow unbounded; the per-tile wrap in
-      // frame() handles the infinite loop visually.
-      var rect = allItems[bestI].getBoundingClientRect();
-      var tileCenter = (rect.left + rect.right) / 2;
-      var shift = viewportCenterX - tileCenter;
-      if (Math.abs(shift) < 1) return; // already centered
-      targetScrollX += shift;
+      T = tiles.length;
+      jMin = -Math.floor(T / 2);
+    }
+
+    function measure() {
+      var w = originals[0].offsetWidth;
+      if (!w) {
+        console.warn("[poster-wall] tile width is 0 — CSS not applied?");
+        return false;
+      }
+      W = w;
+      // Wave falloff scales with the viewport so the curve feels the
+      // same on phone and desktop (700px matches the old desktop look).
+      FALLOFF = Math.min(700, Math.max(420, window.innerWidth * 0.9));
+      var perSide = Math.ceil((window.innerWidth / 2 + (W * PEAK) / 2) / (W * MIN_S)) + 1;
+      var sets = Math.max(2, Math.ceil((2 * perSide) / N));
+      if (N * sets !== T) buildTiles(sets);
+      return true;
+    }
+
+    // Per-frame layout: pure math from focus, style writes only.
+    // No offsetLeft / getBoundingClientRect in here — that is the whole
+    // point. The wave and the wrap read the SAME slot-space positions,
+    // so they can never disagree.
+    var scaleByJ = [];
+    var widthByJ = [];
+    var centerByJ = [];
+    function layout() {
+      if (!T || !W) return;
+      var focus = -scrollX / W;
+      var anchor = Math.round(focus);
+      var f = focus - anchor;  // lean of focus vs. anchor slot, [-0.5, 0.5]
+      var jMax = jMin + T - 1;
+      var j, idx;
+      // Pass 1: wave scale per relative slot offset.
+      for (j = jMin; j <= jMax; j++) {
+        idx = j - jMin;
+        var t = Math.pow(Math.abs(j - f) * W / FALLOFF, EXP);
+        var sc = Math.max(MIN_S, PEAK - t * RANGE);
+        scaleByJ[idx] = sc;
+        widthByJ[idx] = sc * W;
+      }
+      // Pass 2: flush centers — adjacent tiles touch, so center spacing
+      // is the average of the two scaled widths. The anchor tile is
+      // offset from the viewport center by the lean f × local spacing,
+      // which keeps positions continuous as focus crosses half-integers.
+      var z0 = -jMin; // array index of j = 0
+      if (f === 0) {
+        centerByJ[z0] = 0;
+      } else {
+        var neighbor = f > 0 ? 1 : -1;
+        centerByJ[z0] = -f * (widthByJ[z0] + widthByJ[neighbor - jMin]) / 2;
+      }
+      for (j = 1; j <= jMax; j++) {
+        idx = j - jMin;
+        centerByJ[idx] = centerByJ[idx - 1] + (widthByJ[idx - 1] + widthByJ[idx]) / 2;
+      }
+      for (j = -1; j >= jMin; j--) {
+        idx = j - jMin;
+        centerByJ[idx] = centerByJ[idx + 1] - (widthByJ[idx + 1] + widthByJ[idx]) / 2;
+      }
+      // Pass 3: wrap each tile's slot offset into [jMin, jMax] and apply.
+      // The tile's home position (no transform) is the wall's center,
+      // so translateX is just the computed center offset.
+      for (var i = 0; i < T; i++) {
+        var rel = tiles[i].slot - anchor;
+        rel = jMin + ((((rel - jMin) % T) + T) % T);
+        idx = rel - jMin;
+        var el = tiles[i].el;
+        el.style.transform = "translateX(" + centerByJ[idx].toFixed(2) + "px) scale(" + scaleByJ[idx].toFixed(4) + ")";
+        el.style.zIndex = String(1000 - Math.round(Math.abs(rel - f) * 10));
+      }
+    }
+
+    // ─── Animation loop ───
+    // Runs only while scrollX is still chasing targetScrollX. At rest
+    // the geometry is a pure function of scrollX, so a stopped loop is
+    // a correct loop — nothing needs re-evaluating.
+    function frame() {
+      scrollX += (targetScrollX - scrollX) * LERP;
+      if (Math.abs(targetScrollX - scrollX) < 0.3) scrollX = targetScrollX;
+      layout();
+      if (scrollX !== targetScrollX && !document.hidden) {
+        rafId = requestAnimationFrame(frame);
+      } else {
+        rafId = null;
+      }
+    }
+    function ensureAnimating() {
+      if (rafId === null && !document.hidden) {
+        rafId = requestAnimationFrame(frame);
+      }
+    }
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) ensureAnimating();
+    });
+
+    // ─── Snapping ───
+    // Rest state is an integer focus, so a snap never depends on live
+    // DOM geometry — it cannot oscillate or get stuck mid-settle.
+    function snapToNearest() {
+      if (!W) return;
+      restSlot = Math.round(-targetScrollX / W);
+      targetScrollX = -restSlot * W;
       ensureAnimating();
     }
 
-    // Debounce the wheel-snap: only snap after 120ms of
-    // no wheel events. Trackpads fire many small wheel
-    // events in quick succession; we don't want to snap
-    // between each one.
+    // Wheel snap uses a DISPLACEMENT model instead of nearest-slot:
+    // measure how far the gesture moved from the last settled slot.
+    // A deliberate nudge (≥ 0.2 slot) always advances one full slot —
+    // this is what keeps slow mouse-wheel scrolling from snapping back
+    // to the same tile forever (the "stuck" bug).
     var wheelSnapTimer = null;
     function scheduleWheelSnap() {
       if (wheelSnapTimer !== null) clearTimeout(wheelSnapTimer);
       wheelSnapTimer = setTimeout(function () {
         wheelSnapTimer = null;
-        snapToNearest();
+        if (!W) return;
+        var disp = (-targetScrollX / W) - restSlot;
+        var steps = Math.round(disp);
+        if (steps === 0 && Math.abs(disp) >= 0.2) steps = disp > 0 ? 1 : -1;
+        restSlot += steps;
+        targetScrollX = -restSlot * W;
+        ensureAnimating();
       }, 120);
     }
 
+    // ─── Input handlers ───
     function onWheel(e) {
       e.preventDefault();
-      // deltaY is vertical scroll; we use it for horizontal
-      // movement. Trackpads send small deltas; mice send
-      // bigger ones. Either way it feels natural.
-      targetScrollX -= e.deltaY;
+      // deltaY is vertical scroll; we use it for horizontal movement.
+      // deltaMode 1 = lines (Firefox mouse wheel) → convert to px.
+      var dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
+      targetScrollX -= dy;
       ensureAnimating();
       scheduleWheelSnap();
     }
     function onMouseDown(e) {
+      e.preventDefault(); // kill native image drag / text selection
       isDragging = true;
+      dragMoved = 0;
       dragStartX = e.clientX;
       dragStartScrollX = targetScrollX;
       wall.style.cursor = "grabbing";
     }
     function onMouseMove(e) {
       if (!isDragging) return;
-      targetScrollX = dragStartScrollX + (e.clientX - dragStartX);
+      dragMoved = e.clientX - dragStartX;
+      targetScrollX = dragStartScrollX + dragMoved;
       ensureAnimating();
     }
-    function onMouseUp() {
+    function endDrag() {
       if (!isDragging) return;
       isDragging = false;
       wall.style.cursor = "grab";
+      if (Math.abs(dragMoved) > 6) suppressClickBriefly();
       snapToNearest();
     }
     function onTouchStart(e) {
       isDragging = true;
+      dragMoved = 0;
       dragStartX = e.touches[0].clientX;
       dragStartScrollX = targetScrollX;
     }
     function onTouchMove(e) {
       if (!isDragging) return;
-      targetScrollX = dragStartScrollX + (e.touches[0].clientX - dragStartX);
+      dragMoved = e.touches[0].clientX - dragStartX;
+      targetScrollX = dragStartScrollX + dragMoved;
       ensureAnimating();
     }
-    function onTouchEnd() {
-      if (!isDragging) return;
-      isDragging = false;
-      snapToNearest();
-    }
 
-    // v3.14.66: REMOVED wrapTarget entirely.
-    //
-    // The wrap pattern has changed fundamentally. The track
-    // no longer translates — each tile is positioned
-    // individually with its own per-frame translateX, and
-    // each tile's position is wrapped into its own valid
-    // range via a per-tile while-loop in frame(). This is
-    // the same pattern hero-carousel.js uses, and it
-    // produces a completely seamless infinite loop because:
-    //
-    //   - scrollX grows UNBOUNDED (no snap-back to a range)
-    //   - per tile, visualPos = offsetLeft + scrollX
-    //   - per tile, while visualPos > offsetLeft + totalWidth
-    //       visualPos -= totalWidth
-    //     while visualPos < offsetLeft
-    //       visualPos += totalWidth
-    //   - the tile's transform = translateX(visualPos - offsetLeft)
-    //
-    // The wrap is per-tile, per-frame — so no single moment
-    // has the whole wall "jumping" past the user. Each tile
-    // independently slides from one end of its valid range
-    // to the other, and when it hits an edge, it just
-    // re-enters from the other edge of the same range. From
-    // the user's POV, tiles never jump — they smoothly
-    // cycle forever. The boundary between clones and
-    // originals never crosses the visible area because the
-    // wrap range is one full totalWidth wide per tile.
-    //
-    // Why this works better than track-translate + wrap:
-    //   - Track-translate moves ALL tiles by the same delta
-    //     when wrapping, so the user sees a "flash" of all
-    //     tiles shifting simultaneously.
-    //   - Per-tile wrap moves only ONE tile at a time
-    //     (when it crosses its own range boundary), and the
-    //     other tiles don't move. The user only ever sees
-    //     one tile re-entering from the other side, which
-    //     reads as "this carousel has more items" instead
-    //     of "the whole wall just teleported".
+    // Dragging more than a few px and releasing also fires a click on
+    // the tile — swallow it so a drag never opens the film modal.
+    var suppressClick = false;
+    var suppressTimer = null;
+    function suppressClickBriefly() {
+      suppressClick = true;
+      if (suppressTimer !== null) clearTimeout(suppressTimer);
+      suppressTimer = setTimeout(function () {
+        suppressClick = false;
+        suppressTimer = null;
+      }, 350);
+    }
+    wall.addEventListener("click", function (e) {
+      if (!suppressClick) return;
+      suppressClick = false;
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
 
     wall.addEventListener("wheel", onWheel, { passive: false });
     wall.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("mouseup", endDrag);
     wall.addEventListener("touchstart", onTouchStart, { passive: true });
     wall.addEventListener("touchmove", onTouchMove, { passive: true });
-    wall.addEventListener("touchend", onTouchEnd);
+    wall.addEventListener("touchend", endDrag);
     // Cancel drag if the user releases outside the window
-    window.addEventListener("mouseleave", onMouseUp);
+    window.addEventListener("mouseleave", endDrag);
 
-    // ─── Animation loop ───
-    // v3.14.66: completely refactored. The wall no longer
-    // moves. scrollX is the user's scroll position and
-    // grows UNBOUNDED (positive or negative). Each tile
-    // is positioned individually with its own translateX,
-    // and its visual position is wrapped into a valid
-    // range via a per-tile while-loop. This is the hero
-    // carousel's pattern (hero-carousel.js, around line
-    // 1017-1023): phase grows unbounded, displayX is
-    // wrapped per-tile, no single moment has the whole
-    // wall "jumping" past the user.
-    //
-    // Per frame:
-    //   1. Lerp scrollX toward targetScrollX (smooth
-    //      momentum on wheel/drag release).
-    //   2. updateWave() — set each tile's WIDTH based on
-    //      its distance from the viewport center. This
-    //      DOES change offsetLeft (flex layout reflows),
-    //      but the feedback loop converges in 2-3 frames
-    //      so it's not a problem for the wave.
-    //   3. For each tile, compute visualPos =
-    //      offsetLeft + scrollX, wrap it into
-    //      [-WRAP_BUFFER, totalWidth + WRAP_BUFFER]
-    //      (where WRAP_BUFFER = 2 * window.innerWidth),
-    //      and set the tile's transform:
-    //      translateX(visualPos - offsetLeft). The wall
-    //      itself is NOT translated — the tiles are.
-    //
-    // totalWidth is a CONSTANT (computed once at setup as
-    // allItems.length * itemWidth). It does NOT change
-    // per frame, which is critical for the wrap to not
-    // twitch: with a live totalWidth, the wrap boundary
-    // would move frame-to-frame (because the wave changes
-    // widths, which changes the total wall width), and
-    // the wrap would subtract different amounts each
-    // time it fires. With a fixed totalWidth, the wrap
-    // boundary is rock-solid and tile positions are
-    // smooth even after heavy scrolling.
-    //
-    // The wrap is per-tile, per-frame, so no tile ever
-    // "jumps". A tile smoothly slides through its valid
-    // range and seamlessly re-enters from the other edge
-    // when it crosses. From the user's POV, the carousel
-    // just goes on forever.
-    //
-    // v3.14.66x: totalWidth is a CONSTANT now, not computed
-    // per frame. With the wave using transform: scale +
-    // margin (instead of width), every tile's offsetLeft
-    // is stable — the flex layout never reflows. So
-    // totalWidth can be computed once at setup and reused
-    // every frame. This is critical for smoothness: the
-    // wrap boundary no longer moves frame-to-frame, so
-    // the wrap always subtracts the SAME amount, so
-    // tile positions don't twitch on heavy scroll.
-    function frame() {
-      // Lerp: 0.15 = snappy but smooth. Lower = more momentum.
-      scrollX += (targetScrollX - scrollX) * 0.15;
-      // Snap to target when close enough — prevents infinite
-      // tiny updates once the user stops interacting.
-      if (Math.abs(targetScrollX - scrollX) < 0.3) {
-        scrollX = targetScrollX;
-      }
-      // Step 1: wave sets each tile's transform: scale and
-      // matching negative margin. Does NOT change offsetLeft
-      // (the layout box width is fixed at itemWidth, the
-      // margin shrinkage exactly compensates the scale).
-      updateWave();
-      // Step 2: per-tile wrap + position. The wall is now
-      // STATIC; each tile carries its own translateX. The
-      // wrap range is [-WRAP_BUFFER, totalWidth + WRAP_BUFFER]
-      // where WRAP_BUFFER = 2 * window.innerWidth (set at
-      // setup), so the wrap only fires when the tile is at
-      // least 2 viewports past the visible edge. This means
-      // the wave re-evaluation for the wrapped tile happens
-      // entirely offscreen — the user never sees the tile
-      // "flash" as it wraps.
-      //
-      // totalWidth is FIXED (computed once at setup). With
-      // a fixed totalWidth, the wrap always subtracts the
-      // SAME amount, so tile positions don't twitch on
-      // heavy scroll. (The previous version recomputed
-      // totalWidth from the live offsetLeft + offsetWidth
-      // every frame, which made the wrap boundary wiggle
-      // because the wave changes widths every frame.)
-      var allItems = wall.querySelectorAll(":scope > li");
-      var viewportW = window.innerWidth;
-      for (var i = 0; i < allItems.length; i++) {
-        var item = allItems[i];
-        var visualPos = item.offsetLeft + scrollX;
-        // v3.14.66x2: wrap fires at the VIEWPORT edge.
-        // The previous version used `totalWidth + 2 *
-        // window.innerWidth` as the wrap boundary — which
-        // meant the wrap fired 2880px PAST the right edge
-        // of the viewport. By the time the wrap fired, the
-        // user had been staring at empty space for ~20000px
-        // of scroll, and concluded the wall "ends". Fix:
-        // the wrap fires the moment a tile crosses the
-        // viewport edge, so new tiles appear on the left as
-        // the user scrolls right (the standard infinite-
-        // carousel conveyor belt). The tile re-enters at
-        // `visualPos - totalWidth`, which is far enough
-        // offscreen left that the teleport is invisible (it
-        // happens at the exact moment the tile leaves the
-        // right edge). This matches the hero carousel's
-        // wrap, which uses `item.offset + X_RANGE` as the
-        // boundary (right at the clone's position, not
-        // 2 viewports past it).
-        while (visualPos > viewportW) {
-          visualPos -= totalWidth;
-        }
-        while (visualPos < -viewportW) {
-          visualPos += totalWidth;
-        }
-        item.style.transform = "translateX(" + (visualPos - item.offsetLeft) + "px)";
-      }
+    // ─── Resize ───
+    // Re-measure the tile width, rebuild clone sets if the wrap window
+    // no longer covers the viewport, and re-anchor to the settled slot.
+    var resizeTimer = null;
+    window.addEventListener("resize", function () {
+      if (resizeTimer !== null) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        resizeTimer = null;
+        if (!measure()) return;
+        scrollX = targetScrollX = -restSlot * W;
+        layout();
+        ensureAnimating();
+      }, 150);
+    });
 
-      // Keep animating as long as we're still moving toward
-      // target OR the user is actively dragging OR the wave
-      // is still settling.
-      //
-      // v3.14.66x: we now ALWAYS keep the frame loop running
-      // (while the page is visible). The wave needs to
-      // re-evaluate every frame because the per-tile wrap
-      // moves tiles, which changes the distance from the
-      // viewport center, which changes the wave. If the
-      // loop stops when scrollX == targetScrollX, the wave
-      // is frozen at its initial (wrong) state — the "starts
-      // small" bug. The cost is one frame loop per frame
-      // forever, but the work per frame is tiny (50 tiles,
-      // 2 attribute writes each) and modern browsers handle
-      // this trivially. We bail out if document.hidden is
-      // true so we're not burning CPU in a background tab.
-      if (typeof document !== "undefined" && document.hidden) {
-        rafId = null;
-        return;
-      }
-      requestAnimationFrame(frame);
-    }
-    var rafId = null;
-    function ensureAnimating() {
-      if (rafId === null) {
-        rafId = requestAnimationFrame(frame);
-      }
-    }
-    // v3.14.66: Kick off the loop immediately so the
-    // per-tile positions are applied on first paint.
-    // (The old code kicked off via the wrapTarget override;
-    // now we just start it directly.)
-    ensureAnimating();
+    // ─── Setup ───
+    if (!measure()) return;
+    // Going live switches the tiles from the no-JS flex fallback to
+    // absolute positioning parked at the wall's center (see sections.css).
+    wall.classList.add("poster-wall--live");
+    scrollX = targetScrollX = -restSlot * W;
+    layout();
 
-    // ─── Wave (coverflow scale) ───
-    // For every item, compute its distance from the viewport
-    // center and set its WIDTH based on that distance. The
-    // center item is the "picked" one (width 440 = 1.1× the
-    // 400px baseline), and items on either side shrink along
-    // a power curve so the drop-off is steep near the center
-    // and flat at the edges.
-    //
-    //   distance 0   → t=0.0  → width 440 (picked, big)
-    //   distance 200 → t=0.13 → width 408
-    //   distance 400 → t=0.38 → width 340
-    //   distance 700+→ t=1.0  → width 180 (clamped at 0.45)
-    //
-    // v3.14.51 BUGFIX: the viewport center must be
-    // window.innerWidth / 2, NOT wall.getBoundingClientRect()
-    // center (the wall is narrower than the viewport due to
-    // section padding, so wall center and viewport center
-    // are at DIFFERENT x-positions).
-    //
-    // v3.14.57: width-based sizing (not transform: scale).
-    // The layout box matches the visual size, so adjacent
-    // tiles are flush — no gaps. Tarek specifically does
-    // NOT want gaps between the tiles.
-    //
-    // v3.14.66x: the wave's effect on offsetLeft (via
-    // width changes) is fine for the wave itself — the
-    // feedback loop converges in 2-3 frames. The TWITCHING
-    // issue that became obvious with per-tile wrap is
-    // addressed in the wrap, not the wave. The wrap now
-    // uses a FIXED totalWidth (computed once at setup
-    // from itemWidth * tileCount, not from the live
-    // offsetLeft + offsetWidth), so the wrap boundary
-    // doesn't move frame-to-frame. See the frame() comment
-    // for details.
-    function updateWave(overrideScrollX) {
-      var viewportCenterX = window.innerWidth / 2;
-      var useScrollX = (overrideScrollX !== undefined) ? overrideScrollX : scrollX;
-      var wallLeft = wall.getBoundingClientRect().left;
-      var allItems = wall.querySelectorAll(":scope > li");
-      for (var i = 0; i < allItems.length; i++) {
-        var item = allItems[i];
-        // Compute the tile's visual position manually
-        // (offsetLeft + scrollX) instead of using
-        // getBoundingClientRect(). This is critical for
-        // the setup phase, where the per-tile transforms
-        // haven't been applied yet — getBoundingClientRect
-        // would return the pre-wrap flex position, not
-        // the visual position the user will actually see.
-        // The frame loop calls updateWave() WITHOUT an
-        // override, so it uses the live scrollX from
-        // the closure and the per-tile transforms
-        // (which were set on the previous frame).
-        var itemCenterX = wallLeft + item.offsetLeft + useScrollX + item.offsetWidth / 2;
-        var distance = Math.abs(itemCenterX - viewportCenterX);
-        var t = Math.pow(distance / 700, 1.5);
-        var scale = Math.max(0.45, 1.10 - t * 0.65);
-        item.style.width = (itemWidth * scale) + "px";
-      }
-    }
-
-    // ─── Resize handler ───
-    // The viewport width changes on resize; the first item
-    // needs to be re-centered. v3.14.66: no more
-    // wall.style.transform — the per-tile frame loop will
-    // pick up the new scrollX on its next iteration.
-    function onResize() {
-      var newItemWidth = wall.querySelectorAll(":scope > li")[totalClonesBefore].offsetWidth;
-      if (newItemWidth !== itemWidth) {
-        itemWidth = newItemWidth;
-        oneSetWidth = itemCount * itemWidth;
-        cloneSetWidth = totalClonesBefore * itemWidth;
-      }
-      // Re-center the first original item at the viewport
-      // center. The centering math is unchanged from the
-      // track-translate world: it just gives us the scrollX
-      // value that places the first original at
-      // (window.innerWidth / 2). The frame loop will then
-      // apply the per-tile wrap, which is a no-op for the
-      // first original (its visualPos equals offsetLeft, so
-      // its transform is 0).
-      var firstOrig = wall.querySelectorAll(":scope > li")[totalClonesBefore];
-      var wallLeft = wall.getBoundingClientRect().left;
-      var centerOffset = (window.innerWidth / 2) - wallLeft - firstOrig.offsetLeft - (firstOrig.offsetWidth / 2);
-      // Preserve the user's current relative offset, then
-      // re-anchor to the new center.
-      var relOffset = scrollX - centerOffset;
-      scrollX = centerOffset + relOffset;
-      targetScrollX = scrollX;
-      ensureAnimating();
-    }
-    window.addEventListener("resize", onResize);
-
-    console.info("[poster-wall] carousel:",
-      itemCount, "originals +", (clonesAfter.length + clonesAfter2.length), "clones after +",
-      totalClonesBefore, "clones before =",
-      wall.querySelectorAll(":scope > li").length, "total tiles (2 buffer sets on each side, wrap offscreen)");
-
-    // v3.14.52: After initial transform, log the actual
-    // visual position of the first ORIGINAL tile so we can
-    // see if it landed in the viewport (centered) or
-    // somewhere off-screen.
-    setTimeout(function () {
-      var firstOrig = wall.querySelectorAll(":scope > li")[totalClonesBefore];
-      var rect = firstOrig.getBoundingClientRect();
-      var center = (rect.left + rect.right) / 2;
-      var dist = Math.abs(center - window.innerWidth / 2);
-      console.info("[poster-wall] first original tile:",
-        "left", Math.round(rect.left), "right", Math.round(rect.right),
-        "center", Math.round(center),
-        "viewport center", Math.round(window.innerWidth / 2),
-        "distance", Math.round(dist),
-        "scale", firstOrig.style.transform || "(none)");
-    }, 200);
+    console.info("[poster-wall] slot carousel:", N, "films ×", T / N,
+      "sets =", T, "tiles · tile", W + "px · falloff", Math.round(FALLOFF) + "px");
   }
-
-  // v3.14.43: WAVE / CURVE layout for desktop (≥768px).
-  // Tarek: "on pc i think we'll do another style of carrousel,
-  // could we do the style were the films act as a wave? so
-  // there is only one pick thats the middle film and the
-  // others do a curve smalling themselfs when going from the
-  // center to the sides".
-  //
-  // How it works: on every scroll, calculate each tile's
-  // distance from the viewport center. Apply a transform
-  // based on that distance:
-  //   - scale: 1.0 at center, 0.5 at the edges (linear falloff)
-  //   - translateY: 0 at center, 60px at the edges
-  // The center item is the "picked" one (largest, no Y offset).
-  // Items to the sides get smaller and sink lower, creating a
-  // v3.14.48: REMOVED setupWave entirely. The coverflow scale
-  // animation is now done with CSS scroll-driven animations
-  // (view-timeline) in sections.css — no JavaScript scroll
-  // listener updating transforms on every frame. The browser
-  // tracks each tile's position in the scroll container
-  // natively and interpolates the scale smoothly. This is the
-  // standard pattern, learned from addyosmani.com/blog/coverflow
-  // and the scroll-driven-animations.style demos.
 
   return {
     loadData,
