@@ -85,7 +85,7 @@
 .film-modal {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 3000;
   display: none;
   /* When open, fade the root in. The backdrop and content handle their
      own animations for a staggered reveal. */

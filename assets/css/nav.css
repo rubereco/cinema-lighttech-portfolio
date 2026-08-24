@@ -14,7 +14,7 @@
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 2000;
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas: "brand . navtoggle lang";
@@ -109,7 +109,7 @@
 /* While the mobile nav is open, lift the header above the overlay
    so the brand and lang toggle stay visible. */
 .site-header:has(+ .nav-mobile.is-open) {
-  z-index: 110;
+  z-index: 2010;
   background: var(--c-bg);
 }
 
@@ -176,7 +176,7 @@
   /* Force full viewport height including on iOS Safari where 100vh is unreliable. */
   min-height: 100vh;
   min-height: 100dvh;
-  z-index: 100;
+  z-index: 2000;
   display: flex;
   flex-direction: column;
   background: var(--c-bg);
@@ -265,7 +265,7 @@
   height: 44px;
   border-radius: 8px;
   position: relative;
-  z-index: 120;
+  z-index: 2020;
 }
 
 .nav-toggle span {
