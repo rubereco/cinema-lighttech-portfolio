@@ -43,15 +43,15 @@
   <rect x="120" y="220" width="6" height="200" fill="#E8A33D"/>
 
   <!-- eyebrow / role -->
-  <text x="150" y="240" font-family="system-ui, -apple-system, sans-serif" font-size="22" letter-spacing="6" fill="#E8A33D" font-weight="600">GAFFER &amp; BEST BOY ELECTRIC</text>
+  <text x="150" y="240" font-family="system-ui, -apple-system, sans-serif" font-size="22" letter-spacing="6" fill="#E8A33D" font-weight="600">GAFFER</text>
 
   <!-- main title -->
   <text x="150" y="350" font-family="Anton, Impact, system-ui, sans-serif" font-size="96" fill="#f4f4f5" font-weight="400">TAREK RECOLONS</text>
 
   <!-- subtitle -->
-  <text x="150" y="430" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#cfc8bf">High-End Cinematographic Lighting</text>
+  <text x="150" y="430" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#cfc8bf">Cinematographic Lighting</text>
 
   <!-- footer row: IMDb + features -->
   <text x="150" y="555" font-family="system-ui, -apple-system, sans-serif" font-size="20" letter-spacing="3" fill="#9a938a" font-weight="500">FEATURE FILMS · SERIES · COMMERCIALS</text>
-  <text x="150" y="585" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#9a938a">Based in Spain · Available worldwide · imdb.com/name/nm5007366</text>
+  <text x="150" y="585" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#9a938a">imdb.com/name/nm5007366</text>
 </svg>

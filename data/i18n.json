@@ -18,9 +18,9 @@
     },
     "brand": "Tarek Recolons",
     "hero": {
-      "role": "Gaffer & Best Boy Electric",
-      "headline": "High-End Cinematographic Lighting.",
-      "tagline": "Technical and artistic solutions for international feature films and commercials. Based in Spain, available worldwide.",
+      "role": "Gaffer",
+      "headline": "Cinematographic Lighting",
+      "tagline": "Technical and artistic solutions for feature films.",
       "ctaPrimary": "View credits",
       "ctaSecondary": "Rental kit"
     },
@@ -40,8 +40,8 @@
       "typeShort": "Short film"
     },
     "about": {
-      "title": "About",
-      "body": "<p>With over a decade of experience in the electrical department, I specialize in major feature films and commercials. I've been part of technical crews on international projects such as <em>The Bookshop</em>, <em>Calladita</em>, and <em>Boca Norte</em>.</p><p>My approach combines technical precision with artistic sensitivity, ensuring the Cinematographer's vision is executed efficiently and safely.</p>",
+      "title": "About me and professional career",
+      "body": "<p>With 10+ years of experience in the electrical and cinematographic lighting department, I have worked mainly on feature films, series and advertising productions, both national and international.</p><p>During this time I have developed skills in planning, preparation and execution of lighting, working alongside the Director of Photography to bring their visual proposal to set accurately, efficiently and safely.</p><p>The experience gained over years of shooting and on productions of different scales has allowed me to work with diverse technical teams, adapt to the needs of each project and quickly solve the challenges that may arise on set.</p><p>My career includes work on feature films and international projects, acquiring solid experience in both technical work and coordination of the electrical team.</p><p>The goal is simple: understand the Director of Photography's proposal, find the right solution and make it work on set. All with a way of working based on precision, organization and adaptability.</p>",
       "statsYearsLabel": "Years experience",
       "statsYearsValue": "10+",
       "statsFilmsLabel": "Feature films",
@@ -124,9 +124,9 @@
     },
     "brand": "Tarek Recolons",
     "hero": {
-      "role": "Gaffer y Best Boy Electric",
-      "headline": "Iluminación cinematográfica de alto nivel.",
-      "tagline": "Soluciones técnicas y artísticas para largometrajes internacionales y publicidad. Desde España, disponible en todo el mundo.",
+      "role": "Gaffer",
+      "headline": "Iluminación cinematográfica",
+      "tagline": "Soluciones técnicas y artísticas para largometrajes.",
       "ctaPrimary": "Ver créditos",
       "ctaSecondary": "Equipo de alquiler"
     },
@@ -146,8 +146,8 @@
       "typeShort": "Cortometraje"
     },
     "about": {
-      "title": "Sobre mí",
-      "body": "<p>Con más de una década de experiencia en el departamento eléctrico, me especializo en largometrajes y publicidad de gran nivel. He formado parte de equipos técnicos en proyectos internacionales como <em>The Bookshop</em>, <em>Calladita</em> y <em>Boca Norte</em>.</p><p>Mi enfoque combina precisión técnica con sensibilidad artística, asegurando que la visión del Director de Fotografía se ejecute con eficiencia y seguridad.</p>",
+      "title": "Sobre mí y carrera profesional",
+      "body": "<p>Con +10 años de experiencia en el departamento eléctrico y de iluminación cinematográfica, se ha trabajado principalmente en largometrajes, series y producciones publicitarias, tanto nacionales como internacionales.</p><p>Durante este tiempo se han desarrollado habilidades en planificación, preparación y ejecución de la iluminación, trabajando junto al Director de Fotografía para llevar su propuesta visual a rodaje de forma precisa, eficiente y segura.</p><p>La experiencia obtenida durante años de rodajes y en producciones de diferentes escalas ha permitido trabajar con equipos técnicos diversos, adaptarse a las necesidades de cada proyecto y resolver de forma rápida los retos que puedan surgir en set.</p><p>La trayectoria incluye trabajos en largometrajes y proyectos internacionales, adquiriendo una sólida experiencia tanto en el trabajo técnico como en la coordinación del equipo eléctrico.</p><p>El objetivo es sencillo: entender la propuesta del Director de Fotografía, encontrar la solución adecuada y hacer que funcione en rodaje. Todo ello con una forma de trabajo basada en la precisión, la organización y la capacidad de adaptación.</p>",
       "statsYearsLabel": "Años de experiencia",
       "statsYearsValue": "10+",
       "statsFilmsLabel": "Largometrajes",
