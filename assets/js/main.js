@@ -240,29 +240,11 @@ function setupYearStamp() {
   window.dispatchEvent(new CustomEvent("tarek:i18n-ready", { detail: { lang } }));
 })();
 
-/* ──────────────── Section chrome: sticky-in-section links ──────────────── */
-/* The bottom-left IMDb link + bottom-right "next section" arrow live inside
-   #work as .section-chrome with `position: sticky; bottom: 56px` (see
-   components.css). Pure CSS — no JS needed:
-   - The pills scroll with the section naturally.
-   - They stick to viewport-bottom-minus-56px as the user scrolls down
-     through the section.
-   - When the section's bottom edge exits the viewport, the sticky element
-     scrolls away with the section automatically.
-   - The pill is bounded by its parent (the section), so it can NEVER float
-     over #about or any other section.
-
-   This is the textbook "Sticky Bottom CTA" pattern. Previous iterations
-   (v3.11.0–v3.11.6) used `position: fixed` with IntersectionObserver or
-   transform-based fall-to-floor triggers and kept producing the same
-   "pills disappear mid-scroll" bug because the timing of fade-out vs.
-   dock-release was never right. CSS sticky is bounded by its parent —
-   no timing bugs possible. */
-
+/* ──────────────── Section chrome hook ──────────────── */
+/* v3.15.1: the old sticky bottom chrome (IMDb link + next-section arrow)
+   was removed from #work. This function remains a no-op hook so the
+   boot sequence doesn't need conditionals. */
 function setupSectionChrome() {
-  // Intentional no-op. Kept as a hook so init() can call it without
-  // conditionals, in case we ever need to add scroll-driven effects
-  // (e.g. active-section highlighting) later.
   return;
 }
 

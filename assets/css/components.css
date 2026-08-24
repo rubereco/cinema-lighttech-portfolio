@@ -39,205 +39,6 @@
   border-color: var(--c-fg);
 }
 
-/* ──────────────── In-section chrome pills ────────────────
-   Floating pill-style links used as bottom-of-section chrome
-   (e.g. "View on IMDb →" inside the work section).
-   The chrome container (`.section-chrome`) is positioned by main.js
-   as either fixed or absolute depending on scroll state.
-   See nav.css for related reduced-motion handling. */
-
-.section-link {
-  pointer-events: auto;        /* re-enable clicks on the actual links */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  /* Fixed pill height regardless of content (text vs icon-only). Both pills
-     lock to this exact height — text auto-centers via flex + box-sizing. */
-  min-height: 44px;
-  font-size: 14px;
-  line-height: 1;              /* so the text line-box = font-size; predictable centering */
-  color: var(--c-fg-dim);
-  text-decoration: none;
-  padding: 0 16px;             /* horizontal only; height is set by min-height */
-  border-radius: 999px;
-  box-sizing: border-box;      /* include border + padding inside the 44px */
-  background: color-mix(in srgb, var(--c-surface) 78%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  /* Buddie: "ugly static border" — replace with a soft white glow that
-     reads as light leaking out from behind the pill. Borderless so the
-     glow is the only edge cue.
-     v3.11.8: 75% spread (12→9, 28→21).
-     v3.11.9: pushed to 25% spread (12→3, 28→7). The aura is now a
-     tight halo right at the pill's edge, not a soft bleed. Alpha
-     doubled so the smaller glow still reads as bright. */
-  border: none;
-  box-shadow:
-    0 0 3px rgba(255, 255, 255, 0.24),
-    0 0 7px rgba(255, 255, 255, 0.18);
-  /* v3.11.2: smoother motion. Was 180ms ease across the board with
-     no actual transform value on hover (so the transform transition
-     never fired). Now: longer 300ms duration, custom cubic-bezier
-     easing for a buttery feel, and a real transform value
-     (scale + lift) on hover/focus so the pill actually moves.
-     Active state adds a tiny scale-down for click feedback. */
-  transition:
-    color 280ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    background 280ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    filter 280ms cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform, box-shadow;
-}
-.section-link:hover,
-.section-link:focus-visible {
-  color: var(--c-accent);
-  background: color-mix(in srgb, var(--c-surface) 92%, transparent);
-  filter: brightness(1.08);
-  /* Real transform now — the v3.10 era transition declared
-     `transform 180ms ease` but no rule ever set a transform, so
-     the timing function was dead code. Now the pill lifts and
-     grows slightly on hover, matching the carousel's buttery
-     feel. */
-  transform: translateY(-1px) scale(1.04);
-}
-.section-link:active {
-  /* Click feedback — settle back down so the user feels the press */
-  transform: translateY(0) scale(0.98);
-  transition-duration: 120ms;
-}
-
-/* IMDb pill — orange glow to match its orange text. Same borderless
-   treatment as the next-arrow pill but the glow hue is the accent.
-   v3.11.8: 75% compression — 12→9, 28→21.
-   v3.11.9: 25% compression — 12→3, 28→7. Tight halo at the edge,
-   alpha bumped significantly so the orange still pops. */
-.section-link.link-arrow {
-  border-bottom: none;
-  padding-bottom: 0;
-  box-shadow:
-    0 0 3px rgba(232, 163, 61, 0.40),
-    0 0 7px rgba(232, 163, 61, 0.26);
-}
-.section-link.link-arrow:hover,
-.section-link.link-arrow:focus-visible {
-  box-shadow:
-    /* v3.11.2: stronger glow on hover so the orange bleed reads as
-       "this thing is reacting to me" rather than a static decoration.
-       v3.11.8: 75% spread (18→14, 40→30, 64→48).
-       v3.11.9: 25% spread (18→5, 40→10, 64→16). The hover now
-       looks like a bright orange rim around the pill rather than
-       a soft lantern. Alpha pushed to keep the color punch. */
-    0 0 5px rgba(232, 163, 61, 0.65),
-    0 0 10px rgba(232, 163, 61, 0.40),
-    0 0 16px rgba(232, 163, 61, 0.22);
-}
-
-/* Next-arrow icon container (inside the next-section pill) */
-.next-arrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-}
-.next-arrow svg {
-  width: 100%;
-  height: 100%;
-}
-/* Gentle pulse to invite the tap on big sections / mobile */
-@keyframes section-chrome-pulse {
-  0%, 100% { transform: translateY(0); opacity: 0.85; }
-  50%      { transform: translateY(3px); opacity: 1; }
-}
-.section-link-next .next-arrow { animation: section-chrome-pulse 2.2s ease-in-out infinite; }
-.section-link-next:hover .next-arrow,
-.section-link-next:focus-visible .next-arrow { animation: none; transform: translateY(2px); }
-@media (prefers-reduced-motion: reduce) {
-  .section-link-next .next-arrow { animation: none; }
-}
-
-/* ──────────────── In-section chrome container ────────────────
-   bottom-left IMDb link + bottom-right "next section" arrow.
-
-   v3.11.7: REDID with the textbook Sticky Bottom CTA pattern
-   (position: sticky; bottom: <offset>). The element lives as the
-   last child of the <section> and behaves like position: relative
-   (scrolls naturally with the section) UNTIL it would be 56px from
-   the viewport bottom — at that point it sticks there like
-   position: fixed. When the section's bottom edge exits the
-   viewport, the sticky element scrolls away with the section
-   automatically. No JS, no IntersectionObserver, no transform,
-   no measurement. The browser handles the whole show.
-
-   Why this beats position:fixed:
-   - fixed pins to the viewport from the moment the page loads,
-     so you need an IntersectionObserver or scroll listener to
-     hide it when the section isn't on screen → timing bugs,
-     "pills disappear after i scroll down the section", etc.
-   - sticky is bounded by the parent: it can ONLY be visible
-     while the parent section is on screen. It scrolls away
-     naturally with the section's bottom edge. No JS needed.
-
-   Caveat: the parent must NOT have `overflow: hidden|auto|scroll`
-   or sticky is broken. .section has none.
-
-   v3.11.10: the work section's --section-pad-y (96px desktop /
-   56px mobile) was creating a big dark gap below the buttons
-   before the next section. The buttons were floating at the top
-   of that gap, looking like they didn't belong to anything.
-   Buddie: "i would want the buttons to be centered between
-   sections. ... i don't like that much gap between the buttons
-   and the next section."
-
-   The fix: pull the chrome DOWN by the section's bottom padding
-   using a negative margin-bottom. The chrome now sits flush at
-   the section's bottom edge — visually centered in the
-   transition between sections, with the next section's own top
-   padding providing the only spacing below. The section's own
-   padding is untouched (so the visual balance of the section
-   is preserved), but the chrome is pulled into the padding
-   area to close the gap. */
-
-.section-chrome {
-  position: sticky;
-  bottom: 56px;
-  /* span the full section content width (opt out of the
-     .section > * container constraint). The two pills sit at
-     the left and right edges with their own internal padding. */
-  left: 0;
-  right: 0;
-  margin-left: 0;
-  margin-right: 0;
-  max-width: none;
-  width: 100%;
-  padding: 18px max(20px, 4vw);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 50;
-  pointer-events: none;        /* container is a no-op; children opt back in */
-  /* v3.11.10: pull chrome down into the section's bottom padding
-     so the buttons sit flush at the boundary with the next section
-     (no big dark gap below). The padding variable scales with
-     breakpoint (56/72/96px) so this stays in sync. */
-  margin-bottom: calc(-1 * var(--section-pad-y, 56px));
-}
-
-/* ──────────────── Inline link with arrow ────────────────
-   Used by partner-name links on the partners page. Always orange
-   text + orange underline. (When the same class is applied to a
-   `.section-link` pill, the pill overrides the underline — see above.) */
-.link-arrow {
-  display: inline-flex;
-  align-items: center;
-  font-size: 14px;
-  color: var(--c-accent);
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 2px;
-}
-
 /* ──────────────── Reduced motion ──────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -248,7 +49,6 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .section-chrome { transition: none; }
   .site-header { transition: none; }
 }
 
@@ -375,28 +175,30 @@ html.film-modal-open body {
   outline: none;
 }
 
-/* v3.14.34: chrome bar at the top of the modal — back arrow (left),
-   position indicator (center, e.g. "Selected Work 2 of 13"), close X
-   (right). The X is the existing .film-modal__close; the back arrow
-   is new and styled the same. */
+/* v3.15.4: the chrome now only holds the close X. The position
+   indicator lives inside .film-modal__header so it sits above the film
+   title on desktop. On mobile it is absolutely positioned back at the
+   top-left of the modal card. */
 .film-modal__chrome {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-end;
   padding: 14px 18px;
-  border-bottom: 1px solid var(--c-border);
-  flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.2);
+  border-bottom: none;
+  background: transparent;
 }
 .film-modal__position {
-  flex: 1;
-  text-align: left;  /* v3.14.35: was center, now left-aligned since the back arrow is gone */
+  display: block;
   font-size: 0.85rem;
   color: rgba(232, 232, 232, 0.75);
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
   user-select: none;
+  margin-bottom: 6px;
 }
 
 /* v3.14.34: prev/next nav buttons, one on each side of the modal.
@@ -432,13 +234,26 @@ html.film-modal-open body {
   opacity: 0;
   pointer-events: none;
 }
-.film-modal__nav--prev { left: -24px; }   /* half-out, peeking from the modal edge */
-.film-modal__nav--next { right: -24px; }
+.film-modal__nav--prev { left: 16px; }
+.film-modal__nav--next { right: 16px; }
 @media (max-width: 700px) {
-  /* On mobile, the modal is near-fullscreen — pull the nav buttons
-     back inside the modal so they don't fall off the viewport. */
+  /* On mobile, the modal is near-fullscreen — keep the nav buttons
+     inside but closer to the edge so they don't cover the poster. */
   .film-modal__nav--prev { left: 8px; }
   .film-modal__nav--next { right: 8px; }
+
+  /* The position indicator is inside the info header, but on mobile
+     we pull it back up to the top-left corner so the layout matches
+     the previous mobile chrome style. */
+  .film-modal__position {
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    z-index: 6;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    margin-bottom: 0;
+  }
 }
 .film-modal__nav svg { width: 24px; height: 24px; }
 
@@ -611,7 +426,10 @@ html.film-modal-open body {
   color: var(--c-fg);
   /* Prevent very long company names from overflowing the chip */
   max-width: 100%;
-  word-break: break-word;
+  /* Only wrap at natural break points (spaces); avoid breaking a single
+     word into a tall narrow stack on narrow viewports. */
+  word-break: normal;
+  overflow-wrap: anywhere;
 }
 
 .film-modal__no-credits {
@@ -644,12 +462,15 @@ html.film-modal-open body {
 @media (min-width: 720px) {
   .film-modal__content {
     flex-direction: row;
-    max-height: min(640px, calc(100vh - 64px));
-    max-height: min(640px, calc(100dvh - 64px));
+    /* Wider card on large screens so the info panel can breathe. */
+    width: min(1100px, calc(100vw - 64px));
+    max-height: min(720px, calc(100vh - 64px));
+    max-height: min(720px, calc(100dvh - 64px));
   }
 
   .film-modal__poster {
-    flex: 0 0 38%;
+    /* Smaller poster share so the crew/info column gets most of the room. */
+    flex: 0 0 32%;
     border-right: 1px solid var(--c-border);
   }
 
@@ -662,23 +483,49 @@ html.film-modal-open body {
 
   .film-modal__info {
     border-top: none;
-    padding: 28px 32px 24px;
-    flex: 1 1 62%;
+    padding: 28px 36px 24px;
+    flex: 1 1 68%;
+    min-width: 0;
   }
 
   .film-modal__crew-row {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 16px;
+    /* Two-column grid keeps the label width predictable and lets the
+       value column fill the rest without fighting flex shrink. */
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 20px;
+    align-items: start;
     padding: 12px 0;
   }
 
-  .film-modal__crew-row dt {
-    flex: 0 0 180px;
+  .film-modal__crew-row dt,
+  .film-modal__crew-row dd {
+    flex: none;
   }
 
   .film-modal__crew-row dd {
-    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* v3.15.5: the close X floats at the top-right of the card. The
+     position indicator sits inside the info header, aligned with the X
+     on the same top line; the film title starts just below it. */
+  .film-modal__chrome {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 14px 18px;
+  }
+
+  .film-modal__position {
+    position: static;
+    color: var(--c-fg-muted);
+    text-shadow: none;
+    margin-bottom: 10px;
+  }
+
+  .film-modal__info {
+    padding-top: 14px;
   }
 }
 

@@ -16,8 +16,8 @@
 
 /* Force all direct children of .section to obey container width and center.
    Same pattern .section-alt used to use. Children that need to be
-   edge-to-edge (e.g. .poster-wall, .section-chrome) opt out below
-   with max-width:none + margin:0. */
+   edge-to-edge (e.g. .poster-wall) opt out below with max-width:none
+   + margin:0. */
 .section > * {
   max-width: var(--container);
   margin-left: auto;

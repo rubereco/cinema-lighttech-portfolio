@@ -37,9 +37,7 @@
       "type": "Type",
       "typeFeature": "Feature film",
       "typeSeries": "TV Series",
-      "typeShort": "Short film",
-      "viewOnIMDb": "Also on IMDb →",
-      "nextSectionAria": "Next section: About"
+      "typeShort": "Short film"
     },
     "about": {
       "title": "About",
@@ -145,9 +143,7 @@
       "type": "Tipo",
       "typeFeature": "Largometraje",
       "typeSeries": "Serie de TV",
-      "typeShort": "Cortometraje",
-      "viewOnIMDb": "También en IMDb →",
-      "nextSectionAria": "Siguiente sección: Sobre mí"
+      "typeShort": "Cortometraje"
     },
     "about": {
       "title": "Sobre mí",

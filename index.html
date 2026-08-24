@@ -71,9 +71,7 @@
       "type": "Type",
       "typeFeature": "Feature film",
       "typeSeries": "TV Series",
-      "typeShort": "Short film",
-      "viewOnIMDb": "Also on IMDb →",
-      "nextSectionAria": "Next section: About"
+      "typeShort": "Short film"
     },
     "about": {
       "title": "About",
@@ -179,9 +177,7 @@
       "type": "Tipo",
       "typeFeature": "Largometraje",
       "typeSeries": "Serie de TV",
-      "typeShort": "Cortometraje",
-      "viewOnIMDb": "También en IMDb →",
-      "nextSectionAria": "Siguiente sección: Sobre mí"
+      "typeShort": "Cortometraje"
     },
     "about": {
       "title": "Sobre mí",
@@ -1140,25 +1136,6 @@
         <!-- populated by assets/js/main.js on DOMContentLoaded -->
       </ul>
 
-      <!-- In-section chrome: only visible while #work is on screen.
-           IMDb link at bottom-left, "next section" arrow at bottom-right. -->
-      <div class="section-chrome" aria-hidden="false">
-        <a class="section-link section-link-left link-arrow"
-           href="https://www.imdb.com/name/nm5007366/"
-           target="_blank" rel="noopener"
-           data-i18n="work.viewOnIMDb">Also on IMDb →</a>
-        <a class="section-link section-link-next"
-           href="#about"
-           data-i18n-attr="aria-label:work.nextSectionAria"
-           aria-label="Next section: About">
-          <span class="next-arrow" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 5v14M6 13l6 6 6-6"/>
-            </svg>
-          </span>
-        </a>
-      </div>
     </section>
 
     <!-- ════════════════════════════════════════════════════════════════
@@ -1275,14 +1252,11 @@
   <div id="film-modal" class="film-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="film-modal-title">
     <div class="film-modal__backdrop" data-film-modal-close tabindex="-1"></div>
     <article class="film-modal__content" role="document">
-      <!-- v3.14.34: Paramount+ style chrome — back arrow at top-left,
-           position indicator in the middle ("Selected Work 2 of 13"),
-           close X stays at top-right. Sits above the poster+info grid.
-           v3.14.35: back arrow removed per Tarek — the close X is
-           the only way out, and a single click now closes the whole
-           modal chain (not one film at a time). -->
+      <!-- v3.15.4: the chrome now only holds the close X (top-right).
+           The position indicator lives inside .film-modal__header so it
+           appears above the film title on desktop, while CSS pulls it
+           back to the top-left on mobile. -->
       <header class="film-modal__chrome">
-        <span class="film-modal__position" id="film-modal-position"></span>
         <button class="film-modal__close" data-film-modal-close type="button" data-i18n-attr="aria-label:film.closeAria" aria-label="Close film details">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 6L6 18M6 6l12 12"/>
@@ -1311,6 +1285,7 @@
 
       <div class="film-modal__info">
         <header class="film-modal__header">
+          <span class="film-modal__position" id="film-modal-position"></span>
           <h2 id="film-modal-title" class="film-modal__title"></h2>
           <p class="film-modal__meta">
             <span id="film-modal-year" class="film-modal__year"></span>

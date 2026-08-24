@@ -227,7 +227,6 @@
      the guttered layout (v3.10.25). */
   padding-left: 0;
   padding-right: 0;
-  /* containing block so .section-chrome can switch to position:absolute inside */
   position: relative;
   /* v3.10.23: solid #141417. This is the "medium" band of the
      three-shade pattern. The hero is the onion (dark, fixed radial),
@@ -237,10 +236,9 @@
   background: #141417;
 }
 
-/* v3.14.46: poster wall and chrome fill the section's content
-   area. The wall opts out of the .section > * container
-   constraint so it can be wider than var(--container) on
-   desktop. The chrome stays at 100% of the section. */
+/* v3.14.46: the poster wall fills the section's content area.
+   It opts out of the .section > * container constraint so it
+   can be wider than var(--container) on desktop. */
 .section-posters > .poster-wall {
   max-width: none;
   margin-left: 0;
@@ -250,13 +248,6 @@
      symmetric, the wall's center always coincides with the
      viewport center — the slot-model carousel relies on that. */
 }
-.section-posters > .section-chrome {
-  max-width: none;
-  margin-left: 0;
-  margin-right: 0;
-  width: 100%;
-}
-
 /* v3.10.27: per-section background overrides. The four sections
    after the hero now alternate between a solid band and the
    body's onion radial:
@@ -281,68 +272,36 @@
   padding-right: max(20px, 4vw);
 }
 
-/* v3.14.53: give the poster wall a bit of breathing room
-   below the section header. The wall is the section's
-   second child after .section-head; without this margin
-   the tiles start immediately under the headline, which
-   feels cramped on desktop.
-   v3.14.58: the wall is now vertically centered in the
-   section (auto top/bottom margins, flex column on the
-   section). Tarek: "i want the images to be centered
-   and align centered, not stickying to the top." The
-   previous 48px margin pinned the wall to the top
-   under the header, leaving all the empty space at the
-   bottom. The flex-column + auto-margins approach
-   pushes the header up, the chrome down, and centers
-   the wall in the remaining space — feels balanced on
-   any viewport height. The section also gets a
-   min-height: 100vh so there's actual empty space to
-   distribute (without it, the section is just the
-   height of its content, and the auto margins resolve
-   to 0 — the carousel ends up stuck under the header
-   anyway, which is what Tarek was complaining about). */
+/* v3.15.1: the poster wall sits right under the section header.
+   The section is no longer forced to viewport height, so the only
+   space below the carousel is a controlled padding-bottom that keeps
+   it from touching the next section without leaving a huge gap. */
 .section-posters {
   display: flex;
   flex-direction: column;
-  /* v3.14.58: min-height ensures the section is taller than
-     its content so the auto margins (below) have room to
-     actually center the carousel. The total content height
-     is roughly:
-       --section-pad-y × 2   = 96 × 2 = 192px
-       + .section-head        ≈ 60px
-       + .poster-wall         = 700px on desktop (v3.15.0: derived
-                                 from --tile-w; smaller on mobile)
-       + .section-chrome      ≈ 80px
-       ────────────────────── ≈ 1032px
-     min-height: 100vh alone is 900px on a 900px viewport,
-     which is LESS than the content — the section collapses
-     to content-height, auto margins resolve to 0, and the
-     carousel ends up stuck under the header (the original
-     bug). Adding +80px gives the section just enough extra
-     room to be visibly taller than the content at 900px
-     viewports, scaling up naturally on taller screens. */
-  min-height: calc(100vh + 80px);
+  /* v3.15.1: removed the viewport-driven min-height. The fixed
+     extra space left a big dark gap between the carousel and the
+     About section, especially on mobile. With the wall pinned under
+     the header (margin-top: 0) and no forced section height, the
+     section now ends right after the carousel content. */
+  min-height: 0;
 }
 .section-posters > .poster-wall {
-  /* v3.14.63: was margin-top: auto; margin-bottom: auto;
-     which vertically centered the wall in the section's
-     available space. That put a huge gap between the
-     "SELECTED WORK" header and the carousel. Tarek:
-     "the overall carousel could be moved up a little so
-     the title of the section and the carousel don't have
-     that big space in between."
-
-     Now: no top margin (wall sits right under the header
-     with normal flow), keep margin-bottom: auto so any
-     extra section space goes BELOW the wall instead of
-     splitting evenly above/below. */
+  /* v3.14.63: keep the wall right under the header; any residual
+     vertical space is handled by padding-bottom, not by
+     margin-bottom: auto on a tall section. */
   margin-top: 0;
-  margin-bottom: auto;
+  margin-bottom: 0;
 }
-/* Extra bottom space so the carousel doesn't feel
-   pressed against the next section's edge. */
+/* Keep a modest air gap so the carousel doesn't touch the next
+   section, but don't leave the large gap from the old min-height. */
 .section-posters {
-  padding-bottom: 80px;
+  padding-bottom: 48px;
+}
+@media (min-width: 900px) {
+  .section-posters {
+    padding-bottom: 64px;
+  }
 }
 
 /* v3.11.1: on tablet+ restore the guttered layout from v3.10.25.
