@@ -2,8 +2,11 @@
   "id": "tardes-de-soledad-2024",
   "title": "Tardes de Soledad",
   "year": 2024,
-  "poster": "/assets/images/uploads/tardesdesoledad.jpg",
-  "role": "Gaffer",
   "type": "Largometraje",
-  "people": []
+  "role": "Gaffer",
+  "credits": {
+    "production": [],
+    "people": []
+  },
+  "poster": "assets/images/uploads/tardesdesoledad.jpg"
 }

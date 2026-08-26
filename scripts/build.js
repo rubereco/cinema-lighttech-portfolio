@@ -58,11 +58,34 @@ function writeAggregate(outPath, field, items, meta) {
 }
 
 // ─── Films: sort by year desc, then by id ──────────────────────────
-const films = readDir("data/films").sort((a, b) => {
-  if ((b.year ?? 0) !== (a.year ?? 0)) return (b.year ?? 0) - (a.year ?? 0);
-  return (a.id ?? "").localeCompare(b.id ?? "");
-});
-writeAggregate("data/films.json", "films", films, { version: "1.3" });
+// Normalize the folder files so the aggregate always matches the schema
+// the production JS expects: credits.production and credits.people.
+// The Decap admin panel sometimes writes people / production at the top
+// level depending on the schema version; the build step flattens both.
+function normalizeFilm(film) {
+  const normalized = { ...film };
+  const credits = normalized.credits || {};
+  if (!normalized.credits) normalized.credits = credits;
+  if (!Array.isArray(credits.production)) {
+    credits.production = Array.isArray(normalized.production) ? normalized.production : [];
+  }
+  if (!Array.isArray(credits.people)) {
+    credits.people = Array.isArray(normalized.people) ? normalized.people : [];
+  }
+  delete normalized.production;
+  delete normalized.people;
+  // Remove stray null entries left by empty admin fields.
+  credits.production = credits.production.filter((p) => p != null);
+  return normalized;
+}
+
+const films = readDir("data/films")
+  .map(normalizeFilm)
+  .sort((a, b) => {
+    if ((b.year ?? 0) !== (a.year ?? 0)) return (b.year ?? 0) - (a.year ?? 0);
+    return (a.id ?? "").localeCompare(b.id ?? "");
+  });
+writeAggregate("data/films.json", "films", films, { version: "1.4" });
 
 // ─── People: sort by partnership first (regular collaborators
 //     before one-off film credits), then by name ─────────────────

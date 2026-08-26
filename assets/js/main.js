@@ -873,9 +873,12 @@ const FILM_MODAL = (() => {
     // Crew rows
     // v3.14.18: credits.people[].jobId → Jobs collection, then
     // bucketed by the job's category into one of 4 UI rows.
+    // Accept both credits.people and the flatter people[] shape saved
+    // by the admin panel, so either schema renders correctly.
     const credits = film.credits || {};
-    const grouped = groupCrewByRow(credits.people);
-    document.getElementById("film-modal-production").innerHTML = renderList(credits.production);
+    const crewPeople = Array.isArray(credits.people) ? credits.people : (Array.isArray(film.people) ? film.people : []);
+    const grouped = groupCrewByRow(crewPeople);
+    document.getElementById("film-modal-production").innerHTML = renderList(credits.production || []);
     document.getElementById("film-modal-director").innerHTML  = renderCrewRow(grouped.director);
     document.getElementById("film-modal-dop").innerHTML       = renderCrewRow(grouped.dop);
     document.getElementById("film-modal-gaffer").innerHTML    = renderCrewRow(grouped.gaffer);
