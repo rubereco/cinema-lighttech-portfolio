@@ -270,7 +270,6 @@
 .nav-toggle {
   grid-area: navtoggle;
   display: inline-flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 48px;
@@ -279,29 +278,32 @@
   position: relative;
   z-index: 2020;
   overflow: visible;
-  /* Small right margin keeps the rotated X arms from touching the
+  /* Small right margin keeps the icon from touching the
      viewport edge on phones with tight gutters. */
   margin-right: 4px;
 }
 
-.nav-toggle span {
+/* v3.15.3: SVG icons for menu and close. Replaces the previous
+   CSS-only bars because rotated bars were being clipped on mobile
+   Safari/Chrome. SVG lines render cleanly and can be resized via
+   the SVG width/height attributes. */
+.nav-toggle .nav-icon {
   display: block;
-  width: 20px;
-  height: 2px;
-  background: currentColor;
-  margin: 3px 0;
-  transition: transform 0.2s ease, opacity 0.15s ease;
-  transform-origin: center;
+  width: 24px;
+  height: 24px;
+  color: currentColor;
 }
 
-.nav-toggle[aria-expanded="true"] span:nth-child(1) {
-  transform: translateY(5px) rotate(45deg);
+.nav-toggle .icon-close {
+  display: none;
 }
-.nav-toggle[aria-expanded="true"] span:nth-child(2) {
-  opacity: 0;
+
+.nav-toggle[aria-expanded="true"] .icon-menu {
+  display: none;
 }
-.nav-toggle[aria-expanded="true"] span:nth-child(3) {
-  transform: translateY(-5px) rotate(-45deg);
+
+.nav-toggle[aria-expanded="true"] .icon-close {
+  display: block;
 }
 
 /* ──────────────── Language toggle (EN · ES) — always visible ──────────────── */
