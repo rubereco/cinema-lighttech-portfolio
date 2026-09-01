@@ -66,6 +66,14 @@ const I18N = (() => {
     return (typeof value === "string") ? value : null;
   }
 
+  function setMeta(name, content) {
+    if (!content) return;
+    const byName = document.querySelector(`meta[name="${name}"]`);
+    if (byName) byName.setAttribute("content", content);
+    const byProp = document.querySelector(`meta[property="${name}"]`);
+    if (byProp) byProp.setAttribute("content", content);
+  }
+
   /** Apply all translations to the DOM.
    *  If a translation is missing for the active language, the original
    *  English text in the HTML is kept (it serves as a built-in fallback).
@@ -74,6 +82,14 @@ const I18N = (() => {
    */
   function apply(lang) {
     document.documentElement.lang = lang;
+
+    // Update page title and SEO/Open Graph meta tags
+    const metaTitle = t("meta.title", lang);
+    if (metaTitle) document.title = metaTitle;
+    setMeta("description", t("meta.description", lang));
+    setMeta("og:title", metaTitle || document.title);
+    setMeta("og:description", t("meta.description", lang));
+    setMeta("og:locale", lang === "es" ? "es_ES" : "en_US");
 
     // text content — only replace if we found a translation
     document.querySelectorAll("[data-i18n]").forEach((el) => {

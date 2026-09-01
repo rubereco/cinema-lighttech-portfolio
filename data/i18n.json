@@ -17,6 +17,10 @@
       "partners": "Partners"
     },
     "brand": "Tarek Recolons",
+    "meta": {
+      "title": "Tarek Recolons — Gaffer",
+      "description": "Cinematographic lighting. Gaffer on feature films, series, and commercials."
+    },
     "hero": {
       "role": "Gaffer",
       "headline": "Cinematographic Lighting",
@@ -129,6 +133,10 @@
       "creditPrefix": "Diseño y desarrollo por"
     },
     "brand": "Tarek Recolons",
+    "meta": {
+      "title": "Tarek Recolons — Gaffer",
+      "description": "Iluminación cinematográfica. Gaffer en largometrajes, series y publicidad."
+    },
     "hero": {
       "role": "Gaffer",
       "headline": "Iluminación cinematográfica",
