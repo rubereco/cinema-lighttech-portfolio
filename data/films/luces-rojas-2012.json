@@ -1,9 +1,12 @@
 {
-  "title": "Luces rojas",
   "id": "luces-rojas-2012",
+  "title": "Luces rojas",
   "year": 2012,
-  "role": "Eléctrico",
   "type": "Largometraje",
-  "people": [],
-  "poster": "/assets/images/uploads/redlights.jpg"
+  "role": "Eléctrico",
+  "credits": {
+    "production": [],
+    "people": []
+  },
+  "poster": "assets/images/uploads/redlights.jpg"
 }

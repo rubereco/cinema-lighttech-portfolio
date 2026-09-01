@@ -276,6 +276,18 @@
         ]
       },
       "poster": "assets/images/uploads/the-bookshop-2017.jpg"
+    },
+    {
+      "id": "luces-rojas-2012",
+      "title": "Luces rojas",
+      "year": 2012,
+      "type": "Largometraje",
+      "role": "Eléctrico",
+      "credits": {
+        "production": [],
+        "people": []
+      },
+      "poster": "assets/images/uploads/redlights.jpg"
     }
   ]
 }

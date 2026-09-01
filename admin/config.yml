@@ -145,40 +145,51 @@ collections:
           - { label: "Cortometraje",          value: "Cortometraje" }
           - { label: "Comercial",            value: "Comercial" }
           - { label: "Otro",                 value: "Otro" }
-      - name: "people"
-        label: "Personas en esta película"
-        widget: "list"
-        # v3.14.18: credits.people now references the Jobs
-        # collection (data/jobs/) by jobId — a normalized
-        # relationship, no free-text role strings. The dropdown
-        # shows job name (i18n) so Tarek picks "Director of
-        # Photography" not "dop" or "DoP" or "DP". The
-        # description is per-credit i18n for the film detail
-        # page.
-        summary: "{{fields.jobId}} — {{fields.personId}}"
+      - name: "credits"
+        label: "Créditos"
+        widget: "object"
+        collapsed: false
         fields:
-          - name: "personId"
-            label: "Persona"
-            widget: "relation"
-            collection: "people"
-            searchFields: ["name"]
-            valueField: "id"
-            displayFields: ["name"]
-          - name: "jobId"
-            label: "Trabajo / rol en esta película"
-            widget: "relation"
-            collection: "jobs"
-            searchFields: ["name.en", "name.es", "id"]
-            valueField: "id"
-            displayFields: ["name.en", "category"]
-          - name: "description"
-            label: "Descripción (por crédito, opcional)"
-            widget: "object"
-            collapsed: true
+          - name: "production"
+            label: "Productoras / casas de producción"
+            widget: "list"
             required: false
+            field: { name: "name", label: "Productora", widget: "string" }
+          - name: "people"
+            label: "Personas en esta película"
+            widget: "list"
+            required: false
+            # v3.14.18: credits.people references the Jobs
+            # collection (data/jobs/) by jobId — a normalized
+            # relationship, no free-text role strings. The dropdown
+            # shows job name (i18n) so Tarek picks "Director of
+            # Photography" not "dop" or "DoP" or "DP". The
+            # description is per-credit i18n for the film detail
+            # page.
+            summary: "{{fields.jobId}} — {{fields.personId}}"
             fields:
-              - { name: "en", label: "Inglés",  widget: "text", required: false }
-              - { name: "es", label: "Español", widget: "text", required: false }
+              - name: "personId"
+                label: "Persona"
+                widget: "relation"
+                collection: "people"
+                searchFields: ["name"]
+                valueField: "id"
+                displayFields: ["name"]
+              - name: "jobId"
+                label: "Trabajo / rol en esta película"
+                widget: "relation"
+                collection: "jobs"
+                searchFields: ["name.en", "name.es", "id"]
+                valueField: "id"
+                displayFields: ["name.en", "category"]
+              - name: "description"
+                label: "Descripción (por crédito, opcional)"
+                widget: "object"
+                collapsed: true
+                required: false
+                fields:
+                  - { name: "en", label: "Inglés",  widget: "text", required: false }
+                  - { name: "es", label: "Español", widget: "text", required: false }
 
   # 2) Jobs — the catalog of possible roles. One file per job in
   #    data/jobs/<id>.json. v3.14.18: new normalized table so the

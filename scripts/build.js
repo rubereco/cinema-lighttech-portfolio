@@ -76,6 +76,12 @@ function normalizeFilm(film) {
   delete normalized.people;
   // Remove stray null entries left by empty admin fields.
   credits.production = credits.production.filter((p) => p != null);
+  // Make poster paths relative so they work both on a domain and
+  // when opening the site locally (file://). Decap's image widget
+  // saves them with a leading slash.
+  if (typeof normalized.poster === "string" && normalized.poster.startsWith("/")) {
+    normalized.poster = normalized.poster.slice(1);
+  }
   return normalized;
 }
 
