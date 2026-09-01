@@ -34,7 +34,7 @@
 backend:
   name: github
   repo: rubereco/cinema-lighttech-portfolio
-  branch: wip/portfolio-r1
+  branch: main
   # base_url is the Cloudflare Worker URL. After deploying the
   # oauth-proxy worker, set this to the worker's URL (e.g. the
   # *.workers.dev default or a custom domain like oauth.recalone.com).
