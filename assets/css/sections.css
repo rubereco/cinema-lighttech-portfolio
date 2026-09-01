@@ -144,10 +144,11 @@
    the mobile overrides win on ≤767px viewports. */
 @media (max-width: 767px) {
   .hero {
-    /* No min-height — hero sizes to the content inside it. The
-       carousel (absolute) fills whatever height the hero ends
-       up being, the big anchors at y=0 in the SVG, and the hero
-       ends right where the hero-content ends. */
+    /* v3.15.2: with the shorter hero text, the hero was collapsing
+       and the SVG carousel (preserveAspectRatio="xMidYMid slice")
+       sliced the side images. A modest min-height on the content
+       box keeps the composition compact on phones while still
+       showing enough of the carousel. */
     min-height: 0;
     height: auto;
     /* 50px breathing space above and below. With the hero
@@ -162,7 +163,7 @@
   .hero-content {
     /* Text packed at the top (justify-content: flex-start) so it
        sits over the big (anchored at y=0 in the SVG since v3.10.3). */
-    min-height: 0;
+    min-height: 320px;
     height: auto;
     justify-content: flex-start;
     /* 25px on top and bottom so the text doesn't touch the
