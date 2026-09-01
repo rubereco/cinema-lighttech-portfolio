@@ -317,7 +317,7 @@ const POSTER_WALL = (() => {
       <li>
         <a class="poster-link" href="#film-${escapeAttr(slug)}" data-film-id="${escapeAttr(slug)}">
           <img class="poster-img" src="${escapeAttr(film.poster)}"
-               alt="${title}" loading="lazy" />
+               alt="${title}" loading="lazy" decoding="async" />
           <span class="poster-meta">
             <span class="poster-title">${title}</span>
             ${meta ? `<span class="poster-sub">${meta}</span>` : ""}

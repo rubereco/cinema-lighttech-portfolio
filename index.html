@@ -20,10 +20,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://recalone.com/assets/images/og-image.svg" />
 
-  <!-- Performance: preconnect + 1 display font only; body uses system stack. -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+  <!-- Performance: self-hosted display font; body uses system stack. -->
+  <link rel="preload" href="assets/fonts/Anton.ttf" as="font" type="font/ttf" crossorigin />
 
   <!-- CSS is split by responsibility. Order matters:
        reset (browser normalize) → tokens (custom properties) →

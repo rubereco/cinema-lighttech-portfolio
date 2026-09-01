@@ -4,6 +4,14 @@
    components stay untouched. Mobile-first; responsive overrides below.
    ════════════════════════════════════════════════════════════════════════ */
 
+@font-face {
+  font-family: "Anton";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/Anton.ttf") format("truetype");
+}
+
 :root {
   /* ── Layout ── */
   --container:      100%;       /* max content width */
