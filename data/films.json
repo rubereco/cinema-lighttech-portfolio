@@ -5,26 +5,6 @@
   },
   "films": [
     {
-      "id": "saw-2026",
-      "title": "Saw",
-      "year": 2026,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [],
-        "people": [
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      }
-    },
-    {
       "id": "els-mals-noms-2025",
       "title": "Els Mals Noms",
       "year": 2025,
