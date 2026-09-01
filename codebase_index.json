@@ -1,7 +1,7 @@
 {
   "_about": "Codebase map for AI navigation. Updated 2026-07-03 after mobile-first + i18n refactor.",
   "name": "Tarek Recolons — Portfolio (mobile-first, EN/ES)",
-  "live_url": "https://tarekrecolons.pages.dev",
+  "live_url": "https://recalone.com",
   "stack": {
     "frontend": "vanilla HTML + CSS + JS (no build step, no framework)",
     "hosting": "Cloudflare Pages (auto-deploy from github.com/rubereco/cinema-lighttech-portfolio)",
@@ -18,25 +18,22 @@
     "og_image": "assets/images/og-image.svg"
   },
   "routes": [
-    { "id": "top",     "label_en": "Hero",      "label_es": "Inicio",    "kind": "hero" },
-    { "id": "work",    "label_en": "Work",      "label_es": "Trabajo",   "kind": "credits" },
-    { "id": "about",   "label_en": "About",     "label_es": "Sobre mí",  "kind": "bio + stats" },
-    { "id": "reel",    "label_en": "Showreel",  "label_es": "Reel",      "kind": "video placeholder" },
-    { "id": "rental",  "label_en": "Rental",    "label_es": "Equipo",    "kind": "kit grid + filters" },
-    { "id": "contact", "label_en": "Contact",   "label_es": "Contacto",  "kind": "contact info + CTA" }
+    { "id": "top",      "label_en": "Hero",                  "label_es": "Inicio",         "kind": "hero carousel" },
+    { "id": "work",     "label_en": "Work",                  "label_es": "Trabajo",        "kind": "credits table + film detail modal" },
+    { "id": "about",    "label_en": "About",                 "label_es": "Sobre mí",       "kind": "bio + stats" },
+    { "id": "partners", "label_en": "Who I Work With",       "label_es": "Con quien trabajo", "kind": "company logo carousel + people accordion" },
+    { "id": "contact",  "label_en": "Contact",               "label_es": "Contacto",       "kind": "contact info + CTA" }
   ],
   "open_todos": {
     "tarek_decisions": [
-      "Pick real contact email (currently placeholder contact@tarekrecolons.com)",
-      "Decide hero photo: keep BTS / swap for portrait / drop background",
-      "Confirm bio voice: keep 1st person / change to 3rd person / add more",
-      "Decide on showreel: Vimeo/YouTube embed OR self-hosted (R2) — licensing dependent",
-      "Confirm or replace the 11 credits (currently includes all of them)"
+      "Hero photo: BTS / portrait / drop background (open)",
+      "Bio voice: 1st vs 3rd person (open)",
+      "Confirm or trim the work credits (open)"
     ],
     "infra": [
-      "Provision Cloudflare R2 bucket `tarek-videos` (paused: needs payment card on file)",
-      "Buy real domain tarekrecolons.com once brand confirmed",
-      "Wire OG image preview by sharing the URL on LinkedIn/WhatsApp"
+      "Provision Cloudflare R2 bucket for video (paused: needs payment card on file)",
+      "Decap CMS Phase 1 (v3.14.0) — waiting on user to deploy OAuth proxy Worker + create GitHub OAuth app + invite Tarek as collaborator",
+      "SEO pass + structured data (planned for next session per memory note)"
     ]
   },
   "file_tree": {

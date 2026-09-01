@@ -1,0 +1,113 @@
+/* ════════════════════════════════════════════════════════════════════════
+   layout.css — page-level layout primitives.
+   Sections, containers, headers, footers. No component styling here.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Base .section: spans the full viewport width (background goes
+   edge-to-edge). Inner content is constrained to var(--container)
+   and centered via the .section > * rule below. The padding-x
+   uses the max(pad-x, half-of-leftover) trick so the gutter is
+   at least var(--pad-x) on small screens and centered on wide
+   screens. */
+.section {
+  padding: var(--section-pad-y) max(var(--pad-x), calc((100% - var(--container)) / 2));
+  max-width: none;
+}
+
+/* Force all direct children of .section to obey container width and center.
+   Same pattern .section-alt used to use. Children that need to be
+   edge-to-edge (e.g. .poster-wall) opt out below with max-width:none
+   + margin:0. */
+.section > * {
+  max-width: var(--container);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  /* Prevent flex/grid from forcing content width to expand the container */
+  min-width: 0;
+}
+
+/* .section-alt: full-width dark band as background. Now redundant
+   with the .section width rules above — the section is already
+   full-width and the children are already constrained. .section-alt
+   just adds the background color and the top/bottom borders. */
+.section-alt {
+  background: var(--c-bg-alt);
+  border-top: 1px solid var(--c-border);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.section-cta {
+  padding-bottom: 80px;
+  /* v3.10.27: transparent so the body's onion radial shows
+     through. The contact section becomes the fifth band of the
+     zebra — onion, like the hero. The page now reads:
+       hero     → onion (radial)
+       posters  → #141417 (solid)
+       about    → onion (transparent, body radial)
+       rental   → #141417 (solid)
+       contact  → onion (transparent, body radial)
+     Five bands, true onion↔solid alternation. */
+  background: transparent;
+}
+
+.section-head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 14px;
+  row-gap: 4px;
+  align-items: baseline;
+  margin-bottom: 28px;
+}
+
+.section-index {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: var(--c-accent);
+  align-self: center;
+  grid-row: 1 / 3;
+}
+
+.section-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(24px, 6vw, 32px);
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.section-sub {
+  margin: 0;
+  color: var(--c-fg-dim);
+  font-size: 14px;
+  grid-column: 2;
+}
+
+.section-foot {
+  margin-top: 28px;
+  text-align: left;
+}
+
+/* Site footer */
+.site-footer {
+  padding: 32px var(--pad-x);
+  text-align: center;
+  font-size: 12px;
+  color: var(--c-fg-muted);
+  border-top: 1px solid var(--c-border);
+}
+
+.site-footer p {
+  margin: 4px 0;
+}
+
+/* Desktop: section heads get a fixed index column */
+@media (min-width: 900px) {
+  .section-head {
+    grid-template-columns: 80px 1fr;
+    column-gap: 18px;
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "_meta": {
+    "version": "1.5",
+    "lastUpdated": "2026-09-01"
+  },
+  "people": [
+    {
+      "id": "juli-carne-martorell",
+      "name": "Juli Carné Martorell",
+      "portrait": "assets/images/uploads/juli-carne-martorell.jpg",
+      "description": {
+        "en": "Cinematographer. Portfolio at julicarnemartorell.com.",
+        "es": "Director de fotografía. Portfolio en julicarnemartorell.com."
+      },
+      "url": "https://www.julicarnemartorell.com",
+      "urlLabel": "Portfolio",
+      "partnership": {
+        "jobIds": [
+          "dop"
+        ],
+        "since": null,
+        "description": {
+          "en": "",
+          "es": ""
+        }
+      }
+    },
+    {
+      "id": "nils-dalmases",
+      "name": "Nils Dalmases",
+      "portrait": "/assets/images/uploads/nildalmases.png",
+      "description": {
+        "en": "Cinematographer. Portfolio at nilsdalmases.com.",
+        "es": "Director de fotografía. Portfolio en nilsdalmases.com."
+      },
+      "url": "https://nilsdalmases.com",
+      "urlLabel": "Portfolio",
+      "partnership": {
+        "jobIds": [
+          "dop"
+        ],
+        "since": null,
+        "description": {
+          "en": "",
+          "es": ""
+        }
+      }
+    },
+    {
+      "id": "alejandro-rojas",
+      "name": "Alejandro Rojas",
+      "portrait": null
+    },
+    {
+      "id": "isabel-coixet",
+      "name": "Isabel Coixet",
+      "portrait": null
+    },
+    {
+      "id": "marc-ortiz-prades",
+      "name": "Marc Ortiz Prades",
+      "portrait": null
+    },
+    {
+      "id": "miguel-faus",
+      "name": "Miguel Faus",
+      "portrait": null
+    },
+    {
+      "id": "tarek-recolons",
+      "name": "Tarek Recolons",
+      "portrait": null,
+      "url": "https://www.imdb.com/name/nm5007366/",
+      "urlLabel": "IMDb"
+    }
+  ]
+}

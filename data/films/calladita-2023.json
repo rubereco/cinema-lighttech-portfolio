@@ -1,0 +1,29 @@
+{
+  "id": "calladita-2023",
+  "title": "Calladita",
+  "year": 2023,
+  "type": "Largometraje",
+  "role": "Gaffer",
+  "credits": {
+    "production": [],
+    "people": [
+      {
+        "personId": "miguel-faus",
+        "description": {
+          "en": "",
+          "es": ""
+        },
+        "jobId": "director"
+      },
+      {
+        "personId": "tarek-recolons",
+        "description": {
+          "en": "",
+          "es": ""
+        },
+        "jobId": "gaffer"
+      }
+    ]
+  },
+  "poster": "assets/images/uploads/calladita-2023.jpg"
+}

@@ -1,0 +1,36 @@
+# ════════════════════════════════════════════════════════════════════════
+# Cloudflare Worker — Decap CMS OAuth proxy
+# ════════════════════════════════════════════════════════════════════════
+#
+# Deploy with:    wrangler deploy
+# Set secrets:    wrangler secret put GITHUB_CLIENT_ID
+#                 wrangler secret put GITHUB_CLIENT_SECRET
+# Tail logs:      wrangler tail
+#
+# After deploy, the worker will be live at the URL Wrangler prints
+# (something like https://decap-oauth-proxy.<your-subdomain>.workers.dev).
+# Either use that URL directly in admin/config.yml's base_url, or add
+# a custom domain route in the Cloudflare dashboard.
+#
+# Required Cloudflare secrets (do NOT commit these):
+#   GITHUB_CLIENT_ID       — from your GitHub OAuth app
+#   GITHUB_CLIENT_SECRET   — from your GitHub OAuth app
+#
+# Both come from https://github.com/settings/developers → your app.
+
+name = "decap-oauth-proxy"
+main = "oauth-proxy.js"
+compatibility_date = "2024-09-23"
+
+# Default Workers Free plan: 100,000 requests/day. The OAuth proxy
+# gets at most 2-3 requests per login (auth, callback, postMessage),
+# so we use a tiny fraction. No paid plan needed.
+# workers_dev = true is the default; uncomment if you want to force it.
+
+# Optional: pin to a custom domain instead of the *.workers.dev URL.
+# After adding a custom domain in the Cloudflare dashboard → Workers →
+# decap-oauth-proxy → Triggers → Routes, also add it here:
+#
+# routes = [
+#   { pattern = "oauth.recalone.com/*", custom_domain = true }
+# ]

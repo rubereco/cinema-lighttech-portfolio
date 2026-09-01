@@ -1,0 +1,272 @@
+{
+  "_meta": {
+    "version": "1.5",
+    "lastUpdated": "2026-09-01"
+  },
+  "films": [
+    {
+      "id": "els-mals-noms-2025",
+      "title": "Els Mals Noms",
+      "year": 2025,
+      "type": "Largometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [
+          "Lamalanga Produccions Audiovisuals",
+          "Admirable Films"
+        ],
+        "people": [
+          {
+            "personId": "marc-ortiz-prades",
+            "description": {
+              "en": "",
+              "es": ""
+            },
+            "jobId": "director"
+          },
+          {
+            "personId": "tarek-recolons",
+            "description": {
+              "en": "",
+              "es": ""
+            },
+            "jobId": "gaffer"
+          }
+        ]
+      },
+      "poster": "assets/images/uploads/els-mals-noms-2025.jpg"
+    },
+    {
+      "id": "lo-que-queda-de-ti-2025",
+      "title": "Lo que queda de ti",
+      "year": 2025,
+      "type": "Largometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [
+          "Potenza Producciones"
+        ],
+        "people": [
+          {
+            "personId": "tarek-recolons",
+            "description": {
+              "en": "",
+              "es": ""
+            },
+            "jobId": "gaffer"
+          }
+        ]
+      },
+      "poster": "assets/images/uploads/lo-que-queda-de-ti-2025.jpg"
+    },
+    {
+      "id": "parenostre-2025",
+      "title": "Parenostre",
+      "year": 2025,
+      "type": "Largometraje",
+      "role": "Lighting Technician / Bestboy",
+      "credits": {
+        "production": [
+          "Minoria Absoluta",
+          "Lastor Media",
+          "Vilaüt Films"
+        ],
+        "people": []
+      },
+      "poster": "assets/images/uploads/parenostre-2025.jpg"
+    },
+    {
+      "id": "un-altre-home-2025",
+      "title": "Un altre home",
+      "year": 2025,
+      "type": "Largometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [
+          "Oberon Media"
+        ],
+        "people": [
+          {
+            "personId": "tarek-recolons",
+            "description": {
+              "en": "",
+              "es": ""
+            },
+            "jobId": "gaffer"
+          }
+        ]
+      },
+      "poster": "assets/images/uploads/un-altre-home-2025.jpg"
+    },
+    {
+      "id": "tardes-de-soledad-2024",
+      "title": "Tardes de Soledad",
+      "year": 2024,
+      "type": "Largometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [],
+        "people": []
+      },
+      "poster": "assets/images/uploads/tardesdesoledad.jpg"
+    },
+    {
+      "id": "calladita-2023",
+      "title": "Calladita",
+      "year": 2023,
+      "type": "Largometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [],
+        "people": [
+          {
+            "personId": "miguel-faus",
+            "description": {
+              "en": "",
+              "es": ""
+            },
+            "jobId": "director"
+          },
+          {
+            "personId": "tarek-recolons",
+            "description": {
+              "en": "",
+              "es": ""
+            },
+            "jobId": "gaffer"
+          }
+        ]
+      },
+      "poster": "assets/images/uploads/calladita-2023.jpg"
+    },
+    {
+      "id": "el-cuco-2023",
+      "title": "El Cuco",
+      "year": 2023,
+      "role": "Gaffer",
+      "type": "Largometraje",
+      "credits": {
+        "production": [],
+        "people": []
+      },
+      "poster": "assets/images/uploads/elcuco.jpg"
+    },
+    {
+      "id": "upon-entry-2022",
+      "title": "Upon Entry",
+      "year": 2022,
+      "type": "Largometraje",
+      "role": "Grip",
+      "credits": {
+        "production": [],
+        "people": [
+          {
+            "personId": "alejandro-rojas",
+            "description": {
+              "en": "",
+              "es": ""
+            },
+            "jobId": "director"
+          }
+        ]
+      },
+      "poster": "assets/images/uploads/upon-entry-2022.jpg"
+    },
+    {
+      "id": "lultima-nit-del-karaoke-2021",
+      "title": "L'última nit del karaoke",
+      "year": 2021,
+      "type": "Serie TV",
+      "role": "Electrician / 2nd Gaffer",
+      "credits": {
+        "production": [],
+        "people": []
+      },
+      "poster": "assets/images/uploads/lultima-nit-del-karaoke-2021.jpg"
+    },
+    {
+      "id": "coque-2020",
+      "title": "Coque",
+      "year": 2020,
+      "type": "Cortometraje",
+      "role": "Gaffer",
+      "credits": {
+        "production": [
+          "Somos Acme SL"
+        ],
+        "people": [
+          {
+            "personId": "tarek-recolons",
+            "description": {
+              "en": "",
+              "es": ""
+            },
+            "jobId": "gaffer"
+          }
+        ]
+      },
+      "poster": "assets/images/uploads/coque-2020.jpg"
+    },
+    {
+      "id": "boca-norte-2019",
+      "title": "Boca Norte",
+      "year": 2019,
+      "type": "Serie TV",
+      "role": "Gaffer",
+      "credits": {
+        "production": [
+          "Playz",
+          "RTVE"
+        ],
+        "people": [
+          {
+            "personId": "tarek-recolons",
+            "description": {
+              "en": "",
+              "es": ""
+            },
+            "jobId": "gaffer"
+          }
+        ]
+      },
+      "poster": "assets/images/uploads/boca-norte-2019.jpg"
+    },
+    {
+      "id": "the-bookshop-2017",
+      "title": "The Bookshop",
+      "year": 2017,
+      "type": "Largometraje",
+      "role": "Electrician Dailies",
+      "credits": {
+        "production": [
+          "Diagonal TV",
+          "A Contracorriente Films",
+          "Green Films"
+        ],
+        "people": [
+          {
+            "personId": "isabel-coixet",
+            "description": {
+              "en": "",
+              "es": ""
+            },
+            "jobId": "director"
+          }
+        ]
+      },
+      "poster": "assets/images/uploads/the-bookshop-2017.jpg"
+    },
+    {
+      "id": "luces-rojas-2012",
+      "title": "Luces rojas",
+      "year": 2012,
+      "type": "Largometraje",
+      "role": "Eléctrico",
+      "credits": {
+        "production": [],
+        "people": []
+      },
+      "poster": "assets/images/uploads/redlights.jpg"
+    }
+  ]
+}

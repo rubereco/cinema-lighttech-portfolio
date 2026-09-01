@@ -1,0 +1,60 @@
+{
+  "_meta": {
+    "version": "1.1",
+    "lastUpdated": "2026-08-04"
+  },
+  "companies": [
+    {
+      "id": "movie-men",
+      "name": "Movie-men",
+      "kind": "equipment-house",
+      "logo": "assets/images/uploads/movie-men.svg?v=2",
+      "logoAlt": "Movie-men logo",
+      "description": {
+        "en": "Industry-leading equipment rental house based in Barcelona. Reliable power distribution units, generators, and full lighting packages for film and commercial productions.",
+        "es": "Casa líder de alquiler de equipos en Barcelona. Unidades de distribución de energía, generadores y paquetes completos de iluminación para producciones cinematográficas y publicitarias."
+      },
+      "url": "https://movie-men.com/",
+      "urlLabel": "Website"
+    },
+    {
+      "id": "kinolux",
+      "name": "Kinolux",
+      "kind": "equipment-house",
+      "logo": "assets/images/uploads/kinolux.svg?v=1",
+      "logoAlt": "Kinolux logo",
+      "description": {
+        "en": "Equipment rental house based in Barcelona. Lighting, grip and accessories for film, TV and commercial productions.",
+        "es": "Casa de alquiler de equipos en Barcelona. Iluminación, grip y accesorios para producciones cinematográficas, TV y publicidad."
+      },
+      "url": "https://kinolux.es/",
+      "urlLabel": "kinolux.es"
+    },
+    {
+      "id": "aluzine",
+      "name": "Aluzine",
+      "kind": "equipment-house",
+      "logo": "assets/images/uploads/aluzine.png?v=1",
+      "logoAlt": "Aluzine logo",
+      "description": {
+        "en": "Lighting rental house based in Spain. HMI, LED and tungsten packages for film, TV and commercial productions.",
+        "es": "Casa de alquiler de iluminación en España. Paquetes de HMI, LED y tungsteno para producciones cinematográficas, TV y publicidad."
+      },
+      "url": "https://www.aluzine.tv/",
+      "urlLabel": "aluzine.tv"
+    },
+    {
+      "id": "cinetecnico",
+      "name": "Cinetécnico",
+      "kind": "equipment-house",
+      "logo": "assets/images/uploads/cinetecnico.png?v=1",
+      "logoAlt": "Cinetécnico logo",
+      "description": {
+        "en": "Equipment rental house based in Spain. Lighting, grip, and accessories for film, TV and commercial productions.",
+        "es": "Casa de alquiler de equipos en España. Iluminación, grip y accesorios para producciones cinematográficas, TV y publicidad."
+      },
+      "url": "https://cinetecnico.com/",
+      "urlLabel": "cinetecnico.com"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+/* ════════════════════════════════════════════════════════════════════════
+   tokens.css — design tokens (custom properties).
+   Single source of truth for spacing, colors, type. Edit values here,
+   components stay untouched. Mobile-first; responsive overrides below.
+   ════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Layout ── */
+  --container:      100%;       /* max content width */
+  --measure:        38ch;       /* readable line-length cap */
+  --pad-x:          20px;       /* horizontal gutter */
+  --section-pad-y:  56px;       /* vertical section padding */
+
+  /* ── Color (single theme — tungsten is the only palette we ship) ── */
+  --c-bg:           #0b0b0d;    /* near-black, slight warm */
+  --c-bg-alt:       #141417;    /* warm-tinted dark (alt sections) */
+  --c-surface:      #0b0b0d;    /* surface / card backgrounds */
+  --c-surface-2:    #1c1c20;    /* slightly lighter surface — used by photo tiles & section accents */
+  --c-card-bg:      rgba(255, 255, 255, 0.03);
+  --c-fg:           #f4f4f5;    /* primary foreground */
+  --c-fg-dim:       rgba(255, 255, 255, 0.7);
+  --c-fg-muted:     rgba(255, 255, 255, 0.5);
+  --c-border:       rgba(255, 255, 255, 0.06);
+  --c-border-strong:rgba(255, 255, 255, 0.4);
+  --c-accent:       #E8A33D;    /* tungsten amber */
+  --c-accent-strong:#f0b35a;    /* hover state */
+  --c-accent-soft:  rgba(232, 163, 61, 0.16);
+
+  /* ── Type ── */
+  --font-display:   "Anton", "Impact", system-ui, sans-serif;
+}
+
+/* Tablet — bump padding */
+@media (min-width: 560px) {
+  :root {
+    --pad-x:         28px;
+    --section-pad-y: 72px;
+  }
+}
+
+/* Desktop — wide container, horizontal padding now lives on the section itself */
+@media (min-width: 900px) {
+  :root {
+    --container:     60rem;
+    --measure:       64ch;
+    --pad-x:         0px;
+    --section-pad-y: 96px;
+  }
+}

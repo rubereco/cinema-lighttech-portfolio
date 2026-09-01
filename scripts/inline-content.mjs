@@ -1,69 +1,108 @@
 // scripts/inline-content.mjs
-// Inlines data/content.json and data/i18n.json into <script type="application/json">
-// blocks inside index.html and showcase.html so the site works when opened
-// directly from the filesystem (file://) where fetch() is blocked by CORS.
+//
+// Inlines each data/*.json file into its own <script type="application/json">
+// block inside index.html / showcase.html / partners.html so the site works
+// when opened from the filesystem (file://, where fetch() is blocked by CORS).
+//
+// Block id convention: "tarek-<basename-of-data-file>"
+//   data/site.json      → <script id="tarek-site">
+//   data/people.json    → <script id="tarek-people">
+//   data/films.json     → <script id="tarek-films">
+//   data/work.json      → <script id="tarek-work">
+//   data/showcase.json  → <script id="tarek-showcase">
+//   data/kit.json       → <script id="tarek-kit">
+//   data/companies.json → <script id="tarek-companies">
+//   data/i18n.json      → <script id="tarek-i18n">
+//
+// Per-page loaders (main.js / showcase.js / partners.js) look up only the
+// blocks they need by id. Inline is checked first; live deploys fall back
+// to fetch("data/<name>.json").
 //
 // Usage: node scripts/inline-content.mjs
-//
-// What it does:
-// 1. Reads data/content.json and data/i18n.json
-// 2. Injects/replaces:
-//    <script type="application/json" id="tarek-content">{...content.json...}</script>
-//    <script type="application/json" id="tarek-i18n">{...i18n.json...}</script>
-// 3. Inside <head> of both index.html and showcase.html
-//
-// The loaders (main.js, showcase.js) check for these inline blocks first,
-// fall back to fetch() if missing — so live deploys still pull fresh data.
 
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { readFileSync, writeFileSync } from "node:fs";
+import { resolve, dirname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 
-function loadJson(path) {
-  return JSON.parse(readFileSync(resolve(ROOT, path), "utf8"));
+// (dataFilePath, blockId) pairs in the order they should appear in <head>.
+const BLOCKS = [
+  ["data/site.json",      "tarek-site"],
+  ["data/people.json",    "tarek-people"],
+  ["data/films.json",     "tarek-films"],
+  ["data/work.json",      "tarek-work"],
+  ["data/hero.json",      "tarek-hero"],
+  ["data/showcase.json",  "tarek-showcase"],
+  ["data/kit.json",       "tarek-kit"],
+  ["data/companies.json", "tarek-companies"],
+  ["data/i18n.json",      "tarek-i18n"],
+];
+
+// Pre-v2 monolithic block + the now-decommissioned tarek-partners block
+// (entities moved to tarek-people + tarek-companies). Kept here so the
+// inliner can strip stale inline blocks from earlier inlines.
+const OBSOLETE_IDS = ["tarek-content", "tarek-partners"];
+
+const PAGES = ["index.html", "showcase.html", "partners.html"];
+
+function blockHtml(id, json) {
+  return `<script type="application/json" id="${id}">\n${json}\n</script>`;
 }
 
-function injectInline(html, id, data) {
-  // Pretty-print with 2-space indent (smaller than minified, easier to debug)
-  const json = JSON.stringify(data, null, 2);
-  const block = `<script type="application/json" id="${id}">\n${json}\n</script>`;
-
-  // Replace existing block if present, otherwise inject before </head>
-  const blockRegex = new RegExp(
+function injectOrReplace(html, id, json) {
+  const re = new RegExp(
     `<script type="application/json" id="${id}">[\\s\\S]*?<\\/script>`,
     "g"
   );
-  if (blockRegex.test(html)) {
-    return html.replace(blockRegex, block);
+  const block = blockHtml(id, json);
+  if (re.test(html)) return html.replace(re, block);
+  // Inject before </head> if the block doesn't exist yet.
+  return html.replace(/<\/head>/i, `${block}\n  </head>`);
+}
+
+function stripObsolete(html, ids) {
+  let out = html;
+  for (const id of ids) {
+    const re = new RegExp(
+      `\\s*<script type="application/json" id="${id}">[\\s\\S]*?<\\/script>`,
+      "g"
+    );
+    out = out.replace(re, "");
   }
-  return html.replace("</head>", `  ${block}\n</head>`);
+  return out;
 }
 
-function processFile(htmlPath, contentId, contentData, i18nId, i18nData) {
-  let html = readFileSync(resolve(ROOT, htmlPath), "utf8");
-  html = injectInline(html, contentId, contentData);
-  html = injectInline(html, i18nId, i18nData);
-  writeFileSync(resolve(ROOT, htmlPath), html, "utf8");
-  console.log(`  ✓ ${htmlPath} (inlined ${contentId} + ${i18nId})`);
-}
-
+// ── run ──
 console.log("Inlining content into HTML files (for file:// compatibility)…\n");
+const filesWritten = [];
+for (const [pageFile] of PAGES.map((p) => [p])) {
+  const pagePath = resolve(ROOT, pageFile);
+  if (!fileExists(pagePath)) continue;
+  let html = readFileSync(pagePath, "utf8");
+  // Drop legacy monolithic block(s) before re-inlining the new split blocks.
+  html = stripObsolete(html, OBSOLETE_IDS);
 
-const content = loadJson("data/content.json");
-const i18n    = loadJson("data/i18n.json");
-
-console.log(`  content.json: ${Object.keys(content).join(", ")}`);
-console.log(`  i18n.json:    ${Object.keys(i18n).join(", ")}\n`);
-
-processFile("index.html",    "tarek-content", content, "tarek-i18n", i18n);
-if (existsSync(resolve(ROOT, "showcase.html"))) {
-  processFile("showcase.html", "tarek-content", content, "tarek-i18n", i18n);
-} else {
-  console.log("  - showcase.html (skipped — not on this branch)");
+  for (const [dataFile, blockId] of BLOCKS) {
+    const dataPath = resolve(ROOT, dataFile);
+    if (!fileExists(dataPath)) continue;
+    const data = JSON.parse(readFileSync(dataPath, "utf8"));
+    const json  = JSON.stringify(data, null, 2);
+    html = injectOrReplace(html, blockId, json);
+  }
+  writeFileSync(pagePath, html);
+  filesWritten.push(pageFile);
 }
 
-console.log("\n✓ Done. HTML files now work via file:// without fetch().");
-console.log("  Live deploys still fetch fresh data from /data/*.json (inline is fallback).");
+console.log("  inlined blocks per page:");
+for (const [dataFile, blockId] of BLOCKS) {
+  const present = fileExists(resolve(ROOT, dataFile));
+  console.log(`    ${blockId.padEnd(20)} ← ${dataFile}${present ? "" : "  (missing)"}`);
+}
+console.log(`\n✓ Done. Wrote: ${filesWritten.join(", ")}`);
+console.log("  Live deploys still fetch fresh data per block from /data/*.json.");
+
+function fileExists(p) {
+  try { readFileSync(p, "utf8"); return true; } catch { return false; }
+}

@@ -1,0 +1,128 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "lastUpdated": "2026-09-01"
+  },
+  "jobs": [
+    {
+      "id": "assistant-director",
+      "name": {
+        "en": "Assistant Director",
+        "es": "Ayudante de dirección"
+      },
+      "category": "direction"
+    },
+    {
+      "id": "director",
+      "name": {
+        "en": "Director",
+        "es": "Director"
+      },
+      "category": "direction"
+    },
+    {
+      "id": "1st-ac",
+      "name": {
+        "en": "1st AC",
+        "es": "1er Ayudante de cámara"
+      },
+      "category": "cinematography"
+    },
+    {
+      "id": "2nd-ac",
+      "name": {
+        "en": "2nd AC",
+        "es": "2º Ayudante de cámara"
+      },
+      "category": "cinematography"
+    },
+    {
+      "id": "camera-operator",
+      "name": {
+        "en": "Camera Operator",
+        "es": "Operador de cámara"
+      },
+      "category": "cinematography"
+    },
+    {
+      "id": "dop",
+      "name": {
+        "en": "Director of Photography",
+        "es": "Director de fotografía"
+      },
+      "category": "cinematography"
+    },
+    {
+      "id": "best-boy-electric",
+      "name": {
+        "en": "Best Boy Electric",
+        "es": "Best Boy Eléctrico"
+      },
+      "category": "lighting"
+    },
+    {
+      "id": "electric",
+      "name": {
+        "en": "Electric",
+        "es": "Eléctrico"
+      },
+      "category": "lighting"
+    },
+    {
+      "id": "gaffer",
+      "name": {
+        "en": "Gaffer",
+        "es": "Gaffer"
+      },
+      "category": "lighting"
+    },
+    {
+      "id": "sparks",
+      "name": {
+        "en": "Sparks",
+        "es": "Sparks"
+      },
+      "category": "lighting"
+    },
+    {
+      "id": "sound-mixer",
+      "name": {
+        "en": "Sound Mixer",
+        "es": "Mezclador de sonido"
+      },
+      "category": "sound"
+    },
+    {
+      "id": "producer",
+      "name": {
+        "en": "Producer",
+        "es": "Productor"
+      },
+      "category": "production"
+    },
+    {
+      "id": "production-manager",
+      "name": {
+        "en": "Production Manager",
+        "es": "Jefe de producción"
+      },
+      "category": "production"
+    },
+    {
+      "id": "editor",
+      "name": {
+        "en": "Editor",
+        "es": "Editor"
+      },
+      "category": "other"
+    },
+    {
+      "id": "writer",
+      "name": {
+        "en": "Writer",
+        "es": "Guionista"
+      },
+      "category": "other"
+    }
+  ]
+}

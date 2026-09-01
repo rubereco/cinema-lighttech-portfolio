@@ -1,0 +1,107 @@
+/* ════════════════════════════════════════════════════════════════════════
+   reset.css — minimal CSS reset + base typography.
+   No theming here; this file is page-agnostic and just normalizes browsers.
+   ════════════════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* honor OS-level font scaling */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* v3.15.3: belt-and-braces prevention of horizontal page scroll on
+     mobile browsers where body overflow-x:hidden isn't enough. */
+  overflow-x: hidden;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  /* Mobile-first body: 16px minimum for legibility on small screens.
+     Lead measure (line-length) is short on phone so eyes don't track far. */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #f4f4f5;
+  /* v3.10.29: body background is the fallback color for very old
+     browsers that don't render the .bg-onion div. v3.10.29: changed
+     to #141417 so the fallback matches the radial center — if the
+     .bg-onion div doesn't render, the body is the same color as
+     the solid sections, so transparent sections still look right. */
+  background-color: #141417;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Smooth scrolling on iOS */
+  overflow-x: hidden;
+}
+
+/* v3.10.31: the "onion" — center nudged up to #202024 (one
+   step lighter than v3.10.30's #1c1c20, still in the same
+   family) AND added 4 intermediate color stops so the gradient
+   doesn't band. The 2-stop gradient was getting posterized on
+   dark colors into visible "onion-shape" rings — smooth 2-stop
+   gradients with subtle color differences can show discrete
+   bands on some displays. Adding intermediate stops
+   (#202024 → #18181d → #0f0f13 → #09090b → #070707 → #050506)
+   keeps the same overall feel but makes the transition
+   continuous, no visible rings. Contrast is rgb(32,32,36) →
+   rgb(5,5,6) = ~27 units per channel, a touch more than
+   v3.10.30's ~23. */
+.bg-onion {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    #202024 0%,
+    #18181d 20%,
+    #0f0f13 40%,
+    #09090b 60%,
+    #070707 80%,
+    #050506 100%
+  );
+}
+
+img, video {
+  max-width: 100%;
+  display: block;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0;
+}
+
+/* skip-link: invisible until focused */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  padding: 12px 16px;
+  background: #fff;
+  color: #000;
+  z-index: 100;
+  border-radius: 0 0 8px 0;
+}
+.skip-link:focus { top: 0; }

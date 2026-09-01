@@ -1,0 +1,25 @@
+{
+  "id": "the-bookshop-2017",
+  "title": "The Bookshop",
+  "year": 2017,
+  "type": "Largometraje",
+  "role": "Electrician Dailies",
+  "credits": {
+    "production": [
+      "Diagonal TV",
+      "A Contracorriente Films",
+      "Green Films"
+    ],
+    "people": [
+      {
+        "personId": "isabel-coixet",
+        "description": {
+          "en": "",
+          "es": ""
+        },
+        "jobId": "director"
+      }
+    ]
+  },
+  "poster": "assets/images/uploads/the-bookshop-2017.jpg"
+}
