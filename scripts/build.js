@@ -57,6 +57,16 @@ function writeAggregate(outPath, field, items, meta) {
   console.log(`  ✓ ${outPath} ← ${items.length} entries`);
 }
 
+// ─── Jobs: load first so films can resolve role jobId → name ───────
+const CATEGORY_ORDER = { direction: 0, cinematography: 1, lighting: 2, sound: 3, production: 4, other: 5 };
+const jobs = readDir("data/jobs").sort((a, b) => {
+  const ca = CATEGORY_ORDER[a.category] ?? 99;
+  const cb = CATEGORY_ORDER[b.category] ?? 99;
+  if (ca !== cb) return ca - cb;
+  return (a.name?.en ?? "").localeCompare(b.name?.en ?? "");
+});
+const jobsById = Object.fromEntries(jobs.map((j) => [j.id, j]));
+
 // ─── Films: sort by year desc, then by id ──────────────────────────
 // Normalize the folder files so the aggregate always matches the schema
 // the production JS expects: credits.production and credits.people.
@@ -82,6 +92,13 @@ function normalizeFilm(film) {
   if (typeof normalized.poster === "string" && normalized.poster.startsWith("/")) {
     normalized.poster = normalized.poster.slice(1);
   }
+  // Resolve role jobId to a display name. Old files keep the free-text
+  // role string; new admin entries store the job id. Prefer Spanish name,
+  // fall back to English, then to the raw id.
+  if (typeof normalized.role === "string" && jobsById[normalized.role]) {
+    const job = jobsById[normalized.role];
+    normalized.role = job.name?.es || job.name?.en || normalized.role;
+  }
   return normalized;
 }
 
@@ -91,7 +108,7 @@ const films = readDir("data/films")
     if ((b.year ?? 0) !== (a.year ?? 0)) return (b.year ?? 0) - (a.year ?? 0);
     return (a.id ?? "").localeCompare(b.id ?? "");
   });
-writeAggregate("data/films.json", "films", films, { version: "1.4" });
+writeAggregate("data/films.json", "films", films, { version: "1.5" });
 
 // ─── People: sort by partnership first (regular collaborators
 //     before one-off film credits), then by name ─────────────────
@@ -103,14 +120,7 @@ const people = readDir("data/people").sort((a, b) => {
 });
 writeAggregate("data/people.json", "people", people, { version: "1.5" });
 
-// ─── Jobs: sort by category order, then by name ──────────────────
-const CATEGORY_ORDER = { direction: 0, cinematography: 1, lighting: 2, sound: 3, production: 4, other: 5 };
-const jobs = readDir("data/jobs").sort((a, b) => {
-  const ca = CATEGORY_ORDER[a.category] ?? 99;
-  const cb = CATEGORY_ORDER[b.category] ?? 99;
-  if (ca !== cb) return ca - cb;
-  return (a.name?.en ?? "").localeCompare(b.name?.en ?? "");
-});
+// ─── Jobs: sorted above, now write the aggregate ──────────────────
 writeAggregate("data/jobs.json", "jobs", jobs, { version: "1.0" });
 
 console.log("build complete.");

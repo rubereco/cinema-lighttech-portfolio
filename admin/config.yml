@@ -135,7 +135,14 @@ collections:
         required: false
         allow_external_urls: false
         hint: "Haz clic para explorar la biblioteca de medios. Los pósteres existentes están en assets/images/uploads/."
-      - { name: "role",  label: "Rol de Tarek en esta película", widget: "string", hint: "ej. Gaffer, Best Boy Electric, Eléctrico" }
+      - name: "role"
+        label: "Rol de Tarek en esta película"
+        widget: "relation"
+        collection: "jobs"
+        searchFields: ["name.en", "name.es", "id"]
+        valueField: "id"
+        displayFields: ["name.es", "name.en", "category"]
+        hint: "Elige un rol del catálogo. Esto garantiza que el texto sea consistente en toda la web."
       - name: "type"
         label: "Tipo"
         widget: "select"
@@ -323,10 +330,6 @@ collections:
         required: false
         allow_external_urls: false
         hint: "Haz clic para explorar la biblioteca de medios. Los retratos existentes están en assets/images/uploads/."
-      - { name: "imdb",      label: "ID de IMDb",     widget: "string", required: false }
-      - { name: "imdbUrl",   label: "URL de IMDb",   widget: "string", required: false }
-      - { name: "instagram", label: "Usuario de Instagram", widget: "string", required: false }
-      - { name: "instagramUrl", label: "URL de Instagram",  widget: "string", required: false }
       - name: "description"
         label: "Bio (i18n)"
         widget: "object"
@@ -336,8 +339,16 @@ collections:
         fields:
           - { name: "en", label: "Inglés",  widget: "text", required: false }
           - { name: "es", label: "Español", widget: "text", required: false }
-      - { name: "url",      label: "URL del sitio web",  widget: "string", required: false }
-      - { name: "urlLabel", label: "Etiqueta de URL",   widget: "string", required: false, hint: "ej. 'Portfolio', 'Sitio web'" }
+      - name: "url"
+        label: "Enlace"
+        widget: "string"
+        required: false
+        hint: "URL a lo que sea: portfolio, IMDb, Instagram, etc."
+      - name: "urlLabel"
+        label: "Etiqueta del enlace"
+        widget: "string"
+        required: false
+        hint: "Texto que se muestra junto al enlace, ej. 'IMDb', 'Instagram', 'Portfolio'."
 
   # 4) Companies — partner businesses (equipment houses, post houses,
   #    any other non-individual partner).
@@ -377,7 +388,6 @@ collections:
                 allow_external_urls: false
                 hint: "Haz clic para explorar la biblioteca de medios. Los logos existentes están en assets/images/uploads/."
               - { name: "logoAlt", label: "Texto alternativo del logo", widget: "string", required: false }
-              - { name: "count",   label: "Número de colaboraciones (oculto si es 0)", widget: "number", value_type: "int", default: 0, required: false }
               - name: "description"
                 label: "Descripción"
                 widget: "object"

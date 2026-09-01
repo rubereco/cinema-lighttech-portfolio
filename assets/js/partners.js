@@ -151,7 +151,6 @@
           kind: c.kind,                       // discriminator for category match
           image: c.logo ?? null,
           imageAlt: c.logoAlt ?? null,
-          count: c.count ?? 0,
           description: c.description ?? { en: "", es: "" },
           url: c.url ?? null,
           urlLabel: c.urlLabel ?? null,
