@@ -286,6 +286,12 @@
      the header (margin-top: 0) and no forced section height, the
      section now ends right after the carousel content. */
   min-height: 0;
+  /* v3.15.3: prevent the absolutely positioned poster tiles from
+     creating a horizontal scroll gutter on mobile. The body has
+     overflow-x:hidden, but on some mobile browsers the poster wall
+     tiles can still extend the scroll width; clipping at the
+     section level fixes it without affecting desktop. */
+  overflow: hidden;
 }
 .section-posters > .poster-wall {
   /* v3.14.63: keep the wall right under the header; any residual

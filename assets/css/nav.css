@@ -31,6 +31,15 @@
   transition: padding 220ms ease;
 }
 
+/* v3.15.3: on mobile the hamburger → X rotation needs the header to
+   not clip the rotated bars. The glass pseudo-element is inset:0 so
+   overflow:visible is safe. Desktop keeps overflow:hidden. */
+@media (max-width: 899px) {
+  .site-header {
+    overflow: visible;
+  }
+}
+
 /* Background overlay — handles the solarband color & glass blur.
    Single layer; the mask-image modulates where the backdrop-filter
    actually applies (FULL at top → weaker toward 60% down). */

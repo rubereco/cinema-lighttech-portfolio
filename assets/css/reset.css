@@ -13,6 +13,9 @@ html {
   /* honor OS-level font scaling */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* v3.15.3: belt-and-braces prevention of horizontal page scroll on
+     mobile browsers where body overflow-x:hidden isn't enough. */
+  overflow-x: hidden;
 }
 
 html, body {
