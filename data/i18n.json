@@ -58,7 +58,10 @@
     },
     "footer": {
       "tagline": "Built with care · no tracking, no cookies.",
-      "rights": "All rights reserved"
+      "rights": "All rights reserved",
+      "legal": "Legal notice",
+      "github": "GitHub",
+      "creditPrefix": "Design and development by"
     },
     "language": {
       "toggleAria": "Switch language",
@@ -120,7 +123,10 @@
     },
     "footer": {
       "tagline": "Hecho con cuidado · sin rastreo, sin cookies.",
-      "rights": "Todos los derechos reservados"
+      "rights": "Todos los derechos reservados",
+      "legal": "Aviso legal",
+      "github": "GitHub",
+      "creditPrefix": "Diseño y desarrollo por"
     },
     "brand": "Tarek Recolons",
     "hero": {

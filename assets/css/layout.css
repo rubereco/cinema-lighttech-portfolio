@@ -104,6 +104,30 @@
   margin: 4px 0;
 }
 
+.footer-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.footer-meta .sep {
+  color: var(--c-fg-muted);
+}
+
+.footer-meta a,
+.footer-credit a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer-meta a:hover,
+.footer-meta a:focus-visible,
+.footer-credit a:hover,
+.footer-credit a:focus-visible {
+  color: var(--c-accent);
+}
+
 /* Desktop: section heads get a fixed index column */
 @media (min-width: 900px) {
   .section-head {

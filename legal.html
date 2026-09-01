@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0b0d" />
+  <title>Aviso legal — Tarek Recolons</title>
+  <meta name="description" content="Aviso legal y nota de responsabilidad del portfolio de Tarek Recolons." />
+  <meta property="og:title" content="Aviso legal — Tarek Recolons" />
+  <meta property="og:description" content="Aviso legal y nota de responsabilidad del portfolio de Tarek Recolons." />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/reset.css" />
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <style>
+    .legal-page {
+      background: var(--c-bg);
+      color: var(--c-fg);
+      min-height: 100vh;
+    }
+    .legal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px var(--pad-x);
+      border-bottom: 1px solid var(--c-border);
+    }
+    .legal-header__back {
+      color: var(--c-fg-dim);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .legal-header__back:hover {
+      color: var(--c-accent);
+    }
+    .legal-lang {
+      display: flex;
+      gap: 8px;
+    }
+    .legal-lang button {
+      background: transparent;
+      border: 1px solid var(--c-border);
+      color: var(--c-fg-dim);
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+      line-height: 1;
+    }
+    .legal-lang button[aria-pressed="true"] {
+      background: var(--c-accent);
+      color: #000;
+      border-color: var(--c-accent);
+    }
+    .legal-main {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: var(--section-pad-y) var(--pad-x);
+    }
+    .legal-main h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 6vw, 3rem);
+      margin-bottom: 32px;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+    .legal-main h2 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      margin: 32px 0 12px;
+      color: var(--c-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .legal-main p,
+    .legal-main li,
+    .legal-main address {
+      color: var(--c-fg-dim);
+      line-height: 1.7;
+      margin-bottom: 12px;
+      max-width: var(--measure);
+    }
+    .legal-main ul {
+      padding-left: 20px;
+      margin-bottom: 16px;
+    }
+    .legal-main address {
+      font-style: normal;
+    }
+    .legal-main a {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .legal-main a:hover,
+    .legal-main a:focus-visible {
+      color: var(--c-accent);
+    }
+    .legal-main .placeholder {
+      background: var(--c-accent-soft);
+      color: var(--c-accent);
+      padding: 0 4px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .legal-block {
+      display: none;
+    }
+    html[lang="es"] .legal-block[lang="es"],
+    html[lang="en"] .legal-block[lang="en"] {
+      display: block;
+    }
+    .legal-footer {
+      text-align: center;
+      padding: 32px var(--pad-x);
+      color: var(--c-fg-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--c-border);
+    }
+  </style>
+</head>
+<body class="legal-page">
+  <header class="legal-header">
+    <a class="legal-header__back" href="/">← <span data-back-es="Volver al portfolio" data-back-en="Back to portfolio">Volver al portfolio</span></a>
+    <div class="legal-lang" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">ES</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main class="legal-main section">
+    <div class="legal-block" lang="es">
+      <h1>Aviso legal</h1>
+
+      <h2>Datos del titular</h2>
+      <address>
+        <strong>Tarek Recolons</strong><br />
+        Correo electrónico: <a href="mailto:tarek@recalone.com">tarek@recalone.com</a><br />
+        Dirección fiscal: Rda. de la Riera, 22, 08459 Sant Antoni de Vilamajor, Barcelona<br />
+        NIF/NIE: 48017236K
+      </address>
+
+      <h2>Objeto de la web</h2>
+      <p>Este sitio es un portfolio profesional que muestra la trayectoria de Tarek Recolons como gaffer en el departamento eléctrico e iluminación cinematográfica. Su finalidad es presentar créditos, proyectos y datos de contacto profesional.</p>
+
+      <h2>Propiedad intelectual e industrial</h2>
+      <p>Los textos propios, el diseño y el código fuente de esta web son propiedad de Tarek Recolons o de sus respectivos colaboradores.</p>
+      <p>Los pósters, fotografías de rodaje, capturas y logotipos de terceros mostrados en los créditos pertenecen a sus productoras, estudios o titulares legítimos y se utilizan únicamente con fines informativos y de reconocimiento profesional. Si cualquier titular desea que se retire un material, puede solicitarlo en el correo indicado arriba.</p>
+
+      <h2>Responsabilidad sobre el contenido</h2>
+      <p>Tarek Recolons es el único responsable del contenido publicado en este sitio. El desarrollador de la web no asume responsabilidad sobre los textos, imágenes ni decisiones editoriales añadidas tras la entrega del sitio.</p>
+      <p>La información se ofrece a efectos informativos. Aunque se intenta mantener actualizada, no se garantiza que esté libre de errores u omisiones en todo momento.</p>
+
+      <h2>Enlaces externos</h2>
+      <p>Este sitio puede incluir enlaces a IMDb, Instagram u otras plataformas externas. No se controla el contenido de esos sitios, por lo que no se asume responsabilidad sobre sus políticas ni publicaciones.</p>
+
+      <h2>Protección de datos</h2>
+      <p>Esta web no utiliza formularios de contacto ni cookies de seguimiento. Si un usuario envía un correo electrónico, sus datos se usarán únicamente para responder a esa consulta y no se cederán a terceros.</p>
+      <p>Para ejercer los derechos de acceso, rectificación, oposición o supresión, escribe a <a href="mailto:tarek@recalone.com">tarek@recalone.com</a>.</p>
+
+      <h2>Legislación aplicable</h2>
+      <p>Este aviso legal se rige por la legislación española y, en particular, por la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI).</p>
+
+      <h2>Créditos del sitio</h2>
+      <p>Diseño y desarrollo web por <a href="https://github.com/rubereco" target="_blank" rel="noopener">Ruben Recolons</a>.<br />Contenido, textos e imágenes publicadas por Tarek Recolons.</p>
+    </div>
+
+    <div class="legal-block" lang="en">
+      <h1>Legal notice</h1>
+
+      <h2>Owner information</h2>
+      <address>
+        <strong>Tarek Recolons</strong><br />
+        Email: <a href="mailto:tarek@recalone.com">tarek@recalone.com</a><br />
+        Registered address: Rda. de la Riera, 22, 08459 Sant Antoni de Vilamajor, Barcelona<br />
+        Tax ID: 48017236K
+      </address>
+
+      <h2>Purpose of the website</h2>
+      <p>This site is a professional portfolio showcasing Tarek Recolons' career as a gaffer in the electrical and cinematographic lighting department. Its purpose is to present credits, projects and professional contact details.</p>
+
+      <h2>Intellectual and industrial property</h2>
+      <p>The original text, design and source code of this website are the property of Tarek Recolons or their respective collaborators.</p>
+      <p>Posters, set photography, stills and third-party logos displayed in the credits belong to their production companies, studios or lawful owners and are used for informational and professional recognition purposes only. Any rights holder may request removal by writing to the email above.</p>
+
+      <h2>Liability for content</h2>
+      <p>Tarek Recolons is solely responsible for the content published on this site. The web developer assumes no liability for texts, images or editorial decisions added after the site was delivered.</p>
+      <p>The information is provided for informational purposes. Although every effort is made to keep it up to date, there is no guarantee that it is completely free of errors or omissions at all times.</p>
+
+      <h2>External links</h2>
+      <p>This site may include links to IMDb, Instagram or other external platforms. We do not control the content of those sites and therefore assume no responsibility for their policies or publications.</p>
+
+      <h2>Data protection</h2>
+      <p>This website does not use contact forms or tracking cookies. If a user sends an email, their data will be used solely to reply to that inquiry and will not be shared with third parties.</p>
+      <p>To exercise rights of access, rectification, objection or erasure, write to <a href="mailto:tarek@recalone.com">tarek@recalone.com</a>.</p>
+
+      <h2>Applicable law</h2>
+      <p>This legal notice is governed by Spanish law and, in particular, by Law 34/2002 of 11 July on Information Society Services and Electronic Commerce (LSSI).</p>
+
+      <h2>Site credits</h2>
+      <p>Web design and development by <a href="https://github.com/rubereco" target="_blank" rel="noopener">Ruben Recolons</a>.<br />Content, texts and images published by Tarek Recolons.</p>
+    </div>
+  </main>
+
+  <footer class="legal-footer">
+    <p>© Tarek Recolons · <span id="year">2025</span></p>
+  </footer>
+
+  <script>
+    (function () {
+      const html = document.documentElement;
+      const buttons = document.querySelectorAll('.legal-lang button');
+      const backLabel = document.querySelector('[data-back-es]');
+
+      function setLang(lang) {
+        html.lang = lang;
+        document.title = lang === 'es'
+          ? 'Aviso legal — Tarek Recolons'
+          : 'Legal notice — Tarek Recolons';
+        if (backLabel) {
+          backLabel.textContent = backLabel.getAttribute('data-back-' + lang);
+        }
+        buttons.forEach(function (btn) {
+          const active = btn.getAttribute('data-lang') === lang;
+          btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+        try { localStorage.setItem('tarek-lang', lang); } catch (e) {}
+      }
+
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          setLang(btn.getAttribute('data-lang'));
+        });
+      });
+
+      // Sync with main site language if available
+      let stored = null;
+      try { stored = localStorage.getItem('tarek-lang'); } catch (e) {}
+      const browserLang = navigator.language && navigator.language.startsWith('es') ? 'es' : 'en';
+      setLang(stored || browserLang || 'es');
+
+      document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+  </script>
+</body>
+</html>
