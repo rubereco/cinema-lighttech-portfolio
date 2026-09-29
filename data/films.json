@@ -303,6 +303,18 @@
         "people": []
       },
       "poster": "assets/images/uploads/redlights.jpg"
+    },
+    {
+      "id": "la-culpa-2010",
+      "title": "La Culpa",
+      "year": 2010,
+      "poster": "assets/images/uploads/la-culpa.jpg",
+      "role": "Eléctrico",
+      "type": "Cortometraje",
+      "credits": {
+        "production": [],
+        "people": []
+      }
     }
   ]
 }
