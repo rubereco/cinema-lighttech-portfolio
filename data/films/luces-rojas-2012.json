@@ -2,11 +2,9 @@
   "id": "luces-rojas-2012",
   "title": "Luces rojas",
   "year": 2012,
-  "type": "Largometraje",
-  "role": "electric",
-  "credits": {
-    "production": [],
-    "people": []
-  },
-  "poster": "assets/images/uploads/redlights.jpg"
+  "type": "feature",
+  "role": "electrician",
+  "poster": "assets/images/uploads/redlights.jpg",
+  "displayOrder": 17,
+  "trailerUrl": "https://www.youtube.com/watch?v=NcMkgDNhpMQ"
 }

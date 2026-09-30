@@ -2,7 +2,9 @@
   "id": "la-mala-madre-2026",
   "title": "La Mala Madre",
   "year": 2026,
-  "poster": "/assets/images/uploads/la-mala-madre.jpg",
+  "type": "feature",
   "role": "gaffer",
-  "type": "Largometraje"
+  "poster": "/assets/images/uploads/la-mala-madre.jpg",
+  "displayOrder": 3,
+  "trailerUrl": "https://vimeo.com/1121117953/8c7df73042"
 }

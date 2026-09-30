@@ -2,7 +2,9 @@
   "id": "ayer-no-termina-nunca-2013",
   "title": "Ayer No Termina Nunca ",
   "year": 2013,
+  "type": "feature",
+  "role": "electrician",
   "poster": "/assets/images/uploads/ayer-no-termina-nunca.jpg",
-  "role": "electric",
-  "type": "Largometraje"
+  "displayOrder": 16,
+  "trailerUrl": "https://www.youtube.com/watch?v=L1YXB7rn5Ks"
 }

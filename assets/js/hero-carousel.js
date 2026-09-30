@@ -671,7 +671,7 @@
     // data-y attribute still overrides the random y for fine-tuning.
     var smallsLeft = INITIAL_OFFSET;
     var smallsRight = X_RANGE - WRAP_MARGIN - SMALL_WIDTH;
-    var xSlotWidth = (smallsRight - smallsLeft) / smalls.length;
+    var xSlotWidth = smalls.length ? (smallsRight - smallsLeft) / smalls.length : 0;
     smalls.forEach(function (tile, i) {
       var xSlot = smallsLeft + (i + 0.5) * xSlotWidth;
       var xOffset = (Math.random() - 0.5) * SMALL_X_OFFSET_RANGE; // ±30 desktop, ±12 mobile
@@ -738,41 +738,16 @@
   //
   // v3.14.31: Tarek reported "after deleting the image and hard
   // refreshing i can still see the image". Root cause: init()
-  // was reading the inlined tarek-hero JSON block in index.html
-  // (for file:// compatibility) and never re-fetching. The
-  // inlined block is only refreshed when `npm run build` runs
-  // (= every Cloudflare Pages deploy). Locally, if Tarek edits
-  // data/hero.json via git/admin and just hard-refreshes, the
-  // inlined block is stale and the carousel shows old data.
-  //
-  // Fix: ALWAYS fetch data/hero.json (cache: "no-cache") on
-  // init. The inline block is now only a fallback for file://
-  // (where fetch is blocked by CORS) or for fetch errors.
-  // The live site always shows the latest data from the repo.
+  // Load the same JSON file that the admin edits. On mobile only the
+  // large photographs are added to the hero; small ones move to About.
   var _heroDiag = false; // set true to silence the [hero-carousel] log line
-  function readHeroInline() {
-    var el = document.getElementById("tarek-hero");
-    if (!el) return null;
-    try { return JSON.parse(el.textContent); } catch (e) { return null; }
-  }
   function loadHeroData() {
-    // file:// — fetch is blocked by CORS, inline is the only option
-    if (location.protocol === "file:") {
-      var inline = readHeroInline();
-      if (!_heroDiag) console.info("[hero-carousel] file:// protocol — using inline tarek-hero:", inline ? (inline.items ? inline.items.length + " items" : "present") : "missing");
-      return Promise.resolve(inline);
-    }
-    // http(s) — always fetch fresh, fall back to inline on error
     if (!_heroDiag) console.info("[hero-carousel] fetching data/hero.json (cache: no-cache)");
     return fetch("data/hero.json", { cache: "no-cache" })
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
       .then(function (d) {
         if (!_heroDiag) console.info("[hero-carousel] fetched", d && d.items ? d.items.length + " items" : "(no items)");
         return d;
-      })
-      .catch(function (e) {
-        console.warn("[hero-carousel] fetch failed, falling back to inline", e);
-        return readHeroInline();
       });
   }
 
@@ -789,6 +764,7 @@
     for (var i = 0; i < items.length; i++) {
       var it = items[i] || {};
       if (!it.file) continue;
+      if (isMobile && it.size === "small") continue;
       var img = document.createElementNS(SVG_NS, "image");
       img.setAttribute("href", it.file);
       img.setAttribute("data-size", it.size === "small" ? "small" : "big");
@@ -803,9 +779,7 @@
     if (!hero || !stage) return;
     if (typeof gsap === 'undefined') return;
 
-    // v3.14.31: always go through loadHeroData (fetch on http,
-    // inline on file://). The rest of init() runs inside the
-    // .then() so buildLayout() runs AFTER the tiles are in the SVG.
+    // Build the layout only after the photograph list has loaded.
     loadHeroData().then(function (data) {
       if (!data || !data.items || !data.items.length) {
         if (!_heroDiag) console.warn("[hero-carousel] no items in data, carousel will be empty");
@@ -1308,22 +1282,22 @@
       // even outside the hero, so we don't need pointerleave
       // to do anything special.
   
-      // === Resize: re-check the mobile breakpoint ===
-      // If the user resizes from desktop down to mobile (or vice versa),
-      // the carousel state needs to be re-evaluated. On resize to mobile,
-      // we don't actually stop the ticker (would require more plumbing)
-      // — but the SVG is hidden via CSS so the user sees the static
-      // background, not the carousel. The state will be correct on
-      // next page load.
+    }).catch(function (error) {
+      console.error("[hero-carousel] could not load photographs:", error);
     });
   }
 
   function boot() {
     if (typeof gsap === 'undefined') {
-      setTimeout(boot, 60);
+      console.error('[hero-carousel] local GSAP library did not load');
       return;
     }
     init();
+    // Tile counts differ across the breakpoint, so rebuild the carousel on a
+    // genuine desktop/mobile layout change.
+    window.matchMedia('(max-width: 767px)').addEventListener('change', function () {
+      window.location.reload();
+    });
   }
 
   if (document.readyState === 'loading') {

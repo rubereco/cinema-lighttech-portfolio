@@ -1,51 +1,5 @@
 {
-  "_meta": {
-    "version": "1.5",
-    "lastUpdated": "2026-09-29"
-  },
   "people": [
-    {
-      "id": "juli-carne-martorell",
-      "name": "Juli Carné Martorell",
-      "portrait": "assets/images/uploads/juli-carne-martorell.jpg",
-      "description": {
-        "en": "Cinematographer. Portfolio at julicarnemartorell.com.",
-        "es": "Director de fotografía. Portfolio en julicarnemartorell.com."
-      },
-      "url": "https://www.julicarnemartorell.com",
-      "urlLabel": "Portfolio",
-      "partnership": {
-        "jobIds": [
-          "dop"
-        ],
-        "since": null,
-        "description": {
-          "en": "",
-          "es": ""
-        }
-      }
-    },
-    {
-      "id": "nils-dalmases",
-      "name": "Nils Dalmases",
-      "portrait": "/assets/images/uploads/nildalmases.png",
-      "description": {
-        "en": "Cinematographer. Portfolio at nilsdalmases.com.",
-        "es": "Director de fotografía. Portfolio en nilsdalmases.com."
-      },
-      "url": "https://nilsdalmases.com",
-      "urlLabel": "Portfolio",
-      "partnership": {
-        "jobIds": [
-          "dop"
-        ],
-        "since": null,
-        "description": {
-          "en": "",
-          "es": ""
-        }
-      }
-    },
     {
       "id": "alejandro-rojas",
       "name": "Alejandro Rojas",
@@ -55,6 +9,18 @@
       "id": "isabel-coixet",
       "name": "Isabel Coixet",
       "portrait": null
+    },
+    {
+      "id": "juli-carne-martorell",
+      "name": "Juli Carné Martorell",
+      "portrait": "assets/images/uploads/juli-carne-martorell.jpg",
+      "url": "https://www.julicarnemartorell.com",
+      "partnership": {
+        "since": null,
+        "categories": [
+          "cinematography"
+        ]
+      }
     },
     {
       "id": "marc-ortiz-prades",
@@ -67,11 +33,22 @@
       "portrait": null
     },
     {
+      "id": "nils-dalmases",
+      "name": "Nils Dalmases",
+      "portrait": "/assets/images/uploads/nildalmases.png",
+      "url": "https://nilsdalmases.com",
+      "partnership": {
+        "since": null,
+        "categories": [
+          "cinematography"
+        ]
+      }
+    },
+    {
       "id": "tarek-recolons",
       "name": "Tarek Recolons",
       "portrait": null,
-      "url": "https://www.imdb.com/name/nm5007366/",
-      "urlLabel": "IMDb"
+      "url": "https://www.imdb.com/name/nm5007366/"
     }
   ]
 }

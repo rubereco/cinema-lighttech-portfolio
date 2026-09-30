@@ -2,7 +2,9 @@
   "id": "ceniza-en-la-boca-2026",
   "title": "Ceniza en la Boca",
   "year": 2026,
-  "poster": "/assets/images/uploads/ceniza-en-la-boca.jpg",
+  "type": "feature",
   "role": "gaffer",
-  "type": "Largometraje"
+  "poster": "/assets/images/uploads/ceniza-en-la-boca.jpg",
+  "displayOrder": 2,
+  "trailerUrl": "https://www.youtube.com/watch?v=u9_qWBrM8dE"
 }
