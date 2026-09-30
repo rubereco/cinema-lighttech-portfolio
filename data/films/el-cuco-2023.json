@@ -2,13 +2,9 @@
   "id": "el-cuco-2023",
   "title": "El Cuco",
   "year": 2023,
+  "type": "feature",
   "role": "gaffer",
-  "type": "Largometraje",
-  "credits": {
-    "production": [
-      null
-    ],
-    "people": []
-  },
-  "poster": "/assets/images/uploads/elcuco.jpg"
+  "poster": "/assets/images/uploads/elcuco.jpg",
+  "displayOrder": 10,
+  "trailerUrl": "https://www.rtve.es/play/videos/somos-cine/trailer-cuco-belen-cuesta-jorge-suqet/6840745"
 }

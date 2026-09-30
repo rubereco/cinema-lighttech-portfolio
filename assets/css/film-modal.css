@@ -1,0 +1,40 @@
+.film-modal { position: fixed; inset: 0; z-index: 3000; display: none; }
+.film-modal[aria-hidden="false"] { display: grid; place-items: center; }
+.film-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.88); backdrop-filter: blur(8px); }
+.film-modal__content {
+  position: relative; width: min(1080px, calc(100vw - 32px)); max-height: calc(100dvh - 32px);
+  overflow-y: auto; background: var(--c-bg); color: var(--c-fg);
+  border: 1px solid var(--c-border); border-radius: 12px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+}
+html.film-modal-open, html.film-modal-open body { overflow: hidden; }
+.film-modal__chrome { position: absolute; top: 12px; right: 12px; z-index: 3; }
+.film-modal__close, .film-modal__nav {
+  display: grid; place-items: center; width: 44px; height: 44px;
+  border: 1px solid var(--c-border); border-radius: 50%;
+  background: rgba(0,0,0,.8); color: white; cursor: pointer;
+}
+.film-modal__close:hover, .film-modal__nav:hover { border-color: var(--c-accent); }
+.film-modal__close svg, .film-modal__nav svg { width: 22px; height: 22px; }
+.film-modal__nav { position: absolute; z-index: 3; top: min(28vw, 300px); }
+.film-modal__nav--prev { left: 12px; }
+.film-modal__nav--next { right: 12px; }
+.film-modal__media {
+  display: grid; place-items: center; width: 100%; aspect-ratio: 16 / 9;
+  max-height: 60dvh; background: #050505; overflow: hidden;
+}
+.film-modal__media iframe, .film-modal__media img { display: block; width: 100%; height: 100%; border: 0; }
+.film-modal__media img { object-fit: contain; }
+.film-modal__info { padding: clamp(20px, 3vw, 36px); display: grid; gap: 16px; }
+.film-modal__title { margin: 0; font-family: var(--font-display); font-size: clamp(28px, 4vw, 48px); line-height: 1.05; }
+.film-modal__meta { display: flex; gap: 12px; margin: 6px 0 0; color: var(--c-fg-dim); }
+.film-modal__meta > span:not([hidden]) + span:not([hidden])::before { content: "·"; margin-right: 12px; }
+.film-modal__role { margin: 0; display: flex; gap: 12px; align-items: baseline; }
+.film-modal__role-label { color: var(--c-fg-muted); }
+.film-modal__role strong { color: var(--c-accent); }
+.film-modal__watch { color: var(--c-accent); text-decoration: underline; text-underline-offset: 3px; }
+.film-modal [hidden] { display: none !important; }
+@media (max-width: 699px) {
+  .film-modal__content { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
+  .film-modal__nav { top: 28vw; width: 40px; height: 40px; }
+}

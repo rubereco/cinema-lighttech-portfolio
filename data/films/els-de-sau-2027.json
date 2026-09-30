@@ -2,7 +2,9 @@
   "id": "els-de-sau-2027",
   "title": "Els de Sau",
   "year": 2027,
-  "poster": "/assets/images/uploads/els-de-sau.webp",
+  "type": "feature",
   "role": "gaffer",
-  "type": "Largometraje"
+  "poster": "/assets/images/uploads/els-de-sau.webp",
+  "displayOrder": 1,
+  "trailerUrl": null
 }

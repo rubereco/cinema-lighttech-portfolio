@@ -2,11 +2,9 @@
   "id": "lultima-nit-del-karaoke-2021",
   "title": "L'última nit del karaoke",
   "year": 2021,
-  "type": "Serie TV",
-  "role": "Electrician / 2nd Gaffer",
-  "credits": {
-    "production": [],
-    "people": []
-  },
-  "poster": "assets/images/uploads/lultima-nit-del-karaoke-2021.jpg"
+  "type": "series",
+  "role": "electrician2nd",
+  "poster": "assets/images/uploads/lultima-nit-del-karaoke-2021.jpg",
+  "displayOrder": 12,
+  "trailerUrl": "https://vimeo.com/640411356"
 }

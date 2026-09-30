@@ -2,22 +2,9 @@
   "id": "un-altre-home-2025",
   "title": "Un altre home",
   "year": 2025,
-  "type": "Largometraje",
-  "role": "Gaffer",
-  "credits": {
-    "production": [
-      "Oberon Media"
-    ],
-    "people": [
-      {
-        "personId": "tarek-recolons",
-        "description": {
-          "en": "",
-          "es": ""
-        },
-        "jobId": "gaffer"
-      }
-    ]
-  },
-  "poster": "assets/images/uploads/un-altre-home-2025.jpg"
+  "type": "feature",
+  "role": "gaffer",
+  "poster": "assets/images/uploads/un-altre-home-2025.jpg",
+  "displayOrder": 5,
+  "trailerUrl": "https://www.youtube.com/watch?v=_IhwTl5UVhM"
 }
