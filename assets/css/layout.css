@@ -27,15 +27,6 @@
   min-width: 0;
 }
 
-.section-alt {
-  background: transparent;
-}
-
-.section-cta {
-  padding-bottom: 80px;
-  background: transparent;
-}
-
 .section-head {
   display: flex;
   flex-direction: column;

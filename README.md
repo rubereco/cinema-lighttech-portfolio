@@ -9,6 +9,8 @@ Static portfolio for Cloudflare Pages, with a Decap CMS editor at `/admin/`. The
 3. Cloudflare Pages runs `npm run build`. `scripts/build.js` combines `data/films/*.json` into `data/films.json` and `data/people/*.json` into `data/people.json`. `scripts/seo.mjs` refreshes the film fallback, structured data, page metadata, and initial About/legal copy from the translation file.
 4. Once Pages deploys the new build, the public JavaScript fetches those JSON files. Visitors see the change on the next page load.
 
+For Cloudflare preview deployments, the build points the preview admin at `CF_PAGES_BRANCH`. Its edits read and publish against that branch. The production admin continues to use `main`, so preview translations are visible in the editor before the PR is merged.
+
 This is deployment-based publishing. Admin edits do not update an already open visitor tab immediately.
 
 ## Content map

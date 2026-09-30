@@ -30,12 +30,28 @@ body {
   font-size: 16px;
   line-height: 1.55;
   color: #f4f4f5;
-  /* One background color continues through all sections. */
+  /* Fallback behind the fixed radial background. */
   background-color: #141417;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Smooth scrolling on iOS */
   overflow-x: hidden;
+}
+
+.bg-onion {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    #202024 0%,
+    #18181d 20%,
+    #0f0f13 40%,
+    #09090b 60%,
+    #070707 80%,
+    #050506 100%
+  );
 }
 
 img, video {

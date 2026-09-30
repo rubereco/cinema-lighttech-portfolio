@@ -10,10 +10,6 @@
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh; /* dynamic viewport — fixes iOS Safari 100vh bug */
-  /* v3.10.19: transparent — body's radial gradient (reset.css) shows
-     through. The center of that radial is #050506 and is anchored to
-     the middle of the viewport, so the hero always shows the darkest
-     part of the onion in the middle of the screen. */
   background: transparent;
   overflow: hidden;
   isolation: isolate;
@@ -88,11 +84,7 @@
        showing enough of the carousel. */
     min-height: 0;
     height: auto;
-    /* 50px breathing space above and below. With the hero
-       transparent, the margin shows the edge of the body's
-       radial — fading toward #0b0b0d, which is exactly the
-       color of .section-posters just below. */
-    margin: 50px 0;
+    margin: 24px 0 0;
     cursor: default;
     /* v3.10.19: transparent so the body's radial shows through. */
     background-color: transparent;
@@ -166,11 +158,6 @@
   padding-left: 0;
   padding-right: 0;
   position: relative;
-  /* v3.10.23: solid #141417. This is the "medium" band of the
-     three-shade pattern. The hero is the onion (dark, fixed radial),
-     then the four sections after it are #141417 → #1c1c20 → #0b0b0d
-     → #141417. Three distinct shades so you can actually see the
-     bands changing as you scroll. */
   background: transparent;
 }
 
@@ -222,17 +209,6 @@
   margin-top: 0;
   margin-bottom: 0;
 }
-/* Keep a modest air gap so the carousel doesn't touch the next
-   section, but don't leave the large gap from the old min-height. */
-.section-posters {
-  padding-bottom: 48px;
-}
-@media (min-width: 900px) {
-  .section-posters {
-    padding-bottom: 64px;
-  }
-}
-
 /* v3.11.1: on tablet+ restore the guttered layout from v3.10.25.
    Mobile (<560px) stays full-bleed per Buddie's "fill all the
    screen" feedback — the poster wall reaches the screen edges.
@@ -376,6 +352,8 @@
   grid-template-columns: 1fr;
   gap: 28px;
 }
+
+.about-grid > .section-head { margin-bottom: 0; }
 
 .about-body {
   font-size: 16px;

@@ -1289,7 +1289,7 @@
 
   function boot() {
     if (typeof gsap === 'undefined') {
-      setTimeout(boot, 60);
+      console.error('[hero-carousel] local GSAP library did not load');
       return;
     }
     init();
