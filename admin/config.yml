@@ -144,15 +144,20 @@ collections:
     label: Traducciones
     files:
       - name: translations
-        label: 'Textos en inglés y español'
+        label: 'Textos del sitio en inglés y español'
         file: data/i18n.json
         format: json
         fields:
           - name: entries
-            label: Textos
+            label: 'Abre un texto para editarlo'
             widget: list
-            summary: '{{fields.key}}'
+            collapsed: true
+            allow_add: false
+            allow_remove: false
+            allow_reorder: false
+            summary: '{{fields.editorLabel}}'
             fields:
-              - { name: key, label: Clave, widget: string }
-              - { name: en, label: Inglés, widget: text }
-              - { name: es, label: Español, widget: text }
+              - { name: key, label: 'Clave interna', widget: hidden }
+              - { name: editorLabel, label: 'Nombre interno', widget: hidden }
+              - { name: en, label: 'Texto en inglés', widget: text, hint: 'Si aparecen etiquetas o palabras entre llaves, consérvalas al cambiar el texto.' }
+              - { name: es, label: 'Texto en español', widget: text, hint: 'Si aparecen etiquetas o palabras entre llaves, consérvalas al cambiar el texto.' }

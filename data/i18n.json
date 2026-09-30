@@ -2,446 +2,535 @@
   "entries": [
     {
       "key": "about.body",
+      "editorLabel": "Sobre mí · Texto principal",
       "en": "<p>With 10+ years of experience in the electrical and cinematographic lighting department, I have worked mainly on feature films, series and advertising productions, both national and international.</p><p>During this time I have developed skills in planning, preparation and execution of lighting, working alongside the Director of Photography to bring their visual proposal to set accurately, efficiently and safely.</p><p>The experience gained over years of shooting and on productions of different scales has allowed me to work with diverse technical teams, adapt to the needs of each project and quickly solve the challenges that may arise on set.</p><p>My career includes work on feature films and international projects, acquiring solid experience in both technical work and coordination of the electrical team.</p><p>The goal is simple: understand the Director of Photography's proposal, find the right solution and make it work on set. All with a way of working based on precision, organization and adaptability.</p>",
       "es": "<p>Con +10 años de experiencia en el departamento eléctrico y de iluminación cinematográfica, se ha trabajado principalmente en largometrajes, series y producciones publicitarias, tanto nacionales como internacionales.</p><p>Durante este tiempo se han desarrollado habilidades en planificación, preparación y ejecución de la iluminación, trabajando junto al Director de Fotografía para llevar su propuesta visual a rodaje de forma precisa, eficiente y segura.</p><p>La experiencia obtenida durante años de rodajes y en producciones de diferentes escalas ha permitido trabajar con equipos técnicos diversos, adaptarse a las necesidades de cada proyecto y resolver de forma rápida los retos que puedan surgir en set.</p><p>La trayectoria incluye trabajos en largometrajes y proyectos internacionales, adquiriendo una sólida experiencia tanto en el trabajo técnico como en la coordinación del equipo eléctrico.</p><p>El objetivo es sencillo: entender la propuesta del Director de Fotografía, encontrar la solución adecuada y hacer que funcione en rodaje. Todo ello con una forma de trabajo basada en la precisión, la organización y la capacidad de adaptación.</p>"
     },
     {
       "key": "about.carouselLabel",
+      "editorLabel": "Sobre mí · Nombre del carrusel de fotos",
       "en": "Behind the scenes",
       "es": "Detrás de cámaras"
     },
     {
       "key": "about.choosePhoto",
+      "editorLabel": "Sobre mí · Selector de fotos",
       "en": "Choose photo",
       "es": "Elegir foto"
     },
     {
       "key": "about.closePhoto",
+      "editorLabel": "Sobre mí · Botón para cerrar la foto",
       "en": "Close photo",
       "es": "Cerrar foto"
     },
     {
       "key": "about.nextPhoto",
+      "editorLabel": "Sobre mí · Botón para la foto siguiente",
       "en": "Next photo",
       "es": "Foto siguiente"
     },
     {
       "key": "about.photo.hk-cinema.alt",
+      "editorLabel": "Sobre mí · Descripción de la foto del cine",
       "en": "Cinema lighting setup",
       "es": "Iluminación de cine"
     },
     {
       "key": "about.photo.lantern-stairs.alt",
+      "editorLabel": "Sobre mí · Descripción de la foto de las escaleras",
       "en": "Lantern-lit staircase",
       "es": "Escalera iluminada con faroles"
     },
     {
       "key": "about.photo.red-ladder.alt",
+      "editorLabel": "Sobre mí · Descripción de la foto de la escalera roja",
       "en": "Red ladder on set",
       "es": "Escalera roja en un rodaje"
     },
     {
       "key": "about.photo.tunnel.alt",
+      "editorLabel": "Sobre mí · Descripción de la foto del túnel",
       "en": "Lighting in a tunnel",
       "es": "Iluminación en un túnel"
     },
     {
       "key": "about.photoPosition",
+      "editorLabel": "Sobre mí · Número de foto",
       "en": "Photo {current} of {total}",
       "es": "Foto {current} de {total}"
     },
     {
       "key": "about.photoPreview",
+      "editorLabel": "Sobre mí · Nombre de la foto ampliada",
       "en": "Photo preview",
       "es": "Vista ampliada de la foto"
     },
     {
       "key": "about.previousPhoto",
+      "editorLabel": "Sobre mí · Botón para la foto anterior",
       "en": "Previous photo",
       "es": "Foto anterior"
     },
     {
       "key": "about.statsAria",
+      "editorLabel": "Sobre mí · Nombre de los datos de trayectoria",
       "en": "Career highlights",
       "es": "Datos de la trayectoria"
     },
     {
       "key": "about.statsAvailabilityLabel",
+      "editorLabel": "Sobre mí · Dato de disponibilidad: nombre",
       "en": "Availability",
       "es": "Disponibilidad"
     },
     {
       "key": "about.statsAvailabilityValue",
+      "editorLabel": "Sobre mí · Dato de disponibilidad: valor",
       "en": "Global",
       "es": "Global"
     },
     {
       "key": "about.statsFilmsLabel",
+      "editorLabel": "Sobre mí · Dato de largometrajes: nombre",
       "en": "Feature films",
       "es": "Largometrajes"
     },
     {
       "key": "about.statsFilmsValue",
+      "editorLabel": "Sobre mí · Dato de largometrajes: cifra",
       "en": "10+",
       "es": "10+"
     },
     {
       "key": "about.statsYearsLabel",
+      "editorLabel": "Sobre mí · Dato de experiencia: nombre",
       "en": "Years experience",
       "es": "Años de experiencia"
     },
     {
       "key": "about.statsYearsValue",
+      "editorLabel": "Sobre mí · Dato de experiencia: cifra",
       "en": "10+",
       "es": "10+"
     },
     {
       "key": "about.title",
+      "editorLabel": "Sobre mí · Título de la sección",
       "en": "About me and professional career",
       "es": "Sobre mí y carrera profesional"
     },
     {
       "key": "brand",
+      "editorLabel": "Cabecera · Nombre de Tarek",
       "en": "Tarek Recolons",
       "es": "Tarek Recolons"
     },
     {
       "key": "companies.aluzine.description",
+      "editorLabel": "Empresas · Descripción de Aluzine",
       "en": "Lighting rental house based in Spain. HMI, LED and tungsten packages for film, TV and commercial productions.",
       "es": "Casa de alquiler de iluminación en España. Paquetes de HMI, LED y tungsteno para producciones cinematográficas, TV y publicidad."
     },
     {
       "key": "companies.cinetecnico.description",
+      "editorLabel": "Empresas · Descripción de Cinetécnico",
       "en": "Equipment rental house based in Spain. Lighting, grip, and accessories for film, TV and commercial productions.",
       "es": "Casa de alquiler de equipos en España. Iluminación, grip y accesorios para producciones cinematográficas, TV y publicidad."
     },
     {
       "key": "companies.kinolux.description",
+      "editorLabel": "Empresas · Descripción de Kinolux",
       "en": "Equipment rental house based in Barcelona. Lighting, grip and accessories for film, TV and commercial productions.",
       "es": "Casa de alquiler de equipos en Barcelona. Iluminación, grip y accesorios para producciones cinematográficas, TV y publicidad."
     },
     {
       "key": "companies.movie-men.description",
+      "editorLabel": "Empresas · Descripción de Movie-men",
       "en": "Industry-leading equipment rental house based in Barcelona. Reliable power distribution units, generators, and full lighting packages for film and commercial productions.",
       "es": "Casa líder de alquiler de equipos en Barcelona. Unidades de distribución de energía, generadores y paquetes completos de iluminación para producciones cinematográficas y publicitarias."
     },
     {
       "key": "contact.emailLabel",
+      "editorLabel": "Contacto · Nombre del correo",
       "en": "Email",
       "es": "Correo"
     },
     {
       "key": "contact.imdbLabel",
+      "editorLabel": "Contacto · Nombre de IMDb",
       "en": "IMDb",
       "es": "IMDb"
     },
     {
       "key": "contact.instagramLabel",
+      "editorLabel": "Contacto · Nombre de Instagram",
       "en": "Instagram",
       "es": "Instagram"
     },
     {
       "key": "contact.lede",
+      "editorLabel": "Contacto · Frase de presentación",
       "en": "Available for feature, series, and select commercial work.",
       "es": "Disponible para largometrajes, series y producciones comerciales seleccionadas."
     },
     {
       "key": "contact.title",
+      "editorLabel": "Contacto · Título de la sección",
       "en": "Get in touch",
       "es": "Contacto"
     },
     {
       "key": "film.closeAria",
+      "editorLabel": "Películas · Botón para cerrar detalles",
       "en": "Close film details",
       "es": "Cerrar detalles de la película"
     },
     {
       "key": "film.nextAria",
+      "editorLabel": "Películas · Botón para la película siguiente",
       "en": "Next film",
       "es": "Película siguiente"
     },
     {
       "key": "film.posterAlt",
+      "editorLabel": "Películas · Descripción del póster",
       "en": "Poster for {title}",
       "es": "Póster de {title}"
     },
     {
       "key": "film.previousAria",
+      "editorLabel": "Películas · Botón para la película anterior",
       "en": "Previous film",
       "es": "Película anterior"
     },
     {
       "key": "film.trailerTitle",
+      "editorLabel": "Películas · Nombre del tráiler",
       "en": "Trailer for {title}",
       "es": "Tráiler de {title}"
     },
     {
       "key": "film.watchTrailer",
+      "editorLabel": "Películas · Botón para ver el tráiler",
       "en": "Watch trailer",
       "es": "Ver tráiler"
     },
     {
       "key": "film.yourRole",
+      "editorLabel": "Películas · Nombre del rol de Tarek",
       "en": "Role on set",
       "es": "Rol en rodaje"
     },
     {
       "key": "filmType.ad",
+      "editorLabel": "Tipos de película · Anuncio",
       "en": "Advertisement",
       "es": "Anuncio"
     },
     {
       "key": "filmType.feature",
+      "editorLabel": "Tipos de película · Largometraje",
       "en": "Feature film",
       "es": "Largometraje"
     },
     {
       "key": "filmType.other",
+      "editorLabel": "Tipos de película · Otro",
       "en": "Other",
       "es": "Otro"
     },
     {
       "key": "filmType.series",
+      "editorLabel": "Tipos de película · Serie",
       "en": "TV series",
       "es": "Serie de TV"
     },
     {
       "key": "filmType.short",
+      "editorLabel": "Tipos de película · Cortometraje",
       "en": "Short film",
       "es": "Cortometraje"
     },
     {
       "key": "filmType.video",
+      "editorLabel": "Tipos de película · Videoclip",
       "en": "Music video",
       "es": "Videoclip"
     },
     {
       "key": "footer.creditPrefix",
+      "editorLabel": "Pie de página · Crédito de diseño y desarrollo",
       "en": "Design and development by",
       "es": "Diseño y desarrollo por"
     },
     {
       "key": "footer.github",
+      "editorLabel": "Pie de página · Enlace a GitHub",
       "en": "GitHub",
       "es": "GitHub"
     },
     {
       "key": "footer.legal",
+      "editorLabel": "Pie de página · Enlace al aviso legal",
       "en": "Legal notice",
       "es": "Aviso legal"
     },
     {
       "key": "hero.headline",
+      "editorLabel": "Portada · Título principal",
       "en": "Cinematographic Lighting",
       "es": "Iluminación cinematográfica"
     },
     {
       "key": "hero.role",
+      "editorLabel": "Portada · Profesión de Tarek",
       "en": "Gaffer",
       "es": "Gaffer"
     },
     {
       "key": "hero.tagline",
+      "editorLabel": "Portada · Frase bajo el título",
       "en": "Technical and artistic solutions for feature films.",
       "es": "Soluciones técnicas y artísticas para largometrajes."
     },
     {
       "key": "language.en",
+      "editorLabel": "Idioma · Botón de inglés",
       "en": "EN",
       "es": "EN"
     },
     {
       "key": "language.es",
+      "editorLabel": "Idioma · Botón de español",
       "en": "ES",
       "es": "ES"
     },
     {
       "key": "language.toggleAria",
+      "editorLabel": "Idioma · Nombre del selector",
       "en": "Switch language",
       "es": "Cambiar idioma"
     },
     {
       "key": "legal.back",
+      "editorLabel": "Aviso legal · Enlace para volver al portfolio",
       "en": "Back to portfolio",
       "es": "Volver al portfolio"
     },
     {
       "key": "legal.body",
+      "editorLabel": "Aviso legal · Texto completo",
       "en": "<h1>Legal notice</h1>\r\n\r\n      <h2>Owner information</h2>\r\n      <address>\r\n        <strong>Tarek Recolons</strong><br />\r\n        Email: <a data-site-email href=\"mailto:\"></a><br />\r\n        Registered address: Rda. de la Riera, 22, 08459 Sant Antoni de Vilamajor, Barcelona<br />\r\n        Tax ID: 48017236K\r\n      </address>\r\n\r\n      <h2>Purpose of the website</h2>\r\n      <p>This site is a professional portfolio showcasing Tarek Recolons' career as a gaffer in the electrical and cinematographic lighting department. Its purpose is to present credits, projects and professional contact details.</p>\r\n\r\n      <h2>Intellectual and industrial property</h2>\r\n      <p>The original text, design and source code of this website are the property of Tarek Recolons or their respective collaborators.</p>\r\n      <p>Posters, set photography, stills and third-party logos displayed in the credits belong to their production companies, studios or lawful owners and are used for informational and professional recognition purposes only. Any rights holder may request removal by writing to the email above.</p>\r\n\r\n      <h2>Liability for content</h2>\r\n      <p>Tarek Recolons is solely responsible for the content published on this site. The web developer assumes no liability for texts, images or editorial decisions added after the site was delivered.</p>\r\n      <p>The information is provided for informational purposes. Although every effort is made to keep it up to date, there is no guarantee that it is completely free of errors or omissions at all times.</p>\r\n\r\n      <h2>External links</h2>\r\n      <p>This site may include links to IMDb, Instagram or other external platforms. We do not control the content of those sites and therefore assume no responsibility for their policies or publications.</p>\r\n\r\n      <h2>Data protection</h2>\r\n      <p>This website does not use contact forms or tracking cookies. If a user sends an email, their data will be used solely to reply to that inquiry and will not be shared with third parties.</p>\r\n      <p>To exercise rights of access, rectification, objection or erasure, write to <a data-site-email href=\"mailto:\"></a>.</p>\r\n\r\n      <h2>Applicable law</h2>\r\n      <p>This legal notice is governed by Spanish law and, in particular, by Law 34/2002 of 11 July on Information Society Services and Electronic Commerce (LSSI).</p>\r\n\r\n      <h2>Site credits</h2>\r\n      <p>Web design and development by <a href=\"https://github.com/rubereco\" target=\"_blank\" rel=\"noopener\">Ruben Recolons</a>.<br />Content, texts and images published by Tarek Recolons.</p>",
       "es": "<h1>Aviso legal</h1>\r\n\r\n      <h2>Datos del titular</h2>\r\n      <address>\r\n        <strong>Tarek Recolons</strong><br />\r\n        Correo electrónico: <a data-site-email href=\"mailto:\"></a><br />\r\n        Dirección fiscal: Rda. de la Riera, 22, 08459 Sant Antoni de Vilamajor, Barcelona<br />\r\n        NIF/NIE: 48017236K\r\n      </address>\r\n\r\n      <h2>Objeto de la web</h2>\r\n      <p>Este sitio es un portfolio profesional que muestra la trayectoria de Tarek Recolons como gaffer en el departamento eléctrico e iluminación cinematográfica. Su finalidad es presentar créditos, proyectos y datos de contacto profesional.</p>\r\n\r\n      <h2>Propiedad intelectual e industrial</h2>\r\n      <p>Los textos propios, el diseño y el código fuente de esta web son propiedad de Tarek Recolons o de sus respectivos colaboradores.</p>\r\n      <p>Los pósters, fotografías de rodaje, capturas y logotipos de terceros mostrados en los créditos pertenecen a sus productoras, estudios o titulares legítimos y se utilizan únicamente con fines informativos y de reconocimiento profesional. Si cualquier titular desea que se retire un material, puede solicitarlo en el correo indicado arriba.</p>\r\n\r\n      <h2>Responsabilidad sobre el contenido</h2>\r\n      <p>Tarek Recolons es el único responsable del contenido publicado en este sitio. El desarrollador de la web no asume responsabilidad sobre los textos, imágenes ni decisiones editoriales añadidas tras la entrega del sitio.</p>\r\n      <p>La información se ofrece a efectos informativos. Aunque se intenta mantener actualizada, no se garantiza que esté libre de errores u omisiones en todo momento.</p>\r\n\r\n      <h2>Enlaces externos</h2>\r\n      <p>Este sitio puede incluir enlaces a IMDb, Instagram u otras plataformas externas. No se controla el contenido de esos sitios, por lo que no se asume responsabilidad sobre sus políticas ni publicaciones.</p>\r\n\r\n      <h2>Protección de datos</h2>\r\n      <p>Esta web no utiliza formularios de contacto ni cookies de seguimiento. Si un usuario envía un correo electrónico, sus datos se usarán únicamente para responder a esa consulta y no se cederán a terceros.</p>\r\n      <p>Para ejercer los derechos de acceso, rectificación, oposición o supresión, escribe a <a data-site-email href=\"mailto:\"></a>.</p>\r\n\r\n      <h2>Legislación aplicable</h2>\r\n      <p>Este aviso legal se rige por la legislación española y, en particular, por la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI).</p>\r\n\r\n      <h2>Créditos del sitio</h2>\r\n      <p>Diseño y desarrollo web por <a href=\"https://github.com/rubereco\" target=\"_blank\" rel=\"noopener\">Ruben Recolons</a>.<br />Contenido, textos e imágenes publicadas por Tarek Recolons.</p>"
     },
     {
       "key": "legal.description",
+      "editorLabel": "Aviso legal · Descripción para buscadores",
       "en": "Legal notice for Tarek Recolons portfolio.",
       "es": "Aviso legal del portfolio de Tarek Recolons."
     },
     {
       "key": "legal.title",
+      "editorLabel": "Aviso legal · Título de la página",
       "en": "Legal notice — Tarek Recolons",
       "es": "Aviso legal — Tarek Recolons"
     },
     {
       "key": "meta.description",
+      "editorLabel": "Página principal · Descripción para buscadores",
       "en": "Cinematographic lighting. Gaffer on feature films, series, and commercials.",
       "es": "Iluminación cinematográfica. Gaffer en largometrajes, series y publicidad."
     },
     {
       "key": "meta.title",
+      "editorLabel": "Página principal · Título del navegador",
       "en": "Tarek Recolons — Gaffer",
       "es": "Tarek Recolons — Gaffer"
     },
     {
       "key": "nav.about",
+      "editorLabel": "Menú · Enlace a Sobre mí",
       "en": "About",
       "es": "Sobre mí"
     },
     {
       "key": "nav.contact",
+      "editorLabel": "Menú · Enlace a Contacto",
       "en": "Contact",
       "es": "Contacto"
     },
     {
       "key": "nav.mobileAria",
+      "editorLabel": "Menú · Nombre de la navegación móvil",
       "en": "Mobile navigation",
       "es": "Navegación móvil"
     },
     {
       "key": "nav.partners",
+      "editorLabel": "Menú · Enlace a Colaboradores",
       "en": "Partners",
       "es": "Colaboradores"
     },
     {
       "key": "nav.primaryAria",
+      "editorLabel": "Menú · Nombre de la navegación principal",
       "en": "Primary navigation",
       "es": "Navegación principal"
     },
     {
       "key": "nav.toggleAria",
+      "editorLabel": "Menú · Botón para abrir y cerrar",
       "en": "Toggle menu",
       "es": "Abrir o cerrar menú"
     },
     {
       "key": "nav.work",
+      "editorLabel": "Menú · Enlace a Trabajo",
       "en": "Work",
       "es": "Trabajo"
     },
     {
       "key": "partners.count.partner_one",
+      "editorLabel": "Colaboradores · Recuento de una persona",
       "en": "partner",
       "es": "colaborador"
     },
     {
       "key": "partners.count.partner_other",
+      "editorLabel": "Colaboradores · Recuento de varias personas",
       "en": "partners",
       "es": "colaboradores"
     },
     {
       "key": "partners.empty",
+      "editorLabel": "Colaboradores · Mensaje cuando no hay nadie",
       "en": "No partners listed yet.",
       "es": "Aún no hay colaboradores listados."
     },
     {
       "key": "partners.intro",
+      "editorLabel": "Colaboradores · Frase de presentación",
       "en": "The companies, cinematographers, and lighting technicians I work with.",
       "es": "Las empresas, directores de fotografía y técnicos de iluminación con los que trabajo."
     },
     {
       "key": "partners.logosLabel",
+      "editorLabel": "Colaboradores · Nombre de los logotipos de empresas",
       "en": "Companies",
       "es": "Empresas"
     },
     {
       "key": "partners.pageTitle",
+      "editorLabel": "Colaboradores · Título de la sección",
       "en": "Who I Work With",
       "es": "Con quien trabajo"
     },
     {
       "key": "partners.section.cinematography",
+      "editorLabel": "Colaboradores · Categoría Fotografía",
       "en": "Cinematography",
       "es": "Fotografía"
     },
     {
       "key": "partners.section.direction",
+      "editorLabel": "Colaboradores · Categoría Dirección",
       "en": "Direction",
       "es": "Dirección"
     },
     {
       "key": "partners.section.lighting",
+      "editorLabel": "Colaboradores · Categoría Iluminación",
       "en": "Lighting",
       "es": "Iluminación"
     },
     {
       "key": "partners.section.other",
+      "editorLabel": "Colaboradores · Categoría Otros",
       "en": "Other",
       "es": "Otros"
     },
     {
       "key": "partners.section.production",
+      "editorLabel": "Colaboradores · Categoría Producción",
       "en": "Production",
       "es": "Producción"
     },
     {
       "key": "partners.section.sound",
+      "editorLabel": "Colaboradores · Categoría Sonido",
       "en": "Sound",
       "es": "Sonido"
     },
     {
       "key": "partners.website",
+      "editorLabel": "Colaboradores · Enlace al sitio web",
       "en": "Website",
       "es": "Sitio web"
     },
     {
       "key": "people.juli-carne-martorell.description",
+      "editorLabel": "Personas · Descripción de Juli Carné Martorell",
       "en": "Cinematographer. Portfolio at julicarnemartorell.com.",
       "es": "Director de fotografía. Portfolio en julicarnemartorell.com."
     },
     {
       "key": "people.nils-dalmases.description",
+      "editorLabel": "Personas · Descripción de Nils Dalmases",
       "en": "Cinematographer. Portfolio at nilsdalmases.com.",
       "es": "Director de fotografía. Portfolio en nilsdalmases.com."
     },
     {
       "key": "roles.electrician",
+      "editorLabel": "Roles · Eléctrico",
       "en": "Electrician",
       "es": "Eléctrico"
     },
     {
       "key": "roles.electrician2nd",
+      "editorLabel": "Roles · Eléctrico y segundo gaffer",
       "en": "Electrician / 2nd Gaffer",
       "es": "Eléctrico / 2º Gaffer"
     },
     {
       "key": "roles.electricianDailies",
+      "editorLabel": "Roles · Eléctrico por jornadas",
       "en": "Electrician (dailies)",
       "es": "Eléctrico (dailies)"
     },
     {
       "key": "roles.gaffer",
+      "editorLabel": "Roles · Gaffer",
       "en": "Gaffer",
       "es": "Gaffer"
     },
     {
       "key": "roles.grip",
+      "editorLabel": "Roles · Grip",
       "en": "Grip",
       "es": "Grip"
     },
     {
       "key": "roles.lightingBestboy",
+      "editorLabel": "Roles · Técnico de iluminación y Best Boy",
       "en": "Lighting Technician / Bestboy",
       "es": "Técnico de iluminación / Best Boy"
     },
     {
       "key": "section.skipToContent",
+      "editorLabel": "Accesibilidad · Enlace para saltar al contenido",
       "en": "Skip to content",
       "es": "Saltar al contenido"
     },
     {
       "key": "work.subtitle",
+      "editorLabel": "Trabajo · Frase bajo el título",
       "en": "Feature films, series and selected shorts",
       "es": "Largometrajes, series y cortometrajes seleccionados"
     },
     {
       "key": "work.title",
+      "editorLabel": "Trabajo · Título de la sección",
       "en": "Selected Work",
       "es": "Trabajo seleccionado"
     }

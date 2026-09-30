@@ -26,11 +26,16 @@ if (pagesBranch && pagesBranch !== "main") {
 
 const translationEntries = JSON.parse(fs.readFileSync(path.join(root, "data", "i18n.json"), "utf8")).entries;
 const translationKeys = new Set();
+const editorLabels = new Set();
 for (const entry of translationEntries) {
   if (!entry.key || !entry.en || !entry.es || translationKeys.has(entry.key)) {
     throw new Error(`Invalid or duplicate translation key: ${entry.key}`);
   }
+  if (!entry.editorLabel || editorLabels.has(entry.editorLabel)) {
+    throw new Error(`Missing or duplicate translation editor label: ${entry.key}`);
+  }
   translationKeys.add(entry.key);
+  editorLabels.add(entry.editorLabel);
 }
 for (const page of ["index.html", "legal.html"]) {
   const html = fs.readFileSync(path.join(root, page), "utf8");

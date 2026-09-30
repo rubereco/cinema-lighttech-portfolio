@@ -35,6 +35,7 @@ On phones the hero shows only its large photos. Every small hero photo also appe
 - Run `npm run build` after changing film or person source files. Configure Cloudflare Pages to run `npm run build` and publish the repository root, where `index.html` lives.
 - Serve the repository over HTTP to preview it. Opening `index.html` as a local file cannot fetch the JSON data.
 - Keep IDs equal to JSON filenames. Store translated English and Spanish text together as entries in `data/i18n.json`. Use `data-i18n` for plain text and `data-i18n-html` for the About and legal HTML blocks.
+- Each translation has an `editorLabel` used only for the Spanish admin list. The hidden `key` links the text to the site; editors change the `en` and `es` values.
 - OAuth Worker setup is in `admin/SETUP.md`. Secrets belong in Cloudflare Worker secrets, not the repository.
 
 The navbar currently uses the existing vector mark in `assets/images/favicon.svg` as the Recalone mark. Replace that file if the approved brand logo differs.
