@@ -1,126 +1,138 @@
 #!/usr/bin/env node
-/**
- * v3.14.16: aggregate folder-based collections back to the
- * single-file shape the production site reads.
- *
- * The Decap CMS admin edits films and people as folder-based
- * collections (one file per entry: data/films/<id>.json,
- * data/people/<id>.json) because the relation widget doesn't
- * reliably index file-based collections with nested lists.
- *
- * The production site (assets/js/main.js, assets/js/partners.js)
- * still reads data/films.json and data/people.json as single
- * aggregates. This build step regenerates those aggregates from
- * the folder sources right before Cloudflare Pages deploys.
- *
- * - Films: sorted by year descending, then by id for stability.
- * - People: sorted by kind, then by id (subject → director → dop
- *   → gaffer → electric, alphabetical within each).
- *
- * If you want a different order, edit the sort comparators below.
- * The work order collection (data/work.json) is the source of
- * truth for the homepage display order, so films.json order is
- * only used as a fallback / for non-ordered consumers.
- */
 "use strict";
 
-const fs = require("fs");
-const path = require("path");
+// Decap edits one JSON file per film/person. The public site consumes the
+// compact aggregates generated here during the Cloudflare Pages build.
+const fs = require("node:fs");
+const path = require("node:path");
+const root = path.resolve(__dirname, "..");
 
-const ROOT = path.resolve(__dirname, "..");
-const today = new Date().toISOString().slice(0, 10);
-
-function readDir(dir) {
-  const abs = path.join(ROOT, dir);
-  if (!fs.existsSync(abs)) {
-    console.error(`  ! directory not found: ${dir}`);
-    return [];
+// A Pages preview must edit the JSON from its own branch. The source config
+// always targets main, so production and local builds keep their normal backend.
+const pagesBranch = process.env.CF_PAGES_BRANCH;
+if (pagesBranch && pagesBranch !== "main") {
+  if (!/^[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(pagesBranch) || pagesBranch.includes("..")) {
+    throw new Error(`Invalid Cloudflare Pages branch: ${pagesBranch}`);
   }
-  return fs
-    .readdirSync(abs)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => {
-      const raw = fs.readFileSync(path.join(abs, f), "utf8");
-      try {
-        return JSON.parse(raw);
-      } catch (err) {
-        console.error(`  ! parse error in ${dir}/${f}: ${err.message}`);
-        process.exit(1);
+  const configPath = path.join(root, "admin", "config.yml");
+  const config = fs.readFileSync(configPath, "utf8");
+  const backendBranch = /^  branch: main\r?$/gm;
+  if ([...config.matchAll(backendBranch)].length !== 1) {
+    throw new Error("Expected one main backend branch in admin/config.yml");
+  }
+  fs.writeFileSync(configPath, config.replace(backendBranch, `  branch: ${pagesBranch}`));
+  console.log(`  admin backend: ${pagesBranch}`);
+}
+
+const translationEntries = JSON.parse(fs.readFileSync(path.join(root, "data", "i18n.json"), "utf8")).entries;
+const translationKeys = new Set();
+const editorLabels = new Set();
+for (const entry of translationEntries) {
+  if (!entry.key || !entry.en || !entry.es || translationKeys.has(entry.key)) {
+    throw new Error(`Invalid or duplicate translation key: ${entry.key}`);
+  }
+  if (!entry.editorLabel || editorLabels.has(entry.editorLabel)) {
+    throw new Error(`Missing or duplicate translation editor label: ${entry.key}`);
+  }
+  translationKeys.add(entry.key);
+  editorLabels.add(entry.editorLabel);
+}
+for (const page of ["index.html", "legal.html"]) {
+  const html = fs.readFileSync(path.join(root, page), "utf8");
+  for (const match of html.matchAll(/data-i18n(?:-html)?="([^"]+)"|data-i18n-attr="([^"]+)"/g)) {
+    const keys = match[1] ? [match[1]] : match[2].split(";").map(part => part.split(":")[1]);
+    for (const key of keys) {
+      if (!translationKeys.has(key)) throw new Error(`${page}: missing translation ${key}`);
+    }
+  }
+}
+for (const key of [
+  "film.watchTrailer", "film.trailerTitle", "film.posterAlt", "about.photoPosition",
+  "partners.website", "partners.empty", "partners.logosLabel",
+  "partners.count.partner_one", "partners.count.partner_other",
+  ...["direction", "cinematography", "lighting", "sound", "production", "other"].map(id => `partners.section.${id}`),
+]) {
+  if (!translationKeys.has(key)) throw new Error(`Missing translation ${key}`);
+}
+
+function readCollection(name) {
+  const dir = path.join(root, "data", name);
+  return fs.readdirSync(dir)
+    .filter(file => file.endsWith(".json"))
+    .map(file => {
+      const item = JSON.parse(fs.readFileSync(path.join(dir, file), "utf8"));
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.id || "") || file !== `${item.id}.json`) {
+        throw new Error(`${name}/${file}: id must use lowercase letters, numbers and hyphens and match its filename`);
       }
+      return item;
     });
 }
 
-function writeAggregate(outPath, field, items, meta) {
-  const abs = path.join(ROOT, outPath);
-  const obj = { _meta: { ...meta, lastUpdated: today }, [field]: items };
-  fs.writeFileSync(abs, JSON.stringify(obj, null, 2) + "\n");
-  console.log(`  ✓ ${outPath} ← ${items.length} entries`);
+function writeAggregate(name, items) {
+  fs.writeFileSync(
+    path.join(root, "data", `${name}.json`),
+    JSON.stringify({ [name]: items }, null, 2) + "\n"
+  );
+  console.log(`  ${name}: ${items.length} entries`);
 }
 
-// ─── Jobs: load first so films can resolve role jobId → name ───────
-const CATEGORY_ORDER = { direction: 0, cinematography: 1, lighting: 2, sound: 3, production: 4, other: 5 };
-const jobs = readDir("data/jobs").sort((a, b) => {
-  const ca = CATEGORY_ORDER[a.category] ?? 99;
-  const cb = CATEGORY_ORDER[b.category] ?? 99;
-  if (ca !== cb) return ca - cb;
-  return (a.name?.en ?? "").localeCompare(b.name?.en ?? "");
-});
-const jobsById = Object.fromEntries(jobs.map((j) => [j.id, j]));
+const films = readCollection("films");
+const ids = new Set();
+const positions = new Set();
+for (const film of films) {
+  if (ids.has(film.id)) throw new Error(`Duplicate film id: ${film.id}`);
+  ids.add(film.id);
+  // Decap can serialize a cleared optional number field as an empty string.
+  // A blank order intentionally hides the film from Selected Work.
+  if (typeof film.displayOrder === "string" && !film.displayOrder.trim()) {
+    film.displayOrder = null;
+  }
+  if (!film.title || !Number.isInteger(film.year)) {
+    throw new Error(`${film.id}: title and year are required`);
+  }
+  if (film.displayOrder != null) {
+    if (!film.poster) throw new Error(`${film.id}: a visible film needs a poster`);
+    if (!fs.existsSync(path.join(root, film.poster.replace(/^\/+/, "")))) {
+      throw new Error(`${film.id}: poster file does not exist`);
+    }
+    if (!Number.isInteger(film.displayOrder) || film.displayOrder < 1) {
+      throw new Error(`${film.id}: displayOrder must be a positive integer`);
+    }
+    if (positions.has(film.displayOrder)) {
+      throw new Error(`${film.id}: duplicate displayOrder ${film.displayOrder}`);
+    }
+    positions.add(film.displayOrder);
+  }
+  if (film.trailerUrl) {
+    const url = new URL(film.trailerUrl);
+    if (url.protocol !== "https:") throw new Error(`${film.id}: trailer URL must use HTTPS`);
+  }
+  if (!translationKeys.has(`roles.${film.role}`) || !translationKeys.has(`filmType.${film.type}`)) {
+    throw new Error(`${film.id}: missing role or type translation`);
+  }
+}
+films.sort((a, b) =>
+  (a.displayOrder ?? Infinity) - (b.displayOrder ?? Infinity) ||
+  (b.year ?? 0) - (a.year ?? 0) ||
+  a.id.localeCompare(b.id)
+);
+writeAggregate("films", films);
 
-// ─── Films: sort by year desc, then by id ──────────────────────────
-// Normalize the folder files so the aggregate always matches the schema
-// the production JS expects: credits.production and credits.people.
-// The Decap admin panel sometimes writes people / production at the top
-// level depending on the schema version; the build step flattens both.
-function normalizeFilm(film) {
-  const normalized = { ...film };
-  const credits = normalized.credits || {};
-  if (!normalized.credits) normalized.credits = credits;
-  if (!Array.isArray(credits.production)) {
-    credits.production = Array.isArray(normalized.production) ? normalized.production : [];
+const heroPhotos = JSON.parse(fs.readFileSync(path.join(root, "data", "hero.json"), "utf8")).items || [];
+const photoIds = new Set();
+for (const photo of heroPhotos) {
+  if (!photo.id || !photo.file || !["big", "small"].includes(photo.size) || photoIds.has(photo.id) ||
+      !fs.existsSync(path.join(root, photo.file.replace(/^\/+/, ""))) ||
+      (photo.size === "small" && !translationKeys.has(`about.photo.${photo.id}.alt`))) {
+    throw new Error(`Invalid hero photo or missing About alt translation: ${photo.id}`);
   }
-  if (!Array.isArray(credits.people)) {
-    credits.people = Array.isArray(normalized.people) ? normalized.people : [];
-  }
-  delete normalized.production;
-  delete normalized.people;
-  // Remove stray null entries left by empty admin fields.
-  credits.production = credits.production.filter((p) => p != null);
-  // Make poster paths relative so they work both on a domain and
-  // when opening the site locally (file://). Decap's image widget
-  // saves them with a leading slash.
-  if (typeof normalized.poster === "string" && normalized.poster.startsWith("/")) {
-    normalized.poster = normalized.poster.slice(1);
-  }
-  // Resolve role jobId to a display name. Old files keep the free-text
-  // role string; new admin entries store the job id. Prefer Spanish name,
-  // fall back to English, then to the raw id.
-  if (typeof normalized.role === "string" && jobsById[normalized.role]) {
-    const job = jobsById[normalized.role];
-    normalized.role = job.name?.es || job.name?.en || normalized.role;
-  }
-  return normalized;
+  photoIds.add(photo.id);
+}
+if (!heroPhotos.some(photo => photo.size === "big") || !heroPhotos.some(photo => photo.size === "small")) {
+  throw new Error("Hero needs a large photo; About needs a small photo");
 }
 
-const films = readDir("data/films")
-  .map(normalizeFilm)
-  .sort((a, b) => {
-    if ((b.year ?? 0) !== (a.year ?? 0)) return (b.year ?? 0) - (a.year ?? 0);
-    return (a.id ?? "").localeCompare(b.id ?? "");
-  });
-writeAggregate("data/films.json", "films", films, { version: "1.5" });
-
-// ─── People: sort by partnership first (regular collaborators
-//     before one-off film credits), then by name ─────────────────
-const people = readDir("data/people").sort((a, b) => {
-  const ap = a.partnership?.jobIds?.length ? 0 : 1;
-  const bp = b.partnership?.jobIds?.length ? 0 : 1;
-  if (ap !== bp) return ap - bp;
-  return (a.name ?? "").localeCompare(b.name ?? "");
-});
-writeAggregate("data/people.json", "people", people, { version: "1.5" });
-
-// ─── Jobs: sorted above, now write the aggregate ──────────────────
-writeAggregate("data/jobs.json", "jobs", jobs, { version: "1.0" });
-
-console.log("build complete.");
+const people = readCollection("people");
+for (const person of people) if (!person.name) throw new Error(`${person.id}: name is required`);
+people.sort((a, b) => a.name.localeCompare(b.name));
+writeAggregate("people", people);

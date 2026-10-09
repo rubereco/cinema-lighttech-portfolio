@@ -1,43 +1,4 @@
-/* ════════════════════════════════════════════════════════════════════════
-   partners.js — render the #partners section in index.html from
-   data/people.json + data/companies.json + data/jobs.json.
-
-   v3.13.0: was a standalone partners.html page. The content moved into
-   the main page where the old Kit & Rental section used to be — the
-   partner accordion now lives at <section id="partners"> and is
-   rendered into the empty <div id="partners-content"> stub.
-
-   v3.14.18: the data layer is now fully normalized — a person is
-   just a collaborator (no role, no works, no relationship), and
-   their role on a film is a jobId referencing the Jobs collection.
-   The partners page shows a person only if they have a
-   `partnership.jobIds` field. Their section on the page is
-   determined by the CATEGORY of the jobs they partner in:
-     - dop / camera-operator / 1st-ac / 2nd-ac → cinematography
-     - gaffer / electric / sparks / best-boy-electric → lighting
-   This is fully data-driven: add a new jobId to the Jobs
-   collection, the partners page picks it up automatically. Add
-   a new section by adding a CATEGORIES entry + an i18n label.
-
-   Architecture (incremental, easy to maintain):
-   - CATEGORIES is the single source of truth for which sections
-     the partners accordion has. Each has:
-       id        — matches a job.category (e.g. "cinematography")
-       source    — "companies" (match by company.kind) or "people"
-                   (match by person's partnership.jobIds categories)
-       labelKey  — i18n key for the section header
-   - To add a new section: add a CATEGORIES entry + a label in
-     data/i18n.json + (if a new job is needed) a new entry in
-     data/jobs/<id>.json.
-   - The data layer is three entities: people, companies, jobs.
-     composePartners() joins them into a single partners[] list
-     bucketed per CATEGORIES entry.
-   - The renderer is fully data-driven. No per-category JS code.
-
-   Loads inline-first (file:// compatibility) with fetch() fallback.
-   Re-renders on tarek:i18n-change.
-   ════════════════════════════════════════════════════════════════════════ */
-
+/* Partners are grouped by their own categories; no Jobs lookup is needed. */
 (function () {
   "use strict";
 
@@ -50,17 +11,7 @@
    *  coverage (no partners) are auto-collapsed so the empty state is hidden. */
   const DEFAULT_OPEN = false;
 
-  /** Category config. Single source of truth for section order and labels.
-   *  Each id matches a job.category from data/jobs/. The renderer groups
-   *  people by their partnership.jobIds → resolved through jobs → category.
-   *  v3.14.19: covers all 6 categories (direction, cinematography, lighting,
-   *  sound, production, other). Sections without partners are auto-hidden
-   *  by the render() filter — so an empty "Sound" section won't render
-   *  until someone partners in a sound job.
-   *  Partnership can be for ANY job in the Jobs collection — not limited
-   *  to cinematography + lighting. Tarek can partner with a director
-   *  (direction), a sound mixer (sound), a producer (production), etc.,
-   *  and they'll show up in the matching section. */
+  /** Partner categories and their display order. */
   const CATEGORIES = [
     { id: "direction",      source: "people", labelKey: "partners.section.direction" },
     { id: "cinematography", source: "people", labelKey: "partners.section.cinematography" },
@@ -71,125 +22,40 @@
   ];
 
   // ─── Loaders ──────────────────────────────────────────────────────────
-  // Reads both inline blocks (file://) or fetches (live deploy). The two
-  // entities compose on the page; see `composePartners()` below.
-
-  function readInline(id) {
-    const el = document.getElementById(id);
-    if (!el) return null;
-    try { return JSON.parse(el.textContent); }
-    catch (err) { console.warn(`[partners] inline #${id} parse failed:`, err); return null; }
-  }
-
-  async function loadBlock(id, fallbackPath) {
-    const inline = readInline(id);
-    if (inline) return inline;
+  async function loadBlock(path) {
     try {
-      const res = await fetch(fallbackPath, { cache: "no-store" });
+      const res = await fetch(path);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
-      console.error(`[partners] failed to load ${fallbackPath}:`, err);
+      console.error(`[partners] failed to load ${path}:`, err);
       return null;
     }
   }
 
   async function loadContent() {
-    const [peopleData, companiesData, jobsData] = await Promise.all([
-      loadBlock("tarek-people",    "data/people.json"),
-      loadBlock("tarek-companies", "data/companies.json"),
-      loadBlock("tarek-jobs",      "data/jobs.json"),
+    const [peopleData, companiesData] = await Promise.all([
+      loadBlock("/data/people.json"),
+      loadBlock("/data/companies.json"),
     ]);
-    return composePartners(peopleData, companiesData, jobsData);
+    const people = (peopleData?.people || [])
+      .filter(person => person.partnership?.categories?.length)
+      .map(person => ({
+        id: person.id, name: person.name, origin: "person",
+        categories: person.partnership.categories,
+        image: person.portrait || null, imageAlt: person.name,
+        url: person.url || null,
+      }));
+    const companies = companiesData?.companies || [];
+    const companyPartners = companies.map(company => ({
+      ...company, origin: "company", image: company.logo || null,
+      imageAlt: company.name,
+    }));
+    return { partners: [...companyPartners, ...people], companies };
   }
 
-  /** Merge people + companies + jobs into a single shape the renderer
-   *  understands. v3.14.18: a person is just a collaborator; their
-   *  partnership is a list of jobIds. We resolve each jobId through
-   *  the jobs collection to get the category, and use that to bucket
-   *  the person into the right section on the partners page.
-   *  A person with no `partnership.jobIds` is filtered out (they're
-   *  a one-off film credit, not a regular collaborator). */
-  function composePartners(peopleData, companiesData, jobsData) {
-    const jobsById = {};
-    for (const j of (jobsData?.jobs ?? [])) jobsById[j.id] = j;
-
-    // People who are partners = have a non-empty partnership.jobIds
-    const partners = (peopleData?.people ?? []).filter(
-      (p) => Array.isArray(p.partnership?.jobIds) && p.partnership.jobIds.length > 0
-    );
-
-    // For each partner, compute the set of categories they cover
-    // (a person who partners as both gaffer and electric covers "lighting"
-    // but only needs to appear in the lighting section once).
-    const partnersWithCategories = partners.map((p) => {
-      const categories = new Set();
-      for (const jobId of p.partnership.jobIds) {
-        const job = jobsById[jobId];
-        if (job?.category) categories.add(job.category);
-      }
-      return {
-        id: p.id,
-        name: p.name,
-        categories: [...categories],  // array for easy .includes() in render
-        partnership: p.partnership,
-        image: p.portrait ?? null,
-        imageAlt: null,
-        description: p.description ?? { en: "", es: "" },
-        url: p.url ?? null,
-        urlLabel: p.urlLabel ?? null,
-        origin: "person",
-      };
-    });
-
-    const companies = companiesData?.companies ?? [];
-    return {
-      partners: [
-        ...companies.map((c) => ({
-          id: c.id,
-          name: c.name,
-          kind: c.kind,                       // discriminator for category match
-          image: c.logo ?? null,
-          imageAlt: c.logoAlt ?? null,
-          description: c.description ?? { en: "", es: "" },
-          url: c.url ?? null,
-          urlLabel: c.urlLabel ?? null,
-          origin: "company",
-        })),
-        ...partnersWithCategories,
-      ],
-      // v3.13.12: also return the raw companies so the logo carousel
-      // can filter by kind:"equipment-house" without going through
-      // the merged list.
-      // v3.14.18: also return jobsById for any future code that needs
-      // to resolve jobId → category or name.
-      companies,
-      jobsById,
-    };
-  }
-
-  // Inline i18n block — the #partners section in index.html works
-  // even if main.js fails to load. (v3.13.0: was partners.html,
-  // now embedded in the main page.)
-  const i18nBlock = (() => {
-    const el = document.getElementById("tarek-i18n");
-    if (!el) return null;
-    try { return JSON.parse(el.textContent); }
-    catch { return null; }
-  })();
-
-  function t(key, lang) {
-    if (!i18nBlock) return null;
-    const dict = i18nBlock[lang] || i18nBlock.en || {};
-    const value = key.split(".").reduce(
-      (acc, k) => (acc && acc[k] !== undefined ? acc[k] : null), dict
-    );
-    return (typeof value === "string") ? value : null;
-  }
-
-  function getActiveLang() {
-    return document.documentElement.lang || "en";
-  }
+  const t = (key, lang) => window.PortfolioI18n.t(key, lang);
+  const getActiveLang = () => window.PortfolioI18n.lang;
 
   // ─── HTML escaping ────────────────────────────────────────────────────
 
@@ -212,12 +78,17 @@
   /** Description: per-language. Falls back to the other language if active
    *  is missing. Clips to MAX_DESCRIPTION_CHARS. */
   function descriptionFor(partner, lang) {
-    const desc = partner.description || {};
-    let text = desc[lang] || desc.en || desc.es || "";
-    if (text.length > MAX_DESCRIPTION_CHARS) {
-      text = text.slice(0, MAX_DESCRIPTION_CHARS - 1).trimEnd() + "…";
-    }
+    const prefix = partner.origin === "person" ? "people" : "companies";
+    let text = t(prefix + "." + partner.id + ".description", lang) || "";
+    if (text.length > MAX_DESCRIPTION_CHARS) text = text.slice(0, MAX_DESCRIPTION_CHARS - 1).trimEnd() + "…";
     return text;
+  }
+
+  function safeHttpUrl(raw) {
+    try {
+      const url = new URL(raw);
+      return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+    } catch (_) { return ""; }
   }
 
   /** Display name. Falls back to name if no surname field (enterprises). */
@@ -228,12 +99,13 @@
   function linkFor(partner) {
     const name = nameFor(partner);
     if (!name) return "";
-    const label = partner.urlLabel || partner.label || "Website";
-    if (!partner.url) {
+    const label = t("partners.website", getActiveLang());
+    const safeUrl = safeHttpUrl(partner.url);
+    if (!safeUrl) {
       return `<span class="partner-name">${escapeText(name)}</span>`;
     }
     return `<a class="partner-name link-arrow"
-              href="${escapeAttr(partner.url)}"
+              href="${escapeAttr(safeUrl)}"
               target="_blank" rel="noopener noreferrer">${escapeText(name)} →</a>
             <span class="partner-link-label">${escapeText(label)}</span>`;
   }
@@ -297,7 +169,7 @@
 
   function sectionHtml(category, items, lang) {
     const label = (category.labelKey && t(category.labelKey, lang)) || category.id;
-    const empty = t("partners.empty", lang) || "No partners listed yet.";
+    const empty = t("partners.empty", lang);
     const bodyId = `partners-section-body-${category.id}`;
 
     // Empty categories stay collapsed so the empty message is hidden by
@@ -310,8 +182,8 @@
       : `<p class="partner-empty">${escapeText(empty)}</p>`;
 
     const countWord = items.length === 1
-      ? (t("partners.count.partner_one", lang) || "partner")
-      : (t("partners.count.partner_other", lang) || "partners");
+      ? t("partners.count.partner_one", lang)
+      : t("partners.count.partner_other", lang);
     const meta = items.length > 0
       ? `<span class="partners-section-meta">${items.length} ${escapeText(countWord)}</span>`
       : "";
@@ -351,15 +223,13 @@
       return;
     }
     const label = t("partners.logosLabel", lang);
-    const itemHtml = (c, isClone) => `
-      <a class="partners-logos__item${isClone ? " is-clone" : ""}" 
-         href="${escapeAttr(c.url || "#")}" 
-         target="_blank" rel="noopener" 
-         aria-label="${escapeAttr(c.name)}" 
-         ${isClone ? 'aria-hidden="true"' : ''}>
-        <img src="${escapeAttr(c.logo || "")}" alt="${escapeAttr(c.logoAlt || c.name || "")}" loading="lazy" />
-      </a>
-    `;
+    const itemHtml = (c, isClone) => {
+      const url = safeHttpUrl(c.url);
+      const image = `<img src="${escapeAttr(c.logo || "")}" alt="" loading="lazy" />`;
+      return url
+        ? `<a class="partners-logos__item${isClone ? " is-clone" : ""}" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttr(c.name)}" ${isClone ? 'aria-hidden="true" tabindex="-1"' : ''}>${image}</a>`
+        : `<span class="partners-logos__item${isClone ? " is-clone" : ""}" ${isClone ? 'aria-hidden="true"' : ''}>${image}</span>`;
+    };
     const originals = companies.map(c => itemHtml(c, false)).join("");
     const clones    = companies.map(c => itemHtml(c, true )).join("");
     target.innerHTML = `
@@ -427,11 +297,8 @@
   }
 
   function startWhenReady() {
-    if (window.TarekI18N && document.documentElement.lang) {
-      boot();
-    } else {
-      window.addEventListener("tarek:i18n-ready", boot, { once: true });
-    }
+    if (window.tarekI18nReady) boot();
+    else window.addEventListener("tarek:i18n-ready", boot, { once: true });
   }
 
   if (document.readyState === "loading") {

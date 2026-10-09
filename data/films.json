@@ -1,332 +1,184 @@
 {
-  "_meta": {
-    "version": "1.5",
-    "lastUpdated": "2026-09-29"
-  },
   "films": [
     {
       "id": "els-de-sau-2027",
       "title": "Els de Sau",
       "year": 2027,
-      "poster": "assets/images/uploads/els-de-sau.webp",
-      "role": "Gaffer",
-      "type": "Largometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      }
+      "type": "feature",
+      "role": "gaffer",
+      "poster": "/assets/images/uploads/els-de-sau.webp",
+      "displayOrder": 1,
+      "trailerUrl": null
     },
     {
       "id": "ceniza-en-la-boca-2026",
       "title": "Ceniza en la Boca",
       "year": 2026,
-      "poster": "assets/images/uploads/ceniza-en-la-boca.jpg",
-      "role": "Gaffer",
-      "type": "Largometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      }
+      "type": "feature",
+      "role": "gaffer",
+      "poster": "/assets/images/uploads/ceniza-en-la-boca.jpg",
+      "displayOrder": 2,
+      "trailerUrl": "https://www.youtube.com/watch?v=u9_qWBrM8dE"
     },
     {
       "id": "la-mala-madre-2026",
       "title": "La Mala Madre",
       "year": 2026,
-      "poster": "assets/images/uploads/la-mala-madre.jpg",
-      "role": "Gaffer",
-      "type": "Largometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      }
+      "type": "feature",
+      "role": "gaffer",
+      "poster": "/assets/images/uploads/la-mala-madre.jpg",
+      "displayOrder": 3,
+      "trailerUrl": "https://vimeo.com/1121117953/8c7df73042"
     },
     {
       "id": "els-mals-noms-2025",
       "title": "Els Mals Noms",
       "year": 2025,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [
-          "Lamalanga Produccions Audiovisuals",
-          "Admirable Films"
-        ],
-        "people": [
-          {
-            "personId": "marc-ortiz-prades",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "director"
-          },
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/els-mals-noms-2025.jpg"
-    },
-    {
-      "id": "lo-que-queda-de-ti-2025",
-      "title": "Lo que queda de ti",
-      "year": 2025,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [
-          "Potenza Producciones"
-        ],
-        "people": [
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/lo-que-queda-de-ti-2025.jpg"
-    },
-    {
-      "id": "parenostre-2025",
-      "title": "Parenostre",
-      "year": 2025,
-      "type": "Largometraje",
-      "role": "Lighting Technician / Bestboy",
-      "credits": {
-        "production": [
-          "Minoria Absoluta",
-          "Lastor Media",
-          "Vilaüt Films"
-        ],
-        "people": []
-      },
-      "poster": "assets/images/uploads/parenostre-2025.jpg"
+      "type": "feature",
+      "role": "gaffer",
+      "poster": "assets/images/uploads/els-mals-noms-2025.jpg",
+      "displayOrder": 4,
+      "trailerUrl": "https://www.youtube.com/watch?v=-kab6SLbTqw"
     },
     {
       "id": "un-altre-home-2025",
       "title": "Un altre home",
       "year": 2025,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [
-          "Oberon Media"
-        ],
-        "people": [
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/un-altre-home-2025.jpg"
+      "type": "feature",
+      "role": "gaffer",
+      "poster": "assets/images/uploads/un-altre-home-2025.jpg",
+      "displayOrder": 5,
+      "trailerUrl": "https://www.youtube.com/watch?v=_IhwTl5UVhM"
+    },
+    {
+      "id": "lo-que-queda-de-ti-2025",
+      "title": "Lo que queda de ti",
+      "year": 2025,
+      "type": "feature",
+      "role": "gaffer",
+      "poster": "assets/images/uploads/lo-que-queda-de-ti-2025.jpg",
+      "displayOrder": 6,
+      "trailerUrl": "https://www.youtube.com/watch?v=Fm0mvwiP3Xw"
+    },
+    {
+      "id": "parenostre-2025",
+      "title": "Parenostre",
+      "year": 2025,
+      "type": "feature",
+      "role": "lightingBestboy",
+      "poster": "assets/images/uploads/parenostre-2025.jpg",
+      "displayOrder": 7,
+      "trailerUrl": "https://www.youtube.com/watch?v=sxXDM7Xs5Gg"
     },
     {
       "id": "tardes-de-soledad-2024",
       "title": "Tardes de Soledad",
       "year": 2024,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [],
-        "people": []
-      },
-      "poster": "assets/images/uploads/tardesdesoledad.jpg"
+      "type": "feature",
+      "role": "gaffer",
+      "poster": "assets/images/uploads/tardesdesoledad.jpg",
+      "displayOrder": 8,
+      "trailerUrl": "https://www.youtube.com/watch?v=MH3DHcAHy54"
     },
     {
       "id": "calladita-2023",
       "title": "Calladita",
       "year": 2023,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [],
-        "people": [
-          {
-            "personId": "miguel-faus",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "director"
-          },
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/calladita-2023.jpg"
+      "type": "feature",
+      "role": "gaffer",
+      "poster": "assets/images/uploads/calladita-2023.jpg",
+      "displayOrder": 9,
+      "trailerUrl": "https://www.youtube.com/watch?v=RSHU3ZzQ7E0"
     },
     {
       "id": "el-cuco-2023",
       "title": "El Cuco",
       "year": 2023,
-      "role": "Gaffer",
-      "type": "Largometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      },
-      "poster": "assets/images/uploads/elcuco.jpg"
+      "type": "feature",
+      "role": "gaffer",
+      "poster": "/assets/images/uploads/elcuco.jpg",
+      "displayOrder": 10,
+      "trailerUrl": "https://www.rtve.es/play/videos/somos-cine/trailer-cuco-belen-cuesta-jorge-suqet/6840745"
     },
     {
       "id": "upon-entry-2022",
       "title": "Upon Entry",
       "year": 2022,
-      "type": "Largometraje",
-      "role": "Grip",
-      "credits": {
-        "production": [],
-        "people": [
-          {
-            "personId": "alejandro-rojas",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "director"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/upon-entry-2022.jpg"
+      "type": "feature",
+      "role": "grip",
+      "poster": "assets/images/uploads/upon-entry-2022.jpg",
+      "displayOrder": 11,
+      "trailerUrl": "https://www.youtube.com/watch?v=THngyQfvGZ4"
     },
     {
       "id": "lultima-nit-del-karaoke-2021",
       "title": "L'última nit del karaoke",
       "year": 2021,
-      "type": "Serie TV",
-      "role": "Electrician / 2nd Gaffer",
-      "credits": {
-        "production": [],
-        "people": []
-      },
-      "poster": "assets/images/uploads/lultima-nit-del-karaoke-2021.jpg"
+      "type": "series",
+      "role": "electrician2nd",
+      "poster": "assets/images/uploads/lultima-nit-del-karaoke-2021.jpg",
+      "displayOrder": 12,
+      "trailerUrl": "https://vimeo.com/640411356"
     },
     {
       "id": "coque-2020",
       "title": "Coque",
       "year": 2020,
-      "type": "Cortometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [
-          "Somos Acme SL"
-        ],
-        "people": [
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/coque-2020.jpg"
+      "type": "short",
+      "role": "gaffer",
+      "poster": "assets/images/uploads/coque-2020.jpg",
+      "displayOrder": 13,
+      "trailerUrl": "https://vimeo.com/596614609"
     },
     {
       "id": "boca-norte-2019",
       "title": "Boca Norte",
       "year": 2019,
-      "type": "Serie TV",
-      "role": "Gaffer",
-      "credits": {
-        "production": [
-          "Playz",
-          "RTVE"
-        ],
-        "people": [
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/boca-norte-2019.jpg"
+      "type": "series",
+      "role": "gaffer",
+      "poster": "assets/images/uploads/boca-norte-2019.jpg",
+      "displayOrder": 14,
+      "trailerUrl": "https://www.rtve.es/play/videos/boca-norte/trailer-oficial-boca-norte-serie-playz/4899168"
     },
     {
       "id": "the-bookshop-2017",
       "title": "The Bookshop",
       "year": 2017,
-      "type": "Largometraje",
-      "role": "Electrician Dailies",
-      "credits": {
-        "production": [
-          "Diagonal TV",
-          "A Contracorriente Films",
-          "Green Films"
-        ],
-        "people": [
-          {
-            "personId": "isabel-coixet",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "director"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/the-bookshop-2017.jpg"
+      "type": "feature",
+      "role": "electricianDailies",
+      "poster": "assets/images/uploads/the-bookshop-2017.jpg",
+      "displayOrder": 15,
+      "trailerUrl": "https://www.imdb.com/video/embed/vi1441315609"
     },
     {
       "id": "ayer-no-termina-nunca-2013",
       "title": "Ayer No Termina Nunca ",
       "year": 2013,
-      "poster": "assets/images/uploads/ayer-no-termina-nunca.jpg",
-      "role": "Eléctrico",
-      "type": "Largometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      }
+      "type": "feature",
+      "role": "electrician",
+      "poster": "/assets/images/uploads/ayer-no-termina-nunca.jpg",
+      "displayOrder": 16,
+      "trailerUrl": "https://www.youtube.com/watch?v=L1YXB7rn5Ks"
     },
     {
       "id": "luces-rojas-2012",
       "title": "Luces rojas",
       "year": 2012,
-      "type": "Largometraje",
-      "role": "Eléctrico",
-      "credits": {
-        "production": [],
-        "people": []
-      },
-      "poster": "assets/images/uploads/redlights.jpg"
+      "type": "feature",
+      "role": "electrician",
+      "poster": "assets/images/uploads/redlights.jpg",
+      "displayOrder": 17,
+      "trailerUrl": "https://www.youtube.com/watch?v=NcMkgDNhpMQ"
     },
     {
       "id": "la-culpa-2010",
       "title": "La Culpa",
       "year": 2010,
-      "poster": "assets/images/uploads/la-culpa.jpg",
-      "role": "Eléctrico",
-      "type": "Cortometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      }
+      "type": "short",
+      "role": "electrician",
+      "poster": "/assets/images/uploads/la-culpa.jpg",
+      "displayOrder": 18,
+      "trailerUrl": "https://vimeo.com/14851272"
     }
   ]
 }

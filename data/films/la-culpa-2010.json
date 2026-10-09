@@ -2,7 +2,9 @@
   "id": "la-culpa-2010",
   "title": "La Culpa",
   "year": 2010,
+  "type": "short",
+  "role": "electrician",
   "poster": "/assets/images/uploads/la-culpa.jpg",
-  "role": "electric",
-  "type": "Cortometraje"
+  "displayOrder": 18,
+  "trailerUrl": "https://vimeo.com/14851272"
 }

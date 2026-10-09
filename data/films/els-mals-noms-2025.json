@@ -2,31 +2,9 @@
   "id": "els-mals-noms-2025",
   "title": "Els Mals Noms",
   "year": 2025,
-  "type": "Largometraje",
-  "role": "Gaffer",
-  "credits": {
-    "production": [
-      "Lamalanga Produccions Audiovisuals",
-      "Admirable Films"
-    ],
-    "people": [
-      {
-        "personId": "marc-ortiz-prades",
-        "description": {
-          "en": "",
-          "es": ""
-        },
-        "jobId": "director"
-      },
-      {
-        "personId": "tarek-recolons",
-        "description": {
-          "en": "",
-          "es": ""
-        },
-        "jobId": "gaffer"
-      }
-    ]
-  },
-  "poster": "assets/images/uploads/els-mals-noms-2025.jpg"
+  "type": "feature",
+  "role": "gaffer",
+  "poster": "assets/images/uploads/els-mals-noms-2025.jpg",
+  "displayOrder": 4,
+  "trailerUrl": "https://www.youtube.com/watch?v=-kab6SLbTqw"
 }

@@ -33,1022 +33,11 @@
   <link rel="stylesheet" href="assets/css/nav.css" />
   <link rel="stylesheet" href="assets/css/components.css" />
   <link rel="stylesheet" href="assets/css/sections.css" />
+  <link rel="stylesheet" href="assets/css/film-modal.css" />
+  <link rel="stylesheet" href="assets/css/about-carousel.css" />
 
-  <!-- Inline favicon (single letter, no external request). -->
+  <!-- Recalone vector mark, shared with the navbar. -->
   <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml" />
-  <script type="application/json" id="tarek-i18n">
-{
-  "_meta": {
-    "languages": [
-      "en",
-      "es"
-    ],
-    "defaultLanguage": "en",
-    "detectFromBrowser": true,
-    "notes": "Translations of UI strings. Film titles, director names, and proper nouns are NOT translated — those are kept as-is in both languages. To add a string: use data-i18n=\"key.path\" on the HTML element. Use data-i18n-html for content with HTML markup (about body). To force a different default per page, set <html lang=\"es\">.",
-    "lastUpdated": "2026-07-21"
-  },
-  "en": {
-    "nav": {
-      "work": "Work",
-      "about": "About",
-      "contact": "Contact",
-      "partners": "Partners"
-    },
-    "brand": "Tarek Recolons",
-    "meta": {
-      "title": "Tarek Recolons — Gaffer",
-      "description": "Cinematographic lighting. Gaffer on feature films, series, and commercials."
-    },
-    "hero": {
-      "role": "Gaffer",
-      "headline": "Cinematographic Lighting",
-      "tagline": "Technical and artistic solutions for feature films.",
-      "ctaPrimary": "View credits",
-      "ctaSecondary": "Rental kit"
-    },
-    "section": {
-      "skipToContent": "Skip to content"
-    },
-    "work": {
-      "title": "Selected Work",
-      "subtitle": "Feature films, series & selected shorts · 2017–2025",
-      "year": "Year",
-      "project": "Project",
-      "role": "Role",
-      "director": "Director / Production",
-      "type": "Type",
-      "typeFeature": "Feature film",
-      "typeSeries": "TV Series",
-      "typeShort": "Short film"
-    },
-    "about": {
-      "title": "About me and professional career",
-      "body": "<p>With 10+ years of experience in the electrical and cinematographic lighting department, I have worked mainly on feature films, series and advertising productions, both national and international.</p><p>During this time I have developed skills in planning, preparation and execution of lighting, working alongside the Director of Photography to bring their visual proposal to set accurately, efficiently and safely.</p><p>The experience gained over years of shooting and on productions of different scales has allowed me to work with diverse technical teams, adapt to the needs of each project and quickly solve the challenges that may arise on set.</p><p>My career includes work on feature films and international projects, acquiring solid experience in both technical work and coordination of the electrical team.</p><p>The goal is simple: understand the Director of Photography's proposal, find the right solution and make it work on set. All with a way of working based on precision, organization and adaptability.</p>",
-      "statsYearsLabel": "Years experience",
-      "statsYearsValue": "10+",
-      "statsFilmsLabel": "Feature films",
-      "statsFilmsValue": "10+",
-      "statsAvailabilityLabel": "Availability",
-      "statsAvailabilityValue": "Global"
-    },
-    "contact": {
-      "title": "Get in touch",
-      "lede": "Available for feature, series, and select commercial work.",
-      "emailLabel": "Email",
-      "imdbLabel": "IMDb",
-      "instagramLabel": "Instagram"
-    },
-    "footer": {
-      "tagline": "Built with care · no tracking, no cookies.",
-      "rights": "All rights reserved",
-      "legal": "Legal notice",
-      "github": "GitHub",
-      "creditPrefix": "Design and development by"
-    },
-    "language": {
-      "toggleAria": "Switch language",
-      "en": "EN",
-      "es": "ES"
-    },
-    "roles": {
-      "gaffer": "Gaffer",
-      "electrician": "Electrician",
-      "electrician2nd": "Electrician / 2nd Gaffer",
-      "electricianDailies": "Electrician (dailies)",
-      "lightingBestboy": "Lighting Technician / Bestboy",
-      "rigging": "Rigging Electric",
-      "grip": "Grip",
-      "spark": "Spark",
-      "sparkDailies": "Spark (dailies)",
-      "lamp": "Lamp Operator"
-    },
-    "partners": {
-      "pageTitle": "Who I Work With",
-      "intro": "The companies, cinematographers, and lighting technicians I work with.",
-      "logosLabel": "Companies",
-      "section": {
-        "direction": "Direction",
-        "cinematography": "Cinematography",
-        "lighting": "Lighting",
-        "sound": "Sound",
-        "production": "Production",
-        "other": "Other"
-      },
-      "empty": "No partners listed yet.",
-      "count": {
-        "one": "collaboration",
-        "other": "collaborations",
-        "partner_one": "partner",
-        "partner_other": "partners"
-      }
-    },
-    "film": {
-      "closeAria": "Close film details",
-      "backToWork": "← All projects",
-      "yourRole": "Role on set",
-      "productionCompany": "Production Company",
-      "director": "Director",
-      "dop": "Director of Photography",
-      "dopAbbr": "(DP / DoP)",
-      "gaffer": "Gaffer",
-      "electrics": "Sparks",
-      "electricsSubtitle": "Electrics / Lighting Technicians",
-      "noCredits": "—"
-    }
-  },
-  "es": {
-    "nav": {
-      "work": "Trabajo",
-      "about": "Sobre mí",
-      "contact": "Contacto",
-      "partners": "Colaboradores"
-    },
-    "footer": {
-      "tagline": "Hecho con cuidado · sin rastreo, sin cookies.",
-      "rights": "Todos los derechos reservados",
-      "legal": "Aviso legal",
-      "github": "GitHub",
-      "creditPrefix": "Diseño y desarrollo por"
-    },
-    "brand": "Tarek Recolons",
-    "meta": {
-      "title": "Tarek Recolons — Gaffer",
-      "description": "Iluminación cinematográfica. Gaffer en largometrajes, series y publicidad."
-    },
-    "hero": {
-      "role": "Gaffer",
-      "headline": "Iluminación cinematográfica",
-      "tagline": "Soluciones técnicas y artísticas para largometrajes.",
-      "ctaPrimary": "Ver créditos",
-      "ctaSecondary": "Equipo de alquiler"
-    },
-    "section": {
-      "skipToContent": "Saltar al contenido"
-    },
-    "work": {
-      "title": "Trabajo seleccionado",
-      "subtitle": "Largometrajes, series y cortometrajes seleccionados · 2017–2025",
-      "year": "Año",
-      "project": "Proyecto",
-      "role": "Rol",
-      "director": "Dirección / Producción",
-      "type": "Tipo",
-      "typeFeature": "Largometraje",
-      "typeSeries": "Serie de TV",
-      "typeShort": "Cortometraje"
-    },
-    "about": {
-      "title": "Sobre mí y carrera profesional",
-      "body": "<p>Con +10 años de experiencia en el departamento eléctrico y de iluminación cinematográfica, se ha trabajado principalmente en largometrajes, series y producciones publicitarias, tanto nacionales como internacionales.</p><p>Durante este tiempo se han desarrollado habilidades en planificación, preparación y ejecución de la iluminación, trabajando junto al Director de Fotografía para llevar su propuesta visual a rodaje de forma precisa, eficiente y segura.</p><p>La experiencia obtenida durante años de rodajes y en producciones de diferentes escalas ha permitido trabajar con equipos técnicos diversos, adaptarse a las necesidades de cada proyecto y resolver de forma rápida los retos que puedan surgir en set.</p><p>La trayectoria incluye trabajos en largometrajes y proyectos internacionales, adquiriendo una sólida experiencia tanto en el trabajo técnico como en la coordinación del equipo eléctrico.</p><p>El objetivo es sencillo: entender la propuesta del Director de Fotografía, encontrar la solución adecuada y hacer que funcione en rodaje. Todo ello con una forma de trabajo basada en la precisión, la organización y la capacidad de adaptación.</p>",
-      "statsYearsLabel": "Años de experiencia",
-      "statsYearsValue": "10+",
-      "statsFilmsLabel": "Largometrajes",
-      "statsFilmsValue": "10+",
-      "statsAvailabilityLabel": "Disponibilidad",
-      "statsAvailabilityValue": "Global"
-    },
-    "contact": {
-      "title": "Contacto",
-      "lede": "Disponible para largometrajes, series y producciones comerciales seleccionadas.",
-      "emailLabel": "Correo",
-      "imdbLabel": "IMDb",
-      "instagramLabel": "Instagram"
-    },
-    "language": {
-      "toggleAria": "Cambiar idioma",
-      "en": "EN",
-      "es": "ES"
-    },
-    "roles": {
-      "gaffer": "Gaffer",
-      "electrician": "Eléctrico",
-      "electrician2nd": "Eléctrico / 2º Gaffer",
-      "electricianDailies": "Eléctrico (dailies)",
-      "lightingBestboy": "Técnico de iluminación / Best Boy",
-      "rigging": "Eléctrico de rigging",
-      "grip": "Grip",
-      "spark": "Spark",
-      "sparkDailies": "Spark (dailies)",
-      "lamp": "Operador de lámpara"
-    },
-    "partners": {
-      "pageTitle": "Con quien trabajo",
-      "intro": "Las empresas, directores de fotografía y técnicos de iluminación con los que trabajo.",
-      "logosLabel": "Empresas",
-      "section": {
-        "direction": "Dirección",
-        "cinematography": "Fotografía",
-        "lighting": "Iluminación",
-        "sound": "Sonido",
-        "production": "Producción",
-        "other": "Otros"
-      },
-      "empty": "Aún no hay colaboradores listados.",
-      "count": {
-        "one": "colaboración",
-        "other": "colaboraciones",
-        "partner_one": "colaborador",
-        "partner_other": "colaboradores"
-      }
-    },
-    "film": {
-      "closeAria": "Cerrar detalles de la película",
-      "backToWork": "← Todos los proyectos",
-      "yourRole": "Rol en rodaje",
-      "productionCompany": "Productora",
-      "director": "Director",
-      "dop": "Director de Fotografía",
-      "dopAbbr": "(DF)",
-      "gaffer": "Gaffer",
-      "electrics": "Eléctricos",
-      "electricsSubtitle": "Técnicos de Iluminación / Sparks",
-      "noCredits": "—"
-    }
-  }
-}
-</script>
-<script type="application/json" id="tarek-site">
-{
-  "_meta": {
-    "lastUpdated": "2026-07-27",
-    "version": "1.0"
-  },
-  "brand": "Tarek Recolons",
-  "contact": {
-    "email": "tarek@recalone.com",
-    "imdbId": "nm5007366",
-    "imdbUrl": "https://www.imdb.com/name/nm5007366/",
-    "instagram": "tarekreco",
-    "instagramUrl": "https://www.instagram.com/tarekreco/"
-  },
-  "stats": {
-    "yearsExperience": "10+",
-    "featureFilms": "10+",
-    "availability": "Global"
-  }
-}
-</script>
-  <script type="application/json" id="tarek-people">
-{
-  "_meta": {
-    "version": "1.5",
-    "lastUpdated": "2026-09-29"
-  },
-  "people": [
-    {
-      "id": "juli-carne-martorell",
-      "name": "Juli Carné Martorell",
-      "portrait": "assets/images/uploads/juli-carne-martorell.jpg",
-      "description": {
-        "en": "Cinematographer. Portfolio at julicarnemartorell.com.",
-        "es": "Director de fotografía. Portfolio en julicarnemartorell.com."
-      },
-      "url": "https://www.julicarnemartorell.com",
-      "urlLabel": "Portfolio",
-      "partnership": {
-        "jobIds": [
-          "dop"
-        ],
-        "since": null,
-        "description": {
-          "en": "",
-          "es": ""
-        }
-      }
-    },
-    {
-      "id": "nils-dalmases",
-      "name": "Nils Dalmases",
-      "portrait": "/assets/images/uploads/nildalmases.png",
-      "description": {
-        "en": "Cinematographer. Portfolio at nilsdalmases.com.",
-        "es": "Director de fotografía. Portfolio en nilsdalmases.com."
-      },
-      "url": "https://nilsdalmases.com",
-      "urlLabel": "Portfolio",
-      "partnership": {
-        "jobIds": [
-          "dop"
-        ],
-        "since": null,
-        "description": {
-          "en": "",
-          "es": ""
-        }
-      }
-    },
-    {
-      "id": "alejandro-rojas",
-      "name": "Alejandro Rojas",
-      "portrait": null
-    },
-    {
-      "id": "isabel-coixet",
-      "name": "Isabel Coixet",
-      "portrait": null
-    },
-    {
-      "id": "marc-ortiz-prades",
-      "name": "Marc Ortiz Prades",
-      "portrait": null
-    },
-    {
-      "id": "miguel-faus",
-      "name": "Miguel Faus",
-      "portrait": null
-    },
-    {
-      "id": "tarek-recolons",
-      "name": "Tarek Recolons",
-      "portrait": null,
-      "url": "https://www.imdb.com/name/nm5007366/",
-      "urlLabel": "IMDb"
-    }
-  ]
-}
-</script>
-  <script type="application/json" id="tarek-jobs">
-{
-  "_meta": {
-    "version": "1.0",
-    "lastUpdated": "2026-08-06"
-  },
-  "jobs": [
-    {
-      "id": "assistant-director",
-      "name": {
-        "en": "Assistant Director",
-        "es": "Ayudante de dirección"
-      },
-      "category": "direction"
-    },
-    {
-      "id": "director",
-      "name": {
-        "en": "Director",
-        "es": "Director"
-      },
-      "category": "direction"
-    },
-    {
-      "id": "1st-ac",
-      "name": {
-        "en": "1st AC",
-        "es": "1er Ayudante de cámara"
-      },
-      "category": "cinematography"
-    },
-    {
-      "id": "2nd-ac",
-      "name": {
-        "en": "2nd AC",
-        "es": "2º Ayudante de cámara"
-      },
-      "category": "cinematography"
-    },
-    {
-      "id": "camera-operator",
-      "name": {
-        "en": "Camera Operator",
-        "es": "Operador de cámara"
-      },
-      "category": "cinematography"
-    },
-    {
-      "id": "dop",
-      "name": {
-        "en": "Director of Photography",
-        "es": "Director de fotografía"
-      },
-      "category": "cinematography"
-    },
-    {
-      "id": "best-boy-electric",
-      "name": {
-        "en": "Best Boy Electric",
-        "es": "Best Boy Eléctrico"
-      },
-      "category": "lighting"
-    },
-    {
-      "id": "electric",
-      "name": {
-        "en": "Electric",
-        "es": "Eléctrico"
-      },
-      "category": "lighting"
-    },
-    {
-      "id": "gaffer",
-      "name": {
-        "en": "Gaffer",
-        "es": "Gaffer"
-      },
-      "category": "lighting"
-    },
-    {
-      "id": "sparks",
-      "name": {
-        "en": "Sparks",
-        "es": "Sparks"
-      },
-      "category": "lighting"
-    },
-    {
-      "id": "sound-mixer",
-      "name": {
-        "en": "Sound Mixer",
-        "es": "Mezclador de sonido"
-      },
-      "category": "sound"
-    },
-    {
-      "id": "producer",
-      "name": {
-        "en": "Producer",
-        "es": "Productor"
-      },
-      "category": "production"
-    },
-    {
-      "id": "production-manager",
-      "name": {
-        "en": "Production Manager",
-        "es": "Jefe de producción"
-      },
-      "category": "production"
-    },
-    {
-      "id": "editor",
-      "name": {
-        "en": "Editor",
-        "es": "Editor"
-      },
-      "category": "other"
-    },
-    {
-      "id": "writer",
-      "name": {
-        "en": "Writer",
-        "es": "Guionista"
-      },
-      "category": "other"
-    }
-  ]
-}
-  </script>
-  <script type="application/json" id="tarek-films">
-{
-  "_meta": {
-    "version": "1.5",
-    "lastUpdated": "2026-09-29"
-  },
-  "films": [
-    {
-      "id": "els-de-sau-2027",
-      "title": "Els de Sau",
-      "year": 2027,
-      "poster": "assets/images/uploads/els-de-sau.webp",
-      "role": "Gaffer",
-      "type": "Largometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      }
-    },
-    {
-      "id": "ceniza-en-la-boca-2026",
-      "title": "Ceniza en la Boca",
-      "year": 2026,
-      "poster": "assets/images/uploads/ceniza-en-la-boca.jpg",
-      "role": "Gaffer",
-      "type": "Largometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      }
-    },
-    {
-      "id": "la-mala-madre-2026",
-      "title": "La Mala Madre",
-      "year": 2026,
-      "poster": "assets/images/uploads/la-mala-madre.jpg",
-      "role": "Gaffer",
-      "type": "Largometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      }
-    },
-    {
-      "id": "els-mals-noms-2025",
-      "title": "Els Mals Noms",
-      "year": 2025,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [
-          "Lamalanga Produccions Audiovisuals",
-          "Admirable Films"
-        ],
-        "people": [
-          {
-            "personId": "marc-ortiz-prades",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "director"
-          },
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/els-mals-noms-2025.jpg"
-    },
-    {
-      "id": "lo-que-queda-de-ti-2025",
-      "title": "Lo que queda de ti",
-      "year": 2025,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [
-          "Potenza Producciones"
-        ],
-        "people": [
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/lo-que-queda-de-ti-2025.jpg"
-    },
-    {
-      "id": "parenostre-2025",
-      "title": "Parenostre",
-      "year": 2025,
-      "type": "Largometraje",
-      "role": "Lighting Technician / Bestboy",
-      "credits": {
-        "production": [
-          "Minoria Absoluta",
-          "Lastor Media",
-          "Vilaüt Films"
-        ],
-        "people": []
-      },
-      "poster": "assets/images/uploads/parenostre-2025.jpg"
-    },
-    {
-      "id": "un-altre-home-2025",
-      "title": "Un altre home",
-      "year": 2025,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [
-          "Oberon Media"
-        ],
-        "people": [
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/un-altre-home-2025.jpg"
-    },
-    {
-      "id": "tardes-de-soledad-2024",
-      "title": "Tardes de Soledad",
-      "year": 2024,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [],
-        "people": []
-      },
-      "poster": "assets/images/uploads/tardesdesoledad.jpg"
-    },
-    {
-      "id": "calladita-2023",
-      "title": "Calladita",
-      "year": 2023,
-      "type": "Largometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [],
-        "people": [
-          {
-            "personId": "miguel-faus",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "director"
-          },
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/calladita-2023.jpg"
-    },
-    {
-      "id": "el-cuco-2023",
-      "title": "El Cuco",
-      "year": 2023,
-      "role": "Gaffer",
-      "type": "Largometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      },
-      "poster": "assets/images/uploads/elcuco.jpg"
-    },
-    {
-      "id": "upon-entry-2022",
-      "title": "Upon Entry",
-      "year": 2022,
-      "type": "Largometraje",
-      "role": "Grip",
-      "credits": {
-        "production": [],
-        "people": [
-          {
-            "personId": "alejandro-rojas",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "director"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/upon-entry-2022.jpg"
-    },
-    {
-      "id": "lultima-nit-del-karaoke-2021",
-      "title": "L'última nit del karaoke",
-      "year": 2021,
-      "type": "Serie TV",
-      "role": "Electrician / 2nd Gaffer",
-      "credits": {
-        "production": [],
-        "people": []
-      },
-      "poster": "assets/images/uploads/lultima-nit-del-karaoke-2021.jpg"
-    },
-    {
-      "id": "coque-2020",
-      "title": "Coque",
-      "year": 2020,
-      "type": "Cortometraje",
-      "role": "Gaffer",
-      "credits": {
-        "production": [
-          "Somos Acme SL"
-        ],
-        "people": [
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/coque-2020.jpg"
-    },
-    {
-      "id": "boca-norte-2019",
-      "title": "Boca Norte",
-      "year": 2019,
-      "type": "Serie TV",
-      "role": "Gaffer",
-      "credits": {
-        "production": [
-          "Playz",
-          "RTVE"
-        ],
-        "people": [
-          {
-            "personId": "tarek-recolons",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "gaffer"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/boca-norte-2019.jpg"
-    },
-    {
-      "id": "the-bookshop-2017",
-      "title": "The Bookshop",
-      "year": 2017,
-      "type": "Largometraje",
-      "role": "Electrician Dailies",
-      "credits": {
-        "production": [
-          "Diagonal TV",
-          "A Contracorriente Films",
-          "Green Films"
-        ],
-        "people": [
-          {
-            "personId": "isabel-coixet",
-            "description": {
-              "en": "",
-              "es": ""
-            },
-            "jobId": "director"
-          }
-        ]
-      },
-      "poster": "assets/images/uploads/the-bookshop-2017.jpg"
-    },
-    {
-      "id": "ayer-no-termina-nunca-2013",
-      "title": "Ayer No Termina Nunca ",
-      "year": 2013,
-      "poster": "assets/images/uploads/ayer-no-termina-nunca.jpg",
-      "role": "Eléctrico",
-      "type": "Largometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      }
-    },
-    {
-      "id": "luces-rojas-2012",
-      "title": "Luces rojas",
-      "year": 2012,
-      "type": "Largometraje",
-      "role": "Eléctrico",
-      "credits": {
-        "production": [],
-        "people": []
-      },
-      "poster": "assets/images/uploads/redlights.jpg"
-    },
-    {
-      "id": "la-culpa-2010",
-      "title": "La Culpa",
-      "year": 2010,
-      "poster": "assets/images/uploads/la-culpa.jpg",
-      "role": "Eléctrico",
-      "type": "Cortometraje",
-      "credits": {
-        "production": [],
-        "people": []
-      }
-    }
-  ]
-}
-</script>
-  <script type="application/json" id="tarek-work">
-{
-  "_meta": {
-    "lastUpdated": "2026-07-27",
-    "version": "1.0"
-  },
-  "rows": [
-    {
-      "filmId": "els-de-sau-2027"
-    },
-    {
-      "filmId": "ceniza-en-la-boca-2026"
-    },
-    {
-      "filmId": "la-mala-madre-2026"
-    },
-    {
-      "filmId": "els-mals-noms-2025"
-    },
-    {
-      "filmId": "un-altre-home-2025"
-    },
-    {
-      "filmId": "lo-que-queda-de-ti-2025"
-    },
-    {
-      "filmId": "parenostre-2025"
-    },
-    {
-      "filmId": "tardes-de-soledad-2024"
-    },
-    {
-      "filmId": "calladita-2023"
-    },
-    {
-      "filmId": "el-cuco-2023"
-    },
-    {
-      "filmId": "upon-entry-2022"
-    },
-    {
-      "filmId": "lultima-nit-del-karaoke-2021"
-    },
-    {
-      "filmId": "coque-2020"
-    },
-    {
-      "filmId": "boca-norte-2019"
-    },
-    {
-      "filmId": "the-bookshop-2017"
-    },
-    {
-      "filmId": "fassman-2015"
-    },
-    {
-      "filmId": "ayer-no-termina-nunca-2013"
-    },
-    {
-      "filmId": "luces-rojas-2012"
-    },
-    {
-      "filmId": "la-culpa-2010"
-    }
-  ]
-}
-</script>
-  <script type="application/json" id="tarek-kit">
-{
-  "_meta": {
-    "lastUpdated": "2026-07-27",
-    "version": "1.0"
-  },
-  "items": [
-    {
-      "name": "Astera Titan Tube Set",
-      "category": "led"
-    },
-    {
-      "name": "ARRI SkyPanel S60-C",
-      "category": "led"
-    },
-    {
-      "name": "Aputure 600d Pro",
-      "category": "led"
-    },
-    {
-      "name": "C-Stand Kit (American)",
-      "category": "grip"
-    },
-    {
-      "name": "Distro Box 63A",
-      "category": "distro"
-    },
-    {
-      "name": "Black Textile Kit",
-      "category": "grip"
-    }
-  ]
-}
-</script>
-  <script type="application/json" id="tarek-companies">
-{
-  "_meta": {
-    "version": "1.1",
-    "lastUpdated": "2026-08-04"
-  },
-  "companies": [
-    {
-      "id": "movie-men",
-      "name": "Movie-men",
-      "kind": "equipment-house",
-      "logo": "assets/images/uploads/movie-men.svg?v=2",
-      "logoAlt": "Movie-men logo",
-      "description": {
-        "en": "Industry-leading equipment rental house based in Barcelona. Reliable power distribution units, generators, and full lighting packages for film and commercial productions.",
-        "es": "Casa líder de alquiler de equipos en Barcelona. Unidades de distribución de energía, generadores y paquetes completos de iluminación para producciones cinematográficas y publicitarias."
-      },
-      "url": "https://movie-men.com/",
-      "urlLabel": "Website"
-    },
-    {
-      "id": "kinolux",
-      "name": "Kinolux",
-      "kind": "equipment-house",
-      "logo": "assets/images/uploads/kinolux.svg?v=1",
-      "logoAlt": "Kinolux logo",
-      "description": {
-        "en": "Equipment rental house based in Barcelona. Lighting, grip and accessories for film, TV and commercial productions.",
-        "es": "Casa de alquiler de equipos en Barcelona. Iluminación, grip y accesorios para producciones cinematográficas, TV y publicidad."
-      },
-      "url": "https://kinolux.es/",
-      "urlLabel": "kinolux.es"
-    },
-    {
-      "id": "kabuto",
-      "name": "KABUTO",
-      "kind": "equipment-house",
-      "logo": "/assets/images/uploads/kabuto_logo_home.png",
-      "url": "https://www.kabutostudios.es",
-      "urlLabel": "kabuto.es"
-    },
-    {
-      "id": "aluzine",
-      "name": "Aluzine",
-      "kind": "equipment-house",
-      "logo": "assets/images/uploads/aluzine.png?v=1",
-      "logoAlt": "Aluzine logo",
-      "description": {
-        "en": "Lighting rental house based in Spain. HMI, LED and tungsten packages for film, TV and commercial productions.",
-        "es": "Casa de alquiler de iluminación en España. Paquetes de HMI, LED y tungsteno para producciones cinematográficas, TV y publicidad."
-      },
-      "url": "https://www.aluzine.tv/",
-      "urlLabel": "aluzine.tv"
-    },
-    {
-      "id": "cinetecnico",
-      "name": "Cinetécnico",
-      "kind": "equipment-house",
-      "logo": "assets/images/uploads/cinetecnico.png?v=1",
-      "logoAlt": "Cinetécnico logo",
-      "description": {
-        "en": "Equipment rental house based in Spain. Lighting, grip, and accessories for film, TV and commercial productions.",
-        "es": "Casa de alquiler de equipos en España. Iluminación, grip y accesorios para producciones cinematográficas, TV y publicidad."
-      },
-      "url": "https://cinetecnico.com/",
-      "urlLabel": "cinetecnico.com"
-    }
-  ]
-}
-</script>
-  <script type="application/json" id="tarek-hero">
-{
-  "items": [
-    {
-      "file": "assets/images/uploads/hero-forest.jpg",
-      "size": "big",
-      "alt": ""
-    },
-    {
-      "file": "assets/images/uploads/hero-tunnel.jpg",
-      "size": "small",
-      "alt": ""
-    },
-    {
-      "file": "assets/images/uploads/hero-main.jpg",
-      "size": "big",
-      "alt": ""
-    },
-    {
-      "file": "assets/images/uploads/hero-red-ladder.jpg",
-      "size": "small",
-      "alt": ""
-    },
-    {
-      "file": "assets/images/uploads/hero-astera-bar.jpg",
-      "size": "big",
-      "alt": ""
-    },
-    {
-      "file": "assets/images/uploads/hero-hk-cinema.jpg",
-      "size": "small",
-      "alt": ""
-    },
-    {
-      "file": "assets/images/uploads/hero-headphones-blue.jpg",
-      "size": "big",
-      "alt": ""
-    },
-    {
-      "file": "assets/images/uploads/hero-lantern-stairs.jpg",
-      "size": "small",
-      "alt": ""
-    }
-  ]
-}
-</script>
   <script type="application/ld+json" id="tarek-ld">
 {
   "@context": "https://schema.org",
@@ -1245,7 +234,19 @@
             "datePublished": "2017",
             "image": "https://recalone.com/assets/images/uploads/the-bookshop-2017.jpg",
             "url": "https://recalone.com/#film-the-bookshop-2017",
-            "description": "Tarek Recolons — Electrician Dailies"
+            "description": "Tarek Recolons — Electrician (dailies)"
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 16,
+          "item": {
+            "@type": "Movie",
+            "name": "Ayer No Termina Nunca ",
+            "datePublished": "2013",
+            "image": "https://recalone.com/assets/images/uploads/ayer-no-termina-nunca.jpg",
+            "url": "https://recalone.com/#film-ayer-no-termina-nunca-2013",
+            "description": "Tarek Recolons — Electrician"
           }
         },
         {
@@ -1253,11 +254,11 @@
           "position": 17,
           "item": {
             "@type": "Movie",
-            "name": "Ayer No Termina Nunca ",
-            "datePublished": "2013",
-            "image": "https://recalone.com/assets/images/uploads/ayer-no-termina-nunca.jpg",
-            "url": "https://recalone.com/#film-ayer-no-termina-nunca-2013",
-            "description": "Tarek Recolons — Eléctrico"
+            "name": "Luces rojas",
+            "datePublished": "2012",
+            "image": "https://recalone.com/assets/images/uploads/redlights.jpg",
+            "url": "https://recalone.com/#film-luces-rojas-2012",
+            "description": "Tarek Recolons — Electrician"
           }
         },
         {
@@ -1265,23 +266,11 @@
           "position": 18,
           "item": {
             "@type": "Movie",
-            "name": "Luces rojas",
-            "datePublished": "2012",
-            "image": "https://recalone.com/assets/images/uploads/redlights.jpg",
-            "url": "https://recalone.com/#film-luces-rojas-2012",
-            "description": "Tarek Recolons — Eléctrico"
-          }
-        },
-        {
-          "@type": "ListItem",
-          "position": 19,
-          "item": {
-            "@type": "Movie",
             "name": "La Culpa",
             "datePublished": "2010",
             "image": "https://recalone.com/assets/images/uploads/la-culpa.jpg",
             "url": "https://recalone.com/#film-la-culpa-2010",
-            "description": "Tarek Recolons — Eléctrico"
+            "description": "Tarek Recolons — Electrician"
           }
         }
       ]
@@ -1292,14 +281,6 @@
   </head>
 <body>
 
-  <!-- v3.10.23: bg-onion — the "onion" radial that the hero sits on.
-       A real <div> in the markup (not a body::before pseudo-element)
-       because position:fixed + z-index:-1 on a pseudo-element was
-       fragile (overflow-x:hidden on body and z-index quirks in some
-       browsers caused the gradient to scroll with the content). A
-       real fixed div is rock-solid: position:fixed pins it to the
-       viewport no matter what, and z-index:-1 places it behind all
-       body content but in front of the body's solid background. -->
   <div class="bg-onion" aria-hidden="true"></div>
 
   <!-- ═══════════════════════════════════════════════════════════════════════
@@ -1311,9 +292,22 @@
        HEADER — brand, hamburger nav (mobile), full nav (desktop), language toggle, theme toggle (desktop)
        ════════════════════════════════════════════════════════════════════ -->
   <header class="site-header" role="banner">
-    <a class="brand" href="#top" data-i18n="brand">Tarek Recolons</a>
+    <a class="brand" href="#top"><img class="brand__mark" src="assets/images/favicon.svg" alt="" width="32" height="32" /><span data-i18n="brand">Tarek Recolons</span></a>
 
-    <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" data-nav-toggle>
+    <!-- Desktop nav: inline horizontal, hidden on mobile via CSS. -->
+    <nav class="nav-desktop" aria-label="Primary navigation" data-i18n-attr="aria-label:nav.primaryAria" data-nav-desktop>
+      <a href="#work"         data-i18n="nav.work">Work</a>
+      <a href="#about"        data-i18n="nav.about">About</a>
+      <a href="#partners"     data-i18n="nav.partners">Partners</a>
+      <a href="#contact"      data-i18n="nav.contact">Contact</a>
+    </nav>
+
+    <div class="lang-toggle" role="group" aria-label="Language" data-i18n-attr="aria-label:language.toggleAria">
+      <button type="button" data-lang="en" aria-pressed="true" data-i18n="language.en">EN</button>
+      <button type="button" data-lang="es" aria-pressed="false" data-i18n="language.es">ES</button>
+    </div>
+
+    <button class="nav-toggle" type="button" aria-label="Toggle menu" data-i18n-attr="aria-label:nav.toggleAria" aria-expanded="false" data-nav-toggle>
       <svg class="nav-icon icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -1324,19 +318,6 @@
         <line x1="4" y1="20" x2="20" y2="4"></line>
       </svg>
     </button>
-
-    <!-- Desktop nav: inline horizontal, hidden on mobile via CSS. -->
-    <nav class="nav-desktop" aria-label="Primary" data-nav-desktop>
-      <a href="#work"         data-i18n="nav.work">Work</a>
-      <a href="#about"        data-i18n="nav.about">About</a>
-      <a href="#partners"     data-i18n="nav.partners">Partners</a>
-      <a href="#contact"      data-i18n="nav.contact">Contact</a>
-    </nav>
-
-    <div class="lang-toggle" role="group" aria-label="Language">
-      <button type="button" data-lang="en" aria-pressed="true" data-i18n="language.en">EN</button>
-      <button type="button" data-lang="es" aria-pressed="false" data-i18n="language.es">ES</button>
-    </div>
   </header>
 
   <!--
@@ -1346,7 +327,7 @@
     without being constrained by the header's backdrop-filter containing block.
     Both navs share the same links but each has its own DOM element + CSS rules.
   -->
-  <nav class="nav-mobile" aria-label="Primary mobile" data-nav>
+  <nav class="nav-mobile" aria-label="Mobile navigation" data-i18n-attr="aria-label:nav.mobileAria" data-nav>
     <a href="#work"          style="--i: 0.04s" data-i18n="nav.work">Work</a>
     <a href="#about"         style="--i: 0.12s" data-i18n="nav.about">About</a>
     <a href="#partners"      style="--i: 0.16s" data-i18n="nav.partners">Partners</a>
@@ -1362,39 +343,15 @@
          Desktop (≥900px) flips to overlay via CSS.
          ════════════════════════════════════════════════════════════════ -->
     <section id="top" class="hero">
-      <!-- Hero = full-bleed SVG carousel (CodePen-style).
-           7 tiles total: 3 big + 4 small, two staggered rows.
-           The 3 BIG tiles are the "main photos": hero-forest, EVF (2nd main),
-           and one BTS. The 4 smalls are decorative.
-           Text floats centered on top via .hero-content.
-           Black background; the tiles are the entire visual.
-
-           Scroll behavior (band-based, the part that took 3 tries to get right):
-           - Outer 20% on each side of the hero = CAROUSEL band.
-             Wheel/drag/touch scrubs the tiles horizontally. Page does NOT scroll.
-           - Middle 60% of the hero = PAGE band.
-             Wheel/drag/touch scrolls the page normally. Carousel does NOT move.
-           - Outside the hero = normal page scroll.
-
-           Cursor: ew-resize in the carousel bands, default in the page band. -->
+      <!-- Large hero photos display on all screens; small tiles display on desktop only. -->
       <svg class="hero-carousel" id="hero-carousel-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <defs>
           <clipPath id="hc-cp1"><rect width="500" height="500" rx="22"/></clipPath>
           <clipPath id="hc-cp2"><rect width="200" height="200" rx="16"/></clipPath>
         </defs>
-        <!-- v3.14.29: tiles are injected at runtime by
-             assets/js/hero-carousel.js from the tarek-hero
-             JSON block (data/hero.json, inlined by
-             scripts/inline-content.mjs at build time).
-             Order + size are now editable from the admin
-             (/admin → Hero carrusel). The <g> stays here as
-             the insertion point; it's empty by design. -->
+        <!-- Filled from data/hero.json by hero-carousel.js. -->
         <g class="hc-row hc-all" id="hero-carousel-tiles"></g>
       </svg>
-
-      <!-- Dark overlay: keeps the centered text legible against moving tiles.
-           pointer-events: none so it never blocks the drag or clicks. -->
-      <div class="hero-overlay" aria-hidden="true"></div>
 
       <!-- Text content — centered on top of the carousel. -->
       <div class="hero-content">
@@ -1404,20 +361,14 @@
       </div>
     </section>
 
-    <!-- ════════════════════════════════════════════════════════════════
-         WORK — poster wall.
-         2:3 portraits, every project the same size and ratio.
-         Mobile: 1 col full-width · Tablet: 3 cols · Desktop: 5 cols (10 films = 5×2).
-         JS renders the grid from data/work.json + data/films.json (data-driven).
-         ════════════════════════════════════════════════════════════════ -->
+    <!-- Selected Work is rendered from data/films.json. -->
     <section id="work" class="section section-posters">
       <header class="section-head">
-        <span class="section-index">01</span>
         <h2 class="section-title" data-i18n="work.title">Selected Work</h2>
-        <p class="section-sub" data-i18n="work.subtitle">Feature films, series &amp; selected shorts · 2017–2025</p>
+        <p class="section-sub" data-i18n="work.subtitle">Feature films, series and selected shorts</p>
       </header>
 
-      <noscript class="poster-static-fallback" aria-label="Selected work">
+      <noscript class="poster-static-fallback" aria-label="Selected Work">
       <ul class="poster-static-list" role="list">
         <li><a href="/#film-els-de-sau-2027">Els de Sau (2027 · Gaffer)</a></li>
         <li><a href="/#film-ceniza-en-la-boca-2026">Ceniza en la Boca (2026 · Gaffer)</a></li>
@@ -1433,10 +384,10 @@
         <li><a href="/#film-lultima-nit-del-karaoke-2021">L&#39;última nit del karaoke (2021 · Electrician / 2nd Gaffer)</a></li>
         <li><a href="/#film-coque-2020">Coque (2020 · Gaffer)</a></li>
         <li><a href="/#film-boca-norte-2019">Boca Norte (2019 · Gaffer)</a></li>
-        <li><a href="/#film-the-bookshop-2017">The Bookshop (2017 · Electrician Dailies)</a></li>
-        <li><a href="/#film-ayer-no-termina-nunca-2013">Ayer No Termina Nunca  (2013 · Eléctrico)</a></li>
-        <li><a href="/#film-luces-rojas-2012">Luces rojas (2012 · Eléctrico)</a></li>
-        <li><a href="/#film-la-culpa-2010">La Culpa (2010 · Eléctrico)</a></li>
+        <li><a href="/#film-the-bookshop-2017">The Bookshop (2017 · Electrician (dailies))</a></li>
+        <li><a href="/#film-ayer-no-termina-nunca-2013">Ayer No Termina Nunca  (2013 · Electrician)</a></li>
+        <li><a href="/#film-luces-rojas-2012">Luces rojas (2012 · Electrician)</a></li>
+        <li><a href="/#film-la-culpa-2010">La Culpa (2010 · Electrician)</a></li>
       </ul>
     </noscript>
     <ul class="poster-wall" id="poster-wall" role="list" aria-busy="true">
@@ -1451,23 +402,35 @@
     <section id="about" class="section section-alt">
       <div class="about-grid">
         <header class="section-head">
-          <span class="section-index">02</span>
           <h2 class="section-title" data-i18n="about.title">About me and professional career</h2>
         </header>
-        <div class="about-body" data-i18n-html="about.body">
-          <p>With 10+ years of experience in the electrical and cinematographic lighting department, I have worked mainly on feature films, series and advertising productions, both national and international.</p>
-          <p>During this time I have developed skills in planning, preparation and execution of lighting, working alongside the Director of Photography to bring their visual proposal to set accurately, efficiently and safely.</p>
-          <p>The experience gained over years of shooting and on productions of different scales has allowed me to work with diverse technical teams, adapt to the needs of each project and quickly solve the challenges that may arise on set.</p>
-          <p>My career includes work on feature films and international projects such as <em>The Bookshop</em>, <em>Calladita</em> and <em>Boca Norte</em>, acquiring solid experience in both technical work and coordination of the electrical team.</p>
-          <p>The goal is simple: understand the Director of Photography's proposal, find the right solution and make it work on set. All with a way of working based on precision, organization and adaptability.</p>
+        <div id="about-carousel" class="about-carousel" aria-label="Behind the scenes" data-i18n-attr="aria-label:about.carouselLabel">
+          <div class="about-carousel__stage"></div>
+          <div class="about-carousel__controls">
+            <button type="button" data-about-prev data-i18n-attr="aria-label:about.previousPhoto" aria-label="Previous photo">&#8592;</button>
+            <div class="about-carousel__dots" role="group" aria-label="Choose photo" data-i18n-attr="aria-label:about.choosePhoto"></div>
+            <button type="button" data-about-next data-i18n-attr="aria-label:about.nextPhoto" aria-label="Next photo">&#8594;</button>
+          </div>
         </div>
-        <dl class="about-stats" aria-label="Career highlights">
+        <div class="about-copy">
+          <div id="about-body" class="about-body" data-i18n-html="about.body">
+            <!-- i18n-fallback:about.body -->
+<p>With 10+ years of experience in the electrical and cinematographic lighting department, I have worked mainly on feature films, series and advertising productions, both national and international.</p><p>During this time I have developed skills in planning, preparation and execution of lighting, working alongside the Director of Photography to bring their visual proposal to set accurately, efficiently and safely.</p><p>The experience gained over years of shooting and on productions of different scales has allowed me to work with diverse technical teams, adapt to the needs of each project and quickly solve the challenges that may arise on set.</p><p>My career includes work on feature films and international projects, acquiring solid experience in both technical work and coordination of the electrical team.</p><p>The goal is simple: understand the Director of Photography's proposal, find the right solution and make it work on set. All with a way of working based on precision, organization and adaptability.</p>
+<!-- /i18n-fallback:about.body -->
+          </div>
+          <button class="about-read-more" type="button" aria-controls="about-body" aria-expanded="false" data-about-read-more>Read more</button>
+        </div>
+        <dl class="about-stats" aria-label="Career highlights" data-i18n-attr="aria-label:about.statsAria">
           <div><dt data-i18n="about.statsYearsLabel">Years experience</dt><dd data-i18n="about.statsYearsValue">10+</dd></div>
           <div><dt data-i18n="about.statsFilmsLabel">Feature films</dt><dd data-i18n="about.statsFilmsValue">10+</dd></div>
           <div><dt data-i18n="about.statsAvailabilityLabel">Availability</dt><dd data-i18n="about.statsAvailabilityValue">Global</dd></div>
         </dl>
       </div>
     </section>
+    <dialog id="about-lightbox" class="about-lightbox" aria-label="Photo preview" data-i18n-attr="aria-label:about.photoPreview">
+      <button type="button" data-about-lightbox-close data-i18n-attr="aria-label:about.closePhoto" aria-label="Close photo">&times;</button>
+      <img src="" alt="" />
+    </dialog>
 
     <!-- ════════════════════════════════════════════════════════════════
          PARTNERS — collaborators, equipment houses, cinematographers
@@ -1479,7 +442,6 @@
          ════════════════════════════════════════════════════════════════ -->
     <section id="partners" class="section section-alt">
       <header class="section-head">
-        <span class="section-index">03</span>
         <h2 class="section-title" data-i18n="partners.pageTitle">Who I Work With</h2>
         <p class="section-sub" data-i18n="partners.intro">The electricians, equipment houses, and cinematographers I work with.</p>
       </header>
@@ -1502,7 +464,6 @@
          ════════════════════════════════════════════════════════════════ -->
     <section id="contact" class="section section-cta">
       <header class="section-head">
-        <span class="section-index">04</span>
         <h2 class="section-title" data-i18n="contact.title">Get in touch</h2>
       </header>
       <p class="lede" data-i18n="contact.lede">Available for feature, series, and select commercial work.</p>
@@ -1510,15 +471,15 @@
       <ul class="contact-list" role="list">
         <li>
           <span class="contact-label" data-i18n="contact.emailLabel">Email</span>
-          <a class="contact-value" href="mailto:tarek@recalone.com">tarek@recalone.com</a>
+          <a class="contact-value" data-contact="email" href="mailto:tarek@recalone.com">tarek@recalone.com</a>
         </li>
         <li>
           <span class="contact-label" data-i18n="contact.imdbLabel">IMDb</span>
-          <a class="contact-value" href="https://www.imdb.com/name/nm5007366/" target="_blank" rel="noopener">Tarek Recolons</a>
+          <a class="contact-value" data-contact="imdb" href="https://www.imdb.com/name/nm5007366/" target="_blank" rel="noopener">Tarek Recolons</a>
         </li>
         <li>
           <span class="contact-label" data-i18n="contact.instagramLabel">Instagram</span>
-          <a class="contact-value" href="https://www.instagram.com/tarekreco/" target="_blank" rel="noopener">@tarekreco</a>
+          <a class="contact-value" data-contact="instagram" href="https://www.instagram.com/tarekreco/" target="_blank" rel="noopener">@tarekreco</a>
         </li>
       </ul>
 
@@ -1542,112 +503,103 @@
     </p>
   </footer>
 
-  <!-- One small JS file: theme toggle + language toggle + mobile nav. ~80 lines. -->
-  <!-- GSAP from CDN — used by hero-carousel.js for the per-frame tile
-       wrap math, idle auto-scroll, and lerp smoothing. v3.10.49+
-       uses native Pointer Events for the drag (no Observer plugin
-       needed), so only gsap.min.js is required.
-       No npm install per project convention (static site, no build step). -->
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+  <!-- Page scripts. JSON content is fetched from the deployed static files. -->
+  <script src="assets/js/vendor/gsap.min.js" defer></script>
+  <script src="assets/js/i18n.js" defer></script>
   <script src="assets/js/hero-carousel.js" defer></script>
+  <script src="assets/js/film-modal.js" defer></script>
+  <script src="assets/js/about-carousel.js" defer></script>
+  <script src="assets/js/about-read-more.js" defer></script>
+  <script src="assets/js/site-content.js" defer></script>
   <script src="assets/js/main.js" defer></script>
   <script src="assets/js/partners.js" defer></script>
 
-  <!-- ════════════════════════════════════════════════════════════════
-       FILM DETAIL MODAL (v3.11.0)
-       Opens when a poster tile fires `tarek:film-open { filmId }`
-       (see POSTER_WALL in main.js). Shows the film's poster,
-       title, year, type, Tarek's role on set, and the full crew
-       list (production company, director, DP/DoP, gaffer, sparks).
-       The crew roles use the most common industry slang in each
-       language (DP / DoP in EN, DF in ES; Sparks in EN, Eléctricos
-       in ES) with the formal term as the primary label so it's
-       readable for non-industry visitors too. Closes on X click,
-       ESC, backdrop click, or browser back. URL hash
-       `#film-<id>` is set on open and cleared on close for deep
-       linking.
-       ════════════════════════════════════════════════════════════════ -->
+  <!-- Film details and trailer player. -->
   <div id="film-modal" class="film-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="film-modal-title">
     <div class="film-modal__backdrop" data-film-modal-close tabindex="-1"></div>
+    <header class="film-modal__chrome">
+      <button class="film-modal__close" data-film-modal-close type="button" data-i18n-attr="aria-label:film.closeAria" aria-label="Close film details">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </header>
     <article class="film-modal__content" role="document">
-      <!-- v3.15.4: the chrome now only holds the close X (top-right).
-           The position indicator lives inside .film-modal__header so it
-           appears above the film title on desktop, while CSS pulls it
-           back to the top-left on mobile. -->
-      <header class="film-modal__chrome">
-        <button class="film-modal__close" data-film-modal-close type="button" data-i18n-attr="aria-label:film.closeAria" aria-label="Close film details">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button>
-      </header>
+      <div class="film-modal__surface">
 
-      <!-- v3.14.34: prev/next arrows on the left/right edges of the
-           modal, like the Paramount+ detail view. Click to navigate
-           between films in work.json order. Hidden on the first
-           and last film (no prev on the first, no next on the last). -->
-      <button class="film-modal__nav film-modal__nav--prev" data-film-modal-prev type="button" aria-label="Previous film">
+      <button class="film-modal__nav film-modal__nav--prev" data-film-modal-prev type="button" aria-label="Previous film" data-i18n-attr="aria-label:film.previousAria">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M15 18l-6-6 6-6"/>
         </svg>
       </button>
-      <button class="film-modal__nav film-modal__nav--next" data-film-modal-next type="button" aria-label="Next film">
+      <button class="film-modal__nav film-modal__nav--next" data-film-modal-next type="button" aria-label="Next film" data-i18n-attr="aria-label:film.nextAria">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 18l6-6-6-6"/>
         </svg>
       </button>
 
-      <div class="film-modal__poster">
-        <img id="film-modal-poster" src="" alt="" />
-      </div>
+      <div class="film-modal__media" id="film-modal-media"></div>
 
       <div class="film-modal__info">
-        <header class="film-modal__header">
-          <span class="film-modal__position" id="film-modal-position"></span>
-          <h2 id="film-modal-title" class="film-modal__title"></h2>
-          <p class="film-modal__meta">
-            <span id="film-modal-year" class="film-modal__year"></span>
-            <span id="film-modal-type" class="film-modal__type"></span>
+        <div class="film-modal__copy">
+          <header class="film-modal__header">
+            <h2 id="film-modal-title" class="film-modal__title"></h2>
+            <p class="film-modal__meta">
+              <span id="film-modal-year" class="film-modal__year"></span>
+              <span id="film-modal-type" class="film-modal__type"></span>
+            </p>
+          </header>
+
+          <p class="film-modal__role" id="film-modal-role-row" hidden>
+            <span class="film-modal__role-label" data-i18n="film.yourRole">Role on set</span>
+            <strong id="film-modal-role"></strong>
           </p>
-        </header>
 
-        <p class="film-modal__role" id="film-modal-role-row" hidden>
-          <span class="film-modal__role-label" data-i18n="film.yourRole">Role on set</span>
-          <strong id="film-modal-role"></strong>
-        </p>
-
-        <dl class="film-modal__crew">
-          <div class="film-modal__crew-row" data-film-field="production">
-            <dt data-i18n="film.productionCompany">Production Company</dt>
-            <dd id="film-modal-production"></dd>
+          <a class="film-modal__watch" id="film-modal-watch" href="#" target="_blank" rel="noopener noreferrer" hidden>Watch trailer</a>
+        </div>
+        <div class="film-modal__current" aria-current="true">
+          <img data-film-modal-current-poster alt="">
+        </div>
+        <nav class="film-modal__poster-nav film-modal__poster-nav--tablet" aria-label="Browse films" data-i18n-attr="aria-label:film.navigationAria" data-film-modal-navigation>
+          <div class="film-modal__poster-strip">
+            <button class="film-modal__poster film-modal__poster--side" data-film-modal-prev type="button" aria-label="Previous film">
+              <img data-film-modal-prev-poster alt="">
+            </button>
+            <div class="film-modal__poster film-modal__poster--current" aria-current="true">
+              <img data-film-modal-current-poster alt="">
+            </div>
+            <button class="film-modal__poster film-modal__poster--side" data-film-modal-next type="button" aria-label="Next film">
+              <img data-film-modal-next-poster alt="">
+            </button>
           </div>
-          <div class="film-modal__crew-row" data-film-field="director">
-            <dt data-i18n="film.director">Director</dt>
-            <dd id="film-modal-director"></dd>
-          </div>
-          <div class="film-modal__crew-row" data-film-field="dop">
-            <dt>
-              <span data-i18n="film.dop">Director of Photography</span>
-              <span class="film-modal__crew-abbr" data-i18n="film.dopAbbr">(DP / DoP)</span>
-            </dt>
-            <dd id="film-modal-dop"></dd>
-          </div>
-          <div class="film-modal__crew-row" data-film-field="gaffer">
-            <dt data-i18n="film.gaffer">Gaffer</dt>
-            <dd id="film-modal-gaffer"></dd>
-          </div>
-          <div class="film-modal__crew-row" data-film-field="electrics">
-            <dt>
-              <span data-i18n="film.electrics">Sparks</span>
-              <span class="film-modal__crew-subtitle" data-i18n="film.electricsSubtitle">Electrics / Lighting Technicians</span>
-            </dt>
-            <dd id="film-modal-electrics"></dd>
-          </div>
-        </dl>
-
-        <a class="film-modal__back" href="#work" data-film-modal-close data-i18n="film.backToWork">← All projects</a>
+          <p class="film-modal__position" data-film-modal-position aria-live="polite"></p>
+        </nav>
       </div>
+      </div>
+      <p class="film-modal__position film-modal__position--desktop" data-film-modal-position aria-live="polite"></p>
     </article>
+    <nav class="film-modal__desktop-nav" aria-label="Browse films" data-i18n-attr="aria-label:film.navigationAria" data-film-modal-navigation>
+      <button class="film-modal__poster film-modal__poster--side" data-film-modal-prev type="button" aria-label="Previous film">
+        <img data-film-modal-prev-poster alt="">
+      </button>
+      <button class="film-modal__poster film-modal__poster--side" data-film-modal-next type="button" aria-label="Next film">
+        <img data-film-modal-next-poster alt="">
+      </button>
+    </nav>
+    <nav class="film-modal__poster-nav film-modal__poster-nav--mobile" aria-label="Browse films" data-i18n-attr="aria-label:film.navigationAria" data-film-modal-navigation>
+      <div class="film-modal__poster-strip">
+        <button class="film-modal__poster film-modal__poster--side" data-film-modal-prev type="button" aria-label="Previous film">
+          <img data-film-modal-prev-poster alt="">
+        </button>
+        <div class="film-modal__poster film-modal__poster--current" aria-current="true">
+          <img data-film-modal-current-poster alt="">
+        </div>
+        <button class="film-modal__poster film-modal__poster--side" data-film-modal-next type="button" aria-label="Next film">
+          <img data-film-modal-next-poster alt="">
+        </button>
+      </div>
+      <p class="film-modal__position" data-film-modal-position aria-live="polite"></p>
+    </nav>
   </div>
 </body>
 </html>

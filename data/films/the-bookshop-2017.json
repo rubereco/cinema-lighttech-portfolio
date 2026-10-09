@@ -2,24 +2,9 @@
   "id": "the-bookshop-2017",
   "title": "The Bookshop",
   "year": 2017,
-  "type": "Largometraje",
-  "role": "Electrician Dailies",
-  "credits": {
-    "production": [
-      "Diagonal TV",
-      "A Contracorriente Films",
-      "Green Films"
-    ],
-    "people": [
-      {
-        "personId": "isabel-coixet",
-        "description": {
-          "en": "",
-          "es": ""
-        },
-        "jobId": "director"
-      }
-    ]
-  },
-  "poster": "assets/images/uploads/the-bookshop-2017.jpg"
+  "type": "feature",
+  "role": "electricianDailies",
+  "poster": "assets/images/uploads/the-bookshop-2017.jpg",
+  "displayOrder": 15,
+  "trailerUrl": "https://www.imdb.com/video/embed/vi1441315609"
 }
