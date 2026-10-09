@@ -376,3 +376,11 @@
 }
 
 .brand__mark { display: block; width: 30px; height: 30px; flex: none; filter: brightness(0) invert(1); }
+
+@media (max-width: 359px) {
+  .site-header { gap: 6px; padding-inline: 12px; }
+  .brand { gap: 6px; font-size: 14px; }
+  .brand__mark { width: 26px; height: 26px; }
+  .lang-toggle button { min-width: 34px; padding-inline: 8px; }
+  .nav-toggle { width: 44px; height: 44px; }
+}
