@@ -77,11 +77,6 @@
 /* Mobile hero layout. */
 @media (max-width: 767px) {
   .hero {
-    /* v3.15.2: with the shorter hero text, the hero was collapsing
-       and the SVG carousel (preserveAspectRatio="xMidYMid slice")
-       sliced the side images. A modest min-height on the content
-       box keeps the composition compact on phones while still
-       showing enough of the carousel. */
     min-height: 0;
     height: auto;
     margin: 24px 0 0;
@@ -90,13 +85,11 @@
     background-color: transparent;
   }
   .hero-content {
-    /* Text packed at the top (justify-content: flex-start) so it
-       sits over the big (anchored at y=0 in the SVG since v3.10.3). */
-    min-height: 320px;
+    /* Match the mobile SVG's 800:900 viewBox. The centered large tile
+       uses most of the phone width without clipping its outer edges. */
+    min-height: 112.5vw;
     height: auto;
     justify-content: flex-start;
-    /* 25px on top and bottom so the text doesn't touch the
-       carousel edges. */
     padding: 25px var(--pad-x);
   }
 }

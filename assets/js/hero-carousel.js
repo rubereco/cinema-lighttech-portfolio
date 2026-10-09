@@ -300,9 +300,11 @@
   // moves 5–25 units per gesture — feels responsive, not jumpy.)
   var DRAG_SENSITIVITY = 500;
 
-  // ── Layout constants (scaled by SCALE for mobile) ────────────
+  // ── Layout constants ────────────
   var BIG_WIDTH = 500 * SCALE;
-  var BIG_HEIGHT = 500 * SCALE;
+  // A taller mobile tile shows more of portrait photographs without
+  // changing the square tiles or spacing on desktop.
+  var BIG_HEIGHT = (isMobile ? 600 : 500) * SCALE;
   var SMALL_WIDTH = 200 * SCALE;
   var SMALL_HEIGHT = 200 * SCALE;
 
@@ -461,7 +463,7 @@
   // doubled from the original 0.3 — the original was
   // almost imperceptible, the new pace is a clearly visible
   // drift without feeling like a screensaver.
-  var AUTO_SCROLL_VELOCITY = 0.6;  // phase/frame, slow drift when idle
+  var AUTO_SCROLL_VELOCITY = isMobile ? 0.72 : 0.6; // 20% quicker idle drift on mobile
   var WHEEL_IDLE_DELAY = 2000;     // ms after last wheel before auto-scroll resumes (v3.10.38: 1500→2000)
 
   // === Build the layout from the SVG's <image> elements ===
@@ -485,51 +487,14 @@
     var bigCount = bigs.length;
     if (bigCount === 0) return [];
 
-    // On desktop, the top-level INITIAL_OFFSET (= 200 * SCALE = 200)
-    // and WRAP_MARGIN (= 200 * SCALE = 200) are the user-tuned
-    // "left margin" and trailing-gap values from v3.9.3 and they
-    // stay as-is. WRAP_MARGIN still inherits the desktop value
-    // on mobile (v3.10.9).
-    //
-    // v3.10.12: mobile now overrides INITIAL_OFFSET too, to 550,
-    // so the 500-unit-wide big centers at x=800 in the viewBox
-    // (the visible-region center on a 375-wide phone, which is
-    // also where the hero text and CTAs are centered). The
-    // desktop keeps INITIAL_OFFSET=200 (left-margin composition
-    // from v3.9.2 — Buddie's "add a margin to the first photo"
-    // QA). Buddie: "i think it would be better if the images
-    // where centered on the section itself not just to the text,
-    // like having in mind the buttons."
+    // Desktop keeps its original left offset and trailing gap.
+    // Mobile centers the first large tile in its 800-unit-wide frame.
     if (isMobile) {
-      // INITIAL_OFFSET: 550 = 800 (viewBox center) - 250 (half of
-      // BIG_WIDTH). Centers the big horizontally on the hero, in
-      // line with the text and the CTAs.
-      INITIAL_OFFSET = 550;
-      // v3.10.55: BIG_Y = 30 on mobile. Was 0 (big anchored flush
-      // at the top of the SVG), but Buddie: "now on mobile are a
-      // touch high" — the top-anchored big sat right against the
-      // 72px sticky nav with no breathing room. 30px of headroom
-      // (matching the PC lift's 50px-of-headroom feel, just a
-      // touch less since the text overlay sits in the empty space
-      // below the big on mobile). Big now spans y=30 to y=730,
-      // center y=380, leaving 30px above and 170px below for the
-      // hero text.
+      // Center a full tile inside the narrower mobile SVG frame.
+      INITIAL_OFFSET = (800 - BIG_WIDTH) / 2;
+      // The 840-unit-tall tile sits inside the 900-unit mobile frame
+      // with 30 units of breathing room above and below.
       BIG_Y = 30;
-      // v3.10.52: re-center the smalls' Y range around the big.
-      // Big on mobile: y=30 to 730 (BIG_Y=30, BIG_HEIGHT=700 at
-      // SCALE=1.4), center at y=380. The default SMALL_Y_MIN/MAX
-      // (= [140, 560] at SCALE=1.4) gives small CENTERS in
-      // [280, 700], which is not centered on 380. Override to
-      // tops [0, 420] so centers land in [140, 560], midpoint
-      // 350 — sits 30px above the new big center (380), which
-      // is fine because the smalls cluster in the visual-weight
-      // portion of the big (just below the text overlay).
-      // Buddie: "the small ones don't spawn centered to the
-      // big ones ... the max and min point is not centered."
-      // PC keeps the default [140, 560] tops (Buddie: "i think
-      // the small ones are good on pc").
-      SMALL_Y_MIN = 0;
-      SMALL_Y_MAX = 420;
     }
 
     // Compute X_RANGE = (bigs' span) + WRAP_MARGIN.
@@ -778,6 +743,8 @@
     var stage = document.getElementById('hero-carousel-svg');
     if (!hero || !stage) return;
     if (typeof gsap === 'undefined') return;
+
+    if (isMobile) stage.setAttribute('viewBox', '0 0 800 900');
 
     // Build the layout only after the photograph list has loaded.
     loadHeroData().then(function (data) {
