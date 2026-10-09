@@ -425,6 +425,26 @@ const POSTER_WALL = (() => {
       return true;
     };
 
+    // Keep the selected work behind the modal aligned with the film that
+    // visitors reached using the modal's previous/next controls.
+    window.addEventListener("tarek:film-modal-close", function (event) {
+      if (!W || !event.detail?.filmId) return;
+      var filmIndex = originals.findIndex(function (el) {
+        return el.querySelector("a.poster-link")?.dataset.filmId === event.detail.filmId;
+      });
+      if (filmIndex < 0) return;
+
+      var anchor = Math.round(-scrollX / W);
+      var offset = ((filmIndex - anchor) % N + N) % N;
+      if (offset > N / 2) offset -= N;
+      pendingFilmId = null;
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = null;
+      restSlot = anchor + offset;
+      scrollX = targetScrollX = -restSlot * W;
+      layout();
+    });
+
     // Vertical wheel scrolling belongs to the page. Drag and touch still move the posters.
     function onMouseDown(e) {
       e.preventDefault(); // kill native image drag / text selection

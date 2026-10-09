@@ -37,10 +37,15 @@ html.film-modal-open, html.film-modal-open body { overflow: hidden; }
 .film-modal [hidden] { display: none !important; }
 @media (max-width: 699px) {
   .film-modal[aria-hidden="false"] {
+    --film-modal-poster-gap: clamp(20px, 11dvh, 96px);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 12px; padding: 8px 0; box-sizing: border-box;
+    gap: var(--film-modal-poster-gap); padding: 8px 0; box-sizing: border-box;
   }
-  .film-modal__content { width: calc(100vw - 16px); max-height: calc(100dvh - 180px); flex: 0 1 auto; }
+  .film-modal__content {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 170px - var(--film-modal-poster-gap));
+    flex: 0 1 auto;
+  }
   .film-modal__nav { display: none; }
   .film-modal__poster-nav {
     position: relative; z-index: 1; display: grid; justify-items: center; gap: 9px;

@@ -130,6 +130,9 @@ window.FILM_MODAL = (() => {
 
   function hide() {
     if (!modal) return;
+    if (currentId) {
+      window.dispatchEvent(new CustomEvent("tarek:film-modal-close", { detail: { filmId: currentId } }));
+    }
     modal.classList.remove("film-modal--open");
     modal.setAttribute("aria-hidden", "true");
     document.documentElement.classList.remove("film-modal-open");
