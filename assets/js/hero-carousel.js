@@ -324,7 +324,10 @@
   // between the same distance ... i prefer that distance that
   // is shorter". Now BIG_SPACING = BIG_WIDTH + WRAP_MARGIN
   // so every gap (inter-tile AND wrap) is exactly WRAP_MARGIN.
-  var BIG_SPACING = (500 + 200) * SCALE; // = 700 * SCALE => 200px visible gap
+  // Keep a narrow gap on phones, where dark photo edges can otherwise
+  // look like a long empty pause between images.
+  var WRAP_MARGIN = (isMobile ? 70 : 200) * SCALE;
+  var BIG_SPACING = BIG_WIDTH + WRAP_MARGIN;
   var X_RANGE = BIG_SPACING * 4; // upper bound; buildLayout() refines it
 
   // Left margin: how far right the first big is from x=0 on load.
@@ -334,12 +337,6 @@
   // without making big 0 feel off-center. On mobile this default
   // is overridden in buildLayout() — see below.
   var INITIAL_OFFSET = 200 * SCALE;
-
-  // Wrap margin: trailing space AFTER the last big, before the
-  // loop wraps. So big 0's right clone doesn't start right where
-  // big 2 ends (Buddie's QA: "the last and the first photos always
-  // are together"). 200 = a small visible gap at the wrap point.
-  var WRAP_MARGIN = 200 * SCALE;
 
   // Y positions
   // v3.10.52: BIG_Y centers the big vertically in the 900-unit
@@ -463,7 +460,7 @@
   // doubled from the original 0.3 — the original was
   // almost imperceptible, the new pace is a clearly visible
   // drift without feeling like a screensaver.
-  var AUTO_SCROLL_VELOCITY = isMobile ? 0.72 : 0.6; // 20% quicker idle drift on mobile
+  var AUTO_SCROLL_VELOCITY = isMobile ? 0.864 : 0.6; // another 20% quicker on mobile
   var WHEEL_IDLE_DELAY = 2000;     // ms after last wheel before auto-scroll resumes (v3.10.38: 1500→2000)
 
   // === Build the layout from the SVG's <image> elements ===
