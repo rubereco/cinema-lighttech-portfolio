@@ -46,6 +46,31 @@ window.FILM_MODAL = (() => {
     role.textContent = film.role ? i18n.t(`roles.${film.role}`) : "";
     roleRow.hidden = !film.role;
     document.getElementById("film-modal-watch").textContent = i18n.t("film.watchTrailer");
+    renderPosterNavigation();
+  }
+
+  function renderPosterNavigation() {
+    const navigation = modal.querySelector(".film-modal__poster-nav");
+    const index = orderedIds.indexOf(currentId);
+    navigation.hidden = index < 0;
+    if (index < 0) return;
+
+    const current = filmsById.get(currentId);
+    const previous = filmsById.get(orderedIds[(index - 1 + orderedIds.length) % orderedIds.length]);
+    const next = filmsById.get(orderedIds[(index + 1) % orderedIds.length]);
+    const previousButton = navigation.querySelector("[data-film-modal-prev]");
+    const nextButton = navigation.querySelector("[data-film-modal-next]");
+    previousButton.hidden = nextButton.hidden = orderedIds.length < 2;
+    previousButton.setAttribute("aria-label", i18n.t("film.previousPosterAria", undefined, { title: previous.title }));
+    nextButton.setAttribute("aria-label", i18n.t("film.nextPosterAria", undefined, { title: next.title }));
+    document.getElementById("film-modal-prev-poster").src = previous.poster;
+    document.getElementById("film-modal-current-poster").src = current.poster;
+    document.getElementById("film-modal-current-poster").alt = i18n.t("film.posterAlt", undefined, { title: current.title });
+    document.getElementById("film-modal-next-poster").src = next.poster;
+    document.getElementById("film-modal-position").textContent = i18n.t("film.position", undefined, {
+      current: index + 1,
+      total: orderedIds.length
+    });
   }
 
   function renderMedia(film) {
@@ -148,7 +173,8 @@ window.FILM_MODAL = (() => {
       if (event.key === "ArrowLeft") move(-1);
       if (event.key === "ArrowRight") move(1);
       if (event.key === "Tab") {
-        const controls = [...modal.querySelectorAll('button:not([disabled]), a[href]:not([hidden]), iframe')];
+        const controls = [...modal.querySelectorAll('button:not([disabled]), a[href]:not([hidden]), iframe')]
+          .filter(control => control.getClientRects().length && !control.closest('[hidden]'));
         const first = controls[0];
         const last = controls.at(-1);
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }

@@ -554,6 +554,20 @@
         <a class="film-modal__watch" id="film-modal-watch" href="#" target="_blank" rel="noopener noreferrer" hidden>Watch trailer</a>
       </div>
     </article>
+    <nav class="film-modal__poster-nav" aria-label="Browse films" data-i18n-attr="aria-label:film.navigationAria">
+      <div class="film-modal__poster-strip">
+        <button class="film-modal__poster film-modal__poster--side" data-film-modal-prev type="button" aria-label="Previous film">
+          <img id="film-modal-prev-poster" alt="">
+        </button>
+        <div class="film-modal__poster film-modal__poster--current" aria-current="true">
+          <img id="film-modal-current-poster" alt="">
+        </div>
+        <button class="film-modal__poster film-modal__poster--side" data-film-modal-next type="button" aria-label="Next film">
+          <img id="film-modal-next-poster" alt="">
+        </button>
+      </div>
+      <p class="film-modal__position" id="film-modal-position" aria-live="polite"></p>
+    </nav>
   </div>
 </body>
 </html>

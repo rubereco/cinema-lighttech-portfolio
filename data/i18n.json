@@ -187,10 +187,22 @@
       "es": "Cerrar detalles de la película"
     },
     {
+      "key": "film.navigationAria",
+      "editorLabel": "Películas · Nombre de la navegación por pósters",
+      "en": "Browse works",
+      "es": "Explorar trabajos"
+    },
+    {
       "key": "film.nextAria",
       "editorLabel": "Películas · Botón para la película siguiente",
       "en": "Next film",
       "es": "Película siguiente"
+    },
+    {
+      "key": "film.nextPosterAria",
+      "editorLabel": "Películas · Póster de la película siguiente",
+      "en": "Next film: {title}",
+      "es": "Película siguiente: {title}"
     },
     {
       "key": "film.posterAlt",
@@ -199,10 +211,22 @@
       "es": "Póster de {title}"
     },
     {
+      "key": "film.position",
+      "editorLabel": "Películas · Posición en la lista de trabajos",
+      "en": "{current} out of {total} works",
+      "es": "{current} de {total} trabajos"
+    },
+    {
       "key": "film.previousAria",
       "editorLabel": "Películas · Botón para la película anterior",
       "en": "Previous film",
       "es": "Película anterior"
+    },
+    {
+      "key": "film.previousPosterAria",
+      "editorLabel": "Películas · Póster de la película anterior",
+      "en": "Previous film: {title}",
+      "es": "Película anterior: {title}"
     },
     {
       "key": "film.trailerTitle",
