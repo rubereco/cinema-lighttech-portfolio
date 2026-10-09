@@ -42,10 +42,15 @@
   position: absolute;
   left: 0;
   bottom: -1px;
-  width: clamp(64px, 9vw, 96px);
+  width: 25%;
   height: 2px;
   background: var(--c-accent);
 }
+
+/* The accent advances one quarter of the heading rule in each section. */
+#about .section-head::after { left: 25%; }
+#partners .section-head::after { left: 50%; }
+#contact .section-head::after { left: 75%; }
 
 .section-title {
   margin: 0;

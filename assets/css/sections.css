@@ -176,14 +176,14 @@
 /* (v3.13.0: #rental rule removed — the slot now hosts #partners.
    The .section-alt class still gives it the solid background.) */
 
-.section-posters > .section-head {
-  /* keep the header inside normal section padding; only the wall goes full-bleed */
-  padding-left: max(20px, 4vw);
-  padding-right: max(20px, 4vw);
-}
-
-.section-posters > .section-head::after {
-  left: max(20px, 4vw);
+@media (max-width: 559px) {
+  /* The poster wall is full bleed on phones; keep its heading rule aligned
+     with the other sections' content gutters. */
+  .section-posters > .section-head {
+    width: calc(100% - var(--pad-x) - var(--pad-x));
+    margin-left: var(--pad-x);
+    margin-right: var(--pad-x);
+  }
 }
 
 /* v3.15.1: the poster wall sits right under the section header.
