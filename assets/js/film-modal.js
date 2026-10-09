@@ -51,7 +51,7 @@ window.FILM_MODAL = (() => {
 
   function renderPosterNavigation() {
     const index = orderedIds.indexOf(currentId);
-    const navigations = modal.querySelectorAll(".film-modal__poster-nav");
+    const navigations = modal.querySelectorAll("[data-film-modal-navigation]");
     navigations.forEach(navigation => { navigation.hidden = index < 0; });
     if (index < 0) return;
 
@@ -61,15 +61,18 @@ window.FILM_MODAL = (() => {
     navigations.forEach(navigation => {
       const previousButton = navigation.querySelector("[data-film-modal-prev]");
       const nextButton = navigation.querySelector("[data-film-modal-next]");
-      const currentPoster = navigation.querySelector("[data-film-modal-current-poster]");
       previousButton.hidden = nextButton.hidden = orderedIds.length < 2;
       previousButton.setAttribute("aria-label", i18n.t("film.previousPosterAria", undefined, { title: previous.title }));
       nextButton.setAttribute("aria-label", i18n.t("film.nextPosterAria", undefined, { title: next.title }));
       navigation.querySelector("[data-film-modal-prev-poster]").src = previous.poster;
-      currentPoster.src = current.poster;
-      currentPoster.alt = i18n.t("film.posterAlt", undefined, { title: current.title });
       navigation.querySelector("[data-film-modal-next-poster]").src = next.poster;
-      navigation.querySelector("[data-film-modal-position]").textContent = i18n.t("film.position", undefined, {
+    });
+    modal.querySelectorAll("[data-film-modal-current-poster]").forEach(poster => {
+      poster.src = current.poster;
+      poster.alt = i18n.t("film.posterAlt", undefined, { title: current.title });
+    });
+    modal.querySelectorAll("[data-film-modal-position]").forEach(position => {
+      position.textContent = i18n.t("film.position", undefined, {
         current: index + 1,
         total: orderedIds.length
       });

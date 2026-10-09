@@ -521,6 +521,7 @@
       </button>
     </header>
     <article class="film-modal__content" role="document">
+      <div class="film-modal__surface">
 
       <button class="film-modal__nav film-modal__nav--prev" data-film-modal-prev type="button" aria-label="Previous film" data-i18n-attr="aria-label:film.previousAria">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -552,23 +553,22 @@
 
           <a class="film-modal__watch" id="film-modal-watch" href="#" target="_blank" rel="noopener noreferrer" hidden>Watch trailer</a>
         </div>
-        <nav class="film-modal__poster-nav film-modal__poster-nav--desktop" aria-label="Browse films" data-i18n-attr="aria-label:film.navigationAria">
-          <div class="film-modal__poster-strip">
-            <button class="film-modal__poster film-modal__poster--side" data-film-modal-prev type="button" aria-label="Previous film">
-              <img data-film-modal-prev-poster alt="">
-            </button>
-            <div class="film-modal__poster film-modal__poster--current" aria-current="true">
-              <img data-film-modal-current-poster alt="">
-            </div>
-            <button class="film-modal__poster film-modal__poster--side" data-film-modal-next type="button" aria-label="Next film">
-              <img data-film-modal-next-poster alt="">
-            </button>
-          </div>
-          <p class="film-modal__position" data-film-modal-position aria-live="polite"></p>
-        </nav>
+        <div class="film-modal__current" aria-current="true">
+          <img data-film-modal-current-poster alt="">
+        </div>
       </div>
+      </div>
+      <p class="film-modal__position film-modal__position--desktop" data-film-modal-position aria-live="polite"></p>
     </article>
-    <nav class="film-modal__poster-nav film-modal__poster-nav--mobile" aria-label="Browse films" data-i18n-attr="aria-label:film.navigationAria">
+    <nav class="film-modal__desktop-nav" aria-label="Browse films" data-i18n-attr="aria-label:film.navigationAria" data-film-modal-navigation>
+      <button class="film-modal__poster film-modal__poster--side" data-film-modal-prev type="button" aria-label="Previous film">
+        <img data-film-modal-prev-poster alt="">
+      </button>
+      <button class="film-modal__poster film-modal__poster--side" data-film-modal-next type="button" aria-label="Next film">
+        <img data-film-modal-next-poster alt="">
+      </button>
+    </nav>
+    <nav class="film-modal__poster-nav film-modal__poster-nav--mobile" aria-label="Browse films" data-i18n-attr="aria-label:film.navigationAria" data-film-modal-navigation>
       <div class="film-modal__poster-strip">
         <button class="film-modal__poster film-modal__poster--side" data-film-modal-prev type="button" aria-label="Previous film">
           <img data-film-modal-prev-poster alt="">
