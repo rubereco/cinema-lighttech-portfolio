@@ -60,15 +60,18 @@ html.film-modal-open, html.film-modal-open body { overflow: hidden; }
   .film-modal__poster--side:hover, .film-modal__poster--side:focus-visible { opacity: 1; border-color: var(--c-accent); transform: translateY(-3px); }
 }
 @media (min-width: 960px) {
-  .film-modal { --film-modal-card-width: min(960px, calc(100vw - 272px)); }
+  .film-modal {
+    --film-modal-side-poster-width: min(328px, max(120px, calc(50vw - 360px)));
+    --film-modal-card-width: min(960px, calc(100vw - var(--film-modal-side-poster-width) - var(--film-modal-side-poster-width) - 24px));
+  }
   .film-modal__content { max-height: calc(100dvh - 64px); }
   .film-modal__desktop-nav {
     position: absolute; top: 50%; left: 50%; z-index: 2;
     display: flex; align-items: center; justify-content: space-between;
-    width: calc(var(--film-modal-card-width) + 216px);
+    width: calc(var(--film-modal-card-width) + var(--film-modal-side-poster-width) + var(--film-modal-side-poster-width) + 24px);
     transform: translate(-50%, -50%); pointer-events: none;
   }
-  .film-modal__desktop-nav .film-modal__poster { width: 96px; flex: none; pointer-events: auto; }
+  .film-modal__desktop-nav .film-modal__poster { width: var(--film-modal-side-poster-width); flex: none; pointer-events: auto; }
   .film-modal__nav { display: none; }
 }
 @media (max-width: 699px) {
