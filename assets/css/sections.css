@@ -182,6 +182,10 @@
   padding-right: max(20px, 4vw);
 }
 
+.section-posters > .section-head::after {
+  left: max(20px, 4vw);
+}
+
 /* v3.15.1: the poster wall sits right under the section header.
    The section is no longer forced to viewport height, so the only
    space below the carousel is a controlled padding-bottom that keeps

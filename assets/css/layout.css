@@ -12,6 +12,7 @@
 .section {
   padding: var(--section-pad-y) max(var(--pad-x), calc((100% - var(--container)) / 2));
   max-width: none;
+  border-top: 1px solid rgba(232, 163, 61, 0.22);
 }
 
 /* Force all direct children of .section to obey container width and center.
@@ -28,12 +29,23 @@
 }
 
 .section-head {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin-bottom: 28px;
   padding-bottom: 18px;
-  border-bottom: 1px solid var(--c-border);
+  border-bottom: 1px solid rgba(232, 163, 61, 0.3);
+}
+
+.section-head::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: clamp(64px, 9vw, 96px);
+  height: 2px;
+  background: var(--c-accent);
 }
 
 .section-title {
