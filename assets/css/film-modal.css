@@ -6,6 +6,7 @@
   overflow-y: auto; background: var(--c-bg); color: var(--c-fg);
   border: 1px solid var(--c-border); border-radius: 12px;
   box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  scrollbar-width: thin; scrollbar-color: var(--c-border) transparent;
 }
 html.film-modal-open, html.film-modal-open body { overflow: hidden; }
 .film-modal__chrome {
@@ -40,7 +41,7 @@ html.film-modal-open, html.film-modal-open body { overflow: hidden; }
 .film-modal [hidden] { display: none !important; }
 @media (max-width: 699px) {
   .film-modal[aria-hidden="false"] {
-    --film-modal-nav-space: clamp(140px, calc(33vw + 28px), 166px);
+    --film-modal-nav-space: clamp(156px, calc(33vw + 44px), 182px);
     grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
     justify-items: center; align-items: center;
     padding: 8px 0; box-sizing: border-box;
