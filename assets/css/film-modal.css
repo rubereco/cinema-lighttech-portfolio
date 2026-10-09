@@ -30,6 +30,11 @@ html.film-modal-open, html.film-modal-open body { overflow: hidden; }
 .film-modal__media iframe, .film-modal__media img { display: block; width: 100%; height: 100%; border: 0; }
 .film-modal__media img { object-fit: contain; }
 .film-modal__info { padding: clamp(20px, 3vw, 36px); display: grid; gap: 16px; }
+.film-modal__poster-strip { display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: center; justify-items: center; gap: 8px; width: 100%; }
+.film-modal__poster { display: block; padding: 0; overflow: hidden; aspect-ratio: 2 / 3; background: #080808; border: 1px solid var(--c-border); border-radius: 4px; }
+.film-modal__poster img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.film-modal__poster--side { opacity: .68; cursor: pointer; transition: opacity .2s ease, border-color .2s ease, transform .2s ease; }
+.film-modal__position { margin: 0; color: var(--c-fg-muted); font-size: 12px; line-height: 1.3; letter-spacing: .06em; text-align: center; }
 .film-modal__title { margin: 0; font-family: var(--font-display); font-size: clamp(28px, 4vw, 48px); line-height: 1.05; }
 .film-modal__meta { display: flex; gap: 12px; margin: 6px 0 0; color: var(--c-fg-dim); }
 .film-modal__meta > span:not([hidden]) + span:not([hidden])::before { content: "·"; margin-right: 12px; }
@@ -39,6 +44,15 @@ html.film-modal-open, html.film-modal-open body { overflow: hidden; }
 .film-modal__watch { color: var(--c-accent); text-decoration: underline; text-underline-offset: 3px; }
 .film-modal__poster-nav { display: none; }
 .film-modal [hidden] { display: none !important; }
+@media (min-width: 900px) {
+  .film-modal__info { grid-template-columns: minmax(0, 1fr) 232px; align-items: center; gap: 24px; }
+  .film-modal__copy { display: grid; gap: 16px; align-content: center; min-width: 0; }
+  .film-modal__poster-nav--desktop { display: grid; justify-items: center; gap: 7px; width: 232px; }
+  .film-modal__poster--side { width: clamp(40px, 4.3vw, 56px); }
+  .film-modal__poster--current { width: clamp(54px, 5vw, 66px); border: 2px solid var(--c-accent); box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+  .film-modal__poster--side:hover, .film-modal__poster--side:focus-visible { opacity: 1; border-color: var(--c-accent); transform: translateY(-3px); }
+  .film-modal__nav { display: none; }
+}
 @media (max-width: 699px) {
   .film-modal[aria-hidden="false"] {
     --film-modal-nav-space: clamp(156px, calc(33vw + 44px), 182px);
@@ -53,23 +67,14 @@ html.film-modal-open, html.film-modal-open body { overflow: hidden; }
     transform: translateY(-10dvh);
   }
   .film-modal__nav { display: none; }
-  .film-modal__poster-nav {
+  .film-modal__poster-nav--mobile {
     grid-row: 3;
     position: relative; z-index: 1; display: grid; justify-items: center; gap: 9px;
     width: min(320px, calc(100vw - 40px)); transform: translateY(-5dvh);
   }
-  .film-modal__poster-strip {
-    display: grid; grid-template-columns: 1fr 1.15fr 1fr;
-    align-items: center; justify-items: center; gap: 10px; width: 100%;
-  }
-  .film-modal__poster {
-    display: block; padding: 0; overflow: hidden; aspect-ratio: 2 / 3;
-    background: #080808; border: 1px solid var(--c-border); border-radius: 4px;
-  }
-  .film-modal__poster img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .film-modal__poster-strip { gap: 10px; }
   .film-modal__poster--side {
-    width: clamp(56px, 18vw, 74px); opacity: .68; cursor: pointer;
-    transition: opacity .2s ease, border-color .2s ease, transform .2s ease;
+    width: clamp(56px, 18vw, 74px);
   }
   .film-modal__poster--side:hover, .film-modal__poster--side:focus-visible {
     opacity: 1; border-color: var(--c-accent); transform: translateY(-3px);
@@ -77,10 +82,6 @@ html.film-modal-open, html.film-modal-open body { overflow: hidden; }
   .film-modal__poster--current {
     width: clamp(72px, 22vw, 92px); border: 2px solid var(--c-accent);
     box-shadow: 0 8px 24px rgba(0,0,0,.45);
-  }
-  .film-modal__position {
-    margin: 0; color: var(--c-fg-muted); font-size: 12px;
-    line-height: 1.3; letter-spacing: .06em; text-align: center;
   }
 }
 @media (prefers-reduced-motion: reduce) {
