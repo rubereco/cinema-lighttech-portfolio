@@ -34,6 +34,7 @@
 
 @media (max-width: 899px) {
   .about-carousel { padding: 10px 0 20px; }
+  .about-carousel__controls { display: none; }
   .about-carousel__stage {
     height: clamp(250px, 80vw, 440px);
     aspect-ratio: auto;

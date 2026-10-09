@@ -1,4 +1,4 @@
-/* Desktop photo slider and mobile rotating photo ring share the same images. */
+/* Desktop photo slider and phone/tablet auto-rotating photo ring share images. */
 (() => {
   const root = document.getElementById("about-carousel");
   if (!root) return;
@@ -11,15 +11,12 @@
   const i18n = window.PortfolioI18n;
   const mobileQuery = matchMedia("(max-width: 899px)");
   const reducedMotionQuery = matchMedia("(prefers-reduced-motion: reduce)");
-  const autoDelay = 4800;
+  const autoDelay = 2500;
   let items = [];
   let active = 0;
   let rotation = 0;
   let autoTimer = null;
   let gesture = null;
-  let suppressStageClick = false;
-  let suppressTimer = null;
-  let hovered = false;
   let visible = false;
 
   function label(key, values) { return i18n.t(key, undefined, values) || ""; }
@@ -49,8 +46,7 @@
   function restartAuto() {
     stopAuto();
     if (!mobileQuery.matches || reducedMotionQuery.matches || document.hidden ||
-        !visible || hovered || gesture || root.querySelector(":focus-visible") ||
-        lightbox?.open || items.length < 2) return;
+        !visible || lightbox?.open || items.length < 2) return;
     autoTimer = setTimeout(() => go(active + 1), autoDelay);
   }
 
@@ -90,61 +86,42 @@
       image.loading = index === 0 ? "eager" : "lazy";
       image.decoding = "async";
       button.append(image);
-      button.addEventListener("click", () => index === active ? openLightbox() : go(index));
+      button.addEventListener("click", () => {
+        if (index === active) openLightbox();
+        else if (!mobileQuery.matches) go(index);
+      });
       ring.append(button);
 
       const dot = document.createElement("button");
       dot.type = "button";
-      dot.addEventListener("click", () => go(index));
+      dot.addEventListener("click", () => { if (!mobileQuery.matches) go(index); });
       dots.append(dot);
     });
     update();
     restartAuto();
   }
 
-  root.querySelector("[data-about-prev]")?.addEventListener("click", () => go(active - 1));
-  root.querySelector("[data-about-next]")?.addEventListener("click", () => go(active + 1));
-  root.addEventListener("pointerenter", event => {
-    if (event.pointerType !== "mouse") return;
-    hovered = true;
-    stopAuto();
+  root.querySelector("[data-about-prev]")?.addEventListener("click", () => {
+    if (!mobileQuery.matches) go(active - 1);
   });
-  root.addEventListener("pointerleave", event => {
-    if (event.pointerType !== "mouse") return;
-    hovered = false;
-    restartAuto();
+  root.querySelector("[data-about-next]")?.addEventListener("click", () => {
+    if (!mobileQuery.matches) go(active + 1);
   });
-  root.addEventListener("focusin", stopAuto);
-  root.addEventListener("focusout", () => setTimeout(restartAuto, 0));
 
-  // A swipe begins on the photo stage only, so it cannot swallow dot or arrow clicks.
+  // Keep desktop pointer navigation; phone and tablet users get the timed rotation only.
   stage.addEventListener("pointerdown", event => {
-    if (event.isPrimary === false) return;
+    if (mobileQuery.matches || event.isPrimary === false) return;
     gesture = { id: event.pointerId, x: event.clientX };
-    stopAuto();
   });
   window.addEventListener("pointerup", event => {
     if (!gesture || event.pointerId !== gesture.id) return;
     const distance = event.clientX - gesture.x;
     gesture = null;
-    if (Math.abs(distance) > 35) {
-      suppressStageClick = true;
-      clearTimeout(suppressTimer);
-      suppressTimer = setTimeout(() => { suppressStageClick = false; }, 300);
-      go(active + (distance < 0 ? 1 : -1));
-    } else {
-      restartAuto();
-    }
+    if (!mobileQuery.matches && Math.abs(distance) > 35) go(active + (distance < 0 ? 1 : -1));
   });
-  window.addEventListener("pointercancel", () => { gesture = null; restartAuto(); });
-  stage.addEventListener("click", event => {
-    if (!suppressStageClick) return;
-    suppressStageClick = false;
-    clearTimeout(suppressTimer);
-    event.preventDefault();
-    event.stopPropagation();
-  }, true);
+  window.addEventListener("pointercancel", () => { gesture = null; });
   root.addEventListener("keydown", event => {
+    if (mobileQuery.matches) return;
     if (event.key === "ArrowLeft") { event.preventDefault(); go(active - 1); }
     if (event.key === "ArrowRight") { event.preventDefault(); go(active + 1); }
   });
