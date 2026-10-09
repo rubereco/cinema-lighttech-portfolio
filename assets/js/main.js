@@ -113,6 +113,11 @@ function setupYearStamp() {
 
 const POSTER_WALL = (() => {
   let filmsById = new Map();
+  let centerBeforeOpen = null;
+
+  function openFilm(filmId) {
+    window.dispatchEvent(new CustomEvent("tarek:film-open", { detail: { filmId } }));
+  }
   async function loadData() {
     const response = await fetch("/data/films.json");
     if (!response.ok) throw new Error(`Films: HTTP ${response.status}`);
@@ -163,7 +168,8 @@ const POSTER_WALL = (() => {
       ev.preventDefault();
       const filmId = link.getAttribute("data-film-id");
       if (!filmId) return;
-      window.dispatchEvent(new CustomEvent("tarek:film-open", { detail: { filmId } }));
+      if (centerBeforeOpen && centerBeforeOpen(link, filmId)) return;
+      openFilm(filmId);
     });
     window.addEventListener("tarek:i18n-change", () => {
       ul.querySelectorAll("a.poster-link").forEach(link => {
@@ -174,10 +180,6 @@ const POSTER_WALL = (() => {
         subtitle.textContent = [film.year, role].filter(Boolean).join(" · ");
       });
     });
-    // v3.14.37: no more touchstart/wheel → resetCycle listeners.
-    // The wall is now a perpetual carousel (CSS animation), so
-    // there's no discrete cycle to reset. The animation pauses
-    // itself on hover/focus via CSS (animation-play-state).
   }
 
   function renderFromState(state) { render(state); }
@@ -237,8 +239,9 @@ const POSTER_WALL = (() => {
     var RANGE = PEAK - MIN_S;
 
     // prefers-reduced-motion: settle instantly, no momentum animation.
-    var LERP = (window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? 1 : 0.15;
+    var reducedMotion = window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var LERP = reducedMotion ? 1 : 0.15;
 
     var W = 0;         // tile width == slot pitch (CSS --tile-w, measured)
     var FALLOFF = 700; // px over which the wave decays to MIN_S
@@ -255,6 +258,7 @@ const POSTER_WALL = (() => {
     var dragStartScrollX = 0;
     var dragMoved = 0;
     var rafId = null;
+    var pendingFilmId = null;
 
     // (Re)build the clone sets. Sets repeat the N originals so the wrap
     // window (T/2 slots in each direction) always covers the viewport,
@@ -369,6 +373,11 @@ const POSTER_WALL = (() => {
         rafId = requestAnimationFrame(frame);
       } else {
         rafId = null;
+        if (scrollX === targetScrollX && pendingFilmId) {
+          var filmId = pendingFilmId;
+          pendingFilmId = null;
+          openFilm(filmId);
+        }
       }
     }
     function ensureAnimating() {
@@ -390,9 +399,39 @@ const POSTER_WALL = (() => {
       ensureAnimating();
     }
 
+    // On desktop, use the same slot-space motion as dragging to bring a
+    // clicked side poster to the center before showing its details.
+    centerBeforeOpen = function (link, filmId) {
+      if (window.innerWidth < 900 || !W || !T) return false;
+      var tile = tiles.find(function (item) { return item.el === link.closest("li"); });
+      if (!tile) return false;
+
+      var anchor = Math.round(-scrollX / W);
+      var relativeSlot = jMin + ((((tile.slot - anchor - jMin) % T) + T) % T);
+      var centeredSlot = anchor + relativeSlot;
+      var centeredX = -centeredSlot * W;
+      pendingFilmId = null;
+      restSlot = centeredSlot;
+      targetScrollX = centeredX;
+
+      if (reducedMotion || Math.abs(scrollX - centeredX) < 0.3) {
+        scrollX = centeredX;
+        layout();
+        return false;
+      }
+
+      pendingFilmId = filmId;
+      ensureAnimating();
+      return true;
+    };
+
     // Vertical wheel scrolling belongs to the page. Drag and touch still move the posters.
     function onMouseDown(e) {
       e.preventDefault(); // kill native image drag / text selection
+      if (pendingFilmId) {
+        pendingFilmId = null;
+        targetScrollX = scrollX;
+      }
       isDragging = true;
       dragMoved = 0;
       dragStartX = e.clientX;
@@ -413,6 +452,10 @@ const POSTER_WALL = (() => {
       snapToNearest();
     }
     function onTouchStart(e) {
+      if (pendingFilmId) {
+        pendingFilmId = null;
+        targetScrollX = scrollX;
+      }
       isDragging = true;
       dragMoved = 0;
       dragStartX = e.touches[0].clientX;
@@ -461,6 +504,7 @@ const POSTER_WALL = (() => {
       if (resizeTimer !== null) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         resizeTimer = null;
+        pendingFilmId = null;
         if (!measure()) return;
         scrollX = targetScrollX = -restSlot * W;
         layout();
