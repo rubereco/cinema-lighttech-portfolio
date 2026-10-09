@@ -513,16 +513,14 @@
   <!-- Film details and trailer player. -->
   <div id="film-modal" class="film-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="film-modal-title">
     <div class="film-modal__backdrop" data-film-modal-close tabindex="-1"></div>
+    <header class="film-modal__chrome">
+      <button class="film-modal__close" data-film-modal-close type="button" data-i18n-attr="aria-label:film.closeAria" aria-label="Close film details">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </header>
     <article class="film-modal__content" role="document">
-
-      <header class="film-modal__chrome">
-        <button class="film-modal__close" data-film-modal-close type="button" data-i18n-attr="aria-label:film.closeAria" aria-label="Close film details">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button>
-      </header>
-
 
       <button class="film-modal__nav film-modal__nav--prev" data-film-modal-prev type="button" aria-label="Previous film" data-i18n-attr="aria-label:film.previousAria">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
