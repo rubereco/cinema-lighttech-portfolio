@@ -399,10 +399,10 @@ const POSTER_WALL = (() => {
       ensureAnimating();
     }
 
-    // On desktop, use the same slot-space motion as dragging to bring a
-    // clicked side poster to the center before showing its details.
+    // Use the same slot-space motion as dragging to bring a clicked side
+    // poster to the center before showing its details at every viewport size.
     centerBeforeOpen = function (link, filmId) {
-      if (window.innerWidth < 900 || !W || !T) return false;
+      if (!W || !T) return false;
       var tile = tiles.find(function (item) { return item.el === link.closest("li"); });
       if (!tile) return false;
 
