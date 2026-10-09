@@ -12,7 +12,6 @@
 .section {
   padding: var(--section-pad-y) max(var(--pad-x), calc((100% - var(--container)) / 2));
   max-width: none;
-  border-top: 1px solid rgba(232, 163, 61, 0.22);
 }
 
 /* Force all direct children of .section to obey container width and center.
