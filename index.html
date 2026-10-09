@@ -294,18 +294,6 @@
   <header class="site-header" role="banner">
     <a class="brand" href="#top"><img class="brand__mark" src="assets/images/favicon.svg" alt="" width="32" height="32" /><span data-i18n="brand">Tarek Recolons</span></a>
 
-    <button class="nav-toggle" type="button" aria-label="Toggle menu" data-i18n-attr="aria-label:nav.toggleAria" aria-expanded="false" data-nav-toggle>
-      <svg class="nav-icon icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-      <svg class="nav-icon icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-        <line x1="4" y1="4" x2="20" y2="20"></line>
-        <line x1="4" y1="20" x2="20" y2="4"></line>
-      </svg>
-    </button>
-
     <!-- Desktop nav: inline horizontal, hidden on mobile via CSS. -->
     <nav class="nav-desktop" aria-label="Primary navigation" data-i18n-attr="aria-label:nav.primaryAria" data-nav-desktop>
       <a href="#work"         data-i18n="nav.work">Work</a>
@@ -318,6 +306,18 @@
       <button type="button" data-lang="en" aria-pressed="true" data-i18n="language.en">EN</button>
       <button type="button" data-lang="es" aria-pressed="false" data-i18n="language.es">ES</button>
     </div>
+
+    <button class="nav-toggle" type="button" aria-label="Toggle menu" data-i18n-attr="aria-label:nav.toggleAria" aria-expanded="false" data-nav-toggle>
+      <svg class="nav-icon icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+      <svg class="nav-icon icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="4" y1="4" x2="20" y2="20"></line>
+        <line x1="4" y1="20" x2="20" y2="4"></line>
+      </svg>
+    </button>
   </header>
 
   <!--
@@ -412,10 +412,13 @@
             <button type="button" data-about-next data-i18n-attr="aria-label:about.nextPhoto" aria-label="Next photo">&#8594;</button>
           </div>
         </div>
-        <div class="about-body" data-i18n-html="about.body">
-          <!-- i18n-fallback:about.body -->
+        <div class="about-copy">
+          <div id="about-body" class="about-body" data-i18n-html="about.body">
+            <!-- i18n-fallback:about.body -->
 <p>With 10+ years of experience in the electrical and cinematographic lighting department, I have worked mainly on feature films, series and advertising productions, both national and international.</p><p>During this time I have developed skills in planning, preparation and execution of lighting, working alongside the Director of Photography to bring their visual proposal to set accurately, efficiently and safely.</p><p>The experience gained over years of shooting and on productions of different scales has allowed me to work with diverse technical teams, adapt to the needs of each project and quickly solve the challenges that may arise on set.</p><p>My career includes work on feature films and international projects, acquiring solid experience in both technical work and coordination of the electrical team.</p><p>The goal is simple: understand the Director of Photography's proposal, find the right solution and make it work on set. All with a way of working based on precision, organization and adaptability.</p>
 <!-- /i18n-fallback:about.body -->
+          </div>
+          <button class="about-read-more" type="button" aria-controls="about-body" aria-expanded="false" data-about-read-more>Read more</button>
         </div>
         <dl class="about-stats" aria-label="Career highlights" data-i18n-attr="aria-label:about.statsAria">
           <div><dt data-i18n="about.statsYearsLabel">Years experience</dt><dd data-i18n="about.statsYearsValue">10+</dd></div>
@@ -506,6 +509,7 @@
   <script src="assets/js/hero-carousel.js" defer></script>
   <script src="assets/js/film-modal.js" defer></script>
   <script src="assets/js/about-carousel.js" defer></script>
+  <script src="assets/js/about-read-more.js" defer></script>
   <script src="assets/js/site-content.js" defer></script>
   <script src="assets/js/main.js" defer></script>
   <script src="assets/js/partners.js" defer></script>

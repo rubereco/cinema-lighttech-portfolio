@@ -16,8 +16,8 @@
   top: 0;
   z-index: 2000;
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-areas: "brand . navtoggle lang";
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: "brand lang navtoggle";
   align-items: center;
   gap: 12px;
   padding: 14px var(--pad-x);
@@ -130,6 +130,7 @@
   grid-area: brand;
   display: inline-flex;
   align-items: center;
+  min-width: 0;
   gap: 8px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -141,6 +142,8 @@
      looking like an outline. */
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
+
+.brand span { overflow: hidden; text-overflow: ellipsis; }
 
 /* ──────────────── Desktop nav ──────────────── */
 
@@ -281,9 +284,7 @@
   position: relative;
   z-index: 2020;
   overflow: visible;
-  /* Small right margin keeps the icon from touching the
-     viewport edge on phones with tight gutters. */
-  margin-right: 4px;
+  margin-right: 0;
 }
 
 /* v3.15.3: SVG icons for menu and close. Replaces the previous

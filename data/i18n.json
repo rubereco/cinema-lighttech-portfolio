@@ -7,6 +7,18 @@
       "es": "<p>Con +10 años de experiencia en el departamento eléctrico y de iluminación cinematográfica, se ha trabajado principalmente en largometrajes, series y producciones publicitarias, tanto nacionales como internacionales.</p><p>Durante este tiempo se han desarrollado habilidades en planificación, preparación y ejecución de la iluminación, trabajando junto al Director de Fotografía para llevar su propuesta visual a rodaje de forma precisa, eficiente y segura.</p><p>La experiencia obtenida durante años de rodajes y en producciones de diferentes escalas ha permitido trabajar con equipos técnicos diversos, adaptarse a las necesidades de cada proyecto y resolver de forma rápida los retos que puedan surgir en set.</p><p>La trayectoria incluye trabajos en largometrajes y proyectos internacionales, adquiriendo una sólida experiencia tanto en el trabajo técnico como en la coordinación del equipo eléctrico.</p><p>El objetivo es sencillo: entender la propuesta del Director de Fotografía, encontrar la solución adecuada y hacer que funcione en rodaje. Todo ello con una forma de trabajo basada en la precisión, la organización y la capacidad de adaptación.</p>"
     },
     {
+      "key": "about.readMore",
+      "editorLabel": "Sobre mí · Botón para ampliar el texto",
+      "en": "Read more",
+      "es": "Leer más"
+    },
+    {
+      "key": "about.readLess",
+      "editorLabel": "Sobre mí · Botón para contraer el texto",
+      "en": "Read less",
+      "es": "Leer menos"
+    },
+    {
       "key": "about.carouselLabel",
       "editorLabel": "Sobre mí · Nombre del carrusel de fotos",
       "en": "Behind the scenes",
