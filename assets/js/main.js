@@ -425,24 +425,36 @@ const POSTER_WALL = (() => {
       return true;
     };
 
-    // Keep the selected work behind the modal aligned with the film that
-    // visitors reached using the modal's previous/next controls.
-    window.addEventListener("tarek:film-modal-close", function (event) {
-      if (!W || !event.detail?.filmId) return;
+    // Modal navigation uses the same settling loop as dragging the wall.
+    // Closing snaps to the last selected film before the overlay disappears.
+    function focusModalFilm(filmId, instant, direction) {
+      if (!W || !filmId) return;
       var filmIndex = originals.findIndex(function (el) {
-        return el.querySelector("a.poster-link")?.dataset.filmId === event.detail.filmId;
+        return el.querySelector("a.poster-link")?.dataset.filmId === filmId;
       });
       if (filmIndex < 0) return;
 
-      var anchor = Math.round(-scrollX / W);
+      var anchor = restSlot;
       var offset = ((filmIndex - anchor) % N + N) % N;
       if (offset > N / 2) offset -= N;
+      if (direction && ((anchor + direction) % N + N) % N === filmIndex) offset = direction;
       pendingFilmId = null;
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      rafId = null;
       restSlot = anchor + offset;
-      scrollX = targetScrollX = -restSlot * W;
-      layout();
+      targetScrollX = -restSlot * W;
+      if (instant || reducedMotion) {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        rafId = null;
+        scrollX = targetScrollX;
+        layout();
+      } else {
+        ensureAnimating();
+      }
+    }
+    window.addEventListener("tarek:film-modal-change", function (event) {
+      focusModalFilm(event.detail?.filmId, false, event.detail?.direction);
+    });
+    window.addEventListener("tarek:film-modal-close", function (event) {
+      focusModalFilm(event.detail?.filmId, true);
     });
 
     // Vertical wheel scrolling belongs to the page. Drag and touch still move the posters.

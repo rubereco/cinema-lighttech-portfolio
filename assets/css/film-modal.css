@@ -1,6 +1,6 @@
 .film-modal { position: fixed; inset: 0; z-index: 3000; display: none; }
 .film-modal[aria-hidden="false"] { display: grid; place-items: center; }
-.film-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.88); backdrop-filter: blur(8px); }
+.film-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.76); backdrop-filter: blur(6px); }
 .film-modal__content {
   position: relative; width: min(1080px, calc(100vw - 32px)); max-height: calc(100dvh - 32px);
   overflow-y: auto; background: var(--c-bg); color: var(--c-fg);

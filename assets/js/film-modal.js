@@ -112,10 +112,11 @@ window.FILM_MODAL = (() => {
     if (image) image.alt = i18n.t("film.posterAlt", undefined, { title: film.title });
   }
 
-  function show(filmId, historyMode = "push") {
+  function show(filmId, historyMode = "push", direction = 0) {
     const film = filmsById.get(filmId);
     if (!film || !modal) return;
     const wasOpen = modal.classList.contains("film-modal--open");
+    const changedFilm = currentId !== filmId;
     if (!wasOpen) previousFocus = document.activeElement;
     currentId = filmId;
     renderText(film);
@@ -125,6 +126,9 @@ window.FILM_MODAL = (() => {
     document.documentElement.classList.add("film-modal-open");
     if (historyMode === "push") history.pushState({ filmModal: true }, "", `#film-${filmId}`);
     if (historyMode === "replace") history.replaceState({ filmModal: true }, "", `#film-${filmId}`);
+    if (changedFilm) {
+      window.dispatchEvent(new CustomEvent("tarek:film-modal-change", { detail: { filmId, direction } }));
+    }
     if (!wasOpen) modal.querySelector(".film-modal__close")?.focus({ preventScroll: true });
   }
 
@@ -153,7 +157,7 @@ window.FILM_MODAL = (() => {
     const current = orderedIds.indexOf(currentId);
     if (current < 0 || orderedIds.length < 2) return;
     const next = (current + delta + orderedIds.length) % orderedIds.length;
-    show(orderedIds[next], "replace");
+    show(orderedIds[next], "replace", delta);
   }
 
   async function init(data) {
