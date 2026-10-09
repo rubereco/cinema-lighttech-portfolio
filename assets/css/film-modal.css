@@ -60,15 +60,15 @@ html.film-modal-open, html.film-modal-open body { overflow: hidden; }
   .film-modal__poster--side:hover, .film-modal__poster--side:focus-visible { opacity: 1; border-color: var(--c-accent); transform: translateY(-3px); }
 }
 @media (min-width: 960px) {
-  .film-modal { --film-modal-card-width: min(960px, calc(100vw - 176px)); }
+  .film-modal { --film-modal-card-width: min(960px, calc(100vw - 224px)); }
   .film-modal__content { max-height: calc(100dvh - 64px); }
   .film-modal__desktop-nav {
     position: absolute; top: 50%; left: 50%; z-index: 2;
     display: flex; align-items: center; justify-content: space-between;
-    width: calc(var(--film-modal-card-width) + 136px);
+    width: calc(var(--film-modal-card-width) + 184px);
     transform: translate(-50%, -50%); pointer-events: none;
   }
-  .film-modal__desktop-nav .film-modal__poster { width: 56px; flex: none; pointer-events: auto; }
+  .film-modal__desktop-nav .film-modal__poster { width: 80px; flex: none; pointer-events: auto; }
   .film-modal__nav { display: none; }
 }
 @media (max-width: 699px) {
