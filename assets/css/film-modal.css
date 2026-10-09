@@ -66,12 +66,17 @@ html.film-modal-open, html.film-modal-open body { overflow: hidden; }
   }
   .film-modal__content { max-height: calc(100dvh - 64px); }
   .film-modal__desktop-nav {
-    position: absolute; top: 50%; left: 50%; z-index: 2;
-    display: flex; align-items: center; justify-content: space-between;
-    width: calc(var(--film-modal-card-width) + var(--film-modal-side-poster-width) + var(--film-modal-side-poster-width) + 24px);
-    transform: translate(-50%, -50%); pointer-events: none;
+    position: absolute; inset: 0; z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--film-modal-card-width) minmax(0, 1fr);
+    align-items: center; pointer-events: none;
   }
-  .film-modal__desktop-nav .film-modal__poster { width: var(--film-modal-side-poster-width); flex: none; pointer-events: auto; }
+  .film-modal__desktop-nav .film-modal__poster {
+    width: var(--film-modal-side-poster-width); justify-self: center;
+    flex: none; pointer-events: auto;
+  }
+  .film-modal__desktop-nav .film-modal__poster:first-child { grid-column: 1; }
+  .film-modal__desktop-nav .film-modal__poster:last-child { grid-column: 3; }
   .film-modal__nav { display: none; }
 }
 @media (max-width: 699px) {
