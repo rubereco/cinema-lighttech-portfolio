@@ -50,12 +50,13 @@ html.film-modal-open, html.film-modal-open body { overflow: hidden; }
     grid-row: 2;
     width: calc(100vw - 16px);
     max-height: max(160px, calc(100dvh - var(--film-modal-nav-space) - var(--film-modal-nav-space) - 16px));
+    transform: translateY(-10dvh);
   }
   .film-modal__nav { display: none; }
   .film-modal__poster-nav {
     grid-row: 3;
     position: relative; z-index: 1; display: grid; justify-items: center; gap: 9px;
-    width: min(320px, calc(100vw - 40px));
+    width: min(320px, calc(100vw - 40px)); transform: translateY(-5dvh);
   }
   .film-modal__poster-strip {
     display: grid; grid-template-columns: 1fr 1.15fr 1fr;
