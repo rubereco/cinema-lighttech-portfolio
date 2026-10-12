@@ -22,21 +22,21 @@
       "id": "kabuto",
       "name": "KABUTO",
       "kind": "equipment-house",
-      "logo": "/assets/images/uploads/kabuto_logo_home.png",
+      "logo": "/assets/images/uploads/kabuto_logo_home.webp",
       "url": "https://www.kabutostudios.es"
     },
     {
       "id": "aluzine",
       "name": "Aluzine",
       "kind": "equipment-house",
-      "logo": "assets/images/uploads/aluzine.png?v=1",
+      "logo": "assets/images/uploads/aluzine.webp",
       "url": "https://www.aluzine.tv/"
     },
     {
       "id": "cinetecnico",
       "name": "Cinetécnico",
       "kind": "equipment-house",
-      "logo": "assets/images/uploads/cinetecnico.png?v=1",
+      "logo": "assets/images/uploads/cinetecnico.webp",
       "url": "https://cinetecnico.com/"
     }
   ]

@@ -2,42 +2,42 @@
   "items": [
     {
       "id": "forest",
-      "file": "assets/images/uploads/hero-forest.jpg",
+      "file": "assets/images/uploads/hero-forest.webp",
       "size": "big"
     },
     {
       "id": "tunnel",
-      "file": "assets/images/uploads/hero-tunnel.jpg",
+      "file": "assets/images/uploads/hero-tunnel.webp",
       "size": "small"
     },
     {
       "id": "main",
-      "file": "assets/images/uploads/hero-main.jpg",
+      "file": "assets/images/uploads/hero-main.webp",
       "size": "big"
     },
     {
       "id": "red-ladder",
-      "file": "assets/images/uploads/hero-red-ladder.jpg",
+      "file": "assets/images/uploads/hero-red-ladder.webp",
       "size": "small"
     },
     {
       "id": "astera-bar",
-      "file": "assets/images/uploads/hero-astera-bar.jpg",
+      "file": "assets/images/uploads/hero-astera-bar.webp",
       "size": "big"
     },
     {
       "id": "hk-cinema",
-      "file": "assets/images/uploads/hero-hk-cinema.jpg",
+      "file": "assets/images/uploads/hero-hk-cinema.webp",
       "size": "small"
     },
     {
       "id": "headphones-blue",
-      "file": "assets/images/uploads/hero-headphones-blue.jpg",
+      "file": "assets/images/uploads/hero-headphones-blue.webp",
       "size": "big"
     },
     {
       "id": "lantern-stairs",
-      "file": "assets/images/uploads/hero-lantern-stairs.jpg",
+      "file": "assets/images/uploads/hero-lantern-stairs.webp",
       "size": "small"
     }
   ]

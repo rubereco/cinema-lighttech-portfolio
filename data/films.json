@@ -16,7 +16,7 @@
       "year": 2026,
       "type": "feature",
       "role": "gaffer",
-      "poster": "/assets/images/uploads/ceniza-en-la-boca.jpg",
+      "poster": "/assets/images/uploads/ceniza-en-la-boca.webp",
       "displayOrder": 2,
       "trailerUrl": "https://www.youtube.com/watch?v=u9_qWBrM8dE"
     },
@@ -26,7 +26,7 @@
       "year": 2026,
       "type": "feature",
       "role": "gaffer",
-      "poster": "/assets/images/uploads/la-mala-madre.jpg",
+      "poster": "/assets/images/uploads/la-mala-madre.webp",
       "displayOrder": 3,
       "trailerUrl": "https://vimeo.com/1121117953/8c7df73042"
     },
@@ -36,7 +36,7 @@
       "year": 2025,
       "type": "feature",
       "role": "gaffer",
-      "poster": "assets/images/uploads/els-mals-noms-2025.jpg",
+      "poster": "assets/images/uploads/els-mals-noms-2025.webp",
       "displayOrder": 4,
       "trailerUrl": "https://www.youtube.com/watch?v=-kab6SLbTqw"
     },
@@ -46,7 +46,7 @@
       "year": 2025,
       "type": "feature",
       "role": "gaffer",
-      "poster": "assets/images/uploads/un-altre-home-2025.jpg",
+      "poster": "assets/images/uploads/un-altre-home-2025.webp",
       "displayOrder": 5,
       "trailerUrl": "https://www.youtube.com/watch?v=_IhwTl5UVhM"
     },
@@ -56,7 +56,7 @@
       "year": 2025,
       "type": "feature",
       "role": "gaffer",
-      "poster": "assets/images/uploads/lo-que-queda-de-ti-2025.jpg",
+      "poster": "assets/images/uploads/lo-que-queda-de-ti-2025.webp",
       "displayOrder": 6,
       "trailerUrl": "https://www.youtube.com/watch?v=Fm0mvwiP3Xw"
     },
@@ -66,7 +66,7 @@
       "year": 2025,
       "type": "feature",
       "role": "lightingBestboy",
-      "poster": "assets/images/uploads/parenostre-2025.jpg",
+      "poster": "assets/images/uploads/parenostre-2025.webp",
       "displayOrder": 7,
       "trailerUrl": "https://www.youtube.com/watch?v=sxXDM7Xs5Gg"
     },
@@ -76,7 +76,7 @@
       "year": 2024,
       "type": "feature",
       "role": "gaffer",
-      "poster": "assets/images/uploads/tardesdesoledad.jpg",
+      "poster": "assets/images/uploads/tardesdesoledad.webp",
       "displayOrder": 8,
       "trailerUrl": "https://www.youtube.com/watch?v=MH3DHcAHy54"
     },
@@ -86,7 +86,7 @@
       "year": 2023,
       "type": "feature",
       "role": "gaffer",
-      "poster": "assets/images/uploads/calladita-2023.jpg",
+      "poster": "assets/images/uploads/calladita-2023.webp",
       "displayOrder": 9,
       "trailerUrl": "https://www.youtube.com/watch?v=RSHU3ZzQ7E0"
     },
@@ -96,7 +96,7 @@
       "year": 2023,
       "type": "feature",
       "role": "gaffer",
-      "poster": "/assets/images/uploads/elcuco.jpg",
+      "poster": "/assets/images/uploads/elcuco.webp",
       "displayOrder": 10,
       "trailerUrl": "https://www.rtve.es/play/videos/somos-cine/trailer-cuco-belen-cuesta-jorge-suqet/6840745"
     },
@@ -106,7 +106,7 @@
       "year": 2022,
       "type": "feature",
       "role": "grip",
-      "poster": "assets/images/uploads/upon-entry-2022.jpg",
+      "poster": "assets/images/uploads/upon-entry-2022.webp",
       "displayOrder": 11,
       "trailerUrl": "https://www.youtube.com/watch?v=THngyQfvGZ4"
     },
@@ -116,7 +116,7 @@
       "year": 2021,
       "type": "series",
       "role": "electrician2nd",
-      "poster": "assets/images/uploads/lultima-nit-del-karaoke-2021.jpg",
+      "poster": "assets/images/uploads/lultima-nit-del-karaoke-2021.webp",
       "displayOrder": 12,
       "trailerUrl": "https://vimeo.com/640411356"
     },
@@ -126,7 +126,7 @@
       "year": 2020,
       "type": "short",
       "role": "gaffer",
-      "poster": "assets/images/uploads/coque-2020.jpg",
+      "poster": "assets/images/uploads/coque-2020.webp",
       "displayOrder": 13,
       "trailerUrl": "https://vimeo.com/596614609"
     },
@@ -136,7 +136,7 @@
       "year": 2019,
       "type": "series",
       "role": "gaffer",
-      "poster": "assets/images/uploads/boca-norte-2019.jpg",
+      "poster": "assets/images/uploads/boca-norte-2019.webp",
       "displayOrder": 14,
       "trailerUrl": "https://www.rtve.es/play/videos/boca-norte/trailer-oficial-boca-norte-serie-playz/4899168"
     },
@@ -146,7 +146,7 @@
       "year": 2017,
       "type": "feature",
       "role": "electricianDailies",
-      "poster": "assets/images/uploads/the-bookshop-2017.jpg",
+      "poster": "assets/images/uploads/the-bookshop-2017.webp",
       "displayOrder": 15,
       "trailerUrl": "https://www.imdb.com/video/embed/vi1441315609"
     },
@@ -156,7 +156,7 @@
       "year": 2013,
       "type": "feature",
       "role": "electrician",
-      "poster": "/assets/images/uploads/ayer-no-termina-nunca.jpg",
+      "poster": "/assets/images/uploads/ayer-no-termina-nunca.webp",
       "displayOrder": 16,
       "trailerUrl": "https://www.youtube.com/watch?v=L1YXB7rn5Ks"
     },
@@ -166,7 +166,7 @@
       "year": 2012,
       "type": "feature",
       "role": "electrician",
-      "poster": "assets/images/uploads/redlights.jpg",
+      "poster": "assets/images/uploads/redlights.webp",
       "displayOrder": 17,
       "trailerUrl": "https://www.youtube.com/watch?v=NcMkgDNhpMQ"
     },
@@ -176,7 +176,7 @@
       "year": 2010,
       "type": "short",
       "role": "electrician",
-      "poster": "/assets/images/uploads/la-culpa.jpg",
+      "poster": "/assets/images/uploads/la-culpa.webp",
       "displayOrder": 18,
       "trailerUrl": "https://vimeo.com/14851272"
     }

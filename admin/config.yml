@@ -15,6 +15,17 @@ media_folder: assets/images/uploads
 public_folder: /assets/images/uploads
 publish_mode: editorial_workflow
 
+# Convert new image uploads in the editor before they reach GitHub.
+# Individual image fields use dimensions suited to where they appear.
+media_processing:
+  enabled: true
+  format:
+    enabled: true
+    default: webp
+  quality: 84
+  strip_metadata: true
+  width: 1600
+
 collections:
   - name: films
     label: Películas
@@ -50,7 +61,18 @@ collections:
           - { label: 'Eléctrico (dailies)', value: electricianDailies }
           - { label: 'Técnico de iluminación / Best Boy', value: lightingBestboy }
           - { label: Grip, value: grip }
-      - { name: poster, label: Póster, widget: image, required: false, allow_external_urls: false }
+      - name: poster
+        label: Póster
+        widget: image
+        required: false
+        allow_external_urls: false
+        hint: 'Al subirlo, se convierte a WebP y se ajusta a 900 px de ancho.'
+        media_processing:
+          enabled: true
+          format: { enabled: true, default: webp }
+          quality: 85
+          strip_metadata: true
+          width: 900
       - { name: displayOrder, label: 'Orden en Trabajo seleccionado', widget: number, value_type: int, min: 1, required: false, hint: 'Un número distinto para cada película. Déjalo vacío para ocultarla del carrusel.' }
       - { name: trailerUrl, label: 'URL del tráiler', widget: string, required: false, hint: 'YouTube y Vimeo se reproducen aquí; RTVE, IMDb y otros enlaces se abren en su web.' }
 
@@ -67,7 +89,18 @@ collections:
     fields:
       - { name: id, label: ID, widget: string, pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', 'Usa minúsculas, números y guiones.'], hint: 'No cambies el ID después de crear la ficha.' }
       - { name: name, label: Nombre, widget: string }
-      - { name: portrait, label: Retrato, widget: image, required: false, allow_external_urls: false }
+      - name: portrait
+        label: Retrato
+        widget: image
+        required: false
+        allow_external_urls: false
+        hint: 'Al subirlo, se convierte a WebP y se ajusta a 256 px de ancho.'
+        media_processing:
+          enabled: true
+          format: { enabled: true, default: webp }
+          quality: 82
+          strip_metadata: true
+          width: 256
       - { name: url, label: Enlace, widget: string, required: false }
       - name: partnership
         label: Colaboración habitual
@@ -103,7 +136,18 @@ collections:
               - { name: id, label: ID, widget: string }
               - { name: name, label: Nombre, widget: string }
               - { name: kind, label: Tipo, widget: string }
-              - { name: logo, label: Logo, widget: image, required: false, allow_external_urls: false }
+              - name: logo
+                label: Logo
+                widget: image
+                required: false
+                allow_external_urls: false
+                hint: 'Las imágenes se ajustan a 400 px y se convierten a WebP. Los SVG se conservan.'
+                media_processing:
+                  enabled: true
+                  format: { enabled: true, default: webp }
+                  quality: 86
+                  strip_metadata: true
+                  width: 400
               - { name: url, label: URL, widget: string, required: false }
 
   - name: site
@@ -137,7 +181,17 @@ collections:
             summary: '{{fields.id}} — {{fields.size}}'
             fields:
               - { name: id, label: 'ID para traducciones', widget: string }
-              - { name: file, label: Imagen, widget: image, allow_external_urls: false }
+              - name: file
+                label: Imagen
+                widget: image
+                allow_external_urls: false
+                hint: 'Al subirla, se convierte a WebP y se ajusta a 1200 px de ancho.'
+                media_processing:
+                  enabled: true
+                  format: { enabled: true, default: webp }
+                  quality: 85
+                  strip_metadata: true
+                  width: 1200
               - { name: size, label: Tamaño, widget: select, options: [big, small] }
 
   - name: i18n
