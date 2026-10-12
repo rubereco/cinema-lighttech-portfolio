@@ -49,6 +49,7 @@ for (const page of ["index.html", "legal.html"]) {
 for (const key of [
   "film.watchTrailer", "film.trailerTitle", "film.posterAlt", "about.photoPosition",
   "partners.website", "partners.empty", "partners.logosLabel",
+  "partners.showAll", "partners.showCarousel",
   "partners.count.partner_one", "partners.count.partner_other",
   ...["direction", "cinematography", "lighting", "sound", "production", "other"].map(id => `partners.section.${id}`),
 ]) {

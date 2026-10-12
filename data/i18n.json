@@ -457,6 +457,18 @@
       "es": "Empresas"
     },
     {
+      "key": "partners.showAll",
+      "editorLabel": "Colaboradores · Botón para ver todas las empresas",
+      "en": "Show all",
+      "es": "Ver todas"
+    },
+    {
+      "key": "partners.showCarousel",
+      "editorLabel": "Colaboradores · Botón para volver al carrusel de empresas",
+      "en": "Show carousel",
+      "es": "Ver carrusel"
+    },
+    {
       "key": "partners.pageTitle",
       "editorLabel": "Colaboradores · Título de la sección",
       "en": "Who I Work With",

@@ -282,41 +282,100 @@ a.partner-name:focus {
   padding: 0.5rem 0;
 }
 
-/* ─── Partners logo carousel ────────────────────────────────────────
-   v3.13.11: equipment houses moved out of the accordion into a
-   dedicated logo strip below it. Continuous marquee animation,
-   pauses on hover. The 3 logos are duplicated in JS so the
-   track is 2× the content and the translateX(-50%) keyframe
-   creates a seamless infinite loop. Fades at the edges via
-   mask-image so logos don't snap in/out hard at the viewport
-   boundaries.
-
-   Sizing:
-   - Each logo item is 120px wide on mobile, 160px on PC
-   - Gap between items: 2.5rem (40px)
-   - The track is width: max-content so it overflows the
-     viewport naturally
-   - On PC: 5 logos visible (5×160 + 4×40 = 960px → viewport
-     expands to fit, centered in the section)
-   - On mobile: 2-3 logos visible (2×120 + 1×40 = 280px →
-     fits any phone width comfortably) */
+/* ─── Company logos: scrolling strip or expandable list ──────────── */
 .partners-logos {
   margin-top: 2.5rem;
   margin-bottom: 2.5rem;
   padding: 1.5rem 0;
   text-align: center;
 }
+.partners-logos__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
 .partners-logos__label {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--c-fg-muted, #9b9b9e);
-  margin: 0 0 1.25rem 0;
+  margin: 0;
   font-weight: 500;
 }
+.partners-logos__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--c-accent);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.partners-logos__toggle:hover { color: var(--c-accent-strong); }
+.partners-logos__toggle:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.partners-logos__toggle-chevron {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 200ms ease;
+}
+.partners-logos.is-expanded .partners-logos__toggle-chevron {
+  transform: translateY(2px) rotate(225deg);
+}
+.partners-logos__all-shell,
+.partners-logos__carousel-shell {
+  display: grid;
+  transition: grid-template-rows 420ms ease, opacity 220ms ease;
+}
+.partners-logos__all-shell {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+}
+.partners-logos__carousel-shell {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.partners-logos.is-expanded .partners-logos__all-shell {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  pointer-events: auto;
+}
+.partners-logos.is-expanded .partners-logos__carousel-shell {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+}
+.partners-logos__all-clip,
+.partners-logos__viewport { min-height: 0; overflow: hidden; }
+.partners-logos__all-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 4vw, 2.5rem);
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+.partners-logos__all-list .partners-logos__item { opacity: 0.85; }
+.partners-logos__name { color: var(--c-fg); font-weight: 600; }
 .partners-logos__viewport {
   position: relative;
-  overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
           mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
 }
@@ -328,8 +387,9 @@ a.partner-name:focus {
   animation: partners-logos-scroll 30s linear infinite;
   will-change: transform;
 }
-.partners-logos:hover .partners-logos__track,
-.partners-logos:focus-within .partners-logos__track {
+.partners-logos__viewport:hover .partners-logos__track,
+.partners-logos__viewport:focus-within .partners-logos__track,
+.partners-logos.is-expanded .partners-logos__track {
   animation-play-state: paused;
 }
 .partners-logos__item {

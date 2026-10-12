@@ -207,40 +207,73 @@
 
   // ─── Render entry point ───────────────────────────────────────────────
 
-  /** Build the equipment-houses logo carousel.
-   *  - Reads companies of kind: "equipment-house" from content.companies
-   *  - Renders a label + a duplicated track of logos (for infinite marquee)
-   *  - Each logo links out to the company's URL, with a grayscale → color hover
-   *  - Returns "" if no equipment-house companies exist (silently no-op) */
+  let logosExpanded = false;
+
+  /** Render every company in the carousel and expandable static list. */
   function renderLogosCarousel(content) {
     const target = document.getElementById("partners-logos");
     if (!target) return;
     const lang = getActiveLang();
-    const companies = (content.companies || []).filter(c => c.kind === "equipment-house");
+    const companies = (content.companies || []).filter(c => c && c.name);
     if (companies.length === 0) {
       target.innerHTML = "";
       target.setAttribute("aria-busy", "false");
       return;
     }
     const label = t("partners.logosLabel", lang);
+    const toggleLabel = t(logosExpanded ? "partners.showCarousel" : "partners.showAll", lang)
+      || (logosExpanded ? "Show carousel" : "Show all");
+    target.setAttribute("aria-label", label);
     const itemHtml = (c, isClone) => {
       const url = safeHttpUrl(c.url);
-      const image = `<img src="${escapeAttr(c.logo || "")}" alt="" loading="lazy" />`;
+      const image = c.logo
+        ? `<img src="${escapeAttr(c.logo)}" alt="" loading="lazy" decoding="async" />`
+        : `<span class="partners-logos__name">${escapeText(c.name)}</span>`;
       return url
         ? `<a class="partners-logos__item${isClone ? " is-clone" : ""}" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttr(c.name)}" ${isClone ? 'aria-hidden="true" tabindex="-1"' : ''}>${image}</a>`
-        : `<span class="partners-logos__item${isClone ? " is-clone" : ""}" ${isClone ? 'aria-hidden="true"' : ''}>${image}</span>`;
+        : `<span class="partners-logos__item${isClone ? " is-clone" : ""}" role="img" aria-label="${escapeAttr(c.name)}" ${isClone ? 'aria-hidden="true"' : ''}>${image}</span>`;
     };
     const originals = companies.map(c => itemHtml(c, false)).join("");
-    const clones    = companies.map(c => itemHtml(c, true )).join("");
+    const clones = companies.map(c => itemHtml(c, true)).join("");
+    const allItems = companies.map(c => `<li>${itemHtml(c, false)}</li>`).join("");
+    target.classList.toggle("is-expanded", logosExpanded);
     target.innerHTML = `
-      <p class="partners-logos__label">${escapeText(label)}</p>
-      <div class="partners-logos__viewport">
-        <div class="partners-logos__track">
-          ${originals}
-          ${clones}
+      <div class="partners-logos__heading">
+        <p class="partners-logos__label">${escapeText(label)}</p>
+        <button class="partners-logos__toggle" type="button" aria-expanded="${logosExpanded}" aria-controls="partners-logos-all">
+          <span class="partners-logos__toggle-text">${escapeText(toggleLabel)}</span>
+          <span class="partners-logos__toggle-chevron" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div id="partners-logos-all" class="partners-logos__all-shell" aria-hidden="${!logosExpanded}" ${logosExpanded ? "" : "inert"}>
+        <div class="partners-logos__all-clip">
+          <ul class="partners-logos__all-list" aria-label="${escapeAttr(label)}">${allItems}</ul>
+        </div>
+      </div>
+      <div class="partners-logos__carousel-shell" aria-hidden="${logosExpanded}" ${logosExpanded ? "inert" : ""}>
+        <div class="partners-logos__viewport">
+          <div class="partners-logos__track">
+            ${originals}
+            ${clones}
+          </div>
         </div>
       </div>
     `;
+    const toggle = target.querySelector(".partners-logos__toggle");
+    const all = target.querySelector(".partners-logos__all-shell");
+    const carousel = target.querySelector(".partners-logos__carousel-shell");
+    toggle.addEventListener("click", () => {
+      logosExpanded = !logosExpanded;
+      target.classList.toggle("is-expanded", logosExpanded);
+      toggle.setAttribute("aria-expanded", String(logosExpanded));
+      toggle.querySelector(".partners-logos__toggle-text").textContent =
+        t(logosExpanded ? "partners.showCarousel" : "partners.showAll", getActiveLang())
+        || (logosExpanded ? "Show carousel" : "Show all");
+      all.toggleAttribute("inert", !logosExpanded);
+      all.setAttribute("aria-hidden", String(!logosExpanded));
+      carousel.toggleAttribute("inert", logosExpanded);
+      carousel.setAttribute("aria-hidden", String(logosExpanded));
+    });
     target.setAttribute("aria-busy", "false");
   }
 
