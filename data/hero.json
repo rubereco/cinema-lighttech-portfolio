@@ -1,44 +1,44 @@
 {
   "items": [
     {
-      "file": "assets/images/uploads/hero-forest.jpg",
-      "size": "big",
-      "alt": ""
+      "id": "forest",
+      "file": "assets/images/uploads/hero-forest.webp",
+      "size": "big"
     },
     {
-      "file": "assets/images/uploads/hero-tunnel.jpg",
-      "size": "small",
-      "alt": ""
+      "id": "tunnel",
+      "file": "assets/images/uploads/hero-tunnel.webp",
+      "size": "small"
     },
     {
-      "file": "assets/images/uploads/hero-main.jpg",
-      "size": "big",
-      "alt": ""
+      "id": "main",
+      "file": "assets/images/uploads/hero-main.webp",
+      "size": "big"
     },
     {
-      "file": "assets/images/uploads/hero-red-ladder.jpg",
-      "size": "small",
-      "alt": ""
+      "id": "red-ladder",
+      "file": "assets/images/uploads/hero-red-ladder.webp",
+      "size": "small"
     },
     {
-      "file": "assets/images/uploads/hero-astera-bar.jpg",
-      "size": "big",
-      "alt": ""
+      "id": "astera-bar",
+      "file": "assets/images/uploads/hero-astera-bar.webp",
+      "size": "big"
     },
     {
-      "file": "assets/images/uploads/hero-hk-cinema.jpg",
-      "size": "small",
-      "alt": ""
+      "id": "hk-cinema",
+      "file": "assets/images/uploads/hero-hk-cinema.webp",
+      "size": "small"
     },
     {
-      "file": "assets/images/uploads/hero-headphones-blue.jpg",
-      "size": "big",
-      "alt": ""
+      "id": "headphones-blue",
+      "file": "assets/images/uploads/hero-headphones-blue.webp",
+      "size": "big"
     },
     {
-      "file": "assets/images/uploads/hero-lantern-stairs.jpg",
-      "size": "small",
-      "alt": ""
+      "id": "lantern-stairs",
+      "file": "assets/images/uploads/hero-lantern-stairs.webp",
+      "size": "small"
     }
   ]
 }

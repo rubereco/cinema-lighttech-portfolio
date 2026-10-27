@@ -15,15 +15,19 @@
 # Required Cloudflare secrets (do NOT commit these):
 #   GITHUB_CLIENT_ID       — from your GitHub OAuth app
 #   GITHUB_CLIENT_SECRET   — from your GitHub OAuth app
+# Optional variable ADMIN_ORIGINS is a comma-separated list of exact HTTPS
+# admin origins allowed to receive tokens. The code defaults to
+# https://recalone.com, https://www.recalone.com, and
+# https://tarekrecolons.pages.dev. Add a preview URL explicitly if needed.
 #
-# Both come from https://github.com/settings/developers → your app.
+# The two GitHub secrets come from your GitHub OAuth app settings.
 
 name = "decap-oauth-proxy"
 main = "oauth-proxy.js"
 compatibility_date = "2024-09-23"
 
 # Default Workers Free plan: 100,000 requests/day. The OAuth proxy
-# gets at most 2-3 requests per login (auth, callback, postMessage),
+# gets only a few HTTP requests per login,
 # so we use a tiny fraction. No paid plan needed.
 # workers_dev = true is the default; uncomment if you want to force it.
 

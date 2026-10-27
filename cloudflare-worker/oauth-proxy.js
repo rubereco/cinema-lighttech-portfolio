@@ -37,9 +37,30 @@
  *   5. In the GitHub OAuth app settings, set the callback URL to
  *      https://oauth.recalone.com/callback
  *
- * That's it. No database, no state to manage. The token lives in the
- * user's browser session, expires when they close the tab.
+ * The OAuth state is kept in a short-lived cookie. Only approved admin
+ * origins may complete the popup handshake and receive a token.
  */
+
+const STATE_COOKIE = "decap_oauth_state";
+const ORIGIN_STORAGE_KEY = "decap_admin_origin";
+
+function allowedAdminOrigins(env) {
+  const configured = [
+    "https://recalone.com,https://www.recalone.com,https://tarekrecolons.pages.dev",
+    env.ADMIN_ORIGINS || "",
+  ].join(",");
+  return [...new Set(configured.split(",").map(value => value.trim()).filter(value => {
+    try { return new URL(value).origin === value && value.startsWith("https://"); }
+    catch (_) { return false; }
+  }))];
+}
+
+function stateFromCookie(request) {
+  const cookie = request.headers.get("Cookie") || "";
+  return cookie.match(/(?:^|;\s*)decap_oauth_state=([^;]+)/)?.[1] || null;
+}
+
+const clearStateCookie = `${STATE_COOKIE}=; Path=/callback; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
 
 export default {
   async fetch(request, env, ctx) {
@@ -103,8 +124,10 @@ export default {
       //   8. Decap's authorizeCallback fires, completes login
       const params = url.searchParams;
       const provider = params.get("provider") || "github";
-      const state = params.get("state") || crypto.randomUUID();
-      const scope = params.get("scope") || "repo,user";
+      if (provider !== "github") return new Response("Unsupported provider", { status: 400 });
+      const state = crypto.randomUUID();
+      const scope = "repo,user";
+      const trustedOrigins = allowedAdminOrigins(env);
 
       const handshakeHtml = `<!doctype html>
 <html lang="en">
@@ -134,40 +157,26 @@ export default {
       var scope    = ${JSON.stringify(scope)};
       var clientId = ${JSON.stringify(env.GITHUB_CLIENT_ID)};
       var origin   = window.location.origin;
+      var trustedOrigins = ${JSON.stringify(trustedOrigins)};
+      var originStorageKey = ${JSON.stringify(ORIGIN_STORAGE_KEY)};
 
-      // Step 1: tell the opener "I'm here, ready to do the OAuth
-      // dance". The opener will swap its message listener to
-      // accept the eventual auth response.
-      //
-      // v3.14.10: targetOrigin was 'origin' (= oauth.recalone.com)
-      // but the opener is at recalone.com — DIFFERENT origins,
-      // so the message was silently dropped. Same bug as
-      // v3.14.6 but in reverse. Use '*' since this message is
-      // going to the window that opened us (window.opener),
-      // which is the same tab that initiated the OAuth flow.
-      // Decap's handshakeCallback validates the message format
-      // (it checks r.data === "authorizing:" + provider) on
-      // receipt, so the wildcard targetOrigin is safe.
+      // This first message contains no secret. The reply must come from
+      // the opener at a trusted origin before authorization begins.
+      if (!window.opener) {
+        document.querySelector(".msg").textContent = "Open this page from the portfolio admin panel to sign in.";
+        return;
+      }
       window.opener.postMessage("authorizing:" + provider, "*");
 
-      // Step 2: wait for the opener to confirm it has swapped
-      // its listener. The opener echoes "authorizing:github"
-      // back to us once it's ready.
-      //
-      // v3.14.11: removed the event.origin check. The opener
-      // (Decap admin page) is at a DIFFERENT origin than us
-      // (e.g. recalone.com vs oauth.recalone.com, or in the
-      // user's case a Cloudflare Pages preview URL like
-      // bbf866f6.tarekrecolons.pages.dev). When the echo
-      // arrives, event.origin is the opener's origin, which
-      // doesn't equal OUR origin (oauth.recalone.com) — so
-      // the listener bailed and the popup never redirected.
-      // The echo isn't a security token (it's just a cue to
-      // start the OAuth flow); Decap already validated the
-      // handshake chain on its end before sending it. Safe
-      // to drop the check.
+      // Decap echoes the handshake after installing its token listener.
       window.addEventListener("message", function (event) {
+        if (event.source !== window.opener) return;
+        if (!trustedOrigins.includes(event.origin)) {
+          document.querySelector(".msg").textContent = "This admin URL is not approved for sign-in.";
+          return;
+        }
         if (event.data !== "authorizing:" + provider) return;
+        sessionStorage.setItem(originStorageKey, event.origin);
         // Step 3: redirect to GitHub's authorize endpoint. The
         // user will see the GitHub auth screen, authorize, and
         // GitHub will redirect back to /callback on us.
@@ -188,7 +197,11 @@ export default {
 
       return new Response(handshakeHtml, {
         status: 200,
-        headers: { "Content-Type": "text/html; charset=utf-8" },
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store",
+          "Set-Cookie": `${STATE_COOKIE}=${state}; Path=/callback; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,
+        },
       });
     }
 
@@ -216,6 +229,15 @@ export default {
 
       if (!code) {
         return new Response("Missing 'code' query parameter", { status: 400 });
+      }
+
+      const returnedState = url.searchParams.get("state");
+      const expectedState = stateFromCookie(request);
+      if (!returnedState || !expectedState || returnedState !== expectedState) {
+        return new Response("Invalid OAuth state", {
+          status: 400,
+          headers: { "Cache-Control": "no-store", "Set-Cookie": clearStateCookie },
+        });
       }
 
       // Exchange the auth code for an access token via GitHub's API.
@@ -254,25 +276,10 @@ export default {
         });
       }
 
-      // Render a tiny HTML page that posts the token back to Decap.
-      // Decap's auth.js listens for a postMessage with
-      //   { type: "authorization:github:success", ... }
-      // We use its exact expected format. window.close() shuts the popup.
-      // The window.opener is the original /admin tab.
-      //
-      // v3.14.6: targetOrigin was window.location.origin (i.e.
-      // https://oauth.recalone.com), but the opener is at
-      // https://recalone.com — DIFFERENT origins, so postMessage
-      // was being silently dropped. Switched to "*" since the
-      // message is going to window.opener (which Decap controls
-      // and validates) and there's no risk of leaking the token
-      // to a 3rd party.
-      //
-      // Sanitization: we pass the token through a <script> context, so
-      // we JSON-encode it (turns any " or </script> into safe escape
-      // sequences). GitHub tokens are alphanumeric + underscore so
-      // there's no real injection risk, but defense in depth.
-      const safeToken = JSON.stringify(tokenData.access_token);
+      // Only send the token to the trusted origin saved during the
+      // handshake. Escaping '<' keeps the token safe inside this script.
+      const safeToken = JSON.stringify(tokenData.access_token).replace(/</g, "\\u003c");
+      const trustedOrigins = allowedAdminOrigins(env);
 
       return new Response(
         `<!doctype html>
@@ -303,17 +310,20 @@ export default {
   <script>
     (function () {
       const token = ${safeToken};
+      const trustedOrigins = ${JSON.stringify(trustedOrigins)};
+      const originStorageKey = ${JSON.stringify(ORIGIN_STORAGE_KEY)};
+      const targetOrigin = sessionStorage.getItem(originStorageKey);
+      sessionStorage.removeItem(originStorageKey);
+      if (!window.opener || !trustedOrigins.includes(targetOrigin)) {
+        document.querySelector(".msg").textContent = "This login session has expired. Please try again from the admin page.";
+        return;
+      }
       // Decap listens on window.opener for an authorization:github:success
       // message with { token, provider } in the data payload.
       const data = JSON.stringify({ token: token, provider: "github" });
-      // v3.14.6: targetOrigin "*" instead of window.location.origin.
-      // The worker is at oauth.recalone.com but the opener (admin page)
-      // is at recalone.com — different origins. Using "*" since window.opener
-      // is the same browser tab that initiated the OAuth flow, and Decap
-      // validates the message format on receipt.
       window.opener.postMessage(
         "authorization:github:success:" + data,
-        "*"
+        targetOrigin
       );
       // Brief delay so the user sees the success message before close.
       setTimeout(function () { window.close(); }, 800);
@@ -323,7 +333,11 @@ export default {
 </html>`,
         {
           status: 200,
-          headers: { "Content-Type": "text/html; charset=utf-8" },
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+            "Cache-Control": "no-store",
+            "Set-Cookie": clearStateCookie,
+          },
         }
       );
     }
