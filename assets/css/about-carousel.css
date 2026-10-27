@@ -1,8 +1,9 @@
 .about-carousel { min-width: 0; }
 .about-carousel__stage {
-  --reel-stage-height: clamp(330px, 34vw, 500px);
+  --reel-stage-height: clamp(390px, 39vw, 560px);
+  --reel-frame-height: clamp(238px, 24.48vw, 360px);
   /* Keep adjacent film frames apart throughout the 60-degree turn. */
-  --reel-radius: calc(var(--reel-stage-height) * .68);
+  --reel-radius: calc(var(--reel-stage-height) * .6);
   position: relative;
   width: 100%;
   height: var(--reel-stage-height);
@@ -22,7 +23,7 @@
   position: absolute;
   inset: 0;
   width: 70%;
-  height: 72%;
+  height: var(--reel-frame-height);
   margin: auto;
   padding: 0;
   overflow: hidden;
@@ -91,9 +92,10 @@
 @media (max-width: 899px) {
   .about-carousel { padding: 0 0 12px; }
   .about-carousel__stage {
-    --reel-stage-height: clamp(340px, 104vw, 420px);
+    --reel-stage-height: clamp(390px, 118vw, 475px);
+    --reel-frame-height: clamp(245px, 74.88vw, 302px);
   }
-  .about-carousel__item { width: 74%; height: 72%; }
+  .about-carousel__item { width: 74%; }
   .about-carousel__item[data-offset="-1"],
   .about-carousel__item[data-offset="1"] { pointer-events: none; }
   .about-carousel__controls { display: none; }
