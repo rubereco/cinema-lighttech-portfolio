@@ -7,7 +7,7 @@
   width: 100%;
   height: var(--reel-stage-height);
   overflow: hidden;
-  perspective: 1000px;
+  perspective: 2000px;
   touch-action: pan-y;
   background: radial-gradient(ellipse at center, rgba(205, 112, 58, .07), transparent 72%);
 }
