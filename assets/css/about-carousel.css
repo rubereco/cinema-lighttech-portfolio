@@ -1,9 +1,11 @@
 .about-carousel { min-width: 0; }
 .about-carousel__stage {
-  --reel-radius: clamp(118px, 12vw, 185px);
+  --reel-stage-height: clamp(330px, 34vw, 500px);
+  /* Keep adjacent film frames apart throughout the 60-degree turn. */
+  --reel-radius: calc(var(--reel-stage-height) * .68);
   position: relative;
   width: 100%;
-  height: clamp(330px, 34vw, 500px);
+  height: var(--reel-stage-height);
   overflow: hidden;
   perspective: 1000px;
   touch-action: pan-y;
@@ -89,8 +91,7 @@
 @media (max-width: 899px) {
   .about-carousel { padding: 0 0 12px; }
   .about-carousel__stage {
-    --reel-radius: clamp(130px, 40vw, 165px);
-    height: clamp(340px, 104vw, 420px);
+    --reel-stage-height: clamp(340px, 104vw, 420px);
   }
   .about-carousel__item { width: 74%; height: 72%; }
   .about-carousel__item[data-offset="-1"],
