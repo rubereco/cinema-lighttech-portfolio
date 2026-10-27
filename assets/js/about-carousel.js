@@ -130,14 +130,10 @@
       card.style.setProperty("--face", String(face));
       const picture = document.createElement("span");
       picture.className = "about-carousel__picture";
-      const wash = document.createElement("img");
-      wash.className = "about-carousel__wash";
-      wash.alt = "";
-      wash.setAttribute("aria-hidden", "true");
       const photo = document.createElement("img");
       photo.className = "about-carousel__photo";
-      [wash, photo].forEach(image => { image.decoding = "async"; });
-      picture.append(wash, photo);
+      photo.decoding = "async";
+      picture.append(photo);
       card.append(picture);
       card.addEventListener("click", () => {
         if (turning || Date.now() < suppressClickUntil) return;
