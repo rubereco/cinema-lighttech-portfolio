@@ -25,12 +25,6 @@
       "es": "Detrás de cámaras"
     },
     {
-      "key": "about.choosePhoto",
-      "editorLabel": "Sobre mí · Selector de fotos",
-      "en": "Choose photo",
-      "es": "Elegir foto"
-    },
-    {
       "key": "about.closePhoto",
       "editorLabel": "Sobre mí · Botón para cerrar la foto",
       "en": "Close photo",

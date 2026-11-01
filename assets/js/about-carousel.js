@@ -4,7 +4,9 @@
   if (!root) return;
 
   const stage = root.querySelector(".about-carousel__stage");
-  const dots = root.querySelector(".about-carousel__dots");
+  const position = root.querySelector(".about-carousel__position");
+  const positionCurrent = position.querySelector(".about-carousel__position-current");
+  const positionTotal = position.querySelector(".about-carousel__position-total");
   const lightbox = document.getElementById("about-lightbox");
   const i18n = window.PortfolioI18n;
   const mobileQuery = matchMedia("(max-width: 899px)");
@@ -50,10 +52,9 @@
       card.querySelector(".about-carousel__photo").alt = altFor(item);
       card.setAttribute("aria-label", altFor(item));
     });
-    dots.querySelectorAll("button").forEach((dot, index) => {
-      dot.setAttribute("aria-current", String(index === active));
-      dot.setAttribute("aria-label", label("about.photoPosition", { current: index + 1, total: items.length }));
-    });
+    positionCurrent.textContent = String(active + 1).padStart(2, "0");
+    positionTotal.textContent = String(items.length).padStart(2, "0");
+    position.setAttribute("aria-label", label("about.photoPosition", { current: active + 1, total: items.length }));
   }
 
   function stopAuto() {
@@ -119,7 +120,6 @@
 
   function render() {
     ring.replaceChildren();
-    dots.replaceChildren();
     stage.replaceChildren(ring);
     if (!items.length) return;
 
@@ -155,12 +155,6 @@
       });
       ring.append(card);
     }
-    items.forEach((_, index) => {
-      const dot = document.createElement("button");
-      dot.type = "button";
-      dot.addEventListener("click", () => { if (!mobileQuery.matches) go(index); });
-      dots.append(dot);
-    });
     ring.style.setProperty("--rotation", String(rotation));
     syncFaces();
     restartAuto();
