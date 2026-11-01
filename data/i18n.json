@@ -25,6 +25,12 @@
       "es": "Detrás de cámaras"
     },
     {
+      "key": "about.choosePhoto",
+      "editorLabel": "Sobre mí · Barra lateral para elegir foto",
+      "en": "Navigate photos",
+      "es": "Navegar por las fotos"
+    },
+    {
       "key": "about.closePhoto",
       "editorLabel": "Sobre mí · Botón para cerrar la foto",
       "en": "Close photo",

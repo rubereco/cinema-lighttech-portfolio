@@ -534,8 +534,8 @@
 
   /* About: 2-col */
   .about-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-    gap: 28px 64px;
+    grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1.2fr);
+    gap: 28px 18px;
     align-items: start;
   }
 
@@ -543,14 +543,16 @@
 
   .about-carousel { grid-column: 1; grid-row: 2 / span 2; }
 
+  .about-carousel__rail { grid-column: 2; grid-row: 2 / span 2; align-self: stretch; }
+
   .about-copy {
-    grid-column: 2;
+    grid-column: 3;
     grid-row: 2;
     max-width: none;
   }
 
   .about-stats {
-    grid-column: 2;
+    grid-column: 3;
     grid-row: 3;
     max-width: 36rem;
     grid-template-columns: repeat(3, 1fr);

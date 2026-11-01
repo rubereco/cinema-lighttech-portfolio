@@ -7,6 +7,8 @@
   const position = root.querySelector(".about-carousel__position");
   const positionCurrent = position.querySelector(".about-carousel__position-current");
   const positionTotal = position.querySelector(".about-carousel__position-total");
+  const rail = document.querySelector(".about-carousel__rail");
+  const railThumb = rail.querySelector(".about-carousel__rail-thumb");
   const lightbox = document.getElementById("about-lightbox");
   const i18n = window.PortfolioI18n;
   const mobileQuery = matchMedia("(max-width: 899px)");
@@ -27,6 +29,8 @@
   let gesture = null;
   let suppressClickUntil = 0;
   let visible = false;
+  let railPointer = null;
+  let railTarget = null;
 
   const mod = (value, length) => ((value % length) + length) % length;
   const label = (key, values) => i18n.t(key, undefined, values) || "";
@@ -54,7 +58,13 @@
     });
     positionCurrent.textContent = String(active + 1).padStart(2, "0");
     positionTotal.textContent = String(items.length).padStart(2, "0");
-    position.setAttribute("aria-label", label("about.photoPosition", { current: active + 1, total: items.length }));
+    const photoPosition = label("about.photoPosition", { current: active + 1, total: items.length });
+    position.setAttribute("aria-label", photoPosition);
+    rail.setAttribute("aria-valuemax", String(items.length));
+    rail.setAttribute("aria-valuenow", String(active + 1));
+    rail.setAttribute("aria-valuetext", photoPosition);
+    railThumb.style.top = `${active / items.length * 100}%`;
+    railThumb.style.height = `${100 / items.length}%`;
   }
 
   function stopAuto() {
@@ -76,7 +86,13 @@
     turning = false;
     root.classList.remove("is-turning");
     syncFaces();
-    if (queuedSteps > 0) {
+    if (railTarget !== null) {
+      const target = railTarget;
+      railTarget = null;
+      queuedSteps = 0;
+      if (target !== active) go(target);
+      else restartAuto(true);
+    } else if (queuedSteps > 0) {
       queuedSteps -= 1;
       turn(queuedDirection);
     } else {
@@ -121,6 +137,7 @@
   function render() {
     ring.replaceChildren();
     stage.replaceChildren(ring);
+    rail.hidden = items.length < 2;
     if (!items.length) return;
 
     function makeFilmEdge(side) {
@@ -168,6 +185,48 @@
   });
   root.querySelector("[data-about-next]")?.addEventListener("click", () => {
     if (!mobileQuery.matches) go(active + 1);
+  });
+
+  function railIndex(clientY) {
+    const bounds = rail.getBoundingClientRect();
+    const fraction = (clientY - bounds.top) / bounds.height;
+    return Math.max(0, Math.min(items.length - 1, Math.floor(fraction * items.length)));
+  }
+
+  function navigateRail(index) {
+    if (mobileQuery.matches || items.length < 2) return;
+    if (turning) railTarget = index;
+    else go(index);
+  }
+
+  rail.addEventListener("pointerdown", event => {
+    if (mobileQuery.matches || items.length < 2 || event.isPrimary === false || event.button !== 0) return;
+    railPointer = event.pointerId;
+    rail.setPointerCapture(event.pointerId);
+    navigateRail(railIndex(event.clientY));
+    event.preventDefault();
+  });
+  rail.addEventListener("pointermove", event => {
+    if (event.pointerId === railPointer) navigateRail(railIndex(event.clientY));
+  });
+  function releaseRail(event) {
+    if (event.pointerId !== railPointer) return;
+    railPointer = null;
+    if (rail.hasPointerCapture(event.pointerId)) rail.releasePointerCapture(event.pointerId);
+  }
+  rail.addEventListener("pointerup", releaseRail);
+  rail.addEventListener("pointercancel", releaseRail);
+  rail.addEventListener("keydown", event => {
+    if (mobileQuery.matches || items.length < 2) return;
+    const target = {
+      ArrowUp: active - 1,
+      ArrowDown: active + 1,
+      Home: 0,
+      End: items.length - 1,
+    }[event.key];
+    if (target === undefined) return;
+    event.preventDefault();
+    navigateRail(target);
   });
 
   // Phone/tablet advance only on the timer; desktop retains drag controls.
