@@ -1,7 +1,7 @@
 backend:
   name: github
   repo: rubereco/cinema-lighttech-portfolio
-  branch: main
+  branch: codex/portfolio-client-updates
   base_url: https://oauth.recalone.com
   auth_endpoint: auth
   open_authoring: false
