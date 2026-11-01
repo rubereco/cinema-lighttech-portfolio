@@ -29,7 +29,6 @@
   padding: 0;
   overflow: hidden;
   border: 0;
-  border-inline: 1px solid rgba(255, 255, 255, .55);
   color: inherit;
   background: #0a0909;
   transform: rotateX(calc(var(--face) * 60deg)) translateZ(var(--reel-radius));
@@ -67,7 +66,6 @@
   inset: 10px var(--film-edge-width);
   overflow: hidden;
   background: #171314;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, .38);
 }
 .about-carousel__picture img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
 .about-carousel__photo { object-fit: cover; object-position: center 57%; }
@@ -108,6 +106,12 @@
   .about-carousel__item[data-offset="-1"],
   .about-carousel__item[data-offset="1"] { pointer-events: none; }
   .about-carousel__controls { display: none; }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .about-carousel__stage { --film-edge-width: 11%; }
+  .about-carousel__item { width: min(84%, 440px); }
+  .about-carousel__perf { width: 48%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
