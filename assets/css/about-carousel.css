@@ -5,6 +5,7 @@
   --reel-radius: calc(var(--reel-stage-height) * .6);
   /* A hexagonal reel: each face reaches the next face at its folded edge. */
   --reel-face-height: calc(var(--reel-radius) * 1.1547);
+  --film-edge-width: 22px;
   position: relative;
   width: 100%;
   height: var(--reel-stage-height);
@@ -29,7 +30,7 @@
   padding: 0;
   overflow: hidden;
   border: 0;
-  border-inline: 1px solid rgba(223, 162, 99, .44);
+  border-inline: 1px solid rgba(255, 255, 255, .55);
   color: inherit;
   background: #0a0909;
   transform: rotateX(calc(var(--face) * 60deg)) translateZ(var(--reel-radius));
@@ -48,12 +49,12 @@
   z-index: 2;
   top: 0;
   bottom: 0;
-  width: 16px;
+  width: var(--film-edge-width);
   background-color: #0b0a0a;
   background-image: linear-gradient(180deg,
-    transparent 0 24%, rgba(210, 173, 130, .65) 24% 70%, transparent 70% 100%);
+    transparent 0 24%, rgba(255, 255, 255, .9) 24% 70%, transparent 70% 100%);
   /* Ten evenly spaced sprocket holes make the pattern meet at each fold. */
-  background-size: 6px 10%;
+  background-size: 8px 10%;
   background-repeat: repeat-y;
   background-position: center;
 }
@@ -61,10 +62,10 @@
 .about-carousel__item::after { right: 0; }
 .about-carousel__picture {
   position: absolute;
-  inset: calc((var(--reel-face-height) - var(--reel-frame-height)) / 2 + 3px) 16px;
+  inset: calc((var(--reel-face-height) - var(--reel-frame-height)) / 2 + 8px) var(--film-edge-width);
   overflow: hidden;
   background: #171314;
-  box-shadow: 0 0 0 1px rgba(223, 162, 99, .3);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .38);
 }
 .about-carousel__picture img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
 .about-carousel__photo { object-fit: cover; object-position: center 57%; }
