@@ -37,12 +37,6 @@
       "es": "Cerrar foto"
     },
     {
-      "key": "about.nextPhoto",
-      "editorLabel": "Sobre mí · Botón para la foto siguiente",
-      "en": "Next photo",
-      "es": "Foto siguiente"
-    },
-    {
       "key": "about.photo.hk-cinema.alt",
       "editorLabel": "Sobre mí · Descripción de la foto del cine",
       "en": "Cinema lighting setup",
@@ -77,12 +71,6 @@
       "editorLabel": "Sobre mí · Nombre de la foto ampliada",
       "en": "Photo preview",
       "es": "Vista ampliada de la foto"
-    },
-    {
-      "key": "about.previousPhoto",
-      "editorLabel": "Sobre mí · Botón para la foto anterior",
-      "en": "Previous photo",
-      "es": "Foto anterior"
     },
     {
       "key": "about.statsAria",

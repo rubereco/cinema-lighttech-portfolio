@@ -198,13 +198,6 @@
   ring.addEventListener("transitionend", event => {
     if (event.target === ring && event.propertyName === "transform") finishTurn();
   });
-  root.querySelector("[data-about-prev]")?.addEventListener("click", () => {
-    if (!mobileQuery.matches) go(active - 1);
-  });
-  root.querySelector("[data-about-next]")?.addEventListener("click", () => {
-    if (!mobileQuery.matches) go(active + 1);
-  });
-
   function railIndex(clientY) {
     const bounds = rail.getBoundingClientRect();
     const fraction = (clientY - bounds.top) / bounds.height;

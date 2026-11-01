@@ -69,39 +69,7 @@
 }
 .about-carousel__picture img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
 .about-carousel__photo { object-fit: cover; object-position: center 57%; }
-.about-carousel__controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  width: max-content;
-  margin: 10px auto 0;
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, .16);
-  border-radius: 999px;
-  background: rgba(16, 14, 14, .88);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
-}
-.about-carousel__controls > button {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 0;
-  border-radius: 50%;
-  color: var(--c-fg);
-  background: transparent;
-  cursor: pointer;
-  transition: color .2s ease, background-color .2s ease, transform .2s ease;
-}
-.about-carousel__controls > button:hover,
-.about-carousel__controls > button:focus-visible {
-  color: var(--c-accent);
-  background: rgba(255, 255, 255, .09);
-}
-.about-carousel__controls > button:hover { transform: translateY(-1px); }
-.about-carousel__controls > button:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
-.about-carousel__controls svg { display: block; width: 22px; height: 22px; }
+.about-carousel__caption { display: flex; justify-content: center; margin-top: 10px; }
 .about-carousel__position {
   display: flex;
   align-items: center;
@@ -168,7 +136,7 @@
   .about-carousel__item { width: 84%; }
   .about-carousel__item[data-offset="-1"],
   .about-carousel__item[data-offset="1"] { pointer-events: none; }
-  .about-carousel__controls { display: none; }
+  .about-carousel__caption { display: none; }
 }
 
 @media (min-width: 600px) and (max-width: 899px) {
