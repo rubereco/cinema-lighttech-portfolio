@@ -123,6 +123,18 @@
     stage.replaceChildren(ring);
     if (!items.length) return;
 
+    function makeFilmEdge(side) {
+      const edge = document.createElement("span");
+      edge.className = `about-carousel__edge about-carousel__edge--${side}`;
+      edge.setAttribute("aria-hidden", "true");
+      for (let perf = 0; perf < 4; perf += 1) {
+        const hole = document.createElement("span");
+        hole.className = "about-carousel__perf";
+        edge.append(hole);
+      }
+      return edge;
+    }
+
     for (let face = 0; face < faceCount; face += 1) {
       const card = document.createElement("button");
       card.type = "button";
@@ -134,7 +146,7 @@
       photo.className = "about-carousel__photo";
       photo.decoding = "async";
       picture.append(photo);
-      card.append(picture);
+      card.append(makeFilmEdge("left"), picture, makeFilmEdge("right"));
       card.addEventListener("click", () => {
         if (turning || Date.now() < suppressClickUntil) return;
         const offset = Number(card.dataset.offset);
