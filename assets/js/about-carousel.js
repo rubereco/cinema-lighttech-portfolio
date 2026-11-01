@@ -32,6 +32,8 @@
   let visible = false;
   let railPointer = null;
   let railTarget = null;
+  let railDesiredIndex = null;
+  let railDragTimer = null;
 
   const mod = (value, length) => ((value % length) + length) % length;
   const label = (key, values) => i18n.t(key, undefined, values) || "";
@@ -64,7 +66,7 @@
     rail.setAttribute("aria-valuemax", String(items.length));
     rail.setAttribute("aria-valuenow", String(active + 1));
     rail.setAttribute("aria-valuetext", photoPosition);
-    railThumb.style.top = `${active / items.length * 100}%`;
+    railThumb.style.top = `${(railPointer !== null ? railDesiredIndex : active) / items.length * 100}%`;
     railThumb.style.height = `${100 / items.length}%`;
   }
 
@@ -136,7 +138,7 @@
     }
     queuedDirection = Math.sign(steps);
     queuedSteps = Math.abs(steps);
-    queuedFast = fast;
+    queuedFast = fast && Math.abs(steps) > 1;
     advanceQueue();
   }
 
@@ -218,17 +220,33 @@
   rail.addEventListener("pointerdown", event => {
     if (mobileQuery.matches || items.length < 2 || event.isPrimary === false || event.button !== 0) return;
     railPointer = event.pointerId;
+    railDesiredIndex = railIndex(event.clientY);
+    railThumb.style.top = `${railDesiredIndex / items.length * 100}%`;
     rail.setPointerCapture(event.pointerId);
-    navigateRail(railIndex(event.clientY));
     event.preventDefault();
   });
   rail.addEventListener("pointermove", event => {
-    if (event.pointerId === railPointer) navigateRail(railIndex(event.clientY));
+    if (event.pointerId !== railPointer) return;
+    const index = railIndex(event.clientY);
+    if (index === railDesiredIndex) return;
+    railDesiredIndex = index;
+    railThumb.style.top = `${index / items.length * 100}%`;
+    if (railDragTimer !== null) clearTimeout(railDragTimer);
+    railDragTimer = setTimeout(() => {
+      railDragTimer = null;
+      navigateRail(railDesiredIndex);
+    }, 100);
   });
   function releaseRail(event) {
     if (event.pointerId !== railPointer) return;
+    if (railDragTimer !== null) clearTimeout(railDragTimer);
+    railDragTimer = null;
+    const target = railDesiredIndex;
     railPointer = null;
+    railDesiredIndex = null;
     if (rail.hasPointerCapture(event.pointerId)) rail.releasePointerCapture(event.pointerId);
+    if (event.type === "pointerup") navigateRail(target);
+    else railThumb.style.top = `${active / items.length * 100}%`;
   }
   rail.addEventListener("pointerup", releaseRail);
   rail.addEventListener("pointercancel", releaseRail);
