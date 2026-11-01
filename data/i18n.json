@@ -62,7 +62,7 @@
     },
     {
       "key": "about.photoPosition",
-      "editorLabel": "Sobre mí · Número de foto",
+      "editorLabel": "Sobre mí · Posición de foto para lectores de pantalla",
       "en": "Photo {current} of {total}",
       "es": "Foto {current} de {total}"
     },

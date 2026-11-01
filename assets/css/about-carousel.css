@@ -69,21 +69,6 @@
 }
 .about-carousel__picture img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
 .about-carousel__photo { object-fit: cover; object-position: center 57%; }
-.about-carousel__caption { display: flex; justify-content: center; margin-top: 10px; }
-.about-carousel__position {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-width: 78px;
-  color: var(--c-fg);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  letter-spacing: .08em;
-}
-.about-carousel__position-current { color: var(--c-accent); }
-.about-carousel__position-divider { opacity: .5; }
 .about-carousel__rail { display: none; }
 .about-carousel__rail-thumb { pointer-events: none; }
 @media (min-width: 900px) {
@@ -136,7 +121,6 @@
   .about-carousel__item { width: 84%; }
   .about-carousel__item[data-offset="-1"],
   .about-carousel__item[data-offset="1"] { pointer-events: none; }
-  .about-carousel__caption { display: none; }
 }
 
 @media (min-width: 600px) and (max-width: 899px) {

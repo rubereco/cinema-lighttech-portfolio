@@ -4,9 +4,6 @@
   if (!root) return;
 
   const stage = root.querySelector(".about-carousel__stage");
-  const position = root.querySelector(".about-carousel__position");
-  const positionCurrent = position.querySelector(".about-carousel__position-current");
-  const positionTotal = position.querySelector(".about-carousel__position-total");
   const rail = document.querySelector(".about-carousel__rail");
   const railThumb = rail.querySelector(".about-carousel__rail-thumb");
   const lightbox = document.getElementById("about-lightbox");
@@ -59,10 +56,7 @@
       card.querySelector(".about-carousel__photo").alt = altFor(item);
       card.setAttribute("aria-label", altFor(item));
     });
-    positionCurrent.textContent = String(active + 1).padStart(2, "0");
-    positionTotal.textContent = String(items.length).padStart(2, "0");
     const photoPosition = label("about.photoPosition", { current: active + 1, total: items.length });
-    position.setAttribute("aria-label", photoPosition);
     rail.setAttribute("aria-valuemax", String(items.length));
     rail.setAttribute("aria-valuenow", String(active + 1));
     rail.setAttribute("aria-valuetext", photoPosition);
