@@ -24,6 +24,7 @@
   let turning = false;
   let queuedSteps = 0;
   let queuedDirection = 1;
+  let queuedFast = false;
   let finishTimer = null;
   let autoTimer = null;
   let gesture = null;
@@ -90,38 +91,53 @@
       const target = railTarget;
       railTarget = null;
       queuedSteps = 0;
-      if (target !== active) go(target);
+      if (target !== active) go(target, true);
       else restartAuto(true);
     } else if (queuedSteps > 0) {
-      queuedSteps -= 1;
-      turn(queuedDirection);
+      advanceQueue();
     } else {
       restartAuto(true);
     }
   }
 
-  function turn(direction) {
+  function turn(direction, steps = 1, duration = turnDuration) {
     if (turning || items.length < 2) return;
     stopAuto();
     turning = true;
     root.classList.add("is-turning");
-    rotation += direction;
-    active = mod(active + direction, items.length);
+    rotation += direction * steps;
+    active = mod(active + direction * steps, items.length);
+    ring.style.setProperty("--reel-turn-duration", `${duration}ms`);
     ring.style.setProperty("--rotation", String(rotation));
     if (reducedMotionQuery.matches) finishTurn();
-    else finishTimer = setTimeout(finishTurn, turnDuration + 100);
+    else finishTimer = setTimeout(finishTurn, duration + 100);
   }
 
-  function go(index) {
+  function advanceQueue() {
+    const steps = queuedFast ? Math.min(2, queuedSteps) : 1;
+    queuedSteps -= steps;
+    turn(queuedDirection, steps, queuedFast ? (steps === 2 ? 280 : 200) : turnDuration);
+  }
+
+  function go(index, fast = false) {
     if (turning || items.length < 2) return;
     const target = mod(index, items.length);
     let steps = target - active;
     if (steps > items.length / 2) steps -= items.length;
     if (steps < -items.length / 2) steps += items.length;
     if (!steps) return;
+    if (reducedMotionQuery.matches) {
+      rotation += steps;
+      active = target;
+      ring.style.setProperty("--rotation", String(rotation));
+      syncFaces();
+      restartAuto(true);
+      return;
+    }
     queuedDirection = Math.sign(steps);
-    queuedSteps = Math.abs(steps) - 1;
-    turn(queuedDirection);
+    queuedSteps = Math.abs(steps);
+    queuedFast = fast;
+    advanceQueue();
   }
 
   function openLightbox() {
@@ -196,7 +212,7 @@
   function navigateRail(index) {
     if (mobileQuery.matches || items.length < 2) return;
     if (turning) railTarget = index;
-    else go(index);
+    else go(index, true);
   }
 
   rail.addEventListener("pointerdown", event => {

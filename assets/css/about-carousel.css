@@ -18,7 +18,7 @@
   inset: 0;
   transform-style: preserve-3d;
   transform: rotateX(calc(var(--rotation, 0) * -60deg));
-  transition: transform .65s cubic-bezier(.22, .65, .22, 1);
+  transition: transform var(--reel-turn-duration, .65s) cubic-bezier(.22, .65, .22, 1);
 }
 .about-carousel__item {
   position: absolute;
@@ -135,7 +135,7 @@
     left: 50%;
     width: 2px;
     border-radius: 2px;
-    background: rgba(255, 255, 255, .28);
+    background: rgba(255, 255, 255, .48);
     transform: translateX(-50%);
   }
   .about-carousel__rail-thumb {
@@ -145,12 +145,12 @@
     width: 4px;
     height: 25%;
     border-radius: 4px;
-    background: var(--c-accent);
+    background: #fff;
     transform: translateX(-50%);
-    transition: top .65s cubic-bezier(.22, .65, .22, 1), height .2s ease;
+    transition: top .25s cubic-bezier(.22, .65, .22, 1), height .2s ease;
   }
   .about-carousel__rail:focus-visible {
-    outline: 2px solid var(--c-accent);
+    outline: 2px solid #fff;
     outline-offset: 2px;
     border-radius: 14px;
   }
