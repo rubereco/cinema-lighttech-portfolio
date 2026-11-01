@@ -48,7 +48,7 @@
   bottom: 0;
   width: var(--film-edge-width);
   display: grid;
-  grid-template-rows: repeat(4, 1fr);
+  grid-template-rows: repeat(8, 1fr);
   place-items: center;
   background: #0a0909;
   pointer-events: none;

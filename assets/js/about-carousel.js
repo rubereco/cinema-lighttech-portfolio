@@ -127,7 +127,7 @@
       const edge = document.createElement("span");
       edge.className = `about-carousel__edge about-carousel__edge--${side}`;
       edge.setAttribute("aria-hidden", "true");
-      for (let perf = 0; perf < 4; perf += 1) {
+      for (let perf = 0; perf < 8; perf += 1) {
         const hole = document.createElement("span");
         hole.className = "about-carousel__perf";
         edge.append(hole);
