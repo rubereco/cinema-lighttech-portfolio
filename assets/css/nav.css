@@ -375,7 +375,7 @@
   }
 }
 
-.brand__mark { display: block; width: 30px; height: 30px; flex: none; filter: brightness(0) invert(1); }
+.brand__mark { display: block; width: 30px; height: 30px; flex: none; }
 
 @media (max-width: 359px) {
   .site-header { gap: 6px; padding-inline: 12px; }

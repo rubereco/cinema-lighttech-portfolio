@@ -38,4 +38,6 @@ On phones the hero shows only its large photos. Every small hero photo also appe
 - Each translation has an `editorLabel` used only for the Spanish admin list. The hidden `key` links the text to the site; editors change the `en` and `es` values.
 - OAuth Worker setup is in `admin/SETUP.md`. Secrets belong in Cloudflare Worker secrets, not the repository.
 
-The navbar currently uses the existing vector mark in `assets/images/favicon.svg` as the Recalone mark. Replace that file if the approved brand logo differs.
+The circular brand mark is available as transparent SVGs in `assets/images/logo-black.svg` and `assets/images/logo-white.svg`. The matching `logo-black-recalone.svg` and `logo-white-recalone.svg` add the RecAlone wordmark below it, with the Anton font embedded for portability. The navbar uses the white mark-only version; `assets/images/favicon.svg` puts it on a dark square for browser tabs.
+
+Three additional client wordmark options are available in black and white: `recalone-rajdhani` (technical), `recalone-space-grotesk` (modern), and `recalone-dm-serif` (editorial). Their lettering is converted to SVG paths. The new fonts come from the [Google Fonts repository](https://github.com/google/fonts) under open-source font licenses.
