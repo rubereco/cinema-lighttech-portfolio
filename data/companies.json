@@ -38,6 +38,12 @@
       "kind": "equipment-house",
       "logo": "assets/images/uploads/cinetecnico.webp",
       "url": "https://cinetecnico.com/"
+    },
+    {
+      "id": "Test-empresa",
+      "name": "testE,presa",
+      "kind": "casa de equipos",
+      "logo": "/assets/images/uploads/testcaratula.webp"
     }
   ]
 }
