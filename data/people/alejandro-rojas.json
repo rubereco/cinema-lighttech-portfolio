@@ -1,5 +1,10 @@
 {
   "id": "alejandro-rojas",
   "name": "Alejandro Rojas",
-  "portrait": null
+  "portrait": null,
+  "partnership": {
+    "categories": [
+      "other"
+    ]
+  }
 }
