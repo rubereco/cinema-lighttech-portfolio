@@ -39,6 +39,16 @@
       "id": "lantern-stairs",
       "file": "assets/images/uploads/hero-lantern-stairs.webp",
       "size": "small"
+    },
+    {
+      "size": "big",
+      "id": "TestGrande",
+      "file": "/assets/images/uploads/testimgbig.webp"
+    },
+    {
+      "id": "TestPetit",
+      "size": "small",
+      "file": "/assets/images/uploads/testimgpetit.webp"
     }
   ]
 }
