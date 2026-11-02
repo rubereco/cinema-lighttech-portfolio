@@ -7,18 +7,18 @@ const fs = require("node:fs");
 const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 
-// A Pages preview must edit the JSON from its own branch. The source config
-// always targets main, so production and local builds keep their normal backend.
+// A Pages deployment must edit the JSON from its own branch. Keep main as the
+// source default for local builds, then select the deployed branch here.
 const pagesBranch = process.env.CF_PAGES_BRANCH;
-if (pagesBranch && pagesBranch !== "main") {
+if (pagesBranch) {
   if (!/^[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(pagesBranch) || pagesBranch.includes("..")) {
     throw new Error(`Invalid Cloudflare Pages branch: ${pagesBranch}`);
   }
   const configPath = path.join(root, "admin", "config.yml");
   const config = fs.readFileSync(configPath, "utf8");
-  const backendBranch = /^  branch: main\r?$/gm;
+  const backendBranch = /^  branch: [^\r\n]+\r?$/gm;
   if ([...config.matchAll(backendBranch)].length !== 1) {
-    throw new Error("Expected one main backend branch in admin/config.yml");
+    throw new Error("Expected one backend branch in admin/config.yml");
   }
   fs.writeFileSync(configPath, config.replace(backendBranch, `  branch: ${pagesBranch}`));
   console.log(`  admin backend: ${pagesBranch}`);
