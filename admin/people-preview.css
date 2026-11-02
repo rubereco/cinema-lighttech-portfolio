@@ -1,0 +1,7 @@
+.person-preview { box-sizing: border-box; min-height: 100vh; padding: 32px 28px; background: #101012; color: #f4f2ed; font: 16px/1.5 system-ui, sans-serif; }
+.person-preview__eyebrow { margin: 0 0 8px; color: #d99440; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.person-preview h1 { margin: 0 0 28px; font-size: 30px; line-height: 1.2; }
+.person-preview__section { border-top: 1px solid #555; padding: 20px 0; }
+.person-preview__section h2 { margin: 0 0 16px; color: #d99440; font-size: 16px; }
+.person-preview__section p { display: grid; gap: 3px; margin: 0 0 14px; }
+.person-preview__section strong { color: #aaa; font-size: 12px; text-transform: uppercase; }

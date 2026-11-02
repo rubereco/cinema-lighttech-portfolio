@@ -45,6 +45,7 @@
         categories: person.partnership.categories,
         image: person.portrait || null, imageAlt: person.name,
         url: person.url || null,
+        linkType: person.linkType || "website",
       }));
     const companies = companiesData?.companies || [];
     const companyPartners = companies.map(company => ({
@@ -54,7 +55,7 @@
     return { partners: [...companyPartners, ...people], companies };
   }
 
-  const t = (key, lang) => window.PortfolioI18n.t(key, lang);
+  const t = (key, lang, values) => window.PortfolioI18n.t(key, lang, values);
   const getActiveLang = () => window.PortfolioI18n.lang;
 
   // ─── HTML escaping ────────────────────────────────────────────────────
@@ -75,11 +76,12 @@
 
   // ─── Field helpers ────────────────────────────────────────────────────
 
-  /** Description: per-language. Falls back to the other language if active
-   *  is missing. Clips to MAX_DESCRIPTION_CHARS. */
-  function descriptionFor(partner, lang) {
-    const prefix = partner.origin === "person" ? "people" : "companies";
-    let text = t(prefix + "." + partner.id + ".description", lang) || "";
+  /** Generate a role and link sentence for the category where this person
+   *  appears. Company descriptions still use their individual translations. */
+  function descriptionFor(partner, category, lang) {
+    let text = partner.origin === "person"
+      ? window.PersonDescription.describe(partner, category, lang, t)
+      : t("companies." + partner.id + ".description", lang) || "";
     if (text.length > MAX_DESCRIPTION_CHARS) text = text.slice(0, MAX_DESCRIPTION_CHARS - 1).trimEnd() + "…";
     return text;
   }
@@ -137,7 +139,7 @@
   function partnerCardHtml(partner, category) {
     const lang = getActiveLang();
     const name = nameFor(partner);
-    const desc = descriptionFor(partner, lang);
+    const desc = descriptionFor(partner, category.id, lang);
     const image = partner.image || "";
     const alt = partner.imageAlt || partner.name || "";
     const hasImage = image.trim() !== "";

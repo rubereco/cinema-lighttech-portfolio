@@ -6,6 +6,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const root = path.resolve(__dirname, "..");
+const personDescription = require("../assets/js/person-description.js");
 
 // A Pages deployment must edit the JSON from its own branch. Keep main as the
 // source default for local builds, then select the deployed branch here.
@@ -52,6 +53,8 @@ for (const key of [
   "partners.showAll", "partners.showCarousel",
   "partners.count.partner_one", "partners.count.partner_other",
   ...["direction", "cinematography", "lighting", "sound", "production", "other"].map(id => `partners.section.${id}`),
+  ...personDescription.categories.map(id => `people.role.${id}`),
+  ...personDescription.linkTypes.map(id => `people.link.${id}`),
 ]) {
   if (!translationKeys.has(key)) throw new Error(`Missing translation ${key}`);
 }
@@ -134,6 +137,11 @@ if (!heroPhotos.some(photo => photo.size === "big") || !heroPhotos.some(photo =>
 }
 
 const people = readCollection("people");
-for (const person of people) if (!person.name) throw new Error(`${person.id}: name is required`);
+for (const person of people) {
+  if (!person.name) throw new Error(`${person.id}: name is required`);
+  if (person.linkType && !personDescription.linkTypes.includes(person.linkType)) {
+    throw new Error(`${person.id}: invalid link type ${person.linkType}`);
+  }
+}
 people.sort((a, b) => a.name.localeCompare(b.name));
 writeAggregate("people", people);

@@ -101,6 +101,17 @@ collections:
           quality: 82
           strip_metadata: true
           width: 256
+      - name: linkType
+        label: 'Tipo de enlace para la descripción'
+        widget: select
+        required: false
+        default: website
+        options:
+          - { label: Portfolio, value: portfolio }
+          - { label: 'Red social', value: social }
+          - { label: 'Sitio web', value: website }
+          - { label: 'Perfil de IMDb', value: imdb }
+          - { label: 'Otro enlace', value: other }
       - { name: url, label: Enlace, widget: string, required: false, hint: 'Página de la persona. Puedes escribir youtube.com o la URL completa; se usará HTTPS si no indicas el protocolo.' }
       - name: partnership
         label: Colaboración habitual

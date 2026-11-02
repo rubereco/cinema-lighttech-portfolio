@@ -505,16 +505,70 @@
       "es": "Sitio web"
     },
     {
-      "key": "people.juli-carne-martorell.description",
-      "editorLabel": "Personas · Descripción de Juli Carné Martorell",
-      "en": "Cinematographer. Portfolio at julicarnemartorell.com.",
-      "es": "Director de fotografía. Portfolio en julicarnemartorell.com."
+      "key": "people.link.imdb",
+      "editorLabel": "Personas · Frase para perfil de IMDb",
+      "en": "IMDb profile at {domain}.",
+      "es": "Perfil de IMDb en {domain}."
     },
     {
-      "key": "people.nils-dalmases.description",
-      "editorLabel": "Personas · Descripción de Nils Dalmases",
-      "en": "Cinematographer. Portfolio at nilsdalmases.com.",
-      "es": "Director de fotografía. Portfolio en nilsdalmases.com."
+      "key": "people.link.other",
+      "editorLabel": "Personas · Frase para otro enlace",
+      "en": "More at {domain}.",
+      "es": "Más información en {domain}."
+    },
+    {
+      "key": "people.link.portfolio",
+      "editorLabel": "Personas · Frase para portfolio",
+      "en": "Portfolio at {domain}.",
+      "es": "Portfolio en {domain}."
+    },
+    {
+      "key": "people.link.social",
+      "editorLabel": "Personas · Frase para red social",
+      "en": "Social profile at {domain}.",
+      "es": "Perfil en redes sociales en {domain}."
+    },
+    {
+      "key": "people.link.website",
+      "editorLabel": "Personas · Frase para sitio web",
+      "en": "Website at {domain}.",
+      "es": "Sitio web en {domain}."
+    },
+    {
+      "key": "people.role.cinematography",
+      "editorLabel": "Personas · Profesión en Fotografía",
+      "en": "Cinematographer",
+      "es": "Director de fotografía"
+    },
+    {
+      "key": "people.role.direction",
+      "editorLabel": "Personas · Profesión en Dirección",
+      "en": "Film director",
+      "es": "Director/a de cine"
+    },
+    {
+      "key": "people.role.lighting",
+      "editorLabel": "Personas · Profesión en Iluminación",
+      "en": "Lighting technician",
+      "es": "Técnico/a de iluminación"
+    },
+    {
+      "key": "people.role.other",
+      "editorLabel": "Personas · Profesión en Otros",
+      "en": "Film collaborator",
+      "es": "Profesional del cine"
+    },
+    {
+      "key": "people.role.production",
+      "editorLabel": "Personas · Profesión en Producción",
+      "en": "Production professional",
+      "es": "Profesional de producción"
+    },
+    {
+      "key": "people.role.sound",
+      "editorLabel": "Personas · Profesión en Sonido",
+      "en": "Sound technician",
+      "es": "Técnico/a de sonido"
     },
     {
       "key": "roles.electrician",

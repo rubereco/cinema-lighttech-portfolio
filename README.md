@@ -36,6 +36,7 @@ On phones the hero shows only its large photos. Every small hero photo also appe
 - Serve the repository over HTTP to preview it. Opening `index.html` as a local file cannot fetch the JSON data.
 - Keep IDs equal to JSON filenames. Store translated English and Spanish text together as entries in `data/i18n.json`. Use `data-i18n` for plain text and `data-i18n-html` for the About and legal HTML blocks.
 - Each translation has an `editorLabel` used only for the Spanish admin list. The hidden `key` links the text to the site; editors change the `en` and `es` values.
+- Partner people use reusable role and link phrases from `data/i18n.json`. Their selected sections and link type generate a short description in each language; the Decap person editor previews every selected section.
 - OAuth Worker setup is in `admin/SETUP.md`. Secrets belong in Cloudflare Worker secrets, not the repository.
 
 The circular brand mark is available as transparent SVGs in `assets/images/logo-black.svg` and `assets/images/logo-white.svg`. The matching `logo-black-recalone.svg` and `logo-white-recalone.svg` add the RecAlone wordmark below it, with the Anton font embedded for portability. The navbar uses the white mark-only version; `assets/images/favicon.svg` puts it on a dark square for browser tabs.
