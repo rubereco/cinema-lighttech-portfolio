@@ -1,0 +1,11 @@
+{
+  "id": "persontest",
+  "name": "TestPersona",
+  "portrait": "/assets/images/uploads/testcaratula.webp",
+  "url": "youtube.com",
+  "partnership": {
+    "categories": [
+      "cinematography"
+    ]
+  }
+}
