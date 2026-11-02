@@ -61,6 +61,12 @@
       "es": "Iluminación en un túnel"
     },
     {
+      "key": "about.photoFallbackAlt",
+      "editorLabel": "Sobre mí · Descripción automática de fotos nuevas",
+      "en": "Behind-the-scenes photo {number}",
+      "es": "Foto de rodaje {number}"
+    },
+    {
       "key": "about.photoPosition",
       "editorLabel": "Sobre mí · Posición de foto para lectores de pantalla",
       "en": "Photo {current} of {total}",

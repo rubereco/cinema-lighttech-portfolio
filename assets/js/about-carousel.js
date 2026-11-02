@@ -34,7 +34,8 @@
 
   const mod = (value, length) => ((value % length) + length) % length;
   const label = (key, values) => i18n.t(key, undefined, values) || "";
-  const altFor = item => label(`about.photo.${item.id}.alt`);
+  const altFor = item => label(`about.photo.${item.id}.alt`)
+    || label("about.photoFallbackAlt", { number: items.indexOf(item) + 1 });
   const frontFace = () => mod(rotation, faceCount);
 
   // Only the front and its immediate neighbours are visible. Reassign hidden

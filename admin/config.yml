@@ -191,7 +191,7 @@ collections:
             widget: list
             summary: '{{fields.id}} — {{fields.size}}'
             fields:
-              - { name: id, label: 'ID para traducciones', widget: string }
+              - { name: id, label: 'Identificador único', widget: string, hint: 'Dale un nombre distinto a cada foto. No necesitas crear una traducción para publicarla.' }
               - name: file
                 label: Imagen
                 widget: image

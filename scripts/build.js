@@ -48,7 +48,7 @@ for (const page of ["index.html", "legal.html"]) {
   }
 }
 for (const key of [
-  "film.watchTrailer", "film.trailerTitle", "film.posterAlt", "about.photoPosition",
+  "film.watchTrailer", "film.trailerTitle", "film.posterAlt", "about.photoPosition", "about.photoFallbackAlt",
   "partners.website", "partners.empty", "partners.logosLabel",
   "partners.showAll", "partners.showCarousel",
   "partners.count.partner_one", "partners.count.partner_other",
@@ -125,10 +125,11 @@ writeAggregate("films", films);
 const heroPhotos = JSON.parse(fs.readFileSync(path.join(root, "data", "hero.json"), "utf8")).items || [];
 const photoIds = new Set();
 for (const photo of heroPhotos) {
-  if (!photo.id || !photo.file || !["big", "small"].includes(photo.size) || photoIds.has(photo.id) ||
-      !fs.existsSync(path.join(root, photo.file.replace(/^\/+/, ""))) ||
-      (photo.size === "small" && !translationKeys.has(`about.photo.${photo.id}.alt`))) {
-    throw new Error(`Invalid hero photo or missing About alt translation: ${photo.id}`);
+  if (!photo.id || !photo.file || !["big", "small"].includes(photo.size) || photoIds.has(photo.id)) {
+    throw new Error(`Invalid or duplicate hero photo: ${photo.id}`);
+  }
+  if (!fs.existsSync(path.join(root, photo.file.replace(/^\/+/, "")))) {
+    throw new Error(`Hero photo ${photo.id}: image file does not exist: ${photo.file}`);
   }
   photoIds.add(photo.id);
 }
