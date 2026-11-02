@@ -85,8 +85,10 @@
   }
 
   function safeHttpUrl(raw) {
+    if (typeof raw !== "string" || !raw.trim()) return "";
+    const value = raw.trim();
     try {
-      const url = new URL(raw);
+      const url = new URL(/^[a-z][a-z\d+.-]*:/i.test(value) ? value : `https://${value}`);
       return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
     } catch (_) { return ""; }
   }

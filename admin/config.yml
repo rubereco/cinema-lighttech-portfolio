@@ -101,7 +101,7 @@ collections:
           quality: 82
           strip_metadata: true
           width: 256
-      - { name: url, label: Enlace, widget: string, required: false }
+      - { name: url, label: Enlace, widget: string, required: false, hint: 'Página de la persona. Puedes escribir youtube.com o la URL completa; se usará HTTPS si no indicas el protocolo.' }
       - name: partnership
         label: Colaboración habitual
         widget: object
@@ -148,7 +148,7 @@ collections:
                   quality: 86
                   strip_metadata: true
                   width: 400
-              - { name: url, label: URL, widget: string, required: false }
+              - { name: url, label: URL, widget: string, required: false, hint: 'Puedes escribir la dirección sin https://; se añadirá automáticamente.' }
 
   - name: site
     label: Sitio
