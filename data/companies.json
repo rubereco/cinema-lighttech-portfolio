@@ -41,9 +41,10 @@
     },
     {
       "id": "Test-empresa",
-      "name": "testE,presa",
+      "name": "TestEmpresa",
       "kind": "casa de equipos",
-      "logo": "/assets/images/uploads/testcaratula.webp"
+      "logo": "/assets/images/uploads/testcaratula.webp",
+      "url": "google.com"
     }
   ]
 }
