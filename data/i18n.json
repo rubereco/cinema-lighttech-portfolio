@@ -123,8 +123,8 @@
     {
       "key": "brand",
       "editorLabel": "Cabecera · Nombre de Tarek",
-      "en": "Tarek Recolons",
-      "es": "Tarek Recolons"
+      "en": "Tarek Recolons TestIngles",
+      "es": "Tarek Recolons TestEspañol"
     },
     {
       "key": "companies.aluzine.description",
